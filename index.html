@@ -10,7 +10,7 @@
 <!-- SDK de Cloudflare Turnstile -->
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
-<!-- Política de Seguridad de Contenido (CSP) -->
+<!-- Política de Seguridad de Contenido (CSP) optimizada -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://challenges.cloudflare.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://rebrandyourbrand-proxy.bernatxd705.workers.dev https://challenges.cloudflare.com https://*.workers.dev; frame-src 'self' https://challenges.cloudflare.com; img-src 'self' data:;">
 
 <title>rebrandyourbrand — Rebranding y diseño visual</title>
@@ -171,7 +171,7 @@
     transition: opacity 400ms ease;
   }
 
-  /* Animación fluida para la barra de carga */
+  /* Animación fluida de la barra de carga estilo shimmer */
   @keyframes shimmer {
     0% { transform: translateX(-100%); }
     100% { transform: translateX(300%); }
@@ -442,13 +442,13 @@
                     class="w-full resize-y bg-ink/50 border border-line p-4 text-sm text-paper placeholder:text-muted/60 focus:outline-none focus:border-ai transition-colors duration-300"></textarea>
           </div>
           
-          <!-- Contenedor estético para Turnstile -->
+          <!-- Contenedor estético y editorial para Turnstile -->
           <div class="p-3.5 bg-ink/30 border border-line flex flex-col items-center justify-center relative">
             <div class="w-full flex items-center justify-between mb-2 text-[0.6rem] tracking-wider text-muted uppercase font-mono">
               <span>verificación de identidad</span>
               <span class="text-ai/80 lowercase">cloudflare turnstile</span>
             </div>
-            <div class="cf-turnstile py-1"></div>
+            <div class="cf-turnstile py-1" data-sitekey="0x4AAAAAAFAc6AhM84k_7AQk"></div>
           </div>
 
           <button id="brand-assistant-submit" type="submit"
@@ -463,9 +463,9 @@
             <span id="assistant-status" class="assistant-status text-[0.65rem] text-muted lowercase">en espera</span>
           </div>
 
-          <!-- Barra de carga sutil y sincronizada con el estado de red -->
-          <div id="assistant-loader" class="w-full h-0.5 bg-ink/50 overflow-hidden mb-3 opacity-0 transition-opacity duration-300">
-            <div id="assistant-loader-bar" class="h-full bg-ai w-1/2"></div>
+          <!-- Barra de carga optimizada y sincronizada -->
+          <div id="assistant-loader" class="w-full h-1 bg-ink/80 rounded-full overflow-hidden mb-3 opacity-0 transition-opacity duration-300">
+            <div id="assistant-loader-bar" class="h-full bg-ai w-1/3 rounded-full"></div>
           </div>
 
           <div id="assistant-output" class="assistant-output bg-ink/20 border border-line/40 p-4 text-xs md:text-sm leading-relaxed text-paper/90 font-mono sm:font-sans" aria-live="polite"></div>
@@ -637,13 +637,14 @@
         return;
       }
 
-      // Activar estado de carga y barra animada
+      // Activar estado de carga y barra visiblemente
       assistantSubmit.disabled = true;
       assistantSubmit.textContent = 'procesando...';
       assistantOutput.textContent = '';
       assistantStatus.textContent = 'consultando con qwen...';
       
       assistantLoader.classList.remove('opacity-0');
+      assistantLoader.classList.add('opacity-100');
       assistantLoaderBar.classList.add('is-loading-anim');
 
       try {
@@ -664,13 +665,15 @@
         assistantOutput.textContent = 'error: ' + error.message;
         assistantStatus.textContent = 'fallido';
       } finally {
-        // Desactivar barra de carga y restablecer controles
+        // Desvanecer barra de carga y restablecer controles
+        assistantLoader.classList.remove('opacity-100');
         assistantLoader.classList.add('opacity-0');
         assistantLoaderBar.classList.remove('is-loading-anim');
 
         assistantSubmit.disabled = false;
         assistantSubmit.textContent = 'preguntar a qwen';
         
+        // Reseteo quirúrgico pasando el contenedor exacto del widget
         if (window.turnstile) {
           const widgetElement = document.querySelector('.cf-turnstile');
           if (widgetElement) {
