@@ -10,7 +10,7 @@
 <!-- SDK de Cloudflare Turnstile -->
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
-<!-- Política de Seguridad de Contenido (CSP) optimizada para Turnstile y Cloudflare Worker -->
+<!-- Política de Seguridad de Contenido (CSP) -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://challenges.cloudflare.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://rebrandyourbrand-proxy.bernatxd705.workers.dev https://challenges.cloudflare.com https://*.workers.dev; frame-src 'self' https://challenges.cloudflare.com; img-src 'self' data:;">
 
 <title>rebrandyourbrand — Rebranding y diseño visual</title>
@@ -171,6 +171,15 @@
     transition: opacity 400ms ease;
   }
 
+  /* Animación fluida para la barra de carga */
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(300%); }
+  }
+  .is-loading-anim {
+    animation: shimmer 1.6s infinite cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
   @keyframes ai-pulse {
     0%, 100% { box-shadow: 0 0 0 0 rgba(232, 163, 61, 0.35); }
     50%      { box-shadow: 0 0 0 12px rgba(232, 163, 61, 0); }
@@ -180,7 +189,8 @@
   @media (prefers-reduced-motion: reduce) {
     .hero-fade, .reveal, html, body, header, section, footer,
     h1, h2, h3, p, span, blockquote,
-    #assistant-panel, #assistant-backdrop, #assistant-trigger {
+    #assistant-panel, #assistant-backdrop, #assistant-trigger,
+    .is-loading-anim {
       transition: none !important;
       animation: none !important;
     }
@@ -404,43 +414,67 @@
 
   <!-- Panel lateral del asistente -->
   <aside id="assistant-panel" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="assistant-panel-title"
-         class="fixed top-0 right-0 h-full w-full sm:w-[420px] z-50 bg-panel border-l border-line overflow-y-auto"
+         class="fixed top-0 right-0 h-full w-full sm:w-[440px] z-50 bg-panel border-l border-line overflow-y-auto shadow-2xl"
          style="transform: translateX(100%);">
-    <div class="p-6 md:p-8">
-      <div class="flex items-center justify-between mb-8">
-        <span class="lowercase text-xs tracking-wide text-ai">tu copiloto de marca</span>
-        <button id="assistant-close" type="button" aria-label="Cerrar el asistente"
-                class="w-8 h-8 rounded-full border border-line flex items-center justify-center hover:border-ai/60 transition-colors duration-300">
-          ✕
-        </button>
+    <div class="p-8 md:p-10 flex flex-col min-h-full justify-between">
+      <div>
+        <div class="flex items-center justify-between mb-10 pb-4 border-b border-line/60">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-ai"></span>
+            <span class="lowercase text-xs tracking-widest text-ai font-medium">qwen engine · v2.5</span>
+          </div>
+          <button id="assistant-close" type="button" aria-label="Cerrar el asistente"
+                  class="w-9 h-9 rounded-full border border-line flex items-center justify-center text-muted hover:text-paper hover:border-ai/60 transition-all duration-300">
+            ✕
+          </button>
+        </div>
+
+        <h2 id="assistant-panel-title" class="lowercase font-display text-3xl mb-3 tracking-tight">pregúntale a qwen</h2>
+        <p class="text-muted text-sm leading-relaxed mb-8">
+          Explora nombres, territorios de marca, enfoques de tono o conceptos visuales con asistencia en tiempo real.
+        </p>
+
+        <form id="brand-assistant-form" class="space-y-4">
+          <div>
+            <label for="brand-prompt" class="sr-only">Pregunta para el asistente de marca</label>
+            <textarea id="brand-prompt" rows="4" required maxlength="500"
+                    placeholder="ej.: propón tres territorios de marca para una firma de arquitectura sostenible."
+                    class="w-full resize-y bg-ink/50 border border-line p-4 text-sm text-paper placeholder:text-muted/60 focus:outline-none focus:border-ai transition-colors duration-300"></textarea>
+          </div>
+          
+          <!-- Contenedor estético para Turnstile -->
+          <div class="p-3.5 bg-ink/30 border border-line flex flex-col items-center justify-center relative">
+            <div class="w-full flex items-center justify-between mb-2 text-[0.6rem] tracking-wider text-muted uppercase font-mono">
+              <span>verificación de identidad</span>
+              <span class="text-ai/80 lowercase">cloudflare turnstile</span>
+            </div>
+            <div class="cf-turnstile py-1"></div>
+          </div>
+
+          <button id="brand-assistant-submit" type="submit"
+                  class="lowercase w-full inline-flex items-center justify-center gap-2 bg-ai text-[#0A0A0C] px-6 py-3.5 text-sm font-medium tracking-wide transition-all duration-300 hover:bg-ai-soft hover:scale-[1.01] disabled:cursor-wait disabled:opacity-60">
+            preguntar a qwen
+          </button>
+        </form>
+
+        <div class="mt-8 pt-6 border-t border-line/60">
+          <div class="flex items-center justify-between mb-2">
+            <span class="lowercase text-[0.65rem] tracking-wider text-muted">resultado del análisis</span>
+            <span id="assistant-status" class="assistant-status text-[0.65rem] text-muted lowercase">en espera</span>
+          </div>
+
+          <!-- Barra de carga sutil y sincronizada con el estado de red -->
+          <div id="assistant-loader" class="w-full h-0.5 bg-ink/50 overflow-hidden mb-3 opacity-0 transition-opacity duration-300">
+            <div id="assistant-loader-bar" class="h-full bg-ai w-1/2"></div>
+          </div>
+
+          <div id="assistant-output" class="assistant-output bg-ink/20 border border-line/40 p-4 text-xs md:text-sm leading-relaxed text-paper/90 font-mono sm:font-sans" aria-live="polite"></div>
+        </div>
       </div>
 
-      <h2 id="assistant-panel-title" class="lowercase font-display text-2xl mb-3">pregúntale a qwen</h2>
-      <p class="text-muted text-sm leading-relaxed mb-6">
-        Explora nombres, tono, conceptos visuales o ideas de campaña con ayuda de IA.
-      </p>
-
-      <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-        <span class="text-[0.65rem] tracking-wide text-muted">QWEN 2.5 · CLOUDFLARE TURNSTILE</span>
-        <span id="assistant-status" class="assistant-status text-xs text-muted lowercase">protección activa</span>
+      <div class="mt-12 pt-6 border-t border-line/40 text-[0.65rem] text-muted text-center lowercase tracking-wider">
+        rebrandyourbrand.design — creative studio AI proxy
       </div>
-
-      <form id="brand-assistant-form">
-        <label for="brand-prompt" class="sr-only">Pregunta para el asistente de marca</label>
-        <textarea id="brand-prompt" rows="5" required maxlength="500"
-                placeholder="ej.: propón tres territorios de marca para una cafetería artesanal urbana."
-                class="w-full resize-y bg-ink/40 border border-line px-4 py-3 text-sm text-paper placeholder:text-muted/70"></textarea>
-        
-        <!-- Widget de Turnstile -->
-        <div class="cf-turnstile my-3" data-sitekey="0x4AAAAAAFAc6AhM84k_7AQk"></div>
-
-        <button id="brand-assistant-submit" type="submit"
-                class="lowercase mt-2 w-full inline-flex items-center justify-center gap-2 bg-ai text-[#0A0A0C] px-5 py-3 text-sm font-medium transition-all duration-300 hover:bg-ai-soft hover:scale-[1.02] disabled:cursor-wait disabled:opacity-60">
-          preguntar a qwen
-        </button>
-      </form>
-
-      <div id="brand-assistant-output" class="assistant-output mt-6 border-t border-line pt-5 text-sm leading-relaxed text-paper/90" aria-live="polite"></div>
     </div>
   </aside>
 
@@ -586,6 +620,8 @@
     const assistantOutput = document.getElementById('brand-assistant-output');
     const assistantStatus = document.getElementById('assistant-status');
     const assistantSubmit = document.getElementById('brand-assistant-submit');
+    const assistantLoader = document.getElementById('assistant-loader');
+    const assistantLoaderBar = document.getElementById('assistant-loader-bar');
 
     assistantForm.addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -596,15 +632,19 @@
       if (!question) return;
 
       if (!turnstileToken) {
-        assistantOutput.textContent = 'Por favor, completa la verificación de seguridad de Turnstile.';
+        assistantOutput.textContent = 'por favor, completa la verificación de identidad humana.';
         assistantStatus.textContent = 'verificación pendiente';
         return;
       }
 
+      // Activar estado de carga y barra animada
       assistantSubmit.disabled = true;
-      assistantSubmit.textContent = 'pensando...';
+      assistantSubmit.textContent = 'procesando...';
       assistantOutput.textContent = '';
-      assistantStatus.textContent = 'verificando y consultando con qwen...';
+      assistantStatus.textContent = 'consultando con qwen...';
+      
+      assistantLoader.classList.remove('opacity-0');
+      assistantLoaderBar.classList.add('is-loading-anim');
 
       try {
         const response = await fetch('https://rebrandyourbrand-proxy.bernatxd705.workers.dev', {
@@ -619,15 +659,18 @@
         if (!response.ok) throw new Error(data.error || 'Error al conectar con el servidor seguro');
         
         assistantOutput.textContent = data.reply;
-        assistantStatus.textContent = 'respuesta generada de forma segura';
+        assistantStatus.textContent = 'completado';
       } catch (error) {
-        assistantOutput.textContent = 'Error de conexión: ' + error.message;
-        assistantStatus.textContent = 'petición bloqueada o fallida';
+        assistantOutput.textContent = 'error: ' + error.message;
+        assistantStatus.textContent = 'fallido';
       } finally {
+        // Desactivar barra de carga y restablecer controles
+        assistantLoader.classList.add('opacity-0');
+        assistantLoaderBar.classList.remove('is-loading-anim');
+
         assistantSubmit.disabled = false;
         assistantSubmit.textContent = 'preguntar a qwen';
         
-        // Reinicio quirúrgico y preciso pasando el elemento contenedor del widget
         if (window.turnstile) {
           const widgetElement = document.querySelector('.cf-turnstile');
           if (widgetElement) {
