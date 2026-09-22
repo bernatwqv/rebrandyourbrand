@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth no-js">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0A0A0C">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>rebrandyourbrand — Rebranding y diseño visual</title>
+<meta name="description" content="Rebranding de marcas y diseño visual: identidad, packaging y dirección de arte con enfoque técnico y artístico.">
+<meta name="google-site-verification" content="YGC3173v8crkOSc3_K39sejUfe4hYPDlsOqbpdTAYXw" />
+<link rel="canonical" href="https://rebrandyourbrand.design/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="rebrandyourbrand.design">
+<meta property="og:title" content="rebrandyourbrand.design — Rebranding y diseño visual">
+<meta property="og:description" content="Identidad visual, packaging y dirección de arte para marcas que necesitan dejar de pasar desapercibidas.">
+<meta property="og:url" content="https://rebrandyourbrand.design/">
+<meta property="og:locale" content="es_ES">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="rebrandyourbrand.design — Rebranding y diseño visual">
+<meta name="twitter:description" content="Identidad visual, packaging y dirección de arte para marcas que necesitan dejar de pasar desapercibidas.">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ProfessionalService",
+  "name": "rebrandyourbrand.design",
+  "url": "https://rebrandyourbrand.design/",
+  "description": "Estudio de rebranding y diseño visual especializado en identidad visual, packaging y dirección de arte.",
+  "areaServed": "ES",
+  "serviceType": ["Rebranding", "Identidad visual", "Packaging", "Dirección de arte"]
+}
+</script>
+
+<!-- Favicon minimalista (emoji, sin archivos externos) -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%A8%3C/text%3E%3C/svg%3E">
+
+<!-- Aplica el tema guardado ANTES del primer pintado, para que nunca se vea un parpadeo del tema equivocado.
+     Por defecto (sin preferencia guardada) la web arranca siempre en modo oscuro. -->
+<script>
+  (function () {
+    var saved = null;
+    try {
+      saved = localStorage.getItem('rybb-theme');
+    } catch (error) {
+      // El modo oscuro por defecto no necesita almacenamiento disponible.
+    }
+    if (saved === 'light') document.documentElement.classList.add('light');
+  })();
+</script>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<script>
+  // Los colores se definen como variables CSS (canales RGB) para poder
+  // invertirlos con una sola clase ".light" en <html>, sin duplicar el HTML.
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          ink:          'rgb(var(--color-bg) / <alpha-value>)',    // negro / blanco
+          panel:        'rgb(var(--color-panel) / <alpha-value>)', // gris negroso / beige
+          line:         'rgb(var(--color-line) / <alpha-value>)',
+          paper:        'rgb(var(--color-text) / <alpha-value>)',
+          muted:        'rgb(var(--color-muted) / <alpha-value>)',
+          brand:        'rgb(var(--color-brand) / <alpha-value>)',      // azul flojito (corporativo)
+          'brand-soft': 'rgb(var(--color-brand-soft) / <alpha-value>)',
+          ai:           'rgb(var(--color-ai) / <alpha-value>)',         // ámbar (asistente)
+          'ai-soft':    'rgb(var(--color-ai-soft) / <alpha-value>)',
+        },
+        fontFamily: {
+          serif: ['"Fraunces"', 'serif'],
+          sans: ['"Inter"', 'sans-serif'],
+        },
+      },
+    },
+  };
+</script>
+
+<style>
+  /* --- Paleta: tema oscuro (por defecto) --- */
+  :root {
+    --color-bg: 10 10 12;           /* #0A0A0C — negro */
+    --color-panel: 30 30 34;        /* #1E1E22 — gris negroso */
+    --color-line: 35 34 38;         /* #232226 */
+    --color-text: 245 242 234;      /* #F5F2EA */
+    --color-muted: 140 139 146;     /* #8C8B92 */
+    --color-brand: 140 163 196;     /* #8CA3C4 — azul flojito (marca) */
+    --color-brand-soft: 183 198 220;/* #B7C6DC — tinte más claro para hover en oscuro */
+    --color-ai: 232 163 61;         /* #E8A33D — ámbar, constante en ambos temas */
+    --color-ai-soft: 240 190 130;   /* #F0BE82 — tinte más claro para hover en oscuro */
+  }
+
+  /* --- Paleta: tema claro --- */
+  html.light {
+    --color-bg: 255 255 255;        /* #FFFFFF — blanco */
+    --color-panel: 237 230 214;     /* #EDE6D6 — beige */
+    --color-line: 228 222 208;      /* #E4DED0 */
+    --color-text: 23 23 26;         /* #17171A */
+    --color-muted: 107 106 112;     /* #6B6A70 */
+    --color-brand: 140 163 196;     /* #8CA3C4 — mismo azul corporativo en ambos temas */
+    --color-brand-soft: 95 122 158; /* #5F7A9E — tinte más oscuro para hover en claro */
+    --color-ai: 232 163 61;         /* #E8A33D — mismo ámbar en ambos temas */
+    --color-ai-soft: 173 118 38;    /* #AD7626 — tinte más oscuro para hover en claro */
+  }
+
+  html { background-color: rgb(var(--color-bg)); }
+  body { font-family: 'Inter', sans-serif; }
+  h1, h2, h3, .font-display { font-family: 'Fraunces', serif; }
+
+  ::selection { background: rgb(var(--color-brand)); color: rgb(var(--color-bg)); }
+
+  /* Transición limpia al cambiar de tema (sin pisar las transiciones propias
+     de botones/enlaces, que ya declaran su propia "transition" vía Tailwind). */
+  html, body, header, section, footer {
+    transition: background-color 500ms ease, border-color 500ms ease;
+  }
+  h1, h2, h3, p, span, blockquote {
+    transition: color 500ms ease;
+  }
+
+  /* Optimización básica para pantallas de alta densidad (retina):
+     los degradados/CSS son vectoriales por naturaleza y ya escalan sin pérdida;
+     si en el futuro añades fotografías, sirve cada imagen a @2x mediante srcset. */
+
+  /* --- Entrada del Hero (fade + slide-up con retraso escalonado) --- */
+  .hero-fade {
+    transition-property: opacity, transform;
+    transition-duration: 900ms;
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  html.is-loaded .hero-fade {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* --- Revelado al hacer scroll --- */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 800ms cubic-bezier(0.16, 1, 0.3, 1),
+                transform 800ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .reveal.in-view {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Si JS no carga, todo debe seguir siendo visible */
+  .no-js .hero-fade,
+  .no-js .reveal { opacity: 1 !important; transform: none !important; }
+
+  /* --- Slider horizontal (beneficios / servicios) --- */
+  .slider-track {
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .slider-track::-webkit-scrollbar { display: none; }
+  .slider-card { scroll-snap-align: start; }
+
+  /* --- Asistente: panel lateral --- */
+  .assistant-output {
+    min-height: 6rem;
+    white-space: pre-wrap;
+  }
+  .assistant-output:empty::before {
+    content: 'la respuesta de qwen aparecerá aquí.';
+    color: rgb(var(--color-muted));
+  }
+  .assistant-status.is-error { color: #c97d7d; }
+  .assistant-status.is-ready { color: rgb(var(--color-ai)); }
+  #brand-prompt:focus { outline: 2px solid rgb(var(--color-ai) / 0.65); outline-offset: 2px; }
+
+  #assistant-panel {
+    transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  #assistant-backdrop {
+    transition: opacity 400ms ease;
+  }
+
+  @keyframes ai-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(232, 163, 61, 0.35); }
+    50%      { box-shadow: 0 0 0 12px rgba(232, 163, 61, 0); }
+  }
+  #assistant-trigger { animation: ai-pulse 2.8s ease-in-out infinite; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-fade, .reveal, html, body, header, section, footer,
+    h1, h2, h3, p, span, blockquote,
+    #assistant-panel, #assistant-backdrop, #assistant-trigger {
+      transition: none !important;
+      animation: none !important;
+    }
+  }
+</style>
+</head>
+
+<body class="bg-ink text-paper antialiased">
+
+  <!-- Header -->
+  <header class="fixed top-0 inset-x-0 z-40 border-b border-line bg-ink/80 backdrop-blur-sm">
+    <div class="max-w-6xl mx-auto px-6 md:px-10 h-16 flex items-center justify-between">
+      <a href="#top" class="flex items-center gap-3">
+        <span class="font-display text-lg tracking-tight">rebrandyourbrand</span>
+        <span class="inline-block w-px h-5 bg-line" aria-hidden="true"></span>
+        <!-- Logo: sustituye este comentario por <img src="logo.svg" alt="rebrandyourbrand" class="h-5 w-auto"> cuando lo tengas -->
+      </a>
+      <nav class="hidden md:flex items-center gap-5 lg:gap-8 ml-auto text-sm text-muted">
+        <a href="#beneficios" class="lowercase hover:text-paper transition-colors duration-300">por qué nosotros</a>
+        <a href="#servicios" class="lowercase hover:text-paper transition-colors duration-300">servicios</a>
+        <a href="#contacto" class="lowercase hover:text-paper transition-colors duration-300">contacto</a>
+      </nav>
+
+      <div class="flex items-center gap-3 md:ml-5 md:pl-5 md:border-l md:border-line">
+        <!-- Botón de cambio de tema -->
+        <button id="theme-toggle" type="button" aria-label="Cambiar a modo claro"
+                class="relative w-10 h-10 rounded-full border border-line flex items-center justify-center text-paper transition-all duration-300 hover:border-brand/60 hover:scale-105">
+          <svg class="theme-icon icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+               style="position:absolute;top:50%;left:50%;width:18px;height:18px;margin:-9px 0 0 -9px;opacity:0;transform:rotate(-90deg) scale(0.5);transition:opacity 400ms cubic-bezier(.4,0,.2,1),transform 400ms cubic-bezier(.4,0,.2,1);">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+          </svg>
+          <svg class="theme-icon icon-moon" viewBox="0 0 24 24" fill="currentColor" stroke="none"
+               style="position:absolute;top:50%;left:50%;width:18px;height:18px;margin:-9px 0 0 -9px;opacity:1;transform:rotate(0deg) scale(1);transition:opacity 400ms cubic-bezier(.4,0,.2,1),transform 400ms cubic-bezier(.4,0,.2,1);">
+            <path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 1020.354 15.354z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section id="top" class="relative pt-40 pb-28 md:pt-52 md:pb-36 px-6 md:px-10 border-b border-line overflow-hidden">
+    <div class="absolute inset-0 pointer-events-none opacity-[0.1]"
+         style="background: radial-gradient(circle at 15% 20%, #8CA3C4 0%, transparent 45%);"></div>
+
+    <div class="max-w-6xl mx-auto relative">
+      <p class="hero-fade delay-0 lowercase text-xs tracking-wide text-muted mb-6">estudio de rebranding y diseño visual</p>
+
+      <h1 class="hero-fade delay-150 lowercase font-display text-[2.6rem] leading-[1.08] sm:text-6xl md:text-7xl max-w-3xl">
+        marcas que dejan de pasar desapercibidas.
+      </h1>
+
+      <p class="hero-fade delay-300 mt-8 max-w-md text-muted text-base md:text-lg leading-relaxed">
+        Rediseñamos identidades visuales combinando dirección de arte y precisión técnica,
+        para marcas que necesitan verse tan bien como lo que hacen.
+      </p>
+
+      <div class="hero-fade delay-500 mt-10 flex flex-wrap items-center gap-5">
+        <a href="#contacto"
+           class="lowercase inline-flex items-center gap-2 bg-brand text-[#0A0A0C] px-6 py-3 text-sm font-medium transition-all duration-300 hover:bg-brand-soft hover:scale-105 hover:shadow-lg hover:shadow-brand/30">
+          empieza tu rebranding
+        </a>
+        <button type="button" data-open-assistant
+           class="lowercase text-sm text-paper/80 border-b border-line pb-0.5 transition-colors duration-300 hover:border-ai hover:text-ai">
+          hablar con el asistente
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Manifiesto / Filosofía -->
+  <section id="manifiesto" class="px-6 md:px-10 py-32 md:py-40 border-b border-line">
+    <div class="max-w-6xl mx-auto">
+      <div class="reveal grid md:grid-cols-2 gap-10 md:gap-16 items-start">
+        <h2 class="lowercase font-display text-4xl md:text-6xl leading-[1.05]">
+          una marca no se decora.<br>se construye.
+        </h2>
+        <p class="text-muted text-base md:text-lg leading-relaxed md:pt-4">
+          Cada proyecto empieza señalando lo esencial y descartando lo superfluo.
+          No perseguimos tendencias: buscamos un sistema que siga siendo cierto
+          dentro de cinco años.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Por qué nosotros / Beneficios -->
+  <section id="beneficios" class="px-6 md:px-10 py-24 md:py-32 border-b border-line">
+    <div class="max-w-6xl mx-auto">
+      <div class="reveal max-w-xl mb-16">
+        <h2 class="lowercase font-display text-3xl md:text-4xl mb-4">por qué nosotros</h2>
+        <p class="text-muted leading-relaxed">
+          El buen diseño no es solo estética: es precisión técnica puesta al servicio de una idea.
+        </p>
+        <div class="flex items-center gap-2 mt-6">
+          <button type="button" class="slider-prev w-9 h-9 rounded-full border border-line flex items-center justify-center transition-colors duration-300 hover:border-brand/60" data-target="beneficios-track" aria-label="anterior">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:16px;height:16px;"><path d="M15 18l-6-6 6 6"/></svg>
+          </button>
+          <button type="button" class="slider-next w-9 h-9 rounded-full border border-line flex items-center justify-center transition-colors duration-300 hover:border-brand/60" data-target="beneficios-track" aria-label="siguiente">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:16px;height:16px;"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div id="beneficios-track" class="slider-track flex gap-6 overflow-x-auto">
+        <div class="reveal slider-card shrink-0 w-[85%] sm:w-[55%] md:w-[36%] border border-line p-6 md:p-8">
+          <h3 class="lowercase font-display text-xl mb-3">criterio artístico</h3>
+          <p class="text-muted text-sm leading-relaxed">
+            Cada decisión visual responde a la personalidad de la marca, no a una tendencia
+            pasajera. Diseñamos para que envejezca bien.
+          </p>
+        </div>
+        <div class="reveal slider-card shrink-0 w-[85%] sm:w-[55%] md:w-[36%] border border-line p-6 md:p-8" style="transition-delay: 100ms;">
+          <h3 class="lowercase font-display text-xl mb-3">ejecución técnica</h3>
+          <p class="text-muted text-sm leading-relaxed">
+            De la idea al archivo entregable: sistemas de marca ordenados, escalables y listos
+            para producción, sin fricciones.
+          </p>
+        </div>
+        <div class="reveal slider-card shrink-0 w-[85%] sm:w-[55%] md:w-[36%] border border-line p-6 md:p-8" style="transition-delay: 200ms;">
+          <h3 class="lowercase font-display text-xl mb-3">proceso claro</h3>
+          <p class="text-muted text-sm leading-relaxed">
+            Sabrás en qué fase está tu proyecto en todo momento: brief, exploración,
+            propuesta final y entrega.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Servicios / Áreas de intervención -->
+  <section id="servicios" class="px-6 md:px-10 py-24 md:py-32 border-b border-line">
+    <div class="max-w-6xl mx-auto">
+      <div class="reveal max-w-xl mb-16">
+        <h2 class="lowercase font-display text-3xl md:text-4xl mb-4">servicios</h2>
+        <p class="text-muted leading-relaxed">
+          Tres áreas de intervención, un mismo criterio.
+        </p>
+        <div class="flex items-center gap-2 mt-6">
+          <button type="button" class="slider-prev w-9 h-9 rounded-full border border-line flex items-center justify-center transition-colors duration-300 hover:border-brand/60" data-target="servicios-track" aria-label="anterior">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:16px;height:16px;"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <button type="button" class="slider-next w-9 h-9 rounded-full border border-line flex items-center justify-center transition-colors duration-300 hover:border-brand/60" data-target="servicios-track" aria-label="siguiente">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:16px;height:16px;"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div id="servicios-track" class="slider-track flex gap-6 overflow-x-auto">
+        <div class="reveal slider-card shrink-0 w-[85%] sm:w-[55%] md:w-[36%] border border-line p-6 md:p-8">
+          <h3 class="lowercase font-display text-xl mb-3">identidad visual</h3>
+          <p class="text-muted text-sm leading-relaxed">
+            Logotipo, sistema cromático, tipografía y las reglas que mantienen la marca
+            reconocible en cualquier soporte.
+          </p>
+        </div>
+        <div class="reveal slider-card shrink-0 w-[85%] sm:w-[55%] md:w-[36%] border border-line p-6 md:p-8" style="transition-delay: 100ms;">
+          <h3 class="lowercase font-display text-xl mb-3">packaging</h3>
+          <p class="text-muted text-sm leading-relaxed">
+            Del concepto a producción: estructura, materiales y acabados pensados
+            para el punto de venta.
+          </p>
+        </div>
+        <div class="reveal slider-card shrink-0 w-[85%] sm:w-[55%] md:w-[36%] border border-line p-6 md:p-8" style="transition-delay: 200ms;">
+          <h3 class="lowercase font-display text-xl mb-3">dirección de arte & web</h3>
+          <p class="text-muted text-sm leading-relaxed">
+            Fotografía, campañas y presencia digital coherentes con el sistema
+            de marca, sin perder personalidad.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer / Contacto -->
+  <footer id="contacto" class="px-6 md:px-10 py-24 md:py-32">
+    <div class="max-w-6xl mx-auto">
+      <div class="reveal flex flex-col md:flex-row md:items-end md:justify-between gap-10">
+        <div>
+          <h2 class="lowercase font-display text-3xl md:text-4xl max-w-md leading-tight mb-6">
+            hablemos de tu marca.
+          </h2>
+          <div class="flex flex-col gap-2 text-sm">
+            <a href="mailto:hola@rebrandyourbrand.com" class="text-paper hover:text-brand transition-colors duration-300 w-fit">
+              hola@rebrandyourbrand.com
+            </a>
+            <a href="https://wa.me/34600000000" target="_blank" rel="noopener"
+               class="lowercase text-paper hover:text-brand transition-colors duration-300 w-fit">
+              whatsapp: +34 600 000 000
+            </a>
+          </div>
+        </div>
+
+        <div class="flex gap-6 text-sm text-muted">
+          <a href="https://instagram.com/rebrandyourbrand" target="_blank" rel="noopener"
+             class="lowercase hover:text-brand transition-colors duration-300">instagram</a>
+          <a href="https://behance.net/rebrandyourbrand" target="_blank" rel="noopener"
+             class="lowercase hover:text-brand transition-colors duration-300">behance</a>
+        </div>
+      </div>
+
+      <div class="mt-16 pt-6 border-t border-line flex flex-col sm:flex-row justify-between gap-2 text-xs text-muted">
+        <span class="lowercase">rebrandyourbrand — rebranding y diseño visual</span>
+        <span>&copy; <span id="year"></span> Todos los derechos reservados</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Botón flotante: abre el asistente -->
+  <button id="assistant-trigger" type="button" data-open-assistant
+          aria-haspopup="dialog" aria-expanded="false" aria-controls="assistant-panel"
+          aria-label="Abrir el asistente de marca"
+          class="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-ai text-[#0A0A0C] flex items-center justify-center shadow-lg transition-transform duration-300 hover:scale-110">
+    <svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;">
+      <path d="M12 2l1.8 5.6L19.4 9.4 13.8 11.2 12 17l-1.8-5.8L4.6 9.4l5.6-1.8L12 2z"></path>
+    </svg>
+  </button>
+
+  <!-- Fondo oscurecido tras el panel -->
+  <div id="assistant-backdrop"
+       class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 opacity-0 pointer-events-none"></div>
+
+  <!-- Panel lateral del asistente -->
+  <aside id="assistant-panel" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="assistant-panel-title"
+         class="fixed top-0 right-0 h-full w-full sm:w-[420px] z-50 bg-panel border-l border-line overflow-y-auto"
+         style="transform: translateX(100%);">
+    <div class="p-6 md:p-8">
+      <div class="flex items-center justify-between mb-8">
+        <span class="lowercase text-xs tracking-wide text-ai">tu copiloto de marca</span>
+        <button id="assistant-close" type="button" aria-label="Cerrar el asistente"
+                class="w-8 h-8 rounded-full border border-line flex items-center justify-center hover:border-ai/60 transition-colors duration-300">
+          ✕
+        </button>
+      </div>
+
+      <h2 id="assistant-panel-title" class="lowercase font-display text-2xl mb-3">pregúntale a qwen</h2>
+      <p class="text-muted text-sm leading-relaxed mb-6">
+        Explora nombres, tono, conceptos visuales o ideas de campaña con ayuda de IA, vía OpenRouter.
+      </p>
+
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <span class="text-[0.65rem] tracking-wide text-muted">QWEN 3.8 FREE · OPENROUTER</span>
+        <span id="assistant-status" class="assistant-status text-xs text-muted lowercase">comprobando conexión...</span>
+      </div>
+
+      <form id="brand-assistant-form">
+        <label for="brand-prompt" class="sr-only">Pregunta para el asistente de marca</label>
+        <textarea id="brand-prompt" rows="5" required
+                  placeholder="ej.: propón tres territorios de marca para una cafetería artesanal urbana."
+                  class="w-full resize-y bg-ink/40 border border-line px-4 py-3 text-sm text-paper placeholder:text-muted/70"></textarea>
+        <button id="brand-assistant-submit" type="submit"
+                class="lowercase mt-4 w-full inline-flex items-center justify-center gap-2 bg-ai text-[#0A0A0C] px-5 py-3 text-sm font-medium transition-all duration-300 hover:bg-ai-soft hover:scale-[1.02] disabled:cursor-wait disabled:opacity-60">
+          preguntar a qwen
+        </button>
+      </form>
+
+      <div id="brand-assistant-output" class="assistant-output mt-6 border-t border-line pt-5 text-sm leading-relaxed text-paper/90" aria-live="polite"></div>
+    </div>
+  </aside>
+
+  <script>
+    document.documentElement.classList.remove('no-js');
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // --- Entrada del Hero: activa las transiciones tras la carga ---
+    window.addEventListener('load', () => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          document.documentElement.classList.add('is-loaded');
+        });
+      });
+    });
+
+    // --- Sliders horizontales (beneficios / servicios) ---
+    function initSlider(trackId) {
+      const track = document.getElementById(trackId);
+      if (!track) return;
+      const prevBtn = document.querySelector(`.slider-prev[data-target="${trackId}"]`);
+      const nextBtn = document.querySelector(`.slider-next[data-target="${trackId}"]`);
+      function scrollByCard(direction) {
+        const card = track.querySelector('.slider-card');
+        if (!card) return;
+        const trackStyles = getComputedStyle(track);
+        const gap = parseFloat(trackStyles.columnGap || trackStyles.gap || '24');
+        track.scrollBy({ left: (card.getBoundingClientRect().width + gap) * direction, behavior: 'smooth' });
+      }
+      if (prevBtn) prevBtn.addEventListener('click', () => scrollByCard(-1));
+      if (nextBtn) nextBtn.addEventListener('click', () => scrollByCard(1));
+    }
+    initSlider('beneficios-track');
+    initSlider('servicios-track');
+
+    // --- Revelado al hacer scroll (IntersectionObserver) ---
+    const revealEls = document.querySelectorAll('.reveal');
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in-view');
+            io.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+      revealEls.forEach((el) => io.observe(el));
+    } else {
+      revealEls.forEach((el) => el.classList.add('in-view'));
+    }
+
+    // --- Cambio de tema (claro / oscuro) ---
+    const themeToggle = document.getElementById('theme-toggle');
+    const iconSun = themeToggle.querySelector('.icon-sun');
+    const iconMoon = themeToggle.querySelector('.icon-moon');
+    function currentIsLight() {
+      return document.documentElement.classList.contains('light');
+    }
+    function updateThemeIcon() {
+      const light = currentIsLight();
+      iconSun.style.opacity = light ? '1' : '0';
+      iconSun.style.transform = light ? 'rotate(0deg) scale(1)' : 'rotate(-90deg) scale(0.5)';
+      iconMoon.style.opacity = light ? '0' : '1';
+      iconMoon.style.transform = light ? 'rotate(90deg) scale(0.5)' : 'rotate(0deg) scale(1)';
+    }
+    function updateThemeColor() {
+      document.querySelector('meta[name="theme-color"]').setAttribute(
+        'content', currentIsLight() ? '#FFFFFF' : '#0A0A0C'
+      );
+    }
+    function updateToggleLabel() {
+      themeToggle.setAttribute(
+        'aria-label',
+        currentIsLight() ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro'
+      );
+    }
+    updateThemeIcon();
+    updateToggleLabel();
+    updateThemeColor();
+    themeToggle.addEventListener('click', () => {
+      document.documentElement.classList.toggle('light');
+      try {
+        localStorage.setItem('rybb-theme', currentIsLight() ? 'light' : 'dark');
+      } catch (error) {
+        // La preferencia visual sigue funcionando aunque el almacenamiento esté bloqueado.
+      }
+      updateThemeIcon();
+      updateToggleLabel();
+      updateThemeColor();
+    });
+
+    // --- Panel lateral del asistente: abrir / cerrar ---
+    const assistantPanel = document.getElementById('assistant-panel');
+    const assistantBackdrop = document.getElementById('assistant-backdrop');
+    const assistantTrigger = document.getElementById('assistant-trigger');
+    const assistantClose = document.getElementById('assistant-close');
+    const assistantPrompt = document.getElementById('brand-prompt');
+    let assistantOpener = null;
+    let assistantIsOpen = false;
+    const assistantFocusableSelector = 'button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), a[href]';
+
+    function openAssistantPanel(opener) {
+      assistantOpener = opener;
+      assistantIsOpen = true;
+      assistantPanel.style.transform = 'translateX(0)';
+      assistantBackdrop.classList.remove('opacity-0', 'pointer-events-none');
+      assistantBackdrop.classList.add('opacity-100');
+      document.body.classList.add('overflow-hidden');
+      assistantTrigger.setAttribute('aria-expanded', 'true');
+      assistantPanel.setAttribute('aria-hidden', 'false');
+      window.setTimeout(() => assistantPrompt.focus(), 400);
+    }
+    function closeAssistantPanel() {
+      assistantIsOpen = false;
+      assistantPanel.style.transform = 'translateX(100%)';
+      assistantBackdrop.classList.add('opacity-0', 'pointer-events-none');
+      assistantBackdrop.classList.remove('opacity-100');
+      document.body.classList.remove('overflow-hidden');
+      assistantTrigger.setAttribute('aria-expanded', 'false');
+      assistantPanel.setAttribute('aria-hidden', 'true');
+      if (assistantOpener && !assistantOpener.disabled) assistantOpener.focus();
+      assistantOpener = null;
+    }
+    document.querySelectorAll('[data-open-assistant]').forEach((btn) => {
+      btn.addEventListener('click', () => openAssistantPanel(btn));
+    });
+    assistantClose.addEventListener('click', closeAssistantPanel);
+    assistantBackdrop.addEventListener('click', closeAssistantPanel);
+    document.addEventListener('keydown', (event) => {
+      if (!assistantIsOpen) return;
+      if (event.key === 'Escape') {
+        closeAssistantPanel();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const focusable = assistantPanel.querySelectorAll(assistantFocusableSelector);
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    });
+
+    // --- Asistente: proxy local de OpenRouter ---
+    const assistantApi = '/api/brand-assistant';
+    const isStaticHosting = window.location.protocol === 'file:';
+    const assistantForm = document.getElementById('brand-assistant-form');
+    const assistantOutput = document.getElementById('brand-assistant-output');
+    const assistantStatus = document.getElementById('assistant-status');
+    const assistantSubmit = document.getElementById('brand-assistant-submit');
+
+    function setAssistantStatus(message, state) {
+      assistantStatus.textContent = message;
+      assistantStatus.classList.toggle('is-error', state === 'error');
+      assistantStatus.classList.toggle('is-ready', state === 'ready');
+    }
+
+    function disableAssistant(message) {
+      assistantPrompt.disabled = true;
+      assistantSubmit.disabled = true;
+      setAssistantStatus(message, 'error');
+    }
+
+    function repairTextEncoding(value) {
+      if (!/[ÃÂâ]/.test(value)) return value;
+      try {
+        const bytes = Uint8Array.from(Array.from(value), (character) => character.charCodeAt(0) & 255);
+        return new TextDecoder('utf-8').decode(bytes);
+      } catch (error) {
+        return value;
+      }
+    }
+
+    async function checkAssistantStatus() {
+      if (isStaticHosting) {
+        disableAssistant('disponible solo con el servidor local');
+        return;
+      }
+
+      try {
+        const response = await fetch(`${assistantApi}/status`);
+        if (!response.ok) {
+          throw new Error(response.status === 404
+            ? 'disponible solo con el servidor local'
+            : 'el proxy no responde correctamente');
+        }
+        const data = await response.json();
+        if (!data.ready) throw new Error('falta OPENROUTER_API_KEY en el servidor');
+        setAssistantStatus('openrouter conectado · modelo listo', 'ready');
+      } catch (error) {
+        if (error.message === 'disponible solo con el servidor local') {
+          disableAssistant(error.message);
+        } else {
+          setAssistantStatus(error.message || 'openrouter no disponible en este momento', 'error');
+        }
+      }
+    }
+
+    assistantForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const question = assistantPrompt.value.trim();
+      if (!question) return;
+
+      assistantSubmit.disabled = true;
+      assistantSubmit.textContent = 'pensando...';
+      assistantOutput.textContent = '';
+      setAssistantStatus('generando respuesta...', 'ready');
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 60000);
+
+      try {
+        const response = await fetch(assistantApi, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          signal: controller.signal,
+          body: JSON.stringify({ prompt: question })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'No se pudo generar la respuesta');
+        assistantOutput.textContent = repairTextEncoding(data.response || 'Qwen no devolvió contenido.');
+        setAssistantStatus('respuesta generada por openrouter', 'ready');
+      } catch (error) {
+        const message = error.name === 'AbortError'
+          ? 'la petición ha tardado demasiado.'
+          : error.message || 'no se pudo conectar con openrouter.';
+        assistantOutput.textContent = message;
+        setAssistantStatus('conexión no disponible', 'error');
+      } finally {
+        clearTimeout(timeout);
+        assistantSubmit.disabled = false;
+        assistantSubmit.textContent = 'preguntar a qwen';
+      }
+    });
+
+    checkAssistantStatus();
+  </script>
+
+</body>
+</html>
