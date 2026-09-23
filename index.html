@@ -164,16 +164,30 @@
   .slider-track::-webkit-scrollbar { display: none; }
   .slider-card { scroll-snap-align: start; }
 
+  /* Ventana de chat: estado vacío centrado, como un chat real recién abierto */
+  .assistant-output:empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
   .assistant-output:empty::before {
     content: attr(data-placeholder);
     color: rgb(var(--color-muted));
+    padding: 0 1rem;
   }
   .assistant-status.is-error { color: #c97d7d; }
   .assistant-status.is-ready { color: rgb(var(--color-ai)); }
   #brand-prompt:focus { outline: 2px solid rgb(var(--color-ai) / 0.65); outline-offset: 2px; }
-  #brand-prompt.prompt-stale { color: rgb(var(--color-muted)) !important; }
 
   .chat-bubble { white-space: pre-wrap; word-break: break-word; }
+
+  /* Entrada suave de cada burbuja nueva (mensajes y "pensando...") */
+  @keyframes bubble-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .bubble-in { animation: bubble-in 350ms cubic-bezier(0.16, 1, 0.3, 1); }
 
   #assistant-panel {
     transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
@@ -192,7 +206,7 @@
     .hero-fade, .reveal, html, body, header, section, footer,
     h1, h2, h3, p, span, blockquote,
     #assistant-panel, #assistant-backdrop, #assistant-trigger,
-    .lang-trans {
+    .lang-trans, .bubble-in {
       transition: none !important;
       animation: none !important;
     }
@@ -395,7 +409,7 @@ se construye.</h2>
 
       <div class="grid md:grid-cols-3 gap-6 items-stretch">
         <!-- Plan Básico -->
-        <div class="reveal border border-line p-8 flex flex-col justify-between bg-panel">
+        <div class="reveal border border-line p-8 flex flex-col justify-between bg-panel transition-colors duration-300 hover:border-brand/50">
           <div>
             <div class="flex items-center justify-between mb-4">
               <h3 class="lang-trans lowercase font-display text-2xl" data-i18n="p1-title">plan básico</h3>
@@ -405,9 +419,9 @@ se construye.</h2>
               Ideal para mantener tu sitio seguro, actualizado y funcionando sin fricciones.
             </p>
             <ul class="space-y-3 text-xs md:text-sm text-paper/80 mb-8">
-              <li class="flex items-center gap-2">✓ <span class="lang-trans" data-i18n="p1-f1">monitorización de uptime 24/7</span></li>
-              <li class="flex items-center gap-2">✓ <span class="lang-trans" data-i18n="p1-f2">actualizaciones mensuales de seguridad</span></li>
-              <li class="flex items-center gap-2">✓ <span class="lang-trans" data-i18n="p1-f3">hasta 1 hora de cambios al mes</span></li>
+              <li class="flex items-center gap-2"><span class="text-brand">✓</span> <span class="lang-trans" data-i18n="p1-f1">monitorización de uptime 24/7</span></li>
+              <li class="flex items-center gap-2"><span class="text-brand">✓</span> <span class="lang-trans" data-i18n="p1-f2">actualizaciones mensuales de seguridad</span></li>
+              <li class="flex items-center gap-2"><span class="text-brand">✓</span> <span class="lang-trans" data-i18n="p1-f3">hasta 1 hora de cambios al mes</span></li>
             </ul>
           </div>
           <a href="#contacto" class="lang-trans lowercase block text-center border border-line py-3 text-xs font-medium hover:border-brand hover:text-brand transition-colors duration-300" data-i18n="plans-cta">
@@ -427,10 +441,10 @@ se construye.</h2>
               El equilibrio perfecto entre rendimiento, optimización y soporte prioritario.
             </p>
             <ul class="space-y-3 text-xs md:text-sm text-paper mb-8">
-              <li class="flex items-center gap-2">✓ <span class="lang-trans" data-i18n="p2-f1">todo lo incluido en el plan básico</span></li>
-              <li class="flex items-center gap-2">✓ <span class="lang-trans" data-i18n="p2-f2">optimización avanzada de velocidad y SEO</span></li>
-              <li class="flex items-center gap-2">✓ <span class="lang-trans" data-i18n="p2-f3">hasta 3 horas de modificaciones mensuales</span></li>
-              <li class="flex items-center gap-2">✓ <span class="lang-trans" data-i18n="p2-f4">soporte técnico prioritario en 24h</span></li>
+              <li class="flex items-center gap-2"><span class="text-brand">✓</span> <span class="lang-trans" data-i18n="p2-f1">todo lo incluido en el plan básico</span></li>
+              <li class="flex items-center gap-2"><span class="text-brand">✓</span> <span class="lang-trans" data-i18n="p2-f2">optimización avanzada de velocidad y SEO</span></li>
+              <li class="flex items-center gap-2"><span class="text-brand">✓</span> <span class="lang-trans" data-i18n="p2-f3">hasta 3 horas de modificaciones mensuales</span></li>
+              <li class="flex items-center gap-2"><span class="text-brand">✓</span> <span class="lang-trans" data-i18n="p2-f4">soporte técnico prioritario en 24h</span></li>
             </ul>
           </div>
           <a href="#contacto" class="lang-trans lowercase block text-center bg-brand text-[#0A0A0C] py-3 text-xs font-medium hover:bg-brand-soft transition-all duration-300 shadow-md" data-i18n="plans-cta">
@@ -439,7 +453,7 @@ se construye.</h2>
         </div>
 
         <!-- Plan Avanzado -->
-        <div class="reveal border border-line p-8 flex flex-col justify-between bg-panel" style="transition-delay: 200ms;">
+        <div class="reveal border border-line p-8 flex flex-col justify-between bg-panel transition-colors duration-300 hover:border-brand/50" style="transition-delay: 200ms;">
           <div>
             <div class="flex items-center justify-between mb-4">
               <h3 class="lang-trans lowercase font-display text-2xl" data-i18n="p3-title">plan avanzado</h3>
@@ -449,10 +463,10 @@ se construye.</h2>
               Para marcas exigentes que buscan un partner tecnológico y creativo constante.
             </p>
             <ul class="space-y-3 text-xs md:text-sm text-paper/80 mb-8">
-              <li class="flex items-center gap-2">✓ <span class="lang-trans" data-i18n="p3-f1">todo lo incluido en el plan estándar</span></li>
-              <li class="flex items-center gap-2">✓ <span class="lang-trans" data-i18n="p3-f2">soporte VIP directo y asesoría mensual</span></li>
-              <li class="flex items-center gap-2">✓ <span class="lang-trans" data-i18n="p3-f3">horas ilimitadas de pequeños ajustes (fair use)</span></li>
-              <li class="flex items-center gap-2">✓ <span class="lang-trans" data-i18n="p3-f4">implementación de secciones a medida</span></li>
+              <li class="flex items-center gap-2"><span class="text-brand">✓</span> <span class="lang-trans" data-i18n="p3-f1">todo lo incluido en el plan estándar</span></li>
+              <li class="flex items-center gap-2"><span class="text-brand">✓</span> <span class="lang-trans" data-i18n="p3-f2">soporte VIP directo y asesoría mensual</span></li>
+              <li class="flex items-center gap-2"><span class="text-brand">✓</span> <span class="lang-trans" data-i18n="p3-f3">horas ilimitadas de pequeños ajustes (fair use)</span></li>
+              <li class="flex items-center gap-2"><span class="text-brand">✓</span> <span class="lang-trans" data-i18n="p3-f4">implementación de secciones a medida</span></li>
             </ul>
           </div>
           <a href="#contacto" class="lang-trans lowercase block text-center border border-line py-3 text-xs font-medium hover:border-brand hover:text-brand transition-colors duration-300" data-i18n="plans-cta">
@@ -500,7 +514,7 @@ se construye.</h2>
   <!-- Botón flotante -->
   <button id="assistant-trigger" type="button" data-open-assistant
          aria-haspopup="dialog" aria-expanded="false" aria-controls="assistant-panel"
-         aria-label="Abrir el asistente de marca"
+         aria-label="Abrir a brandi, el asistente de marca"
          class="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-ai text-[#0A0A0C] flex items-center justify-center shadow-lg transition-transform duration-300 hover:scale-110">
     <svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;">
       <path d="M12 2l1.8 5.6L19.4 9.4 13.8 11.2 12 17l-1.8-5.8L4.6 9.4l5.6-1.8L12 2z"></path>
@@ -521,7 +535,7 @@ se construye.</h2>
             <span class="w-2 h-2 rounded-full bg-ai"></span>
             <span class="lang-trans lowercase text-xs tracking-widest text-ai font-medium" data-i18n="panel-badge">brandi · asistente creativo</span>
           </div>
-          <button id="assistant-close" type="button" aria-label="Cerrar el asistente"
+          <button id="assistant-close" type="button" aria-label="Cerrar a brandi"
                   class="w-9 h-9 rounded-full border border-line flex items-center justify-center text-muted hover:text-paper hover:border-ai/60 transition-all duration-300">
             ✕
           </button>
@@ -542,7 +556,7 @@ se construye.</h2>
           </div>
 
           <div>
-            <label for="brand-prompt" class="sr-only">Pregunta para el asistente de marca</label>
+            <label for="brand-prompt" class="sr-only">Pregunta para brandi</label>
             <textarea id="brand-prompt" rows="3" maxlength="500"
                     placeholder="ej.: propón tres territorios de marca para una firma de arquitectura sostenible."
                     class="lang-trans w-full resize-y bg-ink/50 border border-line p-4 text-sm text-paper placeholder:text-muted/60 focus:outline-none focus:border-ai transition-colors duration-300" data-i18n-placeholder="panel-placeholder"></textarea>
@@ -659,7 +673,7 @@ se construye.</h2>
         "panel-submit": "preguntar a brandi",
         "panel-result": "resultado del análisis",
         "status-waiting": "en espera",
-        "status-consulting": "consultando con el asistente...",
+        "status-consulting": "consultando con brandi...",
         "status-completed": "completado",
         "status-failed": "fallido",
         "output-placeholder": "la respuesta de brandi aparecerá aquí.",
@@ -734,10 +748,10 @@ se construye.</h2>
         "panel-submit": "ask brandi",
         "panel-result": "analysis output",
         "status-waiting": "standing by",
-        "status-consulting": "consulting the assistant...",
+        "status-consulting": "consulting brandi...",
         "status-completed": "completed",
         "status-failed": "failed",
-        "output-placeholder": "the assistant's response will show up here.",
+        "output-placeholder": "brandi's response will show up here.",
         "err-empty": "please drop a line or write a prompt before sending.",
         "err-turnstile": "please complete the human identity verification.",
         "err-network": "error connecting to the secure server",
@@ -935,11 +949,11 @@ se construye.</h2>
     function renderHistory() {
       assistantOutput.innerHTML = '';
       if (!chatHistory.length) return;
-      
+
       chatHistory.forEach((entry) => {
         const isUser = entry.role === 'user';
         const row = document.createElement('div');
-        row.className = 'flex ' + (isUser ? 'justify-end' : 'justify-start');
+        row.className = 'flex bubble-in ' + (isUser ? 'justify-end' : 'justify-start');
 
         const bubble = document.createElement('div');
         bubble.className = 'max-w-[88%] rounded-2xl px-4 py-3 chat-bubble shadow-sm ' + (isUser
@@ -971,7 +985,7 @@ se construye.</h2>
       hideThinkingBubble();
       const row = document.createElement('div');
       row.id = 'thinking-row';
-      row.className = 'flex justify-start';
+      row.className = 'flex justify-start bubble-in';
 
       const bubble = document.createElement('div');
       bubble.className = 'max-w-[88%] rounded-2xl rounded-bl-sm px-4 py-3 bg-ai/10 border border-ai/30 text-paper flex items-center gap-2.5 shadow-sm';
@@ -1032,15 +1046,6 @@ se construye.</h2>
       }
     });
 
-    assistantPrompt.addEventListener('focus', () => {
-      if (assistantPrompt.classList.contains('prompt-stale')) {
-        assistantPrompt.select();
-      }
-    });
-    assistantPrompt.addEventListener('input', () => {
-      assistantPrompt.classList.remove('prompt-stale');
-    });
-
     const assistantError = document.getElementById('assistant-error');
 
     assistantForm.addEventListener('submit', async (event) => {
@@ -1051,7 +1056,6 @@ se construye.</h2>
       const turnstileToken = document.querySelector('[name="cf-turnstile-response"]')?.value;
 
       assistantError.textContent = '';
-      assistantPrompt.classList.remove('prompt-stale');
 
       if (!question) {
         assistantError.textContent = translations[currentLang]["err-empty"];
@@ -1066,8 +1070,8 @@ se construye.</h2>
       }
 
       // Incluimos el nombre del cliente en el prompt enviado a la IA para que lo tenga en cuenta
-      const finalPrompt = clientName 
-        ? `[Cliente: ${clientName}]\n${question}` 
+      const finalPrompt = clientName
+        ? `[Cliente: ${clientName}]\n${question}`
         : question;
 
       assistantSubmit.disabled = true;
@@ -1091,7 +1095,6 @@ se construye.</h2>
         chatHistory.push({ role: 'assistant', text: data.reply });
         renderHistory();
         assistantPrompt.value = '';
-        assistantPrompt.classList.add('prompt-stale');
         setAssistantStatus('status-completed', 'ready');
       } catch (error) {
         assistantError.textContent = 'error: ' + error.message;
@@ -1103,7 +1106,10 @@ se construye.</h2>
         assistantSubmit.textContent = translations[currentLang]["panel-submit"];
 
         if (window.turnstile) {
-          window.turnstile.reset();
+          const widgetElement = document.querySelector('.cf-turnstile');
+          if (widgetElement) {
+            window.turnstile.reset(widgetElement);
+          }
         }
       }
     });
