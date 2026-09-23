@@ -767,6 +767,20 @@
     let timerInterval = null;
     let startTime = null;
 
+    // Lógica para enviar con Enter y permitir saltos de línea con Ctrl + Enter
+    assistantPrompt.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        if (e.ctrlKey) {
+          // Si pulsa Ctrl + Enter, permitimos el comportamiento por defecto (salto de línea)
+          return;
+        } else {
+          // Si pulsa solo Enter, evitamos el salto de línea y enviamos el formulario
+          e.preventDefault();
+          assistantForm.requestSubmit();
+        }
+      }
+    });
+
     assistantForm.addEventListener('submit', async (event) => {
       event.preventDefault();
       
@@ -821,7 +835,7 @@
         assistantOutput.textContent = 'error: ' + error.message;
         assistantStatus.classList.add('is-error');
       } finally {
-        // Detener cronómetro (el tiempo final se queda visible para cuantificar el benchmark)
+        // Detener cronómetro
         clearInterval(timerInterval);
 
         assistantSubmit.disabled = false;
