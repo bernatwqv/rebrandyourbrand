@@ -164,9 +164,6 @@
   .slider-track::-webkit-scrollbar { display: none; }
   .slider-card { scroll-snap-align: start; }
 
-  .assistant-output {
-    min-height: 8rem;
-  }
   .assistant-output:empty::before {
     content: attr(data-placeholder);
     color: rgb(var(--color-muted));
@@ -450,22 +447,22 @@ se construye.</h2>
         <form id="brand-assistant-form" class="space-y-4">
           <div>
             <label for="brand-prompt" class="sr-only">Pregunta para el asistente de marca</label>
-            <textarea id="brand-prompt" rows="4" maxlength="500"
+            <textarea id="brand-prompt" rows="3" maxlength="500"
                     placeholder="ej.: propón tres territorios de marca para una firma de arquitectura sostenible."
                     class="lang-trans w-full resize-y bg-ink/50 border border-line p-4 text-sm text-paper placeholder:text-muted/60 focus:outline-none focus:border-ai transition-colors duration-300" data-i18n-placeholder="panel-placeholder"></textarea>
           </div>
 
           <!-- Contenedor estético para Turnstile -->
-          <div class="p-3.5 bg-ink/30 border border-line flex flex-col items-center justify-center relative">
+          <div class="p-3 bg-ink/30 border border-line flex flex-col items-center justify-center relative">
             <div class="w-full flex items-center justify-between mb-2 text-[0.6rem] tracking-wider text-muted uppercase font-mono">
               <span class="lang-trans" data-i18n="turnstile-label">verificación de identidad</span>
               <span class="text-ai/80 lowercase">cloudflare turnstile</span>
             </div>
-            <div class="cf-turnstile py-1" data-sitekey="0x4AAAAAAFAc6AhM84k_7AQk"></div>
+            <div class="cf-turnstile py-0.5" data-sitekey="0x4AAAAAAFAc6AhM84k_7AQk"></div>
           </div>
 
           <button id="brand-assistant-submit" type="submit"
-                  class="lang-trans lowercase w-full inline-flex items-center justify-center gap-2 bg-ai text-[#0A0A0C] px-6 py-3.5 text-sm font-medium tracking-wide transition-all duration-300 hover:bg-ai-soft hover:scale-[1.01] disabled:cursor-wait disabled:opacity-60" data-i18n="panel-submit">
+                  class="lang-trans lowercase w-full inline-flex items-center justify-center gap-2 bg-ai text-[#0A0A0C] px-6 py-3 text-sm font-medium tracking-wide transition-all duration-300 hover:bg-ai-soft hover:scale-[1.01] disabled:cursor-wait disabled:opacity-60" data-i18n="panel-submit">
             preguntar a brandi
           </button>
 
@@ -476,8 +473,8 @@ se construye.</h2>
         <div class="mt-8 pt-6 border-t border-line/60">
           <span class="lang-trans lowercase text-[0.65rem] tracking-wider text-muted mb-3 block" data-i18n="panel-result">resultado del análisis</span>
 
-          <!-- Contenedor del historial con burbujas -->
-          <div id="assistant-output" class="assistant-output bg-ink/20 border border-line/40 p-4 max-h-[380px] overflow-y-auto" aria-live="polite" data-placeholder="la respuesta de brandi aparecerá aquí."></div>
+          <!-- Contenedor de chat optimizado con burbujas -->
+          <div id="assistant-output" class="assistant-output bg-ink/30 border border-line/60 rounded-xl p-4 h-[340px] overflow-y-auto flex flex-col gap-3 shadow-inner" aria-live="polite" data-placeholder="la respuesta de brandi aparecerá aquí."></div>
         </div>
       </div>
 
@@ -499,7 +496,6 @@ se construye.</h2>
       });
     });
 
-    // Diccionario de traducciones con idioms naturales y frases de pensamiento
     const translations = {
       es: {
         "nav-why": "¿por qué nosotros?",
@@ -776,7 +772,7 @@ se construye.</h2>
     }
     setAssistantStatus('status-waiting', 'idle');
 
-    // Historial de la conversación en formato chat con burbujas
+    // Historial de la conversación en formato chat con burbujas diferenciadas
     const chatHistory = [];
     function roleLabel(role) {
       if (role === 'user') return currentLang === 'es' ? 'tú' : 'you';
@@ -786,20 +782,19 @@ se construye.</h2>
     function renderHistory() {
       assistantOutput.innerHTML = '';
       if (!chatHistory.length) return;
-      const wrap = document.createElement('div');
-      wrap.className = 'flex flex-col gap-3.5';
+      
       chatHistory.forEach((entry) => {
         const isUser = entry.role === 'user';
         const row = document.createElement('div');
         row.className = 'flex ' + (isUser ? 'justify-end' : 'justify-start');
 
         const bubble = document.createElement('div');
-        bubble.className = 'max-w-[85%] rounded-2xl px-4 py-3 chat-bubble ' + (isUser
+        bubble.className = 'max-w-[88%] rounded-2xl px-4 py-3 chat-bubble shadow-sm ' + (isUser
           ? 'bg-brand text-[#0A0A0C] rounded-br-sm'
           : 'bg-ai/10 border border-ai/30 text-paper rounded-bl-sm');
 
         const label = document.createElement('span');
-        label.className = 'block text-[0.65rem] tracking-wide lowercase mb-1 ' + (isUser ? 'text-[#0A0A0C]/70 font-medium' : 'text-ai font-medium');
+        label.className = 'block text-[0.65rem] tracking-wide lowercase mb-1 ' + (isUser ? 'text-[#0A0A0C]/75 font-semibold' : 'text-ai font-semibold');
         label.textContent = roleLabel(entry.role);
 
         const text = document.createElement('span');
@@ -809,9 +804,8 @@ se construye.</h2>
         bubble.appendChild(label);
         bubble.appendChild(text);
         row.appendChild(bubble);
-        wrap.appendChild(row);
+        assistantOutput.appendChild(row);
       });
-      assistantOutput.appendChild(wrap);
       assistantOutput.scrollTop = assistantOutput.scrollHeight;
     }
 
@@ -825,10 +819,9 @@ se construye.</h2>
       const row = document.createElement('div');
       row.id = 'thinking-row';
       row.className = 'flex justify-start';
-      if (chatHistory.length) row.style.marginTop = '0.875rem';
 
       const bubble = document.createElement('div');
-      bubble.className = 'max-w-[85%] rounded-2xl rounded-bl-sm px-4 py-3 bg-ai/10 border border-ai/30 text-paper flex items-center gap-2.5';
+      bubble.className = 'max-w-[88%] rounded-2xl rounded-bl-sm px-4 py-3 bg-ai/10 border border-ai/30 text-paper flex items-center gap-2.5 shadow-sm';
 
       const dot = document.createElement('span');
       dot.className = 'w-1.5 h-1.5 rounded-full bg-ai animate-pulse shrink-0';
@@ -951,10 +944,7 @@ se construye.</h2>
         assistantSubmit.textContent = translations[currentLang]["panel-submit"];
 
         if (window.turnstile) {
-          const widgetElement = document.querySelector('.cf-turnstile');
-          if (widgetElement) {
-            window.turnstile.reset(widgetElement);
-          }
+          window.turnstile.reset();
         }
       }
     });
