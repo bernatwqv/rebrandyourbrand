@@ -118,6 +118,15 @@
     transition: color 500ms ease;
   }
 
+  /* Animación minimalista para cambio de idioma */
+  .lang-trans {
+    transition: opacity 300ms ease, transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .is-changing {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
   .hero-fade {
     transition-property: opacity, transform;
     transition-duration: 900ms;
@@ -157,7 +166,7 @@
     white-space: pre-wrap;
   }
   .assistant-output:empty::before {
-    content: 'la respuesta de qwen aparecerá aquí.';
+    content: attr(data-placeholder);
     color: rgb(var(--color-muted));
   }
   .assistant-status.is-error { color: #c97d7d; }
@@ -171,7 +180,6 @@
     transition: opacity 400ms ease;
   }
 
-  /* Animación fluida de la barra de carga estilo shimmer */
   @keyframes shimmer {
     0% { transform: translateX(-100%); }
     100% { transform: translateX(300%); }
@@ -190,7 +198,7 @@
     .hero-fade, .reveal, html, body, header, section, footer,
     h1, h2, h3, p, span, blockquote,
     #assistant-panel, #assistant-backdrop, #assistant-trigger,
-    .is-loading-anim {
+    .is-loading-anim, .lang-trans {
       transition: none !important;
       animation: none !important;
     }
@@ -208,12 +216,23 @@
         <span class="inline-block w-px h-5 bg-line" aria-hidden="true"></span>
       </a>
       <nav class="hidden md:flex items-center gap-5 lg:gap-8 ml-auto text-sm text-muted">
-        <a href="#beneficios" class="lowercase hover:text-paper transition-colors duration-300">por qué nosotros</a>
-        <a href="#servicios" class="lowercase hover:text-paper transition-colors duration-300">servicios</a>
-        <a href="#contacto" class="lowercase hover:text-paper transition-colors duration-300">contacto</a>
+        <a href="#beneficios" class="lang-trans lowercase hover:text-paper transition-colors duration-300" data-i18n="nav-why">por qué nosotros</a>
+        <a href="#servicios" class="lang-trans lowercase hover:text-paper transition-colors duration-300" data-i18n="nav-services">servicios</a>
+        <a href="#contacto" class="lang-trans lowercase hover:text-paper transition-colors duration-300" data-i18n="nav-contact">contacto</a>
       </nav>
 
       <div class="flex items-center gap-3 md:ml-5 md:pl-5 md:border-l md:border-line">
+        <!-- Botón de cambio de idioma -->
+        <button id="lang-toggle" type="button" aria-label="Cambiar idioma a Inglés"
+                class="relative w-10 h-10 rounded-full border border-line flex items-center justify-center text-paper font-mono text-xs transition-all duration-300 hover:border-brand/60 hover:scale-105">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"></path>
+          </svg>
+          <span id="lang-indicator" class="absolute -bottom-1 -right-1 bg-brand text-ink text-[9px] font-bold px-1 rounded-full uppercase">es</span>
+        </button>
+
+        <!-- Botón de tema -->
         <button id="theme-toggle" type="button" aria-label="Cambiar a modo claro"
                 class="relative w-10 h-10 rounded-full border border-line flex items-center justify-center text-paper transition-all duration-300 hover:border-brand/60 hover:scale-105">
           <svg class="theme-icon icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -237,24 +256,22 @@
          style="background: radial-gradient(circle at 15% 20%, #8CA3C4 0%, transparent 45%);"></div>
 
     <div class="max-w-6xl mx-auto relative">
-      <p class="hero-fade delay-0 lowercase text-xs tracking-wide text-muted mb-6">estudio de rebranding y diseño visual</p>
+      <p class="hero-fade lang-trans delay-0 lowercase text-xs tracking-wide text-muted mb-6" data-i18n="hero-tag">estudio de rebranding y diseño visual</p>
 
-      <h1 class="hero-fade delay-150 lowercase font-display text-[2.6rem] leading-[1.08] sm:text-6xl md:text-7xl max-w-3xl">
+      <h1 class="hero-fade lang-trans delay-150 lowercase font-display text-[2.6rem] leading-[1.08] sm:text-6xl md:text-7xl max-w-3xl" data-i18n="hero-title">
         marcas que dejan de pasar desapercibidas.
       </h1>
 
-      <p class="hero-fade delay-300 mt-8 max-w-md text-muted text-base md:text-lg leading-relaxed">
+      <p class="hero-fade lang-trans delay-300 mt-8 max-w-md text-muted text-base md:text-lg leading-relaxed" data-i18n="hero-desc">
         Rediseñamos identidades visuales combinando dirección de arte y precisión técnica,
         para marcas que necesitan verse tan bien como lo que hacen.
       </p>
 
       <div class="hero-fade delay-500 mt-10 flex flex-wrap items-center gap-5">
-        <a href="#contacto"
-           class="lowercase inline-flex items-center gap-2 bg-brand text-[#0A0A0C] px-6 py-3 text-sm font-medium transition-all duration-300 hover:bg-brand-soft hover:scale-105 hover:shadow-lg hover:shadow-brand/30">
+        <a href="#contacto" class="lang-trans lowercase inline-flex items-center gap-2 bg-brand text-[#0A0A0C] px-6 py-3 text-sm font-medium transition-all duration-300 hover:bg-brand-soft hover:scale-105 hover:shadow-lg hover:shadow-brand/30" data-i18n="hero-cta">
           empieza tu rebranding
         </a>
-        <button type="button" data-open-assistant
-           class="lowercase text-sm text-paper/80 border-b border-line pb-0.5 transition-colors duration-300 hover:border-ai hover:text-ai">
+        <button type="button" data-open-assistant class="lang-trans lowercase text-sm text-paper/80 border-b border-line pb-0.5 transition-colors duration-300 hover:border-ai hover:text-ai" data-i18n="hero-assistant">
           hablar con el asistente
         </button>
       </div>
@@ -265,10 +282,10 @@
   <section id="manifiesto" class="px-6 md:px-10 py-32 md:py-40 border-b border-line">
     <div class="max-w-6xl mx-auto">
       <div class="reveal grid md:grid-cols-2 gap-10 md:gap-16 items-start">
-        <h2 class="lowercase font-display text-4xl md:text-6xl leading-[1.05]">
+        <h2 class="lang-trans lowercase font-display text-4xl md:text-6xl leading-[1.05]" data-i18n="manifesto-title">
           una marca no se decora.<br>se construye.
         </h2>
-        <p class="text-muted text-base md:text-lg leading-relaxed md:pt-4">
+        <p class="lang-trans text-muted text-base md:text-lg leading-relaxed md:pt-4" data-i18n="manifesto-desc">
           Cada proyecto empieza señalando lo esencial y descartando lo superfluo.
           No perseguimos tendencias: buscamos un sistema que siga siendo cierto
           dentro de cinco años.
@@ -281,8 +298,8 @@
   <section id="beneficios" class="px-6 md:px-10 py-24 md:py-32 border-b border-line">
     <div class="max-w-6xl mx-auto">
       <div class="reveal max-w-xl mb-16">
-        <h2 class="lowercase font-display text-3xl md:text-4xl mb-4">por qué nosotros</h2>
-        <p class="text-muted leading-relaxed">
+        <h2 class="lang-trans lowercase font-display text-3xl md:text-4xl mb-4" data-i18n="benefits-heading">por qué nosotros</h2>
+        <p class="lang-trans text-muted leading-relaxed" data-i18n="benefits-sub">
           El buen diseño no es solo estética: es precisión técnica puesta al servicio de una idea.
         </p>
         <div class="flex items-center gap-2 mt-6">
@@ -297,22 +314,22 @@
 
       <div id="beneficios-track" class="slider-track flex gap-6 overflow-x-auto">
         <div class="reveal slider-card shrink-0 w-[85%] sm:w-[55%] md:w-[36%] border border-line p-6 md:p-8">
-          <h3 class="lowercase font-display text-xl mb-3">criterio artístico</h3>
-          <p class="text-muted text-sm leading-relaxed">
+          <h3 class="lang-trans lowercase font-display text-xl mb-3" data-i18n="b1-title">criterio artístico</h3>
+          <p class="lang-trans text-muted text-sm leading-relaxed" data-i18n="b1-desc">
             Cada decisión visual responde a la personalidad de la marca, no a una tendencia
             pasajera. Diseñamos para que envejezca bien.
           </p>
         </div>
         <div class="reveal slider-card shrink-0 w-[85%] sm:w-[55%] md:w-[36%] border border-line p-6 md:p-8" style="transition-delay: 100ms;">
-          <h3 class="lowercase font-display text-xl mb-3">ejecución técnica</h3>
-          <p class="text-muted text-sm leading-relaxed">
+          <h3 class="lang-trans lowercase font-display text-xl mb-3" data-i18n="b2-title">ejecución técnica</h3>
+          <p class="lang-trans text-muted text-sm leading-relaxed" data-i18n="b2-desc">
             De la idea al archivo entregable: sistemas de marca ordenados, escalables y listos
             para producción, sin fricciones.
           </p>
         </div>
         <div class="reveal slider-card shrink-0 w-[85%] sm:w-[55%] md:w-[36%] border border-line p-6 md:p-8" style="transition-delay: 200ms;">
-          <h3 class="lowercase font-display text-xl mb-3">proceso claro</h3>
-          <p class="text-muted text-sm leading-relaxed">
+          <h3 class="lang-trans lowercase font-display text-xl mb-3" data-i18n="b3-title">proceso claro</h3>
+          <p class="lang-trans text-muted text-sm leading-relaxed" data-i18n="b3-desc">
             Sabrás en qué fase está tu proyecto en todo momento: brief, exploración,
             propuesta final y entrega.
           </p>
@@ -325,8 +342,8 @@
   <section id="servicios" class="px-6 md:px-10 py-24 md:py-32 border-b border-line">
     <div class="max-w-6xl mx-auto">
       <div class="reveal max-w-xl mb-16">
-        <h2 class="lowercase font-display text-3xl md:text-4xl mb-4">servicios</h2>
-        <p class="text-muted leading-relaxed">
+        <h2 class="lang-trans lowercase font-display text-3xl md:text-4xl mb-4" data-i18n="services-heading">servicios</h2>
+        <p class="lang-trans text-muted leading-relaxed" data-i18n="services-sub">
           Tres áreas de intervención, un mismo criterio.
         </p>
         <div class="flex items-center gap-2 mt-6">
@@ -341,22 +358,22 @@
 
       <div id="servicios-track" class="slider-track flex gap-6 overflow-x-auto">
         <div class="reveal slider-card shrink-0 w-[85%] sm:w-[55%] md:w-[36%] border border-line p-6 md:p-8">
-          <h3 class="lowercase font-display text-xl mb-3">identidad visual</h3>
-          <p class="text-muted text-sm leading-relaxed">
+          <h3 class="lang-trans lowercase font-display text-xl mb-3" data-i18n="s1-title">identidad visual</h3>
+          <p class="lang-trans text-muted text-sm leading-relaxed" data-i18n="s1-desc">
             Logotipo, sistema cromático, tipografía y las reglas que mantienen la marca
             reconocible en cualquier soporte.
           </p>
         </div>
         <div class="reveal slider-card shrink-0 w-[85%] sm:w-[55%] md:w-[36%] border border-line p-6 md:p-8" style="transition-delay: 100ms;">
-          <h3 class="lowercase font-display text-xl mb-3">packaging</h3>
-          <p class="text-muted text-sm leading-relaxed">
+          <h3 class="lang-trans lowercase font-display text-xl mb-3" data-i18n="s2-title">packaging</h3>
+          <p class="lang-trans text-muted text-sm leading-relaxed" data-i18n="s2-desc">
             Del concepto a producción: estructura, materiales y acabados pensados
             para el punto de venta.
           </p>
         </div>
         <div class="reveal slider-card shrink-0 w-[85%] sm:w-[55%] md:w-[36%] border border-line p-6 md:p-8" style="transition-delay: 200ms;">
-          <h3 class="lowercase font-display text-xl mb-3">dirección de arte & web</h3>
-          <p class="text-muted text-sm leading-relaxed">
+          <h3 class="lang-trans lowercase font-display text-xl mb-3" data-i18n="s3-title">dirección de arte & web</h3>
+          <p class="lang-trans text-muted text-sm leading-relaxed" data-i18n="s3-desc">
             Fotografía, campañas y presencia digital coherentes con el sistema
             de marca, sin perder personalidad.
           </p>
@@ -370,7 +387,7 @@
     <div class="max-w-6xl mx-auto">
       <div class="reveal flex flex-col md:flex-row md:items-end md:justify-between gap-10">
         <div>
-          <h2 class="lowercase font-display text-3xl md:text-4xl max-w-md leading-tight mb-6">
+          <h2 class="lang-trans lowercase font-display text-3xl md:text-4xl max-w-md leading-tight mb-6" data-i18n="footer-title">
             hablemos de tu marca.
           </h2>
           <div class="flex flex-col gap-2 text-sm">
@@ -393,8 +410,8 @@
       </div>
 
       <div class="mt-16 pt-6 border-t border-line flex flex-col sm:flex-row justify-between gap-2 text-xs text-muted">
-        <span class="lowercase">rebrandyourbrand — rebranding y diseño visual</span>
-        <span>&copy; <span id="year"></span> Todos los derechos reservados</span>
+        <span class="lang-trans lowercase" data-i18n="footer-copy">rebrandyourbrand — rebranding y diseño visual</span>
+        <span>&copy; <span id="year"></span> <span class="lang-trans" data-i18n="footer-rights">Todos los derechos reservados</span></span>
       </div>
     </div>
   </footer>
@@ -421,7 +438,7 @@
         <div class="flex items-center justify-between mb-10 pb-4 border-b border-line/60">
           <div class="flex items-center gap-2">
             <span class="w-2 h-2 rounded-full bg-ai"></span>
-            <span class="lowercase text-xs tracking-widest text-ai font-medium">qwen engine · v2.5</span>
+            <span class="lang-trans lowercase text-xs tracking-widest text-ai font-medium" data-i18n="panel-badge">asistente creativo · v2.5</span>
           </div>
           <button id="assistant-close" type="button" aria-label="Cerrar el asistente"
                   class="w-9 h-9 rounded-full border border-line flex items-center justify-center text-muted hover:text-paper hover:border-ai/60 transition-all duration-300">
@@ -429,51 +446,52 @@
           </button>
         </div>
 
-        <h2 id="assistant-panel-title" class="lowercase font-display text-3xl mb-3 tracking-tight">pregúntale a qwen</h2>
-        <p class="text-muted text-sm leading-relaxed mb-8">
+        <h2 id="assistant-panel-title" class="lang-trans lowercase font-display text-3xl mb-3 tracking-tight" data-i18n="panel-title">pregúntale al asistente</h2>
+        <p class="lang-trans text-muted text-sm leading-relaxed mb-8" data-i18n="panel-desc">
           Explora nombres, territorios de marca, enfoques de tono o conceptos visuales con asistencia en tiempo real.
         </p>
 
         <form id="brand-assistant-form" class="space-y-4">
           <div>
             <label for="brand-prompt" class="sr-only">Pregunta para el asistente de marca</label>
-            <textarea id="brand-prompt" rows="4" required maxlength="500"
+            <!-- Sin atributo 'required' para evitar el mensaje nativo feo -->
+            <textarea id="brand-prompt" rows="4" maxlength="500"
                     placeholder="ej.: propón tres territorios de marca para una firma de arquitectura sostenible."
-                    class="w-full resize-y bg-ink/50 border border-line p-4 text-sm text-paper placeholder:text-muted/60 focus:outline-none focus:border-ai transition-colors duration-300"></textarea>
+                    class="lang-trans w-full resize-y bg-ink/50 border border-line p-4 text-sm text-paper placeholder:text-muted/60 focus:outline-none focus:border-ai transition-colors duration-300" data-i18n-placeholder="panel-placeholder"></textarea>
           </div>
           
-          <!-- Contenedor estético y editorial para Turnstile -->
+          <!-- Contenedor estético para Turnstile -->
           <div class="p-3.5 bg-ink/30 border border-line flex flex-col items-center justify-center relative">
             <div class="w-full flex items-center justify-between mb-2 text-[0.6rem] tracking-wider text-muted uppercase font-mono">
-              <span>verificación de identidad</span>
+              <span class="lang-trans" data-i18n="turnstile-label">verificación de identidad</span>
               <span class="text-ai/80 lowercase">cloudflare turnstile</span>
             </div>
             <div class="cf-turnstile py-1" data-sitekey="0x4AAAAAAFAc6AhM84k_7AQk"></div>
           </div>
 
           <button id="brand-assistant-submit" type="submit"
-                  class="lowercase w-full inline-flex items-center justify-center gap-2 bg-ai text-[#0A0A0C] px-6 py-3.5 text-sm font-medium tracking-wide transition-all duration-300 hover:bg-ai-soft hover:scale-[1.01] disabled:cursor-wait disabled:opacity-60">
-            preguntar a qwen
+                  class="lang-trans lowercase w-full inline-flex items-center justify-center gap-2 bg-ai text-[#0A0A0C] px-6 py-3.5 text-sm font-medium tracking-wide transition-all duration-300 hover:bg-ai-soft hover:scale-[1.01] disabled:cursor-wait disabled:opacity-60" data-i18n="panel-submit">
+            preguntar al asistente
           </button>
         </form>
 
         <div class="mt-8 pt-6 border-t border-line/60">
           <div class="flex items-center justify-between mb-2">
-            <span class="lowercase text-[0.65rem] tracking-wider text-muted">resultado del análisis</span>
-            <span id="assistant-status" class="assistant-status text-[0.65rem] text-muted lowercase">en espera</span>
+            <span class="lang-trans lowercase text-[0.65rem] tracking-wider text-muted" data-i18n="panel-result">resultado del análisis</span>
+            <span id="assistant-status" class="assistant-status text-[0.65rem] text-muted lowercase" data-i18n-default="status-waiting">en espera</span>
           </div>
 
-          <!-- Barra de carga optimizada y sincronizada -->
+          <!-- Barra de carga optimizada -->
           <div id="assistant-loader" class="w-full h-1 bg-ink/80 rounded-full overflow-hidden mb-3 opacity-0 transition-opacity duration-300">
             <div id="assistant-loader-bar" class="h-full bg-ai w-1/3 rounded-full"></div>
           </div>
 
-          <div id="assistant-output" class="assistant-output bg-ink/20 border border-line/40 p-4 text-xs md:text-sm leading-relaxed text-paper/90 font-mono sm:font-sans" aria-live="polite"></div>
+          <div id="assistant-output" class="assistant-output bg-ink/20 border border-line/40 p-4 text-xs md:text-sm leading-relaxed text-paper/90 font-mono sm:font-sans" aria-live="polite" data-placeholder="la respuesta del asistente aparecerá aquí."></div>
         </div>
       </div>
 
       <div class="mt-12 pt-6 border-t border-line/40 text-[0.65rem] text-muted text-center lowercase tracking-wider">
-        rebrandyourbrand.design — creative studio AI proxy
+        rebrandyourbrand.design — studio AI proxy
       </div>
     </div>
   </aside>
@@ -488,6 +506,147 @@
           document.documentElement.classList.add('is-loaded');
         });
       });
+    });
+
+    // Diccionario de traducciones (con idioms naturales en inglés para diseño)
+    const translations = {
+      es: {
+        "nav-why": "por qué nosotros",
+        "nav-services": "servicios",
+        "nav-contact": "contacto",
+        "hero-tag": "estudio de rebranding y diseño visual",
+        "hero-title": "marcas que dejan de pasar desapercibidas.",
+        "hero-desc": "Rediseñamos identidades visuales combinando dirección de arte y precisión técnica, para marcas que necesitan verse tan bien como lo que hacen.",
+        "hero-cta": "empieza tu rebranding",
+        "hero-assistant": "hablar con el asistente",
+        "manifesto-title": "una marca no se decora.\nse construye.",
+        "manifesto-desc": "Cada proyecto empieza señalando lo esencial y descartando lo superfluo. No perseguimos tendencias: buscamos un sistema que siga siendo cierto dentro de cinco años.",
+        "benefits-heading": "por qué nosotros",
+        "benefits-sub": "El buen diseño no es solo estética: es precisión técnica puesta al servicio de una idea.",
+        "b1-title": "criterio artístico",
+        "b1-desc": "Cada decisión visual responde a la personalidad de la marca, no a una tendencia pasajera. Diseñamos para que envejezca bien.",
+        "b2-title": "ejecución técnica",
+        "b2-desc": "De la idea al archivo entregable: sistemas de marca ordenados, escalables y listos para producción, sin fricciones.",
+        "b3-title": "proceso claro",
+        "b3-desc": "Sabrás en qué fase está tu proyecto en todo momento: brief, exploración, propuesta final y entrega.",
+        "services-heading": "servicios",
+        "services-sub": "Tres áreas de intervención, un mismo criterio.",
+        "s1-title": "identidad visual",
+        "s1-desc": "Logotipo, sistema cromático, tipografía y las reglas que mantienen la marca reconocible en cualquier soporte.",
+        "s2-title": "packaging",
+        "s2-desc": "Del concepto a producción: estructura, materiales y acabados pensados para el punto de venta.",
+        "s3-title": "dirección de arte & web",
+        "s3-desc": "Fotografía, campañas y presencia digital coherentes con el sistema de marca, sin perder personalidad.",
+        "footer-title": "hablemos de tu marca.",
+        "footer-copy": "rebrandyourbrand — rebranding y diseño visual",
+        "footer-rights": "Todos los derechos reservados",
+        "panel-badge": "asistente creativo · v2.5",
+        "panel-title": "pregúntale al asistente",
+        "panel-desc": "Explora nombres, territorios de marca, enfoques de tono o conceptos visuales con asistencia en tiempo real.",
+        "panel-placeholder": "ej.: propón tres territorios de marca para una firma de arquitectura sostenible.",
+        "turnstile-label": "verificación de identidad",
+        "panel-submit": "preguntar al asistente",
+        "panel-result": "resultado del análisis",
+        "status-waiting": "en espera",
+        "status-consulting": "consultando con el asistente...",
+        "status-completed": "completado",
+        "status-failed": "fallido",
+        "output-placeholder": "la respuesta del asistente aparecerá aquí.",
+        "err-empty": "por favor, escribe una pregunta antes de enviar.",
+        "err-turnstile": "por favor, completa la verificación de identidad humana.",
+        "err-network": "error al conectar con el servidor seguro"
+      },
+      en: {
+        "nav-why": "why us",
+        "nav-services": "services",
+        "nav-contact": "contact",
+        "hero-tag": "rebranding & visual design studio",
+        "hero-title": "brands that refuse to fade into the background.",
+        "hero-desc": "We reshape visual identities marrying razor-sharp art direction with rock-solid engineering, for brands that mean business.",
+        "hero-cta": "kick off your rebranding",
+        "hero-assistant": "talk to the assistant",
+        "manifesto-title": "a brand isn't just window dressing. it's built from scratch.",
+        "manifesto-desc": "We strip away the fluff to cut right to the chase. We don't chase fleeting fads; we build systems designed to stand the test of time.",
+        "benefits-heading": "why us",
+        "benefits-sub": "Great design isn't just eye candy—it's technical precision brought to the table.",
+        "b1-title": "an uncompromising eye",
+        "b1-desc": "Every visual choice speaks to the brand's core DNA, steering clear of cookie-cutter trends. We design things built to last.",
+        "b2-title": "sweating the details",
+        "b2-desc": "From concept to production-ready files: clean, scalable brand systems built like clockwork without a hitch.",
+        "b3-title": "no beating around the bush",
+        "b3-desc": "Cards on the table: you'll always know where your project stands, from brief to the final delivery.",
+        "services-heading": "services",
+        "services-sub": "Three pillars of intervention, one single guiding vision.",
+        "s1-title": "visual identity",
+        "s1-desc": "Logos, color systems, typography, and the rulebook that keeps your brand sharp across every touchpoint.",
+        "s2-title": "packaging",
+        "s2-desc": "From drawing board to shelf-ready: structural design, materials, and finishes tailored to turn heads.",
+        "s3-title": "art direction & web",
+        "s3-desc": "Photography, campaigns, and digital presence seamlessly synced with your brand identity, with zero dilution.",
+        "footer-title": "let's talk business.",
+        "footer-copy": "rebrandyourbrand — rebranding & visual design",
+        "footer-rights": "All rights reserved",
+        "panel-badge": "creative assistant · v2.5",
+        "panel-title": "ask the assistant",
+        "panel-desc": "Brainstorm names, brand territories, tone of voice, or visual concepts with real-time AI assistance.",
+        "panel-placeholder": "e.g., pitch three brand territories for a sustainable architecture firm.",
+        "turnstile-label": "identity verification",
+        "panel-submit": "ask the assistant",
+        "panel-result": "analysis output",
+        "status-waiting": "standing by",
+        "status-consulting": "consulting the assistant...",
+        "status-completed": "completed",
+        "status-failed": "failed",
+        "output-placeholder": "the assistant's response will show up here.",
+        "err-empty": "please drop a line or write a prompt before sending.",
+        "err-turnstile": "please complete the human identity verification.",
+        "err-network": "error connecting to the secure server"
+      }
+    };
+
+    let currentLang = 'es';
+    const langToggle = document.getElementById('lang-toggle');
+    const langIndicator = document.getElementById('lang-indicator');
+
+    function switchLanguage(lang) {
+      currentLang = lang;
+      langIndicator.textContent = lang;
+      langToggle.setAttribute('aria-label', lang === 'es' ? 'Cambiar idioma a Inglés' : 'Change language to Spanish');
+
+      // Animación minimalista de transición
+      const elements = document.querySelectorAll('.lang-trans');
+      elements.forEach(el => el.classList.add('is-changing'));
+
+      setTimeout(() => {
+        elements.forEach(el => {
+          const key = el.getAttribute('data-i18n');
+          if (key && translations[lang][key]) {
+            el.textContent = translations[lang][key];
+          }
+          const placeholderKey = el.getAttribute('data-i18n-placeholder');
+          if (placeholderKey && translations[lang][placeholderKey]) {
+            el.placeholder = translations[lang][placeholderKey];
+          }
+        });
+
+        // Actualizar placeholder del output de IA
+        const outputBox = document.getElementById('assistant-output');
+        if (outputBox) {
+          outputBox.setAttribute('data-placeholder', translations[lang]["output-placeholder"]);
+        }
+
+        // Actualizar estado si está en espera
+        const statusEl = document.getElementById('assistant-status');
+        if (statusEl && statusEl.textContent.trim() === translations[lang === 'es' ? 'en' : 'es']["status-waiting"]) {
+          statusEl.textContent = translations[lang]["status-waiting"];
+        }
+
+        elements.forEach(el => el.classList.remove('is-changing'));
+      }, 300);
+    }
+
+    langToggle.addEventListener('click', () => {
+      switchLanguage(currentLang === 'es' ? 'en' : 'es');
     });
 
     function initSlider(trackId) {
@@ -617,7 +776,7 @@
     });
 
     const assistantForm = document.getElementById('brand-assistant-form');
-    const assistantOutput = document.getElementById('brand-assistant-output');
+    const assistantOutput = document.getElementById('assistant-output');
     const assistantStatus = document.getElementById('assistant-status');
     const assistantSubmit = document.getElementById('brand-assistant-submit');
     const assistantLoader = document.getElementById('assistant-loader');
@@ -629,19 +788,26 @@
       const question = assistantPrompt.value.trim().substring(0, 500);
       const turnstileToken = document.querySelector('[name="cf-turnstile-response"]')?.value;
 
-      if (!question) return;
-
-      if (!turnstileToken) {
-        assistantOutput.textContent = 'por favor, completa la verificación de identidad humana.';
-        assistantStatus.textContent = 'verificación pendiente';
+      // Validación limpia controlada por JS (evita el "Please fill out this field" feo del navegador)
+      if (!question) {
+        assistantOutput.textContent = translations[currentLang]["err-empty"];
+        assistantStatus.textContent = translations[currentLang]["status-failed"];
+        assistantStatus.classList.add('is-error');
         return;
       }
 
-      // Activar estado de carga y barra visiblemente
+      if (!turnstileToken) {
+        assistantOutput.textContent = translations[currentLang]["err-turnstile"];
+        assistantStatus.textContent = translations[currentLang]["status-failed"];
+        assistantStatus.classList.add('is-error');
+        return;
+      }
+
+      assistantStatus.classList.remove('is-error');
       assistantSubmit.disabled = true;
-      assistantSubmit.textContent = 'procesando...';
+      assistantSubmit.textContent = currentLang === 'es' ? 'procesando...' : 'processing...';
       assistantOutput.textContent = '';
-      assistantStatus.textContent = 'consultando con qwen...';
+      assistantStatus.textContent = translations[currentLang]["status-consulting"];
       
       assistantLoader.classList.remove('opacity-0');
       assistantLoader.classList.add('opacity-100');
@@ -657,23 +823,22 @@
         });
 
         const data = await response.json();
-        if (!response.ok) throw new Error(data.error || 'Error al conectar con el servidor seguro');
+        if (!response.ok) throw new Error(data.error || translations[currentLang]["err-network"]);
         
         assistantOutput.textContent = data.reply;
-        assistantStatus.textContent = 'completado';
+        assistantStatus.textContent = translations[currentLang]["status-completed"];
       } catch (error) {
         assistantOutput.textContent = 'error: ' + error.message;
-        assistantStatus.textContent = 'fallido';
+        assistantStatus.textContent = translations[currentLang]["status-failed"];
+        assistantStatus.classList.add('is-error');
       } finally {
-        // Desvanecer barra de carga y restablecer controles
         assistantLoader.classList.remove('opacity-100');
         assistantLoader.classList.add('opacity-0');
         assistantLoaderBar.classList.remove('is-loading-anim');
 
         assistantSubmit.disabled = false;
-        assistantSubmit.textContent = 'preguntar a qwen';
+        assistantSubmit.textContent = translations[currentLang]["panel-submit"];
         
-        // Reseteo quirúrgico pasando el contenedor exacto del widget
         if (window.turnstile) {
           const widgetElement = document.querySelector('.cf-turnstile');
           if (widgetElement) {
