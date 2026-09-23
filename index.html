@@ -11,7 +11,7 @@
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
 <!-- Política de Seguridad de Contenido (CSP) optimizada -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://challenges.cloudflare.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://rebrandyourbrand-proxy.bernatxd705.workers.dev https://challenges.cloudflare.com https://*.workers.dev; frame-src 'self' https://challenges.cloudflare.com; img-src 'self' data:;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://challenges.cloudflare.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://rebrandyourbrand-proxy.bernatxd705.workers.dev https://challenges.cloudflare.com https://*.workers.dev; frame-src 'self' https://challenges.cloudflare.com; img-src 'self' data: https://bernatwqv.github.io;">
 
 <title>rebrandyourbrand — Rebranding y diseño visual</title>
 <meta name="description" content="Rebranding de marcas y diseño visual: identidad, packaging y dirección de arte con enfoque técnico y artístico.">
@@ -23,9 +23,15 @@
 <meta property="og:description" content="Identidad visual, packaging y dirección de arte para marcas que necesitan dejar de pasar desapercibidas.">
 <meta property="og:url" content="https://bernatwqv.github.io/rebrandyourbrand/">
 <meta property="og:locale" content="es_ES">
-<meta name="twitter:card" content="summary">
+<!-- Imagen de vista previa al compartir el enlace (WhatsApp, Twitter/X, LinkedIn...).
+     Sube og-image.png a la raíz del repo junto a index.html. Tamaño recomendado: 1200x630. -->
+<meta property="og:image" content="https://bernatwqv.github.io/rebrandyourbrand/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="rebrandyourbrand.design — Rebranding y diseño visual">
 <meta name="twitter:description" content="Identidad visual, packaging y dirección de arte para marcas que necesitan dejar de pasar desapercibidas.">
+<meta name="twitter:image" content="https://bernatwqv.github.io/rebrandyourbrand/og-image.png">
 
 <script type="application/ld+json">
 {
@@ -220,7 +226,7 @@
             <circle cx="12" cy="12" r="10"></circle>
             <path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"></path>
           </svg>
-          <span id="lang-indicator" class="absolute -bottom-1 -right-1 bg-brand text-ink text-[9px] font-bold px-1 rounded-full uppercase">es</span>
+          <span id="lang-indicator" class="absolute -bottom-1 -right-1 bg-brand text-[#0A0A0C] text-[9px] font-bold px-1 rounded-full uppercase">es</span>
         </button>
 
         <!-- Botón de tema -->
@@ -273,9 +279,8 @@
   <section id="manifiesto" class="px-6 md:px-10 py-32 md:py-40 border-b border-line">
     <div class="max-w-6xl mx-auto">
       <div class="reveal grid md:grid-cols-2 gap-10 md:gap-16 items-start">
-        <h2 class="lang-trans lowercase font-display text-4xl md:text-6xl leading-[1.05]" data-i18n="manifesto-title">
-          una marca no se decora.<br>se construye.
-        </h2>
+        <h2 class="lang-trans lowercase font-display text-4xl md:text-6xl leading-[1.05] whitespace-pre-line" data-i18n="manifesto-title">una marca no se decora.
+se construye.</h2>
         <p class="lang-trans text-muted text-base md:text-lg leading-relaxed md:pt-4" data-i18n="manifesto-desc">
           Cada proyecto empieza señalando lo esencial y descartando lo superfluo.
           No perseguimos tendencias: buscamos un sistema que siga siendo cierto
@@ -295,7 +300,7 @@
         </p>
         <div class="flex items-center gap-2 mt-6">
           <button type="button" class="slider-prev w-9 h-9 rounded-full border border-line flex items-center justify-center transition-colors duration-300 hover:border-brand/60" data-target="beneficios-track" aria-label="anterior">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:16px;height:16px;"><path d="M15 18l-6-6 6 6"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:16px;height:16px;"><path d="M15 18l-6-6 6-6"/></svg>
           </button>
           <button type="button" class="slider-next w-9 h-9 rounded-full border border-line flex items-center justify-center transition-colors duration-300 hover:border-brand/60" data-target="beneficios-track" aria-label="siguiente">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:16px;height:16px;"><path d="M9 18l6-6-6-6"/></svg>
@@ -339,7 +344,7 @@
         </p>
         <div class="flex items-center gap-2 mt-6">
           <button type="button" class="slider-prev w-9 h-9 rounded-full border border-line flex items-center justify-center transition-colors duration-300 hover:border-brand/60" data-target="servicios-track" aria-label="anterior">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:16px;height:16px;"><path d="M15 18l-6-6 6 6"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:16px;height:16px;"><path d="M15 18l-6-6 6-6"/></svg>
           </button>
           <button type="button" class="slider-next w-9 h-9 rounded-full border border-line flex items-center justify-center transition-colors duration-300 hover:border-brand/60" data-target="servicios-track" aria-label="siguiente">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:16px;height:16px;"><path d="M9 18l6-6-6-6"/></svg>
@@ -449,7 +454,7 @@
                     placeholder="ej.: propón tres territorios de marca para una firma de arquitectura sostenible."
                     class="lang-trans w-full resize-y bg-ink/50 border border-line p-4 text-sm text-paper placeholder:text-muted/60 focus:outline-none focus:border-ai transition-colors duration-300" data-i18n-placeholder="panel-placeholder"></textarea>
           </div>
-          
+
           <!-- Contenedor estético para Turnstile -->
           <div class="p-3.5 bg-ink/30 border border-line flex flex-col items-center justify-center relative">
             <div class="w-full flex items-center justify-between mb-2 text-[0.6rem] tracking-wider text-muted uppercase font-mono">
@@ -463,12 +468,14 @@
                   class="lang-trans lowercase w-full inline-flex items-center justify-center gap-2 bg-ai text-[#0A0A0C] px-6 py-3.5 text-sm font-medium tracking-wide transition-all duration-300 hover:bg-ai-soft hover:scale-[1.01] disabled:cursor-wait disabled:opacity-60" data-i18n="panel-submit">
             preguntar al asistente
           </button>
+
+          <p id="assistant-status" class="assistant-status lang-trans lowercase text-xs text-muted text-center" data-i18n="status-waiting">en espera</p>
         </form>
 
         <div class="mt-8 pt-6 border-t border-line/60">
           <div class="flex items-center justify-between mb-2">
             <span class="lang-trans lowercase text-[0.65rem] tracking-wider text-muted" data-i18n="panel-result">resultado del análisis</span>
-            
+
             <!-- Contador de segundos en tiempo real -->
             <div id="assistant-timer-wrap" class="opacity-0 transition-opacity duration-300 flex items-center gap-1.5 font-mono text-[0.65rem] text-ai">
               <span class="w-1.5 h-1.5 rounded-full bg-ai animate-pulse"></span>
@@ -555,7 +562,7 @@
         "hero-desc": "We reshape visual identities marrying razor-sharp art direction with rock-solid engineering, for brands that mean business.",
         "hero-cta": "kick off your rebranding",
         "hero-assistant": "talk to the assistant",
-        "manifesto-title": "a brand isn't just window dressing. it's built from scratch.",
+        "manifesto-title": "a brand isn't just window dressing.\nit's built from scratch.",
         "manifesto-desc": "We strip away the fluff to cut right to the chase. We don't chase fleeting fads; we build systems designed to stand the test of time.",
         "benefits-heading": "why us?",
         "benefits-sub": "Great design isn't just eye candy—it's technical precision brought to the table.",
@@ -601,6 +608,7 @@
     function switchLanguage(lang) {
       currentLang = lang;
       langIndicator.textContent = lang;
+      document.documentElement.lang = lang;
       langToggle.setAttribute('aria-label', lang === 'es' ? 'Cambiar idioma a Inglés' : 'Change language to Spanish');
 
       const elements = document.querySelectorAll('.lang-trans');
@@ -763,9 +771,16 @@
     const assistantSubmit = document.getElementById('brand-assistant-submit');
     const assistantTimerWrap = document.getElementById('assistant-timer-wrap');
     const assistantTimer = document.getElementById('assistant-timer');
-    
+
     let timerInterval = null;
     let startTime = null;
+
+    function setAssistantStatus(key, state) {
+      assistantStatus.textContent = translations[currentLang][key];
+      assistantStatus.classList.toggle('is-error', state === 'error');
+      assistantStatus.classList.toggle('is-ready', state === 'ready');
+    }
+    setAssistantStatus('status-waiting', 'idle');
 
     // Lógica para enviar con Enter y permitir saltos de línea con Ctrl + Enter
     assistantPrompt.addEventListener('keydown', (e) => {
@@ -783,29 +798,27 @@
 
     assistantForm.addEventListener('submit', async (event) => {
       event.preventDefault();
-      
+
       const question = assistantPrompt.value.trim().substring(0, 500);
       const turnstileToken = document.querySelector('[name="cf-turnstile-response"]')?.value;
 
       if (!question) {
         assistantOutput.textContent = translations[currentLang]["err-empty"];
-        assistantStatus.textContent = translations[currentLang]["status-failed"];
-        assistantStatus.classList.add('is-error');
+        setAssistantStatus('status-failed', 'error');
         return;
       }
 
       if (!turnstileToken) {
         assistantOutput.textContent = translations[currentLang]["err-turnstile"];
-        assistantStatus.textContent = translations[currentLang]["status-failed"];
-        assistantStatus.classList.add('is-error');
+        setAssistantStatus('status-failed', 'error');
         return;
       }
 
-      assistantStatus.classList.remove('is-error');
       assistantSubmit.disabled = true;
       assistantSubmit.textContent = currentLang === 'es' ? 'procesando...' : 'processing...';
       assistantOutput.textContent = '';
-      
+      setAssistantStatus('status-consulting', 'idle');
+
       // Iniciar cronómetro de segundos
       startTime = performance.now();
       assistantTimer.textContent = '0.0s';
@@ -829,18 +842,19 @@
 
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || translations[currentLang]["err-network"]);
-        
+
         assistantOutput.textContent = data.reply;
+        setAssistantStatus('status-completed', 'ready');
       } catch (error) {
         assistantOutput.textContent = 'error: ' + error.message;
-        assistantStatus.classList.add('is-error');
+        setAssistantStatus('status-failed', 'error');
       } finally {
         // Detener cronómetro
         clearInterval(timerInterval);
 
         assistantSubmit.disabled = false;
         assistantSubmit.textContent = translations[currentLang]["panel-submit"];
-        
+
         if (window.turnstile) {
           const widgetElement = document.querySelector('.cf-turnstile');
           if (widgetElement) {
