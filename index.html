@@ -295,7 +295,7 @@
     </div>
   </header>
 
-  <!-- Hero (Sin botón intrusivo, diseño zen y limpio) -->
+  <!-- Hero -->
   <section id="top" class="relative pt-40 pb-28 md:pt-52 md:pb-36 px-6 md:px-10 border-b border-line overflow-hidden">
     <div class="paint-splash-container dynamic-splash-group" data-color="#06a3d0" style="top: 15%; right: 10%;"></div>
     <div class="paint-splash-container dynamic-splash-group" data-color="#eed933" style="bottom: 12%; left: 12%;"></div>
@@ -345,7 +345,6 @@ se construye.</h2>
         </p>
       </div>
 
-      <!-- Contenedor del carrusel en escritorio y grid apilado limpio en móvil -->
       <div class="relative px-0 md:px-14 flex flex-col md:flex-row items-center justify-center gap-6">
         <button id="plans-prev" type="button" aria-label="Plan anterior"
                 class="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full border border-line bg-panel text-paper items-center justify-center shadow-lg hover:border-brand hover:scale-110 transition-all duration-300">
@@ -405,7 +404,7 @@ se construye.</h2>
           </div>
 
           <div class="pt-6 border-t border-line/60 text-xs text-brand font-mono">
-            <span data-i18n="studio-card-1-role">dirección de arte & diseño visual</span>
+            <span class="lang-trans" data-i18n="studio-card-1-role">dirección de arte & diseño visual</span>
           </div>
         </div>
 
@@ -435,7 +434,7 @@ se construye.</h2>
           </div>
 
           <div class="pt-6 border-t border-line/60 text-xs text-ai font-mono">
-            <span data-i18n="studio-card-2-role">creador de webs</span>
+            <span class="lang-trans" data-i18n="studio-card-2-role">creador de webs</span>
           </div>
         </div>
 
@@ -1030,7 +1029,6 @@ se construye.</h2>
       container.style.transform = 'translateY(8px)';
 
       setTimeout(() => {
-        // Doble verificación en caso de cambio de tamaño durante el timeout
         if (window.innerWidth < 768) {
           isPlansAnimating = false;
           renderPlans();
@@ -1142,7 +1140,6 @@ se construye.</h2>
       renderPlans();
     });
 
-    // Resize con debounce optimizado
     let resizeTimer;
     window.addEventListener('resize', () => {
       clearTimeout(resizeTimer);
