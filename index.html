@@ -11,32 +11,32 @@
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
 <!-- Política de Seguridad de Contenido (CSP) blindada y estricta -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://challenges.cloudflare.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://rebrandyourbrand-proxy.bernatxd705.workers.dev https://challenges.cloudflare.com; frame-src 'self' https://challenges.cloudflare.com; frame-ancestors 'self'; img-src 'self' data: https://bernatwqv.github.io https://img.lhdigital.cat;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://challenges.cloudflare.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://rebrandyourbrand-proxy.bernatxd705.workers.dev https://challenges.cloudflare.com; frame-src 'self' https://challenges.cloudflare.com; frame-ancestors 'self'; img-src 'self' data: https://img.lhdigital.cat; object-src 'none'; base-uri 'self'; form-action 'self';">
 
 <title>rebrandyourbrand — Rebranding y diseño visual</title>
 <meta name="description" content="Rebranding de marcas y diseño visual: identidad, packaging y dirección de arte con enfoque técnico y artístico.">
 <meta name="google-site-verification" content="YGC3173v8crkOSc3_K39sejUfe4hYPDlsOqbpdTAYXw" />
-<link rel="canonical" href="https://bernatwqv.github.io/rebrandyourbrand/">
+<link rel="canonical" href="https://rebrandyourbrand.es/">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="rebrandyourbrand.design">
-<meta property="og:title" content="rebrandyourbrand.design — Rebranding y diseño visual">
+<meta property="og:site_name" content="rebrandyourbrand.es">
+<meta property="og:title" content="rebrandyourbrand.es — Rebranding y diseño visual">
 <meta property="og:description" content="Identidad visual, packaging y dirección de arte para marcas que necesitan dejar de pasar desapercibidas.">
-<meta property="og:url" content="https://bernatwqv.github.io/rebrandyourbrand/">
+<meta property="og:url" content="https://rebrandyourbrand.es/">
 <meta property="og:locale" content="es_ES">
-<meta property="og:image" content="https://bernatwqv.github.io/rebrandyourbrand/og-image.png">
+<meta property="og:image" content="https://rebrandyourbrand.es/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="rebrandyourbrand.design — Rebranding y diseño visual">
+<meta name="twitter:title" content="rebrandyourbrand.es — Rebranding y diseño visual">
 <meta name="twitter:description" content="Identidad visual, packaging y dirección de arte para marcas que necesitan dejar de pasar desapercibidas.">
-<meta name="twitter:image" content="https://bernatwqv.github.io/rebrandyourbrand/og-image.png">
+<meta name="twitter:image" content="https://rebrandyourbrand.es/og-image.png">
 
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "ProfessionalService",
-  "name": "rebrandyourbrand.design",
-  "url": "https://bernatwqv.github.io/rebrandyourbrand/",
+  "name": "rebrandyourbrand.es",
+  "url": "https://rebrandyourbrand.es/",
   "description": "Estudio de rebranding y diseño visual especializado en identidad visual, packaging y dirección de arte.",
   "areaServed": "ES",
   "serviceType": ["Rebranding", "Identidad visual", "Packaging", "Dirección de arte"]
@@ -117,10 +117,35 @@
 
   ::selection { background: rgb(var(--color-brand)); color: rgb(var(--color-bg)); }
 
-  html, body, header, section, footer, aside, div, h1, h2, h3, p, span, blockquote, a, button, input, textarea {
-    transition-property: background-color, border-color, color, transform, width, opacity;
-    transition-duration: 700ms;
+  /*
+    Transiciones ACOTADAS a elementos que realmente cambian de estado
+    (tema claro/oscuro, cambio de idioma, hover en interactivos).
+    Se elimina la regla global sobre html, body, header, section, footer,
+    div, h1-h3, p, span, a, button, input, textarea: transicionar `width`
+    y `transform` en todo el árbol del DOM provocaba layout thrashing,
+    especialmente en móviles y gama baja.
+  */
+  body,
+  header,
+  .lang-trans,
+  #plans-container,
+  .milestone-content,
+  .terms-content,
+  #assistant-panel,
+  #assistant-backdrop,
+  .theme-icon,
+  button,
+  a {
+    transition-property: background-color, border-color, color, opacity;
+    transition-duration: 400ms;
     transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Elementos con transform propio mantienen su transición específica, no global */
+  button:hover,
+  a:hover {
+    transition-property: background-color, border-color, color, opacity, transform;
+    transition-duration: 300ms;
   }
 
   .paint-splash-container {
@@ -219,10 +244,10 @@
   #assistant-trigger { animation: ai-pulse 2.8s ease-in-out infinite; }
 
   @media (prefers-reduced-motion: reduce) {
-    .hero-fade, .reveal, html, body, header, section, footer,
-    h1, h2, h3, p, span, blockquote,
+    .hero-fade, .reveal, body, header,
+    .lang-trans, #plans-container, .milestone-content, .terms-content,
     #assistant-panel, #assistant-backdrop, #assistant-trigger,
-    .lang-trans, .bubble-in {
+    .theme-icon, button, a, .bubble-in {
       transition: none !important;
       animation: none !important;
     }
@@ -798,8 +823,7 @@ se construye.</h2>
         "p3-f2": "desarrollo web avanzado con integraciones de IA (Brandi)",
         "p3-f3": "arquitectura técnica personalizada y escalable",
         "p3-f4": "entrega llave en mano con propiedad total (cero cuotas)",
-        
-        <!-- Términos ES -->
+
         "terms-eyebrow": "marco legal y operativo",
         "terms-heading": "condiciones de servicio",
         "terms-sub": "Reglas claras, metodología por fases y protección mutua para garantizar el éxito y la transparencia de cada proyecto en rebrandyourbrand.",
@@ -896,8 +920,7 @@ se construye.</h2>
         "p3-f2": "advanced web dev with AI integrations (Brandi)",
         "p3-f3": "customizable and scalable technical architecture",
         "p3-f4": "turnkey delivery with full ownership (zero retainers)",
-        
-        <!-- Términos EN -->
+
         "terms-eyebrow": "legal & operational framework",
         "terms-heading": "terms of service",
         "terms-sub": "Clear rules, phased methodology, and mutual protection to ensure success and transparency for every project at rebrandyourbrand.",
