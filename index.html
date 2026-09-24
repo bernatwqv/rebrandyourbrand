@@ -295,7 +295,7 @@
     </div>
   </header>
 
-  <!-- Hero -->
+  <!-- Hero (Sin botón intrusivo, diseño zen y limpio) -->
   <section id="top" class="relative pt-40 pb-28 md:pt-52 md:pb-36 px-6 md:px-10 border-b border-line overflow-hidden">
     <div class="paint-splash-container dynamic-splash-group" data-color="#06a3d0" style="top: 15%; right: 10%;"></div>
     <div class="paint-splash-container dynamic-splash-group" data-color="#eed933" style="bottom: 12%; left: 12%;"></div>
@@ -310,12 +310,6 @@
       <p class="hero-fade lang-trans delay-300 mt-8 max-w-md text-muted text-base md:text-lg leading-relaxed" data-i18n="hero-desc">
         Rediseñamos identidades visuales combinando dirección de arte y precisión técnica, para marcas que necesitan verse tan bien como lo que hacen.
       </p>
-
-      <div class="hero-fade delay-500 mt-10">
-        <a href="#planes" class="lang-trans lowercase inline-flex items-center gap-2 bg-brand text-[#0A0A0C] px-6 py-3 text-sm font-medium hover:bg-brand-soft hover:scale-105 hover:shadow-lg hover:shadow-brand/30" data-i18n="hero-cta">
-          empieza tu rebranding
-        </a>
-      </div>
     </div>
   </section>
 
@@ -750,11 +744,10 @@ se construye.</h2>
         "nav-planes": "planes",
         "nav-about": "sobre nosotros",
         "nav-terms": "términos",
-        "nav-contacto": "contacto",
+        "nav-contact": "contacto",
         "hero-tag": "estudio de rebranding y diseño visual",
         "hero-title": "marcas que dejan de pasar desapercibidas.",
         "hero-desc": "Rediseñamos identidades visuales combinando dirección de arte y precisión técnica, para marcas que necesitan verse tan bien como lo que hacen.",
-        "hero-cta": "empieza tu rebranding",
         "manifesto-title": "una marca no se decora.\nse construye.",
         "manifesto-desc": "Cada proyecto empieza señalando lo esencial y descartando lo superfluo. No perseguimos tendencias: buscamos un sistema que siga siendo cierto dentro de cinco años.",
         "studio-heading": "sobre nosotros",
@@ -773,6 +766,7 @@ se construye.</h2>
         "bernat-milestone-1-desc": "Diseño de la arquitectura técnica, despliegue full-stack en Cloudflare Workers e integración del asistente de IA Brandi para la captación automatizada de leads del estudio.",
         "milestone-btn-show": "+ ver hitos",
         "milestone-btn-hide": "- ocultar hitos",
+
         "plans-heading": "planes de rebranding y web",
         "plans-sub": "Inversión única por el proyecto completo de diseño y desarrollo. Sin cuotas mensuales ni ataduras.",
         "plans-quote": "nos ahorramos el .99 en trucos de marketing para ofrecerte una calidad innegociable.",
@@ -846,11 +840,10 @@ se construye.</h2>
         "nav-planes": "plans",
         "nav-about": "about us",
         "nav-terms": "terms",
-        "nav-contacto": "contact",
+        "nav-contact": "contact",
         "hero-tag": "rebranding & visual design studio",
         "hero-title": "brands that refuse to fade into the background.",
         "hero-desc": "We reshape visual identities marrying razor-sharp art direction with rock-solid engineering, for brands that mean business.",
-        "hero-cta": "kick off your rebranding",
         "manifesto-title": "a brand isn't just window dressing.\nit's built from scratch.",
         "manifesto-desc": "We strip away the fluff to cut right to the chase. We don't chase fleeting fads; we build systems designed to stand the test of time.",
         "studio-heading": "about us",
@@ -869,6 +862,7 @@ se construye.</h2>
         "bernat-milestone-1-desc": "Technical architecture design, full-stack edge deployment on Cloudflare Workers, and integration of Brandi AI assistant for automated studio lead capture.",
         "milestone-btn-show": "+ view milestones",
         "milestone-btn-hide": "- hide milestones",
+
         "plans-heading": "rebranding & web plans",
         "plans-sub": "One-time investment for the complete design & dev project. No monthly retainers or lock-ins.",
         "plans-quote": "we skip the .99 marketing gimmicks to deliver uncompromising quality.",
@@ -895,7 +889,7 @@ se construye.</h2>
         "p3-f2": "advanced web dev with AI integrations (Brandi)",
         "p3-f3": "customizable and scalable technical architecture",
         "p3-f4": "turnkey delivery with full ownership (zero retainers)",
-
+        
         <!-- Términos EN -->
         "terms-eyebrow": "legal & operational framework",
         "terms-heading": "terms of service",
@@ -956,14 +950,11 @@ se construye.</h2>
 
     function renderPlans() {
       const container = document.getElementById('plans-container');
-      const prevBtn = document.getElementById('plans-prev');
-      const nextBtn = document.getElementById('plans-next');
       if (!container) return;
 
       const isMobile = window.innerWidth < 768;
 
       if (isMobile) {
-        // En móvil renderizamos las 3 tarjetas apiladas verticalmente con su botón CTA individual y sin flechas
         container.innerHTML = '';
         container.style.opacity = '1';
         container.style.transform = 'translateY(0)';
@@ -1033,13 +1024,19 @@ se construye.</h2>
         return;
       }
 
-      // Lógica de escritorio (Desktop Carousel con flechas)
       if (isPlansAnimating) return;
       isPlansAnimating = true;
       container.style.opacity = '0';
       container.style.transform = 'translateY(8px)';
 
       setTimeout(() => {
+        // Doble verificación en caso de cambio de tamaño durante el timeout
+        if (window.innerWidth < 768) {
+          isPlansAnimating = false;
+          renderPlans();
+          return;
+        }
+
         container.innerHTML = '';
 
         const leftIndex = (currentPlanIndex - 1 + 3) % 3;
@@ -1057,7 +1054,7 @@ se construye.</h2>
           const card = document.createElement('div');
 
           if (isCenter) {
-            card.className = 'reveal in-view border-2 border-brand p-8 flex flex-col justify-between bg-panel relative shadow-2xl shadow-brand/20 z-25 w-full md:w-[42%] scale-[1.03] transition-all duration-700 ease-out';
+            card.className = 'reveal in-view border-2 border-brand p-8 flex flex-col justify-between bg-panel relative shadow-2xl shadow-brand/20 z-20 w-full md:w-[42%] scale-[1.03] transition-all duration-700 ease-out';
           } else {
             card.className = 'reveal in-view border border-line p-8 flex flex-col justify-between bg-panel w-full md:w-[29%] opacity-85 hover:opacity-100 scale-95 transition-all duration-700 ease-out';
           }
@@ -1145,8 +1142,13 @@ se construye.</h2>
       renderPlans();
     });
 
+    // Resize con debounce optimizado
+    let resizeTimer;
     window.addEventListener('resize', () => {
-      renderPlans();
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        renderPlans();
+      }, 150);
     });
 
     function switchLanguage(lang) {
