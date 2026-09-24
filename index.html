@@ -148,8 +148,8 @@
     transition: opacity 300ms ease, transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
   }
   .is-changing {
-    opacity: 0;
-    transform: translateY(6px);
+    opacity: 0.15;
+    transform: translateY(6px) scale(0.99);
   }
 
   .hero-fade {
@@ -177,14 +177,6 @@
 
   .no-js .hero-fade,
   .no-js .reveal { opacity: 1 !important; transform: none !important; }
-
-  .slider-track {
-    scroll-snap-type: x mandatory;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-  .slider-track::-webkit-scrollbar { display: none; }
-  .slider-card { scroll-snap-align: start; }
 
   #plans-container {
     transition: opacity 400ms cubic-bezier(0.16, 1, 0.3, 1), transform 400ms cubic-bezier(0.16, 1, 0.3, 1);
@@ -248,10 +240,8 @@
         <span class="inline-block w-px h-5 bg-line" aria-hidden="true"></span>
       </a>
       <nav class="hidden md:flex items-center gap-5 lg:gap-8 ml-auto text-sm text-muted">
-        <a href="#estudio" class="lang-trans lowercase hover:text-paper" data-i18n="nav-studio">el estudio</a>
-        <a href="#beneficios" class="lang-trans lowercase hover:text-paper" data-i18n="nav-why">¿por qué nosotros?</a>
-        <a href="#servicios" class="lang-trans lowercase hover:text-paper" data-i18n="nav-services">servicios</a>
         <a href="#planes" class="lang-trans lowercase hover:text-paper" data-i18n="nav-planes">planes</a>
+        <a href="#sobre-nosotros" class="lang-trans lowercase hover:text-paper" data-i18n="nav-about">sobre nosotros</a>
         <a href="#contacto" class="lang-trans lowercase hover:text-paper" data-i18n="nav-contact">contacto</a>
       </nav>
 
@@ -326,128 +316,6 @@ se construye.</h2>
     </div>
   </section>
 
-  <!-- El Estudio -->
-  <section id="estudio" class="relative px-6 md:px-10 py-24 md:py-32 border-b border-line overflow-hidden">
-    <div class="max-w-6xl mx-auto relative z-10">
-      <div class="reveal mb-12">
-        <h2 class="lang-trans lowercase font-display text-3xl md:text-4xl mb-3" data-i18n="studio-heading">el estudio</h2>
-        <p class="lang-trans text-muted leading-relaxed max-w-lg" data-i18n="studio-sub">
-          Criterio gráfico premiado y ejecución técnica impecable en el edge.
-        </p>
-      </div>
-
-      <div id="estudio-track" class="slider-track flex gap-6 overflow-x-auto pb-4">
-        <div class="reveal slider-card shrink-0 w-[90%] sm:w-[75%] md:w-[48%] bg-panel border border-line p-8 flex flex-col justify-between">
-          <div>
-            <span class="lang-trans lowercase block text-xs tracking-wider text-brand font-mono mb-3" data-i18n="studio-card-1-tag">trayectoria & formación</span>
-            <h3 class="lang-trans lowercase font-display text-2xl text-paper mb-4" data-i18n="studio-card-1-title">gael domènech sevillano</h3>
-            <p class="lang-trans text-muted text-sm leading-relaxed" data-i18n="studio-card-1-desc">
-              Diseñador gráfico nacido en 2004 y ex-estudiante de ilustración en la Escola d’Arts Serra i Abella. Su enfoque combina una sólida sensibilidad estética con una precisión técnica rigurosa en cada proyecto de identidad.
-            </p>
-          </div>
-          <div class="mt-8 pt-6 border-t border-line/60 text-xs text-muted font-mono">
-            <span>dirección de arte & diseño visual</span>
-          </div>
-        </div>
-
-        <div class="reveal slider-card shrink-0 w-[90%] sm:w-[75%] md:w-[48%] bg-panel border border-line p-8 flex flex-col justify-between" style="transition-delay: 100ms;">
-          <div>
-            <span class="lang-trans lowercase block text-xs tracking-wider text-brand font-mono mb-3" data-i18n="studio-card-2-tag">hito destacado</span>
-            <h3 class="lang-trans lowercase font-display text-2xl text-paper mb-3" data-i18n="studio-card-2-title">edición 100 · festes de primavera</h3>
-            <p class="lang-trans text-muted text-sm leading-relaxed mb-6" data-i18n="studio-card-2-desc">
-              Ganador oficial del cartel conmemorativo de la edición número 100 de las Festes de Primavera de L'Hospitalet de Llobregat (2025).
-            </p>
-          </div>
-          <div class="overflow-hidden border border-line/80 bg-ink">
-            <img src="https://img.lhdigital.cat/wp-content/uploads/2025/03/GCH0261-1.jpg" alt="Gael Domènech Sevillano, ganador de la edición 100" class="w-full h-48 object-cover hover:scale-105 transition-transform duration-700">
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Beneficios -->
-  <section id="beneficios" class="px-6 md:px-10 py-24 md:py-32 border-b border-line">
-    <div class="max-w-6xl mx-auto">
-      <div class="reveal max-w-xl mb-16">
-        <h2 class="lang-trans lowercase font-display text-3xl md:text-4xl mb-4" data-i18n="benefits-heading">¿por qué nosotros?</h2>
-        <p class="lang-trans text-muted leading-relaxed" data-i18n="benefits-sub">
-          El buen diseño no es solo estética: es precisión técnica puesta al servicio de una idea.
-        </p>
-        <div class="flex items-center gap-2 mt-6">
-          <button type="button" class="slider-prev w-9 h-9 rounded-full border border-line flex items-center justify-center hover:border-brand/60" data-target="beneficios-track" aria-label="anterior">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:16px;height:16px;"><path d="M15 18l-6-6 6-6"/></svg>
-          </button>
-          <button type="button" class="slider-next w-9 h-9 rounded-full border border-line flex items-center justify-center hover:border-brand/60" data-target="beneficios-track" aria-label="siguiente">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:16px;height:16px;"><path d="M9 18l6-6-6-6"/></svg>
-          </button>
-        </div>
-      </div>
-
-      <div id="beneficios-track" class="slider-track flex gap-6 overflow-x-auto">
-        <div class="reveal slider-card shrink-0 w-[85%] sm:w-[55%] md:w-[36%] bg-panel border border-line p-6 md:p-8">
-          <h3 class="lang-trans lowercase font-display text-xl mb-3" data-i18n="b1-title">criterio artístico</h3>
-          <p class="lang-trans text-muted text-sm leading-relaxed" data-i18n="b1-desc">
-            Cada decisión visual responde a la personalidad de la marca, no a una tendencia pasajera. Diseñamos para que envejezca bien.
-          </p>
-        </div>
-        <div class="reveal slider-card shrink-0 w-[85%] sm:w-[55%] md:w-[36%] bg-panel border border-line p-6 md:p-8" style="transition-delay: 100ms;">
-          <h3 class="lang-trans lowercase font-display text-xl mb-3" data-i18n="b2-title">ejecución técnica</h3>
-          <p class="lang-trans text-muted text-sm leading-relaxed" data-i18n="b2-desc">
-            De la idea al archivo entregable: sistemas de marca ordenados, escalables y listos para producción, sin fricciones.
-          </p>
-        </div>
-        <div class="reveal slider-card shrink-0 w-[85%] sm:w-[55%] md:w-[36%] bg-panel border border-line p-6 md:p-8" style="transition-delay: 200ms;">
-          <h3 class="lang-trans lowercase font-display text-xl mb-3" data-i18n="b3-title">proceso claro</h3>
-          <p class="lang-trans text-muted text-sm leading-relaxed" data-i18n="b3-desc">
-            Sabrás en qué fase está tu proyecto en todo momento: brief, exploración, propuesta final y entrega.
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Servicios -->
-  <section id="servicios" class="px-6 md:px-10 py-24 md:py-32 border-b border-line">
-    <div class="max-w-6xl mx-auto">
-      <div class="reveal max-w-xl mb-16">
-        <h2 class="lang-trans lowercase font-display text-3xl md:text-4xl mb-4" data-i18n="services-heading">servicios</h2>
-        <p class="lang-trans text-muted leading-relaxed" data-i18n="services-sub">
-          Tres áreas de intervención, un mismo criterio.
-        </p>
-        <div class="flex items-center gap-2 mt-6">
-          <button type="button" class="slider-prev w-9 h-9 rounded-full border border-line flex items-center justify-center hover:border-brand/60" data-target="servicios-track" aria-label="anterior">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:16px;height:16px;"><path d="M15 18l-6-6 6-6"/></svg>
-          </button>
-          <button type="button" class="slider-next w-9 h-9 rounded-full border border-line flex items-center justify-center hover:border-brand/60" data-target="servicios-track" aria-label="siguiente">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:16px;height:16px;"><path d="M9 18l6-6-6-6"/></svg>
-          </button>
-        </div>
-      </div>
-
-      <div id="servicios-track" class="slider-track flex gap-6 overflow-x-auto">
-        <div class="reveal slider-card shrink-0 w-[85%] sm:w-[55%] md:w-[36%] bg-panel border border-line p-6 md:p-8">
-          <h3 class="lang-trans lowercase font-display text-xl mb-3" data-i18n="s1-title">identidad visual</h3>
-          <p class="lang-trans text-muted text-sm leading-relaxed" data-i18n="s1-desc">
-            Logotipo, sistema cromático, tipografía y las reglas que mantienen la marca reconocible en cualquier soporte.
-          </p>
-        </div>
-        <div class="reveal slider-card shrink-0 w-[85%] sm:w-[55%] md:w-[36%] bg-panel border border-line p-6 md:p-8" style="transition-delay: 100ms;">
-          <h3 class="lang-trans lowercase font-display text-xl mb-3" data-i18n="s2-title">packaging</h3>
-          <p class="lang-trans text-muted text-sm leading-relaxed" data-i18n="s2-desc">
-            Del concepto a producción: estructura, materiales y acabados pensados para el punto de venta.
-          </p>
-        </div>
-        <div class="reveal slider-card shrink-0 w-[85%] sm:w-[55%] md:w-[36%] bg-panel border border-line p-6 md:p-8" style="transition-delay: 200ms;">
-          <h3 class="lang-trans lowercase font-display text-xl mb-3" data-i18n="s3-title">dirección de arte & web</h3>
-          <p class="lang-trans text-muted text-sm leading-relaxed" data-i18n="s3-desc">
-            Fotografía, campañas y presencia digital coherentes con el sistema de marca, sin perder personalidad.
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <!-- Planes -->
   <section id="planes" class="relative px-6 md:px-10 py-24 md:py-32 border-b border-line overflow-hidden">
     <div class="max-w-6xl mx-auto relative z-10">
@@ -479,6 +347,88 @@ se construye.</h2>
                 class="absolute right-0 md:right-[27%] top-1/2 -translate-y-1/2 -mr-5 z-30 w-10 h-10 rounded-full border border-line bg-panel text-paper flex items-center justify-center shadow-lg hover:border-brand hover:scale-110 transition-all duration-300">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path d="M9 18l6-6-6-6"/></svg>
         </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sobre nosotros -->
+  <section id="sobre-nosotros" class="relative px-6 md:px-10 py-24 md:py-32 border-b border-line overflow-hidden">
+    <div class="max-w-6xl mx-auto relative z-10">
+      <div class="reveal mb-12">
+        <h2 class="lang-trans lowercase font-display text-3xl md:text-4xl mb-3" data-i18n="studio-heading">sobre nosotros</h2>
+        <p class="lang-trans text-muted leading-relaxed max-w-lg" data-i18n="studio-sub">
+          Dirección de arte, desarrollo web en el edge e ingeniería aplicada.
+        </p>
+      </div>
+
+      <!-- Tarjetas de Gael y Bernat al mismo nivel vertical -->
+      <div class="reveal grid md:grid-cols-2 gap-8 items-start">
+        
+        <!-- GAEL (Izquierda - Azul) -->
+        <div class="bg-panel border border-line p-8 flex flex-col justify-between h-full">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="lang-trans lowercase block text-xs tracking-wider text-brand font-mono" data-i18n="studio-card-1-tag">trayectoria & formación</span>
+              <button type="button" class="milestone-toggle text-xs font-mono text-brand hover:underline inline-flex items-center gap-1.5 cursor-pointer" data-target="gael-milestones">
+                <span class="toggle-text" data-i18n="milestone-btn-show">+ ver hitos</span>
+              </button>
+            </div>
+
+            <h3 class="lang-trans lowercase font-display text-2xl text-paper mb-4" data-i18n="studio-card-1-title">gael domènech sevillano</h3>
+            <p class="lang-trans text-muted text-sm leading-relaxed mb-6" data-i18n="studio-card-1-desc">
+              Diseñador gráfico nacido en 2004. Ex-estudiante de ilustración en la Escola d’Arts Serra i Abella.
+            </p>
+          </div>
+
+          <!-- Hitos desplegables de Gael (hacia abajo) -->
+          <div id="gael-milestones" class="milestone-content overflow-hidden transition-all duration-500 max-h-0 opacity-0 space-y-4 pt-2 border-t border-line/40 mb-6">
+            <div class="pt-2">
+              <h4 class="lang-trans lowercase font-display text-lg text-paper mb-1" data-i18n="gael-milestone-1-title">edición 100 · festes de primavera</h4>
+              <p class="lang-trans text-muted text-xs leading-relaxed mb-3" data-i18n="gael-milestone-1-desc">
+                Ganador oficial del cartel conmemorativo de la edición número 100 de las Festes de Primavera de L'Hospitalet de Llobregat (2025).
+              </p>
+              <div class="overflow-hidden border border-line/80 bg-ink">
+                <img src="https://img.lhdigital.cat/wp-content/uploads/2025/03/GCH0261-1.jpg" alt="Gael Domènech Sevillano, ganador de la edición 100" class="w-full h-40 object-cover hover:scale-105 transition-transform duration-700">
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-6 border-t border-line/60 text-xs text-brand font-mono">
+            <span data-i18n="studio-card-1-role">dirección de arte & diseño visual</span>
+          </div>
+        </div>
+
+        <!-- BERNAT (Derecha - Amarillo) -->
+        <div class="bg-panel border border-line p-8 flex flex-col justify-between h-full">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="lang-trans lowercase block text-xs tracking-wider text-ai font-mono" data-i18n="studio-card-2-tag">trayectoria & formación</span>
+              <button type="button" class="milestone-toggle text-xs font-mono text-ai hover:underline inline-flex items-center gap-1.5 cursor-pointer" data-target="bernat-milestones">
+                <span class="toggle-text" data-i18n="milestone-btn-show">+ ver hitos</span>
+              </button>
+            </div>
+
+            <h3 class="lang-trans lowercase font-display text-2xl text-paper mb-4" data-i18n="studio-card-2-title">bernat domènech sevillano</h3>
+            <p class="lang-trans text-muted text-sm leading-relaxed mb-6" data-i18n="studio-card-2-desc">
+              Nacido en 2008. Estudiante de Ingenieria Electrónica Industrial y Automática.
+            </p>
+          </div>
+
+          <!-- Hitos desplegables de Bernat (hacia abajo) -->
+          <div id="bernat-milestones" class="milestone-content overflow-hidden transition-all duration-500 max-h-0 opacity-0 space-y-4 pt-2 border-t border-line/40 mb-6">
+            <div class="pt-2">
+              <h4 class="lang-trans lowercase font-display text-lg text-paper mb-1" data-i18n="bernat-milestone-1-title">creación de esta web</h4>
+              <p class="lang-trans text-muted text-xs leading-relaxed" data-i18n="bernat-milestone-1-desc">
+                Diseño de la arquitectura técnica, despliegue full-stack en Cloudflare Workers e integración del asistente de IA Brandi para la captación automatizada de leads del estudio.
+              </p>
+            </div>
+          </div>
+
+          <div class="pt-6 border-t border-line/60 text-xs text-ai font-mono">
+            <span data-i18n="studio-card-2-role">creador de webs</span>
+          </div>
+        </div>
+
       </div>
     </div>
   </section>
@@ -647,10 +597,8 @@ se construye.</h2>
 
     const translations = {
       es: {
-        "nav-studio": "el estudio",
-        "nav-why": "¿por qué nosotros?",
-        "nav-services": "servicios",
         "nav-planes": "planes",
+        "nav-about": "sobre nosotros",
         "nav-contact": "contacto",
         "hero-tag": "estudio de rebranding y diseño visual",
         "hero-title": "marcas que dejan de pasar desapercibidas.",
@@ -659,30 +607,22 @@ se construye.</h2>
         "hero-assistant": "hablar con brandi",
         "manifesto-title": "una marca no se decora.\nse construye.",
         "manifesto-desc": "Cada proyecto empieza señalando lo esencial y descartando lo superfluo. No perseguimos tendencias: buscamos un sistema que siga siendo cierto dentro de cinco años.",
-        "studio-heading": "el estudio",
-        "studio-sub": "Criterio gráfico premiado y ejecución técnica impecable en el edge.",
+        "studio-heading": "sobre nosotros",
+        "studio-sub": "Dirección de arte, desarrollo web en el edge e ingeniería aplicada.",
         "studio-card-1-tag": "trayectoria & formación",
         "studio-card-1-title": "gael domènech sevillano",
-        "studio-card-1-desc": "Diseñador gráfico nacido en 2004 y ex-estudiante de ilustración en la Escola d’Arts Serra i Abella. Su enfoque combina una sólida sensibilidad estética con una precisión técnica rigurosa en cada proyecto de identidad.",
-        "studio-card-2-tag": "hito destacado",
-        "studio-card-2-title": "edición 100 · festes de primavera",
-        "studio-card-2-desc": "Ganador oficial del cartel conmemorativo de la edición número 100 de las Festes de Primavera de L'Hospitalet de Llobregat (2025).",
-        "benefits-heading": "¿por qué nosotros?",
-        "benefits-sub": "El buen diseño no es solo estética: es precisión técnica puesta al servicio de una idea.",
-        "b1-title": "criterio artístico",
-        "b1-desc": "Cada decisión visual responde a la personalidad de la marca, no a una tendencia pasajera. Diseñamos para que envejezca bien.",
-        "b2-title": "ejecución técnica",
-        "b2-desc": "De la idea al archivo entregable: sistemas de marca ordenados, escalables y listos para producción, sin fricciones.",
-        "b3-title": "proceso claro",
-        "b3-desc": "Sabrás en qué fase está tu proyecto en todo momento: brief, exploración, propuesta final y entrega.",
-        "services-heading": "servicios",
-        "services-sub": "Tres áreas de intervención, un mismo criterio.",
-        "s1-title": "identidad visual",
-        "s1-desc": "Logotipo, sistema cromático, tipografía y las reglas que mantienen la marca reconocible en cualquier soporte.",
-        "s2-title": "packaging",
-        "s2-desc": "Del concepto a producción: estructura, materiales y acabados pensados para el punto de venta.",
-        "s3-title": "dirección de arte & web",
-        "s3-desc": "Fotografía, campañas y presencia digital coherentes con el sistema de marca, sin perder personalidad.",
+        "studio-card-1-desc": "Diseñador gráfico nacido en 2004. Ex-estudiante de ilustración en la Escola d’Arts Serra i Abella.",
+        "studio-card-1-role": "dirección de arte & diseño visual",
+        "gael-milestone-1-title": "edición 100 · festes de primavera",
+        "gael-milestone-1-desc": "Ganador oficial del cartel conmemorativo de la edición número 100 de las Festes de Primavera de L'Hospitalet de Llobregat (2025).",
+        "studio-card-2-tag": "trayectoria & formación",
+        "studio-card-2-title": "bernat domènech sevillano",
+        "studio-card-2-desc": "Nacido en 2008. Estudiante de Ingenieria Electrónica Industrial y Automática.",
+        "studio-card-2-role": "creador de webs",
+        "bernat-milestone-1-title": "creación de esta web",
+        "bernat-milestone-1-desc": "Diseño de la arquitectura técnica, despliegue full-stack en Cloudflare Workers e integración del asistente de IA Brandi para la captación automatizada de leads del estudio.",
+        "milestone-btn-show": "+ ver hitos",
+        "milestone-btn-hide": "- ocultar hitos",
         "plans-heading": "planes de mantenimiento y evolución",
         "plans-sub": "Soporte técnico continuo para que tu web evolucione al mismo ritmo que tu marca.",
         "plans-quote": "nos ahorramos el .99 en trucos de marketing para ofrecerte una calidad innegociable.",
@@ -727,10 +667,8 @@ se construye.</h2>
         "thinking-phrases": ["pensando...", "analizando territorios visuales...", "sintetizando concepto de marca...", "afinando dirección de arte..."]
       },
       en: {
-        "nav-studio": "the studio",
-        "nav-why": "why us?",
-        "nav-services": "services",
         "nav-planes": "plans",
+        "nav-about": "about us",
         "nav-contact": "contact",
         "hero-tag": "rebranding & visual design studio",
         "hero-title": "brands that refuse to fade into the background.",
@@ -739,30 +677,22 @@ se construye.</h2>
         "hero-assistant": "talk to brandi",
         "manifesto-title": "a brand isn't just window dressing.\nit's built from scratch.",
         "manifesto-desc": "We strip away the fluff to cut right to the chase. We don't chase fleeting fads; we build systems designed to stand the test of time.",
-        "studio-heading": "the studio",
-        "studio-sub": "Award-winning graphic criteria and flawless edge web engineering.",
+        "studio-heading": "about us",
+        "studio-sub": "Art direction, edge web development, and applied engineering.",
         "studio-card-1-tag": "background & training",
         "studio-card-1-title": "gael domènech sevillano",
-        "studio-card-1-desc": "Graphic designer born in 2004 and former illustration student at Escola d’Arts Serra i Abella. His approach merges rock-solid aesthetic sensitivity with rigorous technical precision in every identity project.",
-        "studio-card-2-tag": "featured milestone",
-        "studio-card-2-title": "100th edition · festes de primavera",
-        "studio-card-2-desc": "Official winner of the commemorative poster contest for the 100th edition of the Festes de Primavera in L'Hospitalet de Llobregat (2025).",
-        "benefits-heading": "why us?",
-        "benefits-sub": "Great design isn't just eye candy—it's technical precision brought to the table.",
-        "b1-title": "an uncompromising eye",
-        "b1-desc": "Every visual choice speaks to the brand's core DNA, steering clear of cookie-cutter trends. We design things built to last.",
-        "b2-title": "sweating the details",
-        "b2-desc": "From concept to production-ready files: clean, scalable brand systems built like clockwork without a hitch.",
-        "b3-title": "no beating around the bush",
-        "b3-desc": "Cards on the table: you'll always know where your project stands, from brief to the final delivery.",
-        "services-heading": "services",
-        "services-sub": "Three pillars of intervention, one single guiding vision.",
-        "s1-title": "visual identity",
-        "s1-desc": "Logos, color systems, typography, and the rulebook that keeps your brand sharp across every touchpoint.",
-        "s2-title": "packaging",
-        "s2-desc": "From drawing board to shelf-ready: structural design, materials, and finishes tailored to turn heads.",
-        "s3-title": "art direction & web",
-        "s3-desc": "Photography, campaigns, and digital presence seamlessly synced with your brand identity, with zero dilution.",
+        "studio-card-1-desc": "Graphic designer born in 2004. Former illustration student at Escola d’Arts Serra i Abella.",
+        "studio-card-1-role": "art direction & visual design",
+        "gael-milestone-1-title": "100th edition · festes de primavera",
+        "gael-milestone-1-desc": "Official winner of the commemorative poster contest for the 100th edition of the Festes de Primavera in L'Hospitalet de Llobregat (2025).",
+        "studio-card-2-tag": "background & training",
+        "studio-card-2-title": "bernat domènech sevillano",
+        "studio-card-2-desc": "Born in 2008. Industrial Electronic and Automatic Engineering student.",
+        "studio-card-2-role": "web creator",
+        "bernat-milestone-1-title": "creation of this website",
+        "bernat-milestone-1-desc": "Technical architecture design, full-stack edge deployment on Cloudflare Workers, and integration of Brandi AI assistant for automated studio lead capture.",
+        "milestone-btn-show": "+ view milestones",
+        "milestone-btn-hide": "- hide milestones",
         "plans-heading": "maintenance & evolution plans",
         "plans-sub": "Continuous technical support so your website evolves at the exact pace of your brand.",
         "plans-quote": "we skip the .99 marketing gimmicks to deliver uncompromising quality.",
@@ -952,6 +882,15 @@ se construye.</h2>
           }
         });
 
+        document.querySelectorAll('.milestone-toggle').forEach(btn => {
+          const content = document.getElementById(btn.getAttribute('data-target'));
+          const isOpen = content.classList.contains('is-open');
+          const spanText = btn.querySelector('.toggle-text');
+          if (spanText) {
+            spanText.textContent = isOpen ? translations[lang]['milestone-btn-hide'] : translations[lang]['milestone-btn-show'];
+          }
+        });
+
         renderPlans();
 
         const outputBox = document.getElementById('assistant-output');
@@ -970,23 +909,26 @@ se construye.</h2>
       switchLanguage(currentLang === 'es' ? 'en' : 'es');
     });
 
-    function initSlider(trackId) {
-      const track = document.getElementById(trackId);
-      if (!track) return;
-      const prevBtn = document.querySelector(`.slider-prev[data-target="${trackId}"]`);
-      const nextBtn = document.querySelector(`.slider-next[data-target="${trackId}"]`);
-      function scrollByCard(direction) {
-        const card = track.querySelector('.slider-card');
-        if (!card) return;
-        const trackStyles = getComputedStyle(track);
-        const gap = parseFloat(trackStyles.columnGap || trackStyles.gap || '24');
-        track.scrollBy({ left: (card.getBoundingClientRect().width + gap) * direction, behavior: 'smooth' });
-      }
-      if (prevBtn) prevBtn.addEventListener('click', () => scrollByCard(-1));
-      if (nextBtn) nextBtn.addEventListener('click', () => scrollByCard(1));
-    }
-    initSlider('beneficios-track');
-    initSlider('servicios-track');
+    document.querySelectorAll('.milestone-toggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.getAttribute('data-target');
+        const content = document.getElementById(targetId);
+        const isOpen = content.classList.contains('is-open');
+        const spanText = btn.querySelector('.toggle-text');
+
+        if (isOpen) {
+          content.style.maxHeight = '0px';
+          content.classList.remove('is-open');
+          content.style.opacity = '0';
+          spanText.textContent = translations[currentLang]['milestone-btn-show'];
+        } else {
+          content.style.maxHeight = content.scrollHeight + 800 + 'px';
+          content.classList.add('is-open');
+          content.style.opacity = '1';
+          spanText.textContent = translations[currentLang]['milestone-btn-hide'];
+        }
+      });
+    });
 
     const revealEls = document.querySelectorAll('.reveal');
     if ('IntersectionObserver' in window) {
@@ -1059,7 +1001,6 @@ se construye.</h2>
       assistantTrigger.setAttribute('aria-expanded', 'true');
       assistantPanel.setAttribute('aria-hidden', 'false');
 
-      // Forzar renderizado/reinicio de Turnstile al abrir el panel lateral
       if (window.turnstile) {
         const widget = document.getElementById('turnstile-container');
         if (widget) {
