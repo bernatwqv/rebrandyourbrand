@@ -623,7 +623,6 @@ se construye.</h2>
       
       <div class="flex items-center justify-between px-2 py-1 bg-ink/20 border border-line/60">
         <span class="lang-trans text-[0.6rem] text-muted uppercase font-mono" data-i18n="turnstile-label">verificación humana</span>
-        <!-- Usando data-size="compact" nativo en lugar de CSS scale para evitar solapamientos táctiles -->
         <div id="turnstile-container" class="cf-turnstile" data-size="compact" data-sitekey="0x4AAAAAAFAc6AhM84k_7AQk"></div>
       </div>
 
@@ -652,28 +651,45 @@ se construye.</h2>
     document.documentElement.classList.remove('no-js');
     document.getElementById('year').textContent = new Date().getFullYear();
 
-    // Menú de navegación móvil toggle
+    // Menú de navegación móvil toggle con animación de icono hamburguesa <-> "X"
     const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
     const mobileNav = document.getElementById('mobile-nav');
     const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
 
     function toggleMobileMenu() {
       const isOpen = !mobileNav.classList.contains('hidden');
+      const svg = mobileMenuToggle.querySelector('svg');
       if (isOpen) {
         mobileNav.classList.add('hidden');
         mobileMenuToggle.setAttribute('aria-expanded', 'false');
+        svg.innerHTML = `
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        `;
       } else {
         mobileNav.classList.remove('hidden');
         mobileMenuToggle.setAttribute('aria-expanded', 'true');
+        svg.innerHTML = `
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        `;
       }
     }
 
     mobileMenuToggle.addEventListener('click', toggleMobileMenu);
     mobileNavLinks.forEach(link => {
       link.addEventListener('click', () => {
-        mobileNav.classList.add('hidden');
-        mobileMenuToggle.setAttribute('aria-expanded', 'false');
+        toggleMobileMenu();
       });
+    });
+
+    // Cerrar menú móvil al hacer clic fuera
+    document.addEventListener('click', (e) => {
+      const isMenuOpen = !mobileNav.classList.contains('hidden');
+      if (isMenuOpen && !mobileNav.contains(e.target) && !mobileMenuToggle.contains(e.target)) {
+        toggleMobileMenu();
+      }
     });
 
     // Generador dinámico de salpicaduras
@@ -725,7 +741,6 @@ se construye.</h2>
       });
     })();
 
-    // Activación inmediata en DOMContentLoaded para evitar flash de hero en conexiones lentas
     document.addEventListener('DOMContentLoaded', () => {
       document.documentElement.classList.add('is-loaded');
     });
@@ -735,7 +750,7 @@ se construye.</h2>
         "nav-planes": "planes",
         "nav-about": "sobre nosotros",
         "nav-terms": "términos",
-        "nav-contact": "contacto",
+        "nav-contacto": "contacto",
         "hero-tag": "estudio de rebranding y diseño visual",
         "hero-title": "marcas que dejan de pasar desapercibidas.",
         "hero-desc": "Rediseñamos identidades visuales combinando dirección de arte y precisión técnica, para marcas que necesitan verse tan bien como lo que hacen.",
@@ -831,7 +846,7 @@ se construye.</h2>
         "nav-planes": "plans",
         "nav-about": "about us",
         "nav-terms": "terms",
-        "nav-contact": "contact",
+        "nav-contacto": "contact",
         "hero-tag": "rebranding & visual design studio",
         "hero-title": "brands that refuse to fade into the background.",
         "hero-desc": "We reshape visual identities marrying razor-sharp art direction with rock-solid engineering, for brands that mean business.",
@@ -937,7 +952,7 @@ se construye.</h2>
 
     let currentPlanIndex = 1;
     let activePlanKey = null;
-    let isPlansAnimating = false; // Flag para bloquear estados múltiples en clics rápidos
+    let isPlansAnimating = false;
 
     function renderPlans() {
       const container = document.getElementById('plans-container');
@@ -947,7 +962,6 @@ se construye.</h2>
       container.style.opacity = '0';
       container.style.transform = 'translateY(8px)';
 
-      // Sincronizado a 400ms exactos con la duración de CSS transition-duration
       setTimeout(() => {
         container.innerHTML = '';
 
@@ -1102,7 +1116,6 @@ se construye.</h2>
       switchLanguage(currentLang === 'es' ? 'en' : 'es');
     });
 
-    // Acordeón de hitos con ARIA semantics aria-expanded
     document.querySelectorAll('.milestone-toggle').forEach(btn => {
       btn.addEventListener('click', () => {
         const targetId = btn.getAttribute('data-target');
@@ -1190,7 +1203,7 @@ se construye.</h2>
     function openAssistantPanel(opener) {
       assistantOpener = opener;
       assistantIsOpen = true;
-      assistantPanel.removeAttribute('inert'); // Quitar inert para permitir foco
+      assistantPanel.removeAttribute('inert');
       assistantPanel.style.transform = 'translateX(0)';
       assistantBackdrop.classList.remove('opacity-0', 'pointer-events-none');
       assistantBackdrop.classList.add('opacity-100');
@@ -1217,7 +1230,7 @@ se construye.</h2>
       document.body.classList.remove('overflow-hidden');
       assistantTrigger.setAttribute('aria-expanded', 'false');
       assistantPanel.setAttribute('aria-hidden', 'true');
-      assistantPanel.setAttribute('inert', ''); // Añadir inert para que no sea tabulable estando cerrado
+      assistantPanel.setAttribute('inert', '');
       if (assistantOpener && !assistantOpener.disabled) assistantOpener.focus();
       assistantOpener = null;
     }
@@ -1226,12 +1239,21 @@ se construye.</h2>
     });
     assistantClose.addEventListener('click', closeAssistantPanel);
     assistantBackdrop.addEventListener('click', closeAssistantPanel);
+
+    // Manejo unificado de la tecla Escape para menú móvil y panel de IA
     document.addEventListener('keydown', (event) => {
-      if (!assistantIsOpen) return;
       if (event.key === 'Escape') {
+        const isMenuOpen = !mobileNav.classList.contains('hidden');
+        if (isMenuOpen) {
+          toggleMobileMenu();
+          mobileMenuToggle.focus();
+          return;
+        }
+        if (!assistantIsOpen) return;
         closeAssistantPanel();
         return;
       }
+      if (!assistantIsOpen) return;
       if (event.key !== 'Tab') return;
       const focusable = assistantPanel.querySelectorAll(assistantFocusableSelector);
       if (!focusable.length) return;
@@ -1353,7 +1375,6 @@ se construye.</h2>
       if (row) row.remove();
     }
 
-    // Prevención de envíos duplicados, IME composition y doble submit en Enter
     assistantPrompt.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         if (e.isComposing || e.keyCode === 229) return;
