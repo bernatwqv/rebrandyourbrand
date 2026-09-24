@@ -442,18 +442,24 @@ se construye.</h2>
     </div>
   </section>
 
-  <!-- Términos y Condiciones de Servicio -->
+  <!-- Términos y Condiciones de Servicio (Con Desplegable) -->
   <section id="terminos" class="relative px-6 md:px-10 py-24 md:py-32 border-b border-line overflow-hidden bg-panel/30">
     <div class="max-w-4xl mx-auto relative z-10">
-      <div class="reveal mb-12">
-        <span class="lang-trans lowercase block text-xs tracking-widest text-brand font-mono mb-2" data-i18n="terms-eyebrow">marco legal y operativo</span>
-        <h2 class="lang-trans lowercase font-display text-3xl md:text-4xl mb-4" data-i18n="terms-heading">condiciones de servicio</h2>
-        <p class="lang-trans text-muted text-sm leading-relaxed" data-i18n="terms-sub">
-          Reglas claras, metodología por fases y protección mutua para garantizar el éxito y la transparencia de cada proyecto en rebrandyourbrand.
-        </p>
+      <div class="reveal mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <span class="lang-trans lowercase block text-xs tracking-widest text-brand font-mono mb-2" data-i18n="terms-eyebrow">marco legal y operativo</span>
+          <h2 class="lang-trans lowercase font-display text-3xl md:text-4xl mb-4" data-i18n="terms-heading">condiciones de servicio</h2>
+          <p class="lang-trans text-muted text-sm leading-relaxed max-w-xl" data-i18n="terms-sub">
+            Reglas claras, metodología por fases y protección mutua para garantizar el éxito y la transparencia de cada proyecto en rebrandyourbrand.
+          </p>
+        </div>
+        <button type="button" class="terms-toggle text-xs font-mono text-brand hover:underline inline-flex items-center gap-1.5 cursor-pointer shrink-0 pb-1" aria-expanded="false" aria-controls="terms-content" data-target="terms-content">
+          <span class="toggle-text" data-i18n="terms-btn-show">+ ver condiciones</span>
+        </button>
       </div>
 
-      <div class="reveal space-y-8 text-sm md:text-base text-paper/90 leading-relaxed font-sans">
+      <!-- Contenido desplegable de los artículos -->
+      <div id="terms-content" class="terms-content overflow-hidden transition-all duration-500 max-h-0 opacity-0 space-y-8 text-sm md:text-base text-paper/90 leading-relaxed font-sans pt-2">
         
         <!-- Artículo 1 -->
         <div class="bg-panel border border-line p-6 md:p-8 space-y-3">
@@ -797,6 +803,8 @@ se construye.</h2>
         "terms-eyebrow": "marco legal y operativo",
         "terms-heading": "condiciones de servicio",
         "terms-sub": "Reglas claras, metodología por fases y protección mutua para garantizar el éxito y la transparencia de cada proyecto en rebrandyourbrand.",
+        "terms-btn-show": "+ ver condiciones",
+        "terms-btn-hide": "- ocultar condiciones",
         "t1-title": "1. naturaleza de los servicios y alcance de los planes",
         "t1-p": "rebrandyourbrand ofrece servicios cerrados de rebranding y desarrollo web bajo pago único. Cada plan detalla estrictamente sus entregables. Cualquier característica, sección adicional, funcionalidad de comercio electrónico (e-commerce), base de datos compleja o desarrollo a medida que no esté especificado explícitamente en el plan contratado quedará excluido del precio base y requerirá la contratación de un plan superior (Upsell) o un presupuesto extraordinario por hora de ingeniería.",
         "t2-title": "2. metodología de trabajo por fases y límite de revisiones",
@@ -893,6 +901,8 @@ se construye.</h2>
         "terms-eyebrow": "legal & operational framework",
         "terms-heading": "terms of service",
         "terms-sub": "Clear rules, phased methodology, and mutual protection to ensure success and transparency for every project at rebrandyourbrand.",
+        "terms-btn-show": "+ view terms",
+        "terms-btn-hide": "- hide terms",
         "t1-title": "1. nature of services and scope of plans",
         "t1-p": "rebrandyourbrand provides closed rebranding and web development services under a single-payment model. Each plan strictly outlines its deliverables. Any feature, additional section, e-commerce functionality, complex database, or custom development not explicitly specified in the contracted plan is excluded from the base price and will require upgrading to a higher plan (Upsell) or an extraordinary engineering hourly rate.",
         "t2-title": "2. phased workflow methodology and revision limits",
@@ -1178,6 +1188,15 @@ se construye.</h2>
           }
         });
 
+        document.querySelectorAll('.terms-toggle').forEach(btn => {
+          const content = document.getElementById(btn.getAttribute('data-target'));
+          const isOpen = content.classList.contains('is-open');
+          const spanText = btn.querySelector('.toggle-text');
+          if (spanText) {
+            spanText.textContent = isOpen ? translations[lang]['terms-btn-hide'] : translations[lang]['terms-btn-show'];
+          }
+        });
+
         renderPlans();
 
         const outputBox = document.getElementById('assistant-output');
@@ -1214,6 +1233,29 @@ se construye.</h2>
           content.classList.add('is-open');
           content.style.opacity = '1';
           spanText.textContent = translations[currentLang]['milestone-btn-hide'];
+          btn.setAttribute('aria-expanded', 'true');
+        }
+      });
+    });
+
+    document.querySelectorAll('.terms-toggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.getAttribute('data-target');
+        const content = document.getElementById(targetId);
+        const isOpen = content.classList.contains('is-open');
+        const spanText = btn.querySelector('.toggle-text');
+
+        if (isOpen) {
+          content.style.maxHeight = '0px';
+          content.classList.remove('is-open');
+          content.style.opacity = '0';
+          spanText.textContent = translations[currentLang]['terms-btn-show'];
+          btn.setAttribute('aria-expanded', 'false');
+        } else {
+          content.style.maxHeight = content.scrollHeight + 2000 + 'px';
+          content.classList.add('is-open');
+          content.style.opacity = '1';
+          spanText.textContent = translations[currentLang]['terms-btn-hide'];
           btn.setAttribute('aria-expanded', 'true');
         }
       });
