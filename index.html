@@ -558,15 +558,9 @@ se construye.</h2>
     <!-- Barra Inferior de Entrada -->
     <form id="brand-assistant-form" class="p-4 md:p-6 border-t border-line/60 bg-ink/30 shrink-0 space-y-3">
       
-      <div class="flex items-center gap-2">
-        <input type="text" id="user-name" maxlength="50"
-               placeholder="tu nombre o empresa (opc.)"
-               class="lang-trans w-full bg-ink/50 border border-line px-3 py-1.5 text-xs text-paper placeholder:text-muted/60 focus:outline-none focus:border-ai" data-i18n-placeholder="panel-name-placeholder">
-      </div>
-
       <div class="flex items-center justify-between px-2 py-1 bg-ink/20 border border-line/60">
         <span class="lang-trans text-[0.6rem] text-muted uppercase font-mono" data-i18n="turnstile-label">verificación humana</span>
-        <div class="cf-turnstile scale-90 origin-right"></div>
+        <div id="turnstile-container" class="cf-turnstile scale-90 origin-right" data-sitekey="0x4AAAAAAFAc6AhM84k_7AQk"></div>
       </div>
 
       <div class="relative flex items-center bg-ink/60 border border-line rounded-xl p-1.5 focus-within:border-ai">
@@ -720,7 +714,6 @@ se construye.</h2>
         "footer-rights": "Todos los derechos reservados",
         "panel-title": "brandi · asistente creativo",
         "panel-subtitle": "inteligencia artificial de marca",
-        "panel-name-placeholder": "tu nombre o empresa (opc.)",
         "panel-placeholder": "escribe un mensaje a brandi...",
         "turnstile-label": "verificación humana",
         "status-waiting": "en espera",
@@ -801,7 +794,6 @@ se construye.</h2>
         "footer-rights": "All rights reserved",
         "panel-title": "brandi · creative assistant",
         "panel-subtitle": "brand artificial intelligence",
-        "panel-name-placeholder": "your name or company (opt.)",
         "panel-placeholder": "type a message to brandi...",
         "turnstile-label": "human verification",
         "status-waiting": "standing by",
@@ -1053,7 +1045,6 @@ se construye.</h2>
     const assistantTrigger = document.getElementById('assistant-trigger');
     const assistantClose = document.getElementById('assistant-close');
     const assistantPrompt = document.getElementById('brand-prompt');
-    const userNameInput = document.getElementById('user-name');
     let assistantOpener = null;
     let assistantIsOpen = false;
     const assistantFocusableSelector = 'button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), a[href]';
@@ -1067,6 +1058,17 @@ se construye.</h2>
       document.body.classList.add('overflow-hidden');
       assistantTrigger.setAttribute('aria-expanded', 'true');
       assistantPanel.setAttribute('aria-hidden', 'false');
+
+      // Forzar renderizado/reinicio de Turnstile al abrir el panel lateral
+      if (window.turnstile) {
+        const widget = document.getElementById('turnstile-container');
+        if (widget) {
+          try {
+            window.turnstile.reset(widget);
+          } catch (e) {}
+        }
+      }
+
       window.setTimeout(() => assistantPrompt.focus(), 400);
     }
     function closeAssistantPanel() {
@@ -1215,7 +1217,7 @@ se construye.</h2>
     assistantPrompt.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         if (e.shiftKey) {
-          return; // Permite saltos de línea con Shift + Enter
+          return;
         } else {
           e.preventDefault();
           assistantForm.requestSubmit();
@@ -1228,7 +1230,6 @@ se construye.</h2>
     assistantForm.addEventListener('submit', async (event) => {
       event.preventDefault();
 
-      const clientName = userNameInput.value.trim();
       const question = assistantPrompt.value.trim().substring(0, 500);
       const turnstileToken = document.querySelector('[name="cf-turnstile-response"]')?.value;
 
@@ -1255,9 +1256,7 @@ se construye.</h2>
           : `[Plan currently selected by the user: ${planNameEn}]\n`;
       }
 
-      const finalPrompt = planContextPrefix + (clientName
-        ? `[Cliente: ${clientName}]\n${question}`
-        : question);
+      const finalPrompt = planContextPrefix + question;
 
       assistantSubmit.disabled = true;
       setAssistantStatus('status-consulting', 'idle');
@@ -1297,7 +1296,7 @@ se construye.</h2>
         assistantSubmit.disabled = false;
 
         if (window.turnstile) {
-          const widgetElement = document.querySelector('.cf-turnstile');
+          const widgetElement = document.getElementById('turnstile-container');
           if (widgetElement) {
             window.turnstile.reset(widgetElement);
           }
