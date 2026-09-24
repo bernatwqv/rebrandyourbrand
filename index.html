@@ -10,7 +10,7 @@
 <!-- SDK de Cloudflare Turnstile — carga en modo explícito -->
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback&render=explicit" async defer></script>
 
-<!-- Política de Seguridad de Contenido (CSP) blindada con soporte de imágenes para Turnstile -->
+<!-- Política de Seguridad de Contenido (CSP) blindada -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://challenges.cloudflare.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://rebrandyourbrand-proxy.bernatxd705.workers.dev https://challenges.cloudflare.com; frame-src 'self' https://challenges.cloudflare.com; frame-ancestors 'self'; img-src 'self' data: https://img.lhdigital.cat https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self';">
 
 <title>rebrandyourbrand — Rebranding y diseño visual</title>
@@ -628,9 +628,9 @@ se construye.</h2>
     <form id="brand-assistant-form" class="p-4 md:p-6 border-t border-line/60 bg-ink/30 shrink-0 space-y-3">
       
       <!-- Bloque de verificación Turnstile -->
-      <div class="flex flex-col sm:flex-row items-center justify-between gap-2 px-3 py-2 bg-ink/20 border border-line/60 overflow-hidden">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-2 px-3 py-2 bg-ink/20 border border-line/60">
         <span class="lang-trans text-[0.6rem] text-muted uppercase font-mono shrink-0" data-i18n="turnstile-label">verificación humana</span>
-        <div id="turnstile-container" class="shrink-0"></div>
+        <div id="turnstile-container" class="w-full sm:w-auto min-h-[65px] flex items-center justify-center"></div>
       </div>
 
       <div class="relative flex items-center bg-ink/60 border border-line rounded-xl p-1.5 focus-within:border-ai">
@@ -1326,11 +1326,10 @@ se construye.</h2>
     const assistantFocusableSelector = 'button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), a[href]';
 
     const TURNSTILE_SITEKEY = '0x4AAAAAAFAc6AhM84k_7AQk';
-    let turnstileApiReady = false;
     let turnstileWidgetId = null;
 
+    // Callback global de Turnstile
     window.onloadTurnstileCallback = function () {
-      turnstileApiReady = true;
       if (assistantIsOpen) {
         renderOrResetTurnstile();
       }
@@ -1338,17 +1337,17 @@ se construye.</h2>
 
     function renderOrResetTurnstile() {
       const container = document.getElementById('turnstile-container');
-      if (!container || !turnstileApiReady || !window.turnstile) return;
+      if (!container || !window.turnstile) return;
 
       if (turnstileWidgetId === null) {
         try {
           turnstileWidgetId = window.turnstile.render(container, {
             sitekey: TURNSTILE_SITEKEY,
-            size: 'normal',
+            size: 'flexible', // Modo flexible para que se adapte perfectamente a móviles y contenedores
             language: currentLang,
           });
         } catch (e) {
-          console.error('No se pudo renderizar Turnstile:', e);
+          console.error('Error al renderizar Turnstile:', e);
         }
       } else {
         try {
@@ -1386,10 +1385,12 @@ se construye.</h2>
       assistantTrigger.setAttribute('aria-expanded', 'true');
       assistantPanel.setAttribute('aria-hidden', 'false');
 
+      // Renderizar o resetear el widget al abrir
       renderOrResetTurnstile();
 
       window.setTimeout(() => assistantPrompt.focus(), 400);
     }
+
     function closeAssistantPanel() {
       assistantIsOpen = false;
       assistantPanel.style.transform = 'translateX(100%)';
@@ -1404,6 +1405,7 @@ se construye.</h2>
 
       removeTurnstileWidget();
     }
+
     document.querySelectorAll('[data-open-assistant]').forEach((btn) => {
       btn.addEventListener('click', () => openAssistantPanel(btn));
     });
