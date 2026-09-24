@@ -7,8 +7,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 
-<!-- SDK de Cloudflare Turnstile -->
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<!-- SDK de Cloudflare Turnstile — carga en modo explícito: no auto-escanea el DOM
+     buscando elementos .cf-turnstile, así que no falla por contenedores aún ocultos
+     (p. ej. dentro de un panel con transform: translateX(100%)). Nosotros decidimos
+     cuándo y dónde pintar el widget mediante window.turnstile.render(). -->
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback&render=explicit" async defer></script>
 
 <!-- Política de Seguridad de Contenido (CSP) blindada y estricta -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://challenges.cloudflare.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://rebrandyourbrand-proxy.bernatxd705.workers.dev https://challenges.cloudflare.com; frame-src 'self' https://challenges.cloudflare.com; frame-ancestors 'self'; img-src 'self' data: https://img.lhdigital.cat; object-src 'none'; base-uri 'self'; form-action 'self';">
@@ -647,7 +650,7 @@ se construye.</h2>
       <!-- Bloque de verificación Turnstile optimizado en barra horizontal (normal) -->
       <div class="flex flex-col sm:flex-row items-center justify-between gap-2 px-3 py-2 bg-ink/20 border border-line/60 overflow-hidden">
         <span class="lang-trans text-[0.6rem] text-muted uppercase font-mono shrink-0" data-i18n="turnstile-label">verificación humana</span>
-        <div id="turnstile-container" class="cf-turnstile shrink-0" data-size="normal" data-sitekey="0x4AAAAAAFAc6AhM84k_7AQk"></div>
+        <div id="turnstile-container" class="shrink-0"></div>
       </div>
 
       <div class="relative flex items-center bg-ink/60 border border-line rounded-xl p-1.5 focus-within:border-ai">
@@ -1345,6 +1348,70 @@ se construye.</h2>
     let assistantIsOpen = false;
     const assistantFocusableSelector = 'button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), a[href]';
 
+    // --- Turnstile: renderizado explícito ---------------------------------
+    // El script se carga con `render=explicit`, así que Turnstile NUNCA escanea
+    // el DOM por su cuenta. Nosotros controlamos exactamente cuándo se pinta
+    // el widget (solo cuando #turnstile-container ya es visible, es decir,
+    // cuando el panel lateral está abierto), evitando el error de Cloudflare
+    // por contenedores con dimensiones 0 en el momento de renderizar.
+    const TURNSTILE_SITEKEY = '0x4AAAAAAFAc6AhM84k_7AQk';
+    let turnstileApiReady = false;   // true cuando api.js ha terminado de cargar
+    let turnstileWidgetId = null;    // id devuelto por turnstile.render(); null = sin pintar
+
+    // Callback invocado por el propio script de Cloudflare vía ?onload=...
+    window.onloadTurnstileCallback = function () {
+      turnstileApiReady = true;
+      // Si el panel ya estaba abierto cuando la API terminó de cargar
+      // (carga lenta de red), pintamos el widget en cuanto esté listo.
+      if (assistantIsOpen) {
+        renderOrResetTurnstile();
+      }
+    };
+
+    function renderOrResetTurnstile() {
+      const container = document.getElementById('turnstile-container');
+      if (!container || !turnstileApiReady || !window.turnstile) return;
+
+      if (turnstileWidgetId === null) {
+        // Primera vez: el contenedor ya es visible (el panel está abierto),
+        // así que el render explícito funciona sin problemas de dimensiones.
+        try {
+          turnstileWidgetId = window.turnstile.render(container, {
+            sitekey: TURNSTILE_SITEKEY,
+            size: 'normal',
+            language: currentLang,
+          });
+        } catch (e) {
+          console.error('No se pudo renderizar Turnstile:', e);
+        }
+      } else {
+        // Ya existe un widget pintado: simplemente lo reseteamos para
+        // obtener un token limpio cada vez que se reabre el panel.
+        try {
+          window.turnstile.reset(turnstileWidgetId);
+        } catch (e) {}
+      }
+    }
+
+    function removeTurnstileWidget() {
+      if (turnstileWidgetId !== null && window.turnstile) {
+        try {
+          window.turnstile.remove(turnstileWidgetId);
+        } catch (e) {}
+      }
+      turnstileWidgetId = null;
+    }
+
+    function getTurnstileToken() {
+      if (turnstileWidgetId === null || !window.turnstile) return '';
+      try {
+        return window.turnstile.getResponse(turnstileWidgetId) || '';
+      } catch (e) {
+        return '';
+      }
+    }
+    // ------------------------------------------------------------------------
+
     function openAssistantPanel(opener) {
       assistantOpener = opener;
       assistantIsOpen = true;
@@ -1356,14 +1423,9 @@ se construye.</h2>
       assistantTrigger.setAttribute('aria-expanded', 'true');
       assistantPanel.setAttribute('aria-hidden', 'false');
 
-      if (window.turnstile) {
-        const widget = document.getElementById('turnstile-container');
-        if (widget) {
-          try {
-            window.turnstile.reset(widget);
-          } catch (e) {}
-        }
-      }
+      // El panel ya tiene transform: translateX(0), o sea que el contenedor
+      // es visible en este punto: es el momento correcto para pintar/resetear.
+      renderOrResetTurnstile();
 
       window.setTimeout(() => assistantPrompt.focus(), 400);
     }
@@ -1378,6 +1440,11 @@ se construye.</h2>
       assistantPanel.setAttribute('inert', '');
       if (assistantOpener && !assistantOpener.disabled) assistantOpener.focus();
       assistantOpener = null;
+
+      // Limpieza: destruimos el widget al cerrar en vez de dejarlo "vivo"
+      // fuera de pantalla. Evita mantener un token caducado en memoria y
+      // fuerza un widget fresco la próxima vez que se abra el panel.
+      removeTurnstileWidget();
     }
     document.querySelectorAll('[data-open-assistant]').forEach((btn) => {
       btn.addEventListener('click', () => openAssistantPanel(btn));
@@ -1539,7 +1606,7 @@ se construye.</h2>
       event.preventDefault();
 
       const question = assistantPrompt.value.trim().substring(0, 500);
-      const turnstileToken = document.querySelector('[name="cf-turnstile-response"]')?.value;
+      const turnstileToken = getTurnstileToken();
 
       assistantError.textContent = '';
 
@@ -1608,11 +1675,12 @@ se construye.</h2>
         hideThinkingBubble();
         assistantSubmit.disabled = false;
 
-        if (window.turnstile) {
-          const widgetElement = document.getElementById('turnstile-container');
-          if (widgetElement) {
-            window.turnstile.reset(widgetElement);
-          }
+        // Un token de Turnstile es de un solo uso: lo reseteamos tras cada
+        // intento (éxito o error) para que el siguiente envío tenga uno nuevo.
+        if (turnstileWidgetId !== null && window.turnstile) {
+          try {
+            window.turnstile.reset(turnstileWidgetId);
+          } catch (e) {}
         }
       }
     });
