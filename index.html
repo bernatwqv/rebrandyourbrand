@@ -351,10 +351,10 @@ se construye.</h2>
         </p>
       </div>
 
-      <!-- Contenedor del carrusel con posicionamiento relativo robusto y aria-live -->
+      <!-- Contenedor del carrusel en escritorio y grid/stack limpio en móvil -->
       <div class="relative px-0 md:px-14 flex flex-col md:flex-row items-center justify-center gap-6">
         <button id="plans-prev" type="button" aria-label="Plan anterior"
-                class="absolute left-0 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full border border-line bg-panel text-paper flex items-center justify-center shadow-lg hover:border-brand hover:scale-110 transition-all duration-300">
+                class="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full border border-line bg-panel text-paper items-center justify-center shadow-lg hover:border-brand hover:scale-110 transition-all duration-300">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path d="M15 18l-6-6 6-6"/></svg>
         </button>
 
@@ -363,7 +363,7 @@ se construye.</h2>
         </div>
 
         <button id="plans-next" type="button" aria-label="Plan siguiente"
-                class="absolute right-0 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full border border-line bg-panel text-paper flex items-center justify-center shadow-lg hover:border-brand hover:scale-110 transition-all duration-300">
+                class="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full border border-line bg-panel text-paper items-center justify-center shadow-lg hover:border-brand hover:scale-110 transition-all duration-300">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path d="M9 18l6-6-6-6"/></svg>
         </button>
       </div>
@@ -449,7 +449,7 @@ se construye.</h2>
     </div>
   </section>
 
-  <!-- Términos y Condiciones de Servicio (Extensos y blindados) -->
+  <!-- Términos y Condiciones de Servicio -->
   <section id="terminos" class="relative px-6 md:px-10 py-24 md:py-32 border-b border-line overflow-hidden bg-panel/30">
     <div class="max-w-4xl mx-auto relative z-10">
       <div class="reveal mb-12">
@@ -460,7 +460,6 @@ se construye.</h2>
         </p>
       </div>
 
-      <!-- Fuente aumentada a text-sm md:text-base para mayor legibilidad y contraste -->
       <div class="reveal space-y-8 text-sm md:text-base text-paper/90 leading-relaxed font-sans">
         
         <!-- Artículo 1 -->
@@ -471,7 +470,7 @@ se construye.</h2>
           </p>
         </div>
 
-        <!-- Artículo 2 (Fases, Aprobaciones y Rondas) -->
+        <!-- Artículo 2 -->
         <div class="bg-panel border border-line p-6 md:p-8 space-y-4">
           <h3 class="lang-trans lowercase font-display text-lg md:text-xl text-paper font-semibold" data-i18n="t2-title">2. metodología de trabajo por fases y límite de revisiones</h3>
           <p class="lang-trans" data-i18n="t2-intro">
@@ -526,7 +525,7 @@ se construye.</h2>
           </p>
         </div>
 
-        <!-- Artículo 6 (Garantía) -->
+        <!-- Artículo 6 -->
         <div class="bg-panel border border-line p-6 md:p-8 space-y-3">
           <h3 class="lang-trans lowercase font-display text-lg md:text-xl text-paper font-semibold" data-i18n="t6-title">6. garantía técnica post-entrega</h3>
           <p class="lang-trans" data-i18n="t6-p">
@@ -534,7 +533,7 @@ se construye.</h2>
           </p>
         </div>
 
-        <!-- Artículo 7 (Jurisdicción) -->
+        <!-- Artículo 7 -->
         <div class="bg-panel border border-line p-6 md:p-8 space-y-3">
           <h3 class="lang-trans lowercase font-display text-lg md:text-xl text-paper font-semibold" data-i18n="t7-title">7. ley aplicable y jurisdicción</h3>
           <p class="lang-trans" data-i18n="t7-p">
@@ -595,7 +594,7 @@ se construye.</h2>
   <div id="assistant-backdrop"
        class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 opacity-0 pointer-events-none"></div>
 
-  <!-- Panel lateral con chat avanzado (inert por defecto cuando está cerrado para evitar foco fantasma) -->
+  <!-- Panel lateral con chat avanzado -->
   <aside id="assistant-panel" role="dialog" aria-modal="true" aria-hidden="true" inert aria-labelledby="assistant-panel-title"
          class="fixed top-0 right-0 h-full w-full sm:w-[480px] z-50 bg-panel border-l border-line flex flex-col shadow-2xl"
          style="transform: translateX(100%);">
@@ -956,8 +955,85 @@ se construye.</h2>
 
     function renderPlans() {
       const container = document.getElementById('plans-container');
-      if (!container || isPlansAnimating) return;
+      const prevBtn = document.getElementById('plans-prev');
+      const nextBtn = document.getElementById('plans-next');
+      if (!container) return;
 
+      const isMobile = window.innerWidth < 768;
+
+      if (isMobile) {
+        // En móvil renderizamos las 3 tarjetas apiladas verticalmente con su botón CTA individual y sin flechas
+        container.innerHTML = '';
+        container.style.opacity = '1';
+        container.style.transform = 'translateY(0)';
+
+        plansArray.forEach((data, index) => {
+          const isFeatured = index === 1;
+          const card = document.createElement('div');
+          
+          card.className = isFeatured
+            ? 'reveal in-view border-2 border-brand p-8 flex flex-col justify-between bg-panel relative shadow-xl shadow-brand/10 w-full'
+            : 'reveal in-view border border-line p-8 flex flex-col justify-between bg-panel w-full';
+
+          const t = translations[currentLang];
+          const title = t[data.titleKey];
+          const price = t[data.priceKey];
+          const desc = t[data.descKey];
+          const ctaText = t['plans-cta'];
+
+          let badgeHtml = '';
+          if (data.isRecommended) {
+            badgeHtml = `<span class="absolute -top-3 right-6 bg-brand text-[#0A0A0C] text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full lang-trans">${t['plans-badge']}</span>`;
+          }
+
+          let featuresHtml = '';
+          data.features.forEach(fKey => {
+            featuresHtml += `<li class="flex items-center gap-2"><span class="text-brand">✓</span> <span class="lang-trans">${t[fKey]}</span></li>`;
+          });
+
+          card.innerHTML = `
+            ${badgeHtml}
+            <div>
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="lang-trans lowercase font-display text-2xl ${isFeatured ? 'text-paper font-semibold' : ''}">${title}</h3>
+                <span class="lang-trans font-mono text-base ${isFeatured ? 'text-brand font-bold text-lg' : 'text-muted'}">${price}</span>
+              </div>
+              <p class="lang-trans text-muted text-sm leading-relaxed mb-6">${desc}</p>
+              <ul class="space-y-3 text-xs text-paper mb-8">
+                ${featuresHtml}
+              </ul>
+            </div>
+            <button type="button" data-plan-key="${data.titleKey}" class="lang-trans lowercase w-full block text-center bg-brand text-[#0A0A0C] hover:bg-brand-soft shadow-md py-3 text-xs font-medium cursor-pointer">${ctaText}</button>
+          `;
+          container.appendChild(card);
+        });
+
+        container.querySelectorAll('[data-plan-key]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const titleKey = btn.getAttribute('data-plan-key');
+            activePlanKey = titleKey;
+            openAssistantPanel(btn);
+
+            const pTitleEs = translations.es[titleKey];
+            const pTitleEn = translations.en[titleKey];
+            const pPriceEs = translations.es[titleKey.replace('title', 'price')];
+            const pPriceEn = translations.en[titleKey.replace('title', 'price')];
+
+            const greetingEs = `¡Perfecto! Entonces te decantas por el ${pTitleEs} (${pPriceEs} pago único). ¿Cómo se llama tu marca o proyecto actual para continuar?`;
+            const greetingEn = `Perfect! So you're leaning towards the ${pTitleEn} (${pPriceEn} one-time payment). What is your current brand or project name to continue?`;
+
+            chatHistory.push({
+              role: 'assistant',
+              texts: { es: greetingEs, en: greetingEn }
+            });
+            renderHistory();
+          });
+        });
+        return;
+      }
+
+      // Lógica de escritorio (Desktop Carousel con flechas)
+      if (isPlansAnimating) return;
       isPlansAnimating = true;
       container.style.opacity = '0';
       container.style.transform = 'translateY(8px)';
@@ -980,7 +1056,7 @@ se construye.</h2>
           const card = document.createElement('div');
 
           if (isCenter) {
-            card.className = 'reveal in-view border-2 border-brand p-8 flex flex-col justify-between bg-panel relative shadow-2xl shadow-brand/20 z-20 w-full md:w-[42%] scale-[1.03] transition-all duration-700 ease-out';
+            card.className = 'reveal in-view border-2 border-brand p-8 flex flex-col justify-between bg-panel relative shadow-2xl shadow-brand/20 z-25 w-full md:w-[42%] scale-[1.03] transition-all duration-700 ease-out';
           } else {
             card.className = 'reveal in-view border border-line p-8 flex flex-col justify-between bg-panel w-full md:w-[29%] opacity-85 hover:opacity-100 scale-95 transition-all duration-700 ease-out';
           }
@@ -1057,14 +1133,18 @@ se construye.</h2>
     }
 
     document.getElementById('plans-prev').addEventListener('click', () => {
-      if (isPlansAnimating) return;
+      if (isPlansAnimating || window.innerWidth < 768) return;
       currentPlanIndex = (currentPlanIndex - 1 + 3) % 3;
       renderPlans();
     });
 
     document.getElementById('plans-next').addEventListener('click', () => {
-      if (isPlansAnimating) return;
+      if (isPlansAnimating || window.innerWidth < 768) return;
       currentPlanIndex = (currentPlanIndex + 1) % 3;
+      renderPlans();
+    });
+
+    window.addEventListener('resize', () => {
       renderPlans();
     });
 
@@ -1240,7 +1320,6 @@ se construye.</h2>
     assistantClose.addEventListener('click', closeAssistantPanel);
     assistantBackdrop.addEventListener('click', closeAssistantPanel);
 
-    // Manejo unificado de la tecla Escape para menú móvil y panel de IA
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') {
         const isMenuOpen = !mobileNav.classList.contains('hidden');
