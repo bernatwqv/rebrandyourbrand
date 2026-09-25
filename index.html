@@ -141,9 +141,6 @@
     transition-duration: 300ms;
   }
 
-  /* Fondo de blobs ligero (sustituye al generador de salpicaduras):
-     solo 2 elementos por sección en vez de ~10 nodos, con la paleta
-     de marca en vez de colores genéricos. */
   .blob-background {
     position: absolute;
     inset: 0;
@@ -1011,7 +1008,6 @@ se construye.</h2>
       `;
     }
 
-    // Abre el modal de elección de flujo en vez de ir directo al asistente.
     function openPlanChoice(titleKey, opener) {
       pendingPlanKey = titleKey;
       pendingPlanOpener = opener;
@@ -1020,9 +1016,17 @@ se construye.</h2>
       openPlanModal();
     }
 
-    // Cuando el usuario elige "charlar con Brandi": abre el asistente y
-    // añade el saludo contextual (comportamiento que antes iba directo).
     function selectPlan(titleKey, opener) {
+      const isSamePlan = activePlanKey === titleKey;
+
+      // Si es exactamente el mismo plan y ya hay conversación activa, solo reabrimos sin tocar nada
+      if (isSamePlan && chatHistory.length > 0) {
+        openAssistantPanel(opener);
+        return;
+      }
+
+      // Si es un plan diferente o no había historial, limpiamos e iniciamos hilo fresco
+      chatHistory.length = 0;
       activePlanKey = titleKey;
       openAssistantPanel(opener);
 
@@ -1108,8 +1112,6 @@ se construye.</h2>
       }, 400);
     }
 
-    // Delegación de eventos: un listener en el contenedor, registrado una
-    // vez, en vez de re-vincular listeners en cada renderPlans().
     document.getElementById('plans-container').addEventListener('click', (event) => {
       const btn = event.target.closest('[data-plan-key]');
       if (!btn) return;
@@ -1192,9 +1194,6 @@ se construye.</h2>
       });
     }
 
-    // Manejador genérico para los desplegables de "hitos" y "condiciones":
-    // misma lógica de expandir/colapsar, solo cambian las claves de
-    // traducción y el margen extra de altura.
     function bindToggleGroup(selector, showKey, hideKey, extraHeight) {
       document.querySelectorAll(selector).forEach(btn => {
         btn.addEventListener('click', () => {
@@ -1288,7 +1287,6 @@ se construye.</h2>
     const assistantSubmit = document.getElementById('brand-assistant-submit');
     const assistantStatus = document.getElementById('assistant-status');
 
-    // Callback global que dispara Cloudflare cuando api.js termina de cargar.
     window.onloadTurnstileCallback = function () {
       if (assistantIsOpen) {
         renderOrResetTurnstile();
@@ -1299,8 +1297,6 @@ se construye.</h2>
       const container = document.getElementById('turnstile-container');
       if (!container || !window.turnstile) return;
 
-      // Mientras no haya verificación, el botón de envío permanece
-      // deshabilitado — no basta con comprobar el token al hacer submit.
       assistantSubmit.disabled = true;
       setAssistantStatus('status-verifying', 'idle');
 
@@ -1389,7 +1385,6 @@ se construye.</h2>
     assistantClose.addEventListener('click', closeAssistantPanel);
     assistantBackdrop.addEventListener('click', closeAssistantPanel);
 
-    // --- Modal de elección de flujo (Brandi vs. email) ---------------------
     const planModal = document.getElementById('plan-modal');
     const planModalContent = document.getElementById('plan-modal-content');
     const planModalClose = document.getElementById('plan-modal-close');
@@ -1444,7 +1439,6 @@ se construye.</h2>
     planModal.addEventListener('click', (e) => {
       if (e.target === planModal) closePlanModal();
     });
-    // -------------------------------------------------------------------------
 
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') {
@@ -1495,8 +1489,6 @@ se construye.</h2>
       return 'brandi';
     }
 
-    // Los mensajes se pintan con textContent, nunca con innerHTML: ni el
-    // texto del usuario ni la respuesta de la IA pueden inyectar markup.
     function renderHistory() {
       assistantOutput.innerHTML = '';
       if (!chatHistory.length) return;
@@ -1673,8 +1665,6 @@ se construye.</h2>
         }
       } finally {
         hideThinkingBubble();
-        // Tras cada intento (éxito o error), reseteamos Turnstile y volvemos
-        // a deshabilitar el envío hasta la próxima verificación en verde.
         if (turnstileWidgetId !== null && window.turnstile) {
           try {
             window.turnstile.reset(turnstileWidgetId);
