@@ -141,25 +141,22 @@
     transition-duration: 300ms;
   }
 
-  .blob-background {
-    position: absolute;
+  /* Fondo dinámico con manchas de pintura aleatorias (Remorph al cargar) */
+  #paint-background {
+    position: fixed;
     inset: 0;
     pointer-events: none;
     z-index: 0;
     overflow: hidden;
-  }
-  .blob {
-    position: absolute;
-    width: 420px;
-    height: 420px;
-    border-radius: 9999px;
+    opacity: 0.22;
     filter: blur(80px);
-    opacity: 0.18;
-    transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  html.light .blob { opacity: 0.14; }
-  .blob-brand { background: rgb(var(--color-brand)); }
-  .blob-ai { background: rgb(var(--color-ai)); }
+  .blob-paint {
+    position: absolute;
+    border-radius: 9999px;
+    transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1), top 1s ease, left 1s ease;
+  }
+  html.light #paint-background { opacity: 0.15; }
 
   .lang-trans {
     transition: opacity 300ms ease, transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
@@ -243,7 +240,7 @@
     .lang-trans, #plans-container, .milestone-content, .terms-content,
     #assistant-panel, #assistant-backdrop, #assistant-trigger,
     #plan-modal, #plan-modal-content,
-    .theme-icon, button, a, .bubble-in, .blob {
+    .theme-icon, button, a, .bubble-in, .blob-paint {
       transition: none !important;
       animation: none !important;
     }
@@ -252,6 +249,12 @@
 </head>
 
 <body class="bg-ink text-paper antialiased relative overflow-x-hidden">
+
+  <!-- Fondo dinámico con manchas de pintura aleatorias (Remorph al cargar) -->
+  <div id="paint-background" aria-hidden="true">
+    <div id="blob-1" class="blob-paint absolute w-[500px] h-[500px] bg-brand"></div>
+    <div id="blob-2" class="blob-paint absolute w-[420px] h-[420px] bg-ai"></div>
+  </div>
 
   <!-- Header -->
   <header class="fixed top-0 inset-x-0 z-40 border-b border-line bg-ink/80 backdrop-blur-sm">
@@ -312,12 +315,7 @@
   </header>
 
   <!-- Hero -->
-  <section id="top" class="relative pt-40 pb-28 md:pt-52 md:pb-36 px-6 md:px-10 border-b border-line overflow-hidden">
-    <div class="blob-background">
-      <div class="blob blob-brand" style="top: 5%; right: 5%;"></div>
-      <div class="blob blob-ai" style="bottom: 5%; left: 5%;"></div>
-    </div>
-
+  <section id="top" class="relative pt-40 pb-28 md:pt-52 md:pb-36 px-6 md:px-10 border-b border-line overflow-hidden z-10">
     <div class="max-w-6xl mx-auto relative z-10">
       <p class="hero-fade lang-trans delay-0 lowercase text-xs tracking-wide text-muted mb-6" data-i18n="hero-tag">estudio de rebranding y diseño visual</p>
 
@@ -332,11 +330,7 @@
   </section>
 
   <!-- Manifiesto -->
-  <section id="manifiesto" class="relative px-6 md:px-10 py-32 md:py-40 border-b border-line overflow-hidden">
-    <div class="blob-background">
-      <div class="blob blob-ai" style="bottom: 10%; right: 8%;"></div>
-    </div>
-
+  <section id="manifiesto" class="relative px-6 md:px-10 py-32 md:py-40 border-b border-line overflow-hidden z-10">
     <div class="max-w-6xl mx-auto relative z-10">
       <div class="reveal grid md:grid-cols-2 gap-10 md:gap-16 items-start">
         <h2 class="lang-trans lowercase font-display text-4xl md:text-6xl leading-[1.05] whitespace-pre-line" data-i18n="manifesto-title">una marca no se decora.
@@ -349,7 +343,7 @@ se construye.</h2>
   </section>
 
   <!-- Planes -->
-  <section id="planes" class="relative px-6 md:px-10 py-24 md:py-32 border-b border-line overflow-hidden">
+  <section id="planes" class="relative px-6 md:px-10 py-24 md:py-32 border-b border-line overflow-hidden z-10">
     <div class="max-w-6xl mx-auto relative z-10">
       <div class="reveal max-w-xl mb-12">
         <h2 class="lang-trans lowercase font-display text-3xl md:text-4xl mb-4" data-i18n="plans-heading">planes de rebranding y web</h2>
@@ -384,7 +378,7 @@ se construye.</h2>
   </section>
 
   <!-- Sobre nosotros -->
-  <section id="sobre-nosotros" class="relative px-6 md:px-10 py-24 md:py-32 border-b border-line overflow-hidden">
+  <section id="sobre-nosotros" class="relative px-6 md:px-10 py-24 md:py-32 border-b border-line overflow-hidden z-10">
     <div class="max-w-6xl mx-auto relative z-10">
       <div class="reveal mb-12">
         <h2 class="lang-trans lowercase font-display text-3xl md:text-4xl mb-3" data-i18n="studio-heading">sobre nosotros</h2>
@@ -461,7 +455,7 @@ se construye.</h2>
   </section>
 
   <!-- Términos y Condiciones de Servicio -->
-  <section id="terminos" class="relative px-6 md:px-10 py-24 md:py-32 border-b border-line overflow-hidden bg-panel/30">
+  <section id="terminos" class="relative px-6 md:px-10 py-24 md:py-32 border-b border-line overflow-hidden bg-panel/30 z-10">
     <div class="max-w-4xl mx-auto relative z-10">
       <div class="reveal mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
@@ -555,11 +549,7 @@ se construye.</h2>
   </section>
 
   <!-- Footer / Contacto -->
-  <footer id="contacto" class="relative px-6 md:px-10 py-24 md:py-32 overflow-hidden">
-    <div class="blob-background">
-      <div class="blob blob-brand" style="top: 8%; right: 6%;"></div>
-    </div>
-
+  <footer id="contacto" class="relative px-6 md:px-10 py-24 md:py-32 overflow-hidden z-10">
     <div class="max-w-6xl mx-auto relative z-10">
       <div class="reveal flex flex-col md:flex-row md:items-end md:justify-between gap-10">
         <div>
@@ -698,6 +688,19 @@ se construye.</h2>
     document.documentElement.classList.remove('no-js');
     document.getElementById('year').textContent = new Date().getFullYear();
 
+    // 1. Manchas de pintura aleatorias (Remorph al cargar)
+    window.addEventListener('DOMContentLoaded', () => {
+      document.documentElement.classList.add('is-loaded');
+      const b1 = document.getElementById('blob-1');
+      const b2 = document.getElementById('blob-2');
+      if (b1 && b2) {
+        b1.style.top = `${Math.random() * 60}%`;
+        b1.style.left = `${Math.random() * 50}%`;
+        b2.style.bottom = `${Math.random() * 60}%`;
+        b2.style.right = `${Math.random() * 50}%`;
+      }
+    });
+
     const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
     const mobileNav = document.getElementById('mobile-nav');
     const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
@@ -735,10 +738,6 @@ se construye.</h2>
       if (isMenuOpen && !mobileNav.contains(e.target) && !mobileMenuToggle.contains(e.target)) {
         toggleMobileMenu();
       }
-    });
-
-    document.addEventListener('DOMContentLoaded', () => {
-      document.documentElement.classList.add('is-loaded');
     });
 
     const translations = {
@@ -960,10 +959,6 @@ se construye.</h2>
     const langToggle = document.getElementById('lang-toggle');
     const langIndicator = document.getElementById('lang-indicator');
 
-    function randInt(min, max) {
-      return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
-
     const plansArray = [
       { id: 'esencial', titleKey: 'p1-title', priceKey: 'p1-price', descKey: 'p1-desc', features: ['p1-f1', 'p1-f2', 'p1-f3', 'p1-f4'] },
       { id: 'evolucion', titleKey: 'p2-title', priceKey: 'p2-price', descKey: 'p2-desc', features: ['p2-f1', 'p2-f2', 'p2-f3', 'p2-f4'], badgeKey: 'plans-badge', isRecommended: true },
@@ -1019,13 +1014,11 @@ se construye.</h2>
     function selectPlan(titleKey, opener) {
       const isSamePlan = activePlanKey === titleKey;
 
-      // Si es exactamente el mismo plan y ya hay conversación activa, solo reabrimos sin tocar nada
       if (isSamePlan && chatHistory.length > 0) {
         openAssistantPanel(opener);
         return;
       }
 
-      // Si es un plan diferente o no había historial, limpiamos e iniciamos hilo fresco
       chatHistory.length = 0;
       activePlanKey = titleKey;
       openAssistantPanel(opener);
