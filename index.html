@@ -112,6 +112,7 @@ textarea { resize: vertical; }
 .z-40 { z-index: 40; }
 .z-50 { z-index: 50; }
 .z-\[60\] { z-index: 60; }
+.z-\[70\] { z-index: 70; }
 .mx-auto { margin-inline: auto; }
 .mx-5 { margin-inline: 1.25rem; }
 .mt-0\.5 { margin-top: 0.125rem; }
@@ -166,6 +167,7 @@ textarea { resize: vertical; }
 
 .-translate-y-1\/2 { transform: translateY(-50%); }
 .scale-95 { transform: scale(0.95); }
+.scale-100 { transform: scale(1); }
 .scale-\[1\.03\] { transform: scale(1.03); }
 
 .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
@@ -218,6 +220,7 @@ textarea { resize: vertical; }
 .p-4 { padding: 1rem; }
 .p-6 { padding: 1.5rem; }
 .p-8 { padding: 2rem; }
+.p-10 { padding: 2.5rem; }
 .px-0 { padding-inline: 0; }
 .px-1 { padding-inline: 0.25rem; }
 .px-3 { padding-inline: 0.75rem; }
@@ -226,6 +229,7 @@ textarea { resize: vertical; }
 .py-1 { padding-block: 0.25rem; }
 .py-2 { padding-block: 0.5rem; }
 .py-3 { padding-block: 0.75rem; }
+.py-3\.5 { padding-block: 0.875rem; }
 .py-4 { padding-block: 1rem; }
 .py-24 { padding-block: 6rem; }
 .py-32 { padding-block: 8rem; }
@@ -265,6 +269,7 @@ textarea { resize: vertical; }
 .antialiased { -webkit-font-smoothing: antialiased; }
 
 .opacity-0 { opacity: 0; }
+.opacity-100 { opacity: 1; }
 .opacity-85 { opacity: 0.85; }
 
 .shadow-2xl { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
@@ -302,6 +307,7 @@ textarea { resize: vertical; }
   .md\:justify-between { justify-content: space-between; }
   .md\:gap-16 { gap: 4rem; }
   .md\:p-8 { padding: 2rem; }
+  .md\:p-10 { padding: 2.5rem; }
   .md\:px-14 { padding-inline: 3.5rem; }
   .md\:py-32 { padding-block: 8rem; }
   .md\:py-40 { padding-block: 10rem; }
@@ -322,10 +328,6 @@ textarea { resize: vertical; }
   .sm\:w-\[440px\] { width: 440px; }
   .sm\:rounded-2xl { border-radius: 1rem; }
   .sm\:border { border-width: 1px; border-style: solid; }
-
-  /* Anchuras exactas para el carrusel horizontal de los planes */
-  .md\:w-\[29\%\] { width: 29%; }
-  .md\:w-\[42\%\] { width: 42%; }
 }
 </style>
 
@@ -379,7 +381,7 @@ textarea { resize: vertical; }
   ::selection { background: rgb(var(--color-brand)); color: rgb(var(--color-bg)); }
 
   body, header, .lang-trans, #plans-container, .milestone-content, .terms-content,
-  #assistant-panel, #assistant-backdrop, #plan-modal, #plan-modal-content, .theme-icon, button, a {
+  #assistant-panel, #assistant-backdrop, #plan-modal, #plan-modal-content, #launch-modal, #launch-modal-content, .theme-icon, button, a {
     transition-property: background-color, border-color, color, opacity;
     transition-duration: 300ms;
     transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
@@ -433,7 +435,7 @@ textarea { resize: vertical; }
 
   #assistant-panel { transition: transform 400ms cubic-bezier(0.16, 1, 0.3, 1); }
   #assistant-backdrop { transition: opacity 300ms ease; }
-  #plan-modal-content { transition: transform 250ms cubic-bezier(0.16, 1, 0.3, 1), opacity 250ms ease; }
+  #plan-modal-content, #launch-modal-content { transition: transform 250ms cubic-bezier(0.16, 1, 0.3, 1), opacity 250ms ease; }
 
   @keyframes ai-pulse {
     0%, 100% { box-shadow: 0 0 0 0 rgba(232, 163, 61, 0.35); }
@@ -448,7 +450,7 @@ textarea { resize: vertical; }
   @media (prefers-reduced-motion: reduce) {
     .hero-fade, .reveal, body, header, .lang-trans, #plans-container, .milestone-content,
     .terms-content, #assistant-panel, #assistant-backdrop, #assistant-trigger,
-    #plan-modal, #plan-modal-content, .theme-icon, button, a, .bubble-in {
+    #plan-modal, #plan-modal-content, #launch-modal, #launch-modal-content, .theme-icon, button, a, .bubble-in {
       transition: none !important;
       animation: none !important;
     }
@@ -470,7 +472,7 @@ textarea { resize: vertical; }
         <a href="#planes" class="lang-trans lowercase hover:text-paper" data-i18n="nav-planes">planes</a>
         <a href="#sobre-nosotros" class="lang-trans lowercase hover:text-paper" data-i18n="nav-about">sobre nosotros</a>
         <a href="#terminos" class="lang-trans lowercase hover:text-paper" data-i18n="nav-terms">términos</a>
-        <a href="#contacto" class="lang-trans lowercase hover:text-paper" data-i18n="nav-contact">contacto</a>
+        <a href="#contacto" class="lang-trans lowercase hover:text-paper" data-i18n="nav-contacto">contacto</a>
       </nav>
 
       <!-- Barra vertical elegante idéntica a la del logo -->
@@ -550,37 +552,53 @@ se construye.</h2>
       </div>
     </section>
 
-    <!-- Planes (Carrusel Horizontal) -->
+    <!-- Planes (Carrusel de Tarjeta Única con Controles Laterales y Cartelito Azul -50%) -->
     <section id="planes" class="relative px-6 md:px-10 py-24 md:py-32 border-b border-line overflow-hidden z-10">
       <div class="max-w-6xl mx-auto relative z-10">
-        <div class="reveal max-w-xl mb-12">
-          <h2 class="lang-trans lowercase font-display text-3xl md:text-4xl mb-4" data-i18n="plans-heading">planes de rebranding y web</h2>
-          <p class="lang-trans text-muted leading-relaxed" data-i18n="plans-sub">
-            Inversión única por el proyecto completo de diseño y desarrollo. Sin cuotas mensuales ni ataduras.
-          </p>
+        <div class="reveal max-w-xl mb-12 flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <h2 class="lang-trans lowercase font-display text-3xl md:text-4xl mb-4" data-i18n="plans-heading">planes de rebranding y web</h2>
+            <p class="lang-trans text-muted leading-relaxed" data-i18n="plans-sub">
+              Contrata solo identidad o añade desarrollo web a medida. Sin cuotas mensuales ni ataduras.
+            </p>
+          </div>
+          <!-- Cartelito en azul interactivo para el -50% -->
+          <button id="open-launch-modal" type="button" aria-label="Ver información sobre el descuento del 50%"
+                  class="lang-trans bg-brand text-[#0A0A0C] font-mono text-xs font-bold px-4 py-2 rounded-full uppercase tracking-wider inline-flex items-center gap-1.5 hover:scale-105 hover:bg-brand-soft shadow-md cursor-pointer shrink-0">
+            <span>-50% de descuento</span>
+          </button>
         </div>
 
-        <div class="reveal mb-12 p-4 bg-panel border border-line flex items-center gap-3 w-full">
+        <!-- Nota de calidad sin .99 -->
+        <div class="reveal mb-10 p-4 bg-panel border border-line flex items-center gap-3 w-full">
           <span class="w-2 h-2 rounded-full bg-brand shrink-0" aria-hidden="true"></span>
           <p class="lang-trans lowercase text-xs md:text-sm text-paper/90 font-mono tracking-wide" data-i18n="plans-quote">
             nos ahorramos el .99 en trucos de marketing para ofrecerte una calidad innegociable.
           </p>
         </div>
 
-        <div class="relative px-0 md:px-14 flex flex-col md:flex-row items-center justify-center gap-6">
+        <!-- Carrusel de tarjeta única con flechas de navegación -->
+        <div class="relative px-0 md:px-16 flex items-center justify-center">
           <button id="plans-prev" type="button" aria-label="Plan anterior"
-                  class="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full border border-line bg-panel text-paper items-center justify-center shadow-lg hover:border-brand hover:scale-110 transition-all duration-300">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+                  class="absolute left-0 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full border border-line bg-panel text-paper flex items-center justify-center shadow-lg hover:border-brand hover:scale-110 transition-all duration-300">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
           </button>
 
-          <div id="plans-container" aria-live="polite" class="w-full flex flex-col md:flex-row items-stretch justify-center gap-6">
-            <!-- Renderizado dinámico vía JavaScript en formato carrusel horizontal -->
+          <div id="plans-container" aria-live="polite" class="w-full flex items-center justify-center">
+            <!-- Renderizado dinámico de la tarjeta activa -->
           </div>
 
           <button id="plans-next" type="button" aria-label="Plan siguiente"
-                  class="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full border border-line bg-panel text-paper items-center justify-center shadow-lg hover:border-brand hover:scale-110 transition-all duration-300">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+                  class="absolute right-0 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full border border-line bg-panel text-paper flex items-center justify-center shadow-lg hover:border-brand hover:scale-110 transition-all duration-300">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
           </button>
+        </div>
+
+        <!-- Indicador de página (puntos) -->
+        <div class="flex items-center justify-center gap-2 mt-8" id="plans-dots">
+          <button type="button" data-dot-index="0" class="w-2.5 h-2.5 rounded-full bg-brand transition-all"></button>
+          <button type="button" data-dot-index="1" class="w-2 h-2 rounded-full bg-line hover:bg-muted transition-all"></button>
+          <button type="button" data-dot-index="2" class="w-2 h-2 rounded-full bg-line hover:bg-muted transition-all"></button>
         </div>
       </div>
     </section>
@@ -804,7 +822,7 @@ se construye.</h2>
   <div id="assistant-backdrop"
        class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 opacity-0 pointer-events-none" aria-hidden="true"></div>
 
-  <!-- Panel lateral con chat avanzado (completamente oculto con visibility cuando está cerrado para que no quede ningún borde visible) -->
+  <!-- Panel lateral con chat avanzado -->
   <aside id="assistant-panel" role="dialog" aria-modal="true" aria-hidden="true" inert aria-labelledby="assistant-panel-title"
          class="fixed inset-y-0 right-0 w-full sm:inset-y-4 sm:right-4 sm:w-[440px] sm:rounded-2xl z-50 bg-panel sm:border sm:border-line flex flex-col shadow-2xl overflow-hidden"
          style="transform: translateX(calc(100% + 40px)); visibility: hidden;">
@@ -852,6 +870,33 @@ se construye.</h2>
       </div>
     </form>
   </aside>
+
+  <!-- Modal: Popup explicativo del descuento -50% con blur completo -->
+  <div id="launch-modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="launch-modal-title" inert
+       class="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 backdrop-blur-sm opacity-0 pointer-events-none px-6 transition-opacity duration-300">
+    <div id="launch-modal-content" class="bg-panel border-2 border-brand p-8 md:p-10 max-w-xl w-full shadow-2xl transform scale-95 transition-transform duration-300 relative">
+      <div class="flex justify-between items-start mb-6">
+        <div>
+          <span class="lang-trans lowercase block text-xs tracking-widest text-ai font-mono mb-1" data-i18n="launch-modal-eyebrow">filosofía del estudio</span>
+          <h3 id="launch-modal-title" class="lang-trans lowercase font-display text-2xl text-paper" data-i18n="launch-modal-title">¿por qué ofrecemos un -50% de descuento?</h3>
+        </div>
+        <button id="launch-modal-close" type="button" aria-label="Cerrar" class="text-muted hover:text-paper p-1 shrink-0 text-xl font-mono cursor-pointer">✕</button>
+      </div>
+
+      <div class="space-y-4 text-sm md:text-base text-paper/90 leading-relaxed font-sans mb-8">
+        <p class="lang-trans" data-i18n="launch-modal-p1">
+          Como estudio emergente fundado por jóvenes apasionados, sabemos que empezamos nuestro camino sin un portfolio histórico gigante ni la veteranía de las grandes agencias tradicionales.
+        </p>
+        <p class="lang-trans" data-i18n="launch-modal-p2">
+          Por eso, decidimos compensar esto de la forma más honesta posible: reduciendo nuestros precios un 50% de forma temporal. No recortamos en calidad (nos ahorramos los trucos de marketing del .99 para ofrecer excelencia absoluta), sino que invertimos toda nuestra energía y máxima dedicación en cada proyecto para construir relaciones de confianza y casos de éxito memorables junto a ti.
+        </p>
+      </div>
+
+      <button id="launch-modal-ok" type="button" class="lang-trans lowercase w-full block text-center bg-brand text-[#0A0A0C] hover:bg-brand-soft shadow-lg py-3.5 text-xs font-semibold cursor-pointer tracking-wider">
+        entendido, ¡vamos a crear!
+      </button>
+    </div>
+  </div>
 
   <!-- Modal: ¿Cómo quieres empezar? -->
   <div id="plan-modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="plan-modal-title" inert
@@ -945,7 +990,7 @@ se construye.</h2>
         "nav-planes": "planes",
         "nav-about": "sobre nosotros",
         "nav-terms": "términos",
-        "nav-contact": "contacto",
+        "nav-contacto": "contacto",
         "hero-tag": "estudio de rebranding y diseño visual",
         "hero-title": "marcas que dejan de pasar desapercibidas.",
         "hero-desc": "Rediseñamos identidades visuales combinando dirección de arte y precisión técnica, para marcas que necesitan verse tan bien como lo que hacen.",
@@ -969,31 +1014,31 @@ se construye.</h2>
         "milestone-btn-hide": "- ocultar hitos",
 
         "plans-heading": "planes de rebranding y web",
-        "plans-sub": "Inversión única por el proyecto completo de diseño y desarrollo. Sin cuotas mensuales ni ataduras.",
+        "plans-sub": "Contrata solo identidad o añade desarrollo web a medida. Sin cuotas mensuales ni ataduras.",
         "plans-quote": "nos ahorramos el .99 en trucos de marketing para ofrecerte una calidad innegociable.",
+        "launch-modal-eyebrow": "filosofía del estudio",
+        "launch-modal-title": "¿por qué ofrecemos un -50% de descuento?",
+        "launch-modal-p1": "Como estudio emergente fundado por jóvenes apasionados, sabemos que empezamos nuestro camino sin un portfolio histórico gigante ni la veteranía de las grandes agencias tradicionales.",
+        "launch-modal-p2": "Por eso, decidimos compensar esto de la forma más honesta posible: reduciendo nuestros precios un 50% de forma temporal. No recortamos en calidad (nos ahorramos los trucos de marketing del .99 para ofrecer excelencia absoluta), sino que invertimos toda nuestra energía y máxima dedicación en cada proyecto para construir relaciones de confianza y casos de éxito memorables junto a ti.",
+        "launch-modal-ok": "entendido, ¡vamos a crear!",
+
         "plans-badge": "recomendado",
         "plans-cta": "empezar plan",
         "p1-title": "plan esencial",
-        "p1-price": "600 €",
-        "p1-desc": "Landing page de una sola página e identidad visual esencial, entregada llave en mano.",
-        "p1-f1": "logotipo principal (sin variaciones complejas) + paleta y tipografías",
-        "p1-f2": "landing page scrolleable de alto rendimiento (GitHub + Cloudflare)",
-        "p1-f3": "proceso guiado por fases (aprobación visual paso a paso)",
-        "p1-f4": "entrega llave en mano con propiedad total (cero cuotas)",
+        "p1-desc": "Identidad visual esencial para autónomos y negocios locales, entregada llave en mano.",
+        "p1-f1": "logotipo principal + paleta cromática y directrices tipográficas",
+        "p1-f2": "proceso guiado por fases (aprobación visual paso a paso)",
+        "p1-f3": "entrega llave en mano con propiedad total (cero cuotas)",
         "p2-title": "plan evolución",
-        "p2-price": "1.000 €",
-        "p2-desc": "Rebranding integral y web corporativa multicapa para marcas que exigen impacto.",
+        "p2-desc": "Rebranding integral y sistema visual completo para marcas que exigen impacto.",
         "p2-f1": "rebranding integral (sistema visual completo y guía de estilo)",
-        "p2-f2": "web corporativa multicapa (hasta 6 secciones optimizadas)",
-        "p2-f3": "despliegue en el edge ultrarrápido, seguro y escalable",
-        "p2-f4": "entrega llave en mano con propiedad total (cero cuotas)",
+        "p2-f2": "proceso guiado por fases y validación paso a paso",
+        "p2-f3": "entrega llave en mano con propiedad total (cero cuotas)",
         "p3-title": "plan partner",
-        "p3-price": "2.000 €",
-        "p3-desc": "Ecosistema a medida con IA, desarrollo avanzado y dirección de arte exclusiva.",
+        "p3-desc": "Ecosistema de marca profundo con dirección de arte exclusiva y avanzada.",
         "p3-f1": "rebranding profundo y dirección de arte a medida",
-        "p3-f2": "desarrollo web avanzado con integraciones de IA (Brandi)",
-        "p3-f3": "arquitectura técnica personalizada y escalable",
-        "p3-f4": "entrega llave en mano con propiedad total (cero cuotas)",
+        "p3-f2": "sistema visual avanzado y directrices exclusivas",
+        "p3-f3": "entrega llave en mano con propiedad total (cero cuotas)",
 
         "modal-eyebrow": "onboarding",
         "modal-title": "plan seleccionado",
@@ -1038,7 +1083,7 @@ se construye.</h2>
         "turnstile-label": "verificación humana",
         "status-waiting": "en espera",
         "status-verifying": "verificando seguridad...",
-        "status-consulting": "consultando con brandi...",
+        "status-consulting": "consulting con brandi...",
         "status-completed": "completado",
         "status-failed": "fallido",
         "output-placeholder": "inicia la conversación con brandi o selecciona un plan.",
@@ -1075,31 +1120,31 @@ se construye.</h2>
         "milestone-btn-hide": "- hide milestones",
 
         "plans-heading": "rebranding & web plans",
-        "plans-sub": "One-time investment for the complete design & dev project. No monthly retainers or lock-ins.",
+        "plans-sub": "Hire identity only or add custom web development. No monthly retainers or lock-ins.",
         "plans-quote": "we skip the .99 marketing gimmicks to deliver uncompromising quality.",
+        "launch-modal-eyebrow": "studio philosophy",
+        "launch-modal-title": "why do we offer a -50% discount?",
+        "launch-modal-p1": "As an emerging studio founded by passionate youngsters, we know we are starting our path without a massive historical portfolio or the decades-old seniority of traditional agencies.",
+        "launch-modal-p2": "That's why we decided to offset this as honestly as possible: temporarily slashing our prices by 50%. We never compromise on quality (we skip the .99 marketing tricks to deliver absolute excellence), instead pouring all our energy and dedication into every project to build trust and memorable success stories together with you.",
+        "launch-modal-ok": "got it, let's build!",
+
         "plans-badge": "recommended",
         "plans-cta": "get started",
         "p1-title": "essential plan",
-        "p1-price": "€600",
-        "p1-desc": "One-page landing page and essential visual identity, delivered turnkey.",
-        "p1-f1": "main logo (no complex variations) + palette and fonts",
-        "p1-f2": "high-performance scrollable landing page (GitHub + Cloudflare)",
-        "p1-f3": "phased guided workflow (step-by-step visual approval)",
-        "p1-f4": "turnkey delivery with full ownership (zero retainers)",
+        "p1-desc": "Essential visual identity for freelancers and local businesses, delivered turnkey.",
+        "p1-f1": "main logo + color palette and typographic guidelines",
+        "p1-f2": "phased guided workflow (step-by-step visual approval)",
+        "p1-f3": "turnkey delivery with full ownership (zero retainers)",
         "p2-title": "evolution plan",
-        "p2-price": "€1,000",
-        "p2-desc": "Full rebranding and multi-page corporate website for high-impact brands.",
+        "p2-desc": "Full rebranding and complete visual system for high-impact brands.",
         "p2-f1": "full rebranding (complete visual system & style guide)",
-        "p2-f2": "multi-page corporate website (up to 6 optimized sections)",
-        "p2-f3": "lightning-fast, secure, and scalable edge deployment",
-        "p2-f4": "turnkey delivery with full ownership (zero retainers)",
+        "p2-f2": "phased workflow and step-by-step validation",
+        "p2-f3": "turnkey delivery with full ownership (zero retainers)",
         "p3-title": "partner plan",
-        "p3-price": "€2,000",
-        "p3-desc": "Custom ecosystem with AI, advanced development, and exclusive art direction.",
+        "p3-desc": "Deep brand ecosystem with exclusive and advanced art direction.",
         "p3-f1": "deep rebranding & custom art direction",
-        "p3-f2": "advanced web dev with AI integrations (Brandi)",
-        "p3-f3": "customizable and scalable technical architecture",
-        "p3-f4": "turnkey delivery with full ownership (zero retainers)",
+        "p3-f2": "advanced visual system and exclusive guidelines",
+        "p3-f3": "turnkey delivery with full ownership (zero retainers)",
 
         "modal-eyebrow": "onboarding",
         "modal-title": "plan selected",
@@ -1160,58 +1205,99 @@ se construye.</h2>
     const langIndicator = document.getElementById('lang-indicator');
 
     const plansArray = [
-      { id: 'esencial', titleKey: 'p1-title', priceKey: 'p1-price', descKey: 'p1-desc', features: ['p1-f1', 'p1-f2', 'p1-f3', 'p1-f4'] },
-      { id: 'evolucion', titleKey: 'p2-title', priceKey: 'p2-price', descKey: 'p2-desc', features: ['p2-f1', 'p2-f2', 'p2-f3', 'p2-f4'], badgeKey: 'plans-badge', isRecommended: true },
-      { id: 'partner', titleKey: 'p3-title', priceKey: 'p3-price', descKey: 'p3-desc', features: ['p3-f1', 'p3-f2', 'p3-f3', 'p3-f4'] }
+      { id: 'esencial', titleKey: 'p1-title', basePrice: 200, originalPrice: 400, descKey: 'p1-desc', features: ['p1-f1', 'p1-f2', 'p1-f3'] },
+      { id: 'evolucion', titleKey: 'p2-title', basePrice: 400, originalPrice: 800, descKey: 'p2-desc', features: ['p2-f1', 'p2-f2', 'p2-f3'], badgeKey: 'plans-badge', isRecommended: true },
+      { id: 'partner', titleKey: 'p3-title', basePrice: 700, originalPrice: 1400, descKey: 'p3-desc', features: ['p3-f1', 'p3-f2', 'p3-f3'] }
     ];
 
-    let currentPlanIndex = 1;
+    const planWebState = { esencial: false, evolucion: false, partner: false };
+    let currentPlanIndex = 0;
     let activePlanKey = null;
     let isPlansAnimating = false;
 
-    function buildPlanCardHTML(data, { highlighted, showCta }) {
+    function buildPlanCardHTML(data) {
       const t = translations[currentLang];
       const title = t[data.titleKey];
-      const price = t[data.priceKey];
+      const webIncluded = planWebState[data.id];
+      
+      const totalCost = data.basePrice + (webIncluded ? 200 : 0);
+      const originalTotalCost = data.originalPrice + (webIncluded ? 200 : 0);
+
+      const priceStr = currentLang === 'es' ? `${totalCost} €` : `€${totalCost}`;
+      const originalPriceStr = currentLang === 'es' ? `${originalTotalCost} €` : `€${originalTotalCost}`;
       const desc = t[data.descKey];
 
       const badgeHtml = data.isRecommended
         ? `<span class="absolute -top-3 right-6 bg-brand text-[#0A0A0C] text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full lang-trans">${t['plans-badge']}</span>`
         : '';
 
-      const featuresHtml = data.features
-        .map(fKey => `<li class="flex items-center gap-2"><span class="text-brand">✓</span> <span class="lang-trans">${t[fKey]}</span></li>`)
+      let featuresHtml = data.features
+        .map(fKey => `<li class="flex items-center gap-2.5"><span class="text-brand font-bold">✓</span> <span class="lang-trans">${t[fKey]}</span></li>`)
         .join('');
 
-      const ctaHtml = showCta
-        ? `<button type="button" data-plan-key="${data.titleKey}" class="lang-trans lowercase w-full block text-center bg-brand text-[#0A0A0C] hover:bg-brand-soft shadow-md py-3 text-xs font-medium cursor-pointer">${t['plans-cta']}</button>`
-        : '';
+      if (webIncluded) {
+        const webFeatureText = currentLang === 'es' ? 'landing page de alto rendimiento (GitHub + Cloudflare)' : 'high-performance landing page (GitHub + Cloudflare)';
+        featuresHtml += `<li class="flex items-center gap-2.5 bubble-in"><span class="text-brand font-bold">✓</span> <span class="text-paper font-medium">${webFeatureText}</span></li>`;
+      }
+
+      const webToggleLabel = currentLang === 'es' ? 'añadir desarrollo web' : 'add custom web development';
+      const webToggleSub = currentLang === 'es' ? 'landing page lista para producción (precio fijo)' : 'production-ready landing page (fixed price)';
+      
+      const webToggleHtml = `
+        <div class="mb-8 pt-6 border-t border-line/60">
+          <button type="button" data-web-toggle="${data.id}"
+                  class="w-full flex items-center justify-between p-4 rounded-xl border transition-all duration-300 group cursor-pointer ${webIncluded ? 'bg-brand/10 border-brand shadow-md shadow-brand/10' : 'bg-ink/40 border-line hover:border-brand/50'}">
+            <div class="flex items-center gap-3">
+              <div class="w-6 h-6 rounded-full flex items-center justify-center transition-all ${webIncluded ? 'bg-brand text-[#0A0A0C]' : 'border border-line text-transparent group-hover:border-brand'}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="width:12px;height:12px;" class="${webIncluded ? 'opacity-100' : 'opacity-0'}"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <div class="text-left">
+                <span class="lang-trans block text-xs md:text-sm font-medium lowercase ${webIncluded ? 'text-paper font-semibold' : 'text-paper/80'}">${webToggleLabel}</span>
+                <span class="lang-trans text-[10px] text-muted block mt-0.5 lowercase">${webToggleSub}</span>
+              </div>
+            </div>
+            <span class="font-mono text-xs md:text-sm ${webIncluded ? 'text-brand font-bold' : 'text-muted'}">+200 €</span>
+          </button>
+        </div>
+      `;
+
+      const ctaHtml = `<button type="button" data-plan-key="${data.titleKey}" data-plan-id="${data.id}" class="lang-trans lowercase w-full block text-center bg-brand text-[#0A0A0C] hover:bg-brand-soft shadow-lg py-3.5 text-xs font-semibold cursor-pointer tracking-wide">${t['plans-cta']}</button>`;
 
       return `
         ${badgeHtml}
         <div>
           <div class="flex items-center justify-between mb-4">
-            <h3 class="lang-trans lowercase font-display text-2xl ${highlighted ? 'text-paper font-semibold' : ''}">${title}</h3>
-            <span class="lang-trans font-mono text-base ${highlighted ? 'text-brand font-bold text-lg' : 'text-muted'}">${price}</span>
+            <h3 class="lang-trans lowercase font-display text-2xl md:text-3xl text-paper font-semibold">${title}</h3>
+            <div class="text-right flex items-center gap-3">
+              <span class="font-mono text-muted text-base line-through decoration-brand/60">${originalPriceStr}</span>
+              <div>
+                <span class="lang-trans font-mono text-brand font-bold text-2xl">${priceStr}</span>
+                ${webIncluded ? `<span class="block text-[10px] text-muted font-mono">(${data.basePrice}€ brand + 200€ web)</span>` : ''}
+              </div>
+            </div>
           </div>
           <p class="lang-trans text-muted text-sm leading-relaxed mb-6">${desc}</p>
-          <ul class="space-y-3 text-xs md:text-sm ${highlighted ? 'text-paper' : 'text-paper/80'} mb-8">
+          <ul class="space-y-3 text-xs md:text-sm text-paper/90 mb-2">
             ${featuresHtml}
           </ul>
+          ${webToggleHtml}
         </div>
         ${ctaHtml}
       `;
     }
 
-    function openPlanChoice(titleKey, opener) {
+    function openPlanChoice(titleKey, opener, planId) {
       pendingPlanKey = titleKey;
       pendingPlanOpener = opener;
+      pendingPlanId = planId;
       const t = translations[currentLang];
       document.getElementById('plan-modal-title').textContent = t[titleKey];
       openPlanModal();
     }
 
-    function selectPlan(titleKey, opener) {
+    let pendingPlanId = null;
+
+    function selectPlan(titleKey, opener, planId) {
       const isSamePlan = activePlanKey === titleKey;
 
       if (isSamePlan && chatHistory.length > 0) {
@@ -1225,115 +1311,90 @@ se construye.</h2>
 
       const pTitleEs = translations.es[titleKey];
       const pTitleEn = translations.en[titleKey];
-      const pPriceEs = translations.es[titleKey.replace('title', 'price')];
-      const pPriceEn = translations.en[titleKey.replace('title', 'price')];
+      const hasWeb = planId ? planWebState[planId] : false;
+      const basePrice = plansArray.find(p => p.id === planId)?.basePrice || 0;
+      const finalTotal = basePrice + (hasWeb ? 200 : 0);
 
       chatHistory.push({
         role: 'assistant',
         texts: {
-          es: `¡Perfecto! Entonces te decantas por el ${pTitleEs} (${pPriceEs} pago único). ¿Cómo se llama tu marca o proyecto actual para continuar?`,
-          en: `Perfect! So you're leaning towards the ${pTitleEn} (${pPriceEn} one-time payment). What is your current brand or project name to continue?`
+          es: `¡Perfecto! Te decantas por el ${pTitleEs}${hasWeb ? ' con desarrollo web incluido' : ' (solo identidad)'} (${finalTotal} € total con descuento de lanzamiento). ¿Cómo se llama tu marca o proyecto actual para continuar?`,
+          en: `Perfect! You're leaning towards the ${pTitleEn}${hasWeb ? ' with web design included' : ' (identity only)'} (€${finalTotal} total with launch discount). What is your current brand or project name to continue?`
         }
       });
       renderHistory();
+    }
+
+    function updateDots() {
+      const dotsContainer = document.getElementById('plans-dots');
+      if (!dotsContainer) return;
+      const dotButtons = dotsContainer.querySelectorAll('[data-dot-index]');
+      dotButtons.forEach((btn, idx) => {
+        if (idx === currentPlanIndex) {
+          btn.className = 'w-2.5 h-2.5 rounded-full bg-brand transition-all';
+        } else {
+          btn.className = 'w-2 h-2 rounded-full bg-line hover:bg-muted transition-all';
+        }
+      });
     }
 
     function renderPlans() {
       const container = document.getElementById('plans-container');
       if (!container) return;
 
-      const isMobile = window.innerWidth < 768;
-
-      if (isMobile) {
-        container.innerHTML = '';
-        container.style.opacity = '1';
-        container.style.transform = 'translateY(0)';
-
-        const fragment = document.createDocumentFragment();
-        plansArray.forEach((data, index) => {
-          const isFeatured = index === 1;
-          const card = document.createElement('div');
-          card.className = isFeatured
-            ? 'reveal in-view border-2 border-brand p-8 flex flex-col justify-between bg-panel relative shadow-xl shadow-brand/10 w-full'
-            : 'reveal in-view border border-line p-8 flex flex-col justify-between bg-panel w-full';
-          card.innerHTML = buildPlanCardHTML(data, { highlighted: isFeatured, showCta: true });
-          fragment.appendChild(card);
-        });
-        container.appendChild(fragment);
-        return;
-      }
-
       if (isPlansAnimating) return;
       isPlansAnimating = true;
       container.style.opacity = '0';
-      container.style.transform = 'translateY(6px)';
+      container.style.transform = 'translateY(8px)';
 
       setTimeout(() => {
-        if (window.innerWidth < 768) {
-          isPlansAnimating = false;
-          renderPlans();
-          return;
-        }
-
         container.innerHTML = '';
-
-        const leftIndex = (currentPlanIndex - 1 + 3) % 3;
-        const centerIndex = currentPlanIndex;
-        const rightIndex = (currentPlanIndex + 1) % 3;
-
-        const displayOrder = [
-          plansArray[leftIndex],
-          plansArray[centerIndex],
-          plansArray[rightIndex]
-        ];
-
-        const fragment = document.createDocumentFragment();
-        displayOrder.forEach((data, i) => {
-          const isCenter = i === 1;
-          const card = document.createElement('div');
-          card.className = isCenter
-            ? 'reveal in-view border-2 border-brand p-8 flex flex-col justify-between bg-panel relative shadow-2xl shadow-brand/20 z-20 w-full md:w-[42%] scale-[1.03] transition-all duration-500 ease-out'
-            : 'reveal in-view border border-line p-8 flex flex-col justify-between bg-panel w-full md:w-[29%] opacity-85 hover:opacity-100 scale-95 transition-all duration-500 ease-out';
-          card.innerHTML = buildPlanCardHTML(data, { highlighted: isCenter, showCta: isCenter });
-          fragment.appendChild(card);
-        });
-        container.appendChild(fragment);
+        const data = plansArray[currentPlanIndex];
+        const card = document.createElement('div');
+        card.className = 'reveal in-view border-2 border-brand p-8 md:p-10 flex flex-col justify-between bg-panel relative shadow-2xl shadow-brand/15 max-w-lg w-full';
+        card.innerHTML = buildPlanCardHTML(data);
+        container.appendChild(card);
 
         container.style.opacity = '1';
         container.style.transform = 'translateY(0)';
+        updateDots();
         isPlansAnimating = false;
-      }, 300);
+      }, 250);
     }
 
-    document.getElementById('plans-container').addEventListener('click', (event) => {
-      const btn = event.target.closest('[data-plan-key]');
-      if (!btn) return;
-      openPlanChoice(btn.getAttribute('data-plan-key'), btn);
+    const plansContainerEl = document.getElementById('plans-container');
+    plansContainerEl.addEventListener('click', (event) => {
+      const toggleBtn = event.target.closest('[data-web-toggle]');
+      if (toggleBtn) {
+        const planId = toggleBtn.getAttribute('data-web-toggle');
+        planWebState[planId] = !planWebState[planId];
+        renderPlans();
+        return;
+      }
+
+      const planBtn = event.target.closest('[data-plan-key]');
+      if (planBtn) {
+        openPlanChoice(planBtn.getAttribute('data-plan-key'), planBtn, planBtn.getAttribute('data-plan-id'));
+      }
     });
 
     document.getElementById('plans-prev').addEventListener('click', () => {
-      if (isPlansAnimating || window.innerWidth < 768) return;
-      currentPlanIndex = (currentPlanIndex - 1 + 3) % 3;
+      if (isPlansAnimating) return;
+      currentPlanIndex = (currentPlanIndex - 1 + plansArray.length) % plansArray.length;
       renderPlans();
     });
 
     document.getElementById('plans-next').addEventListener('click', () => {
-      if (isPlansAnimating || window.innerWidth < 768) return;
-      currentPlanIndex = (currentPlanIndex + 1) % 3;
+      if (isPlansAnimating) return;
+      currentPlanIndex = (currentPlanIndex + 1) % plansArray.length;
       renderPlans();
     });
 
-    let wasMobile = window.innerWidth < 768;
-    let resizeTimer;
-    window.addEventListener('resize', () => {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(() => {
-        const isMobile = window.innerWidth < 768;
-        if (isMobile !== wasMobile) {
-          wasMobile = isMobile;
-          renderPlans();
-        }
-      }, 120);
+    document.getElementById('plans-dots').addEventListener('click', (e) => {
+      const dot = e.target.closest('[data-dot-index]');
+      if (!dot || isPlansAnimating) return;
+      currentPlanIndex = parseInt(dot.getAttribute('data-dot-index'), 10);
+      renderPlans();
     });
 
     function switchLanguage(lang) {
@@ -1617,6 +1678,45 @@ se construye.</h2>
     assistantClose.addEventListener('click', closeAssistantPanel);
     assistantBackdrop.addEventListener('click', closeAssistantPanel);
 
+    /* Modal Popup Descuento -50% con blur y control total */
+    const launchModal = document.getElementById('launch-modal');
+    const launchModalContent = document.getElementById('launch-modal-content');
+    const launchModalClose = document.getElementById('launch-modal-close');
+    const launchModalOk = document.getElementById('launch-modal-ok');
+    const openLaunchModalBtn = document.getElementById('open-launch-modal');
+    let launchModalIsOpen = false;
+
+    function openLaunchModal() {
+      launchModalIsOpen = true;
+      launchModal.removeAttribute('inert');
+      launchModal.classList.remove('opacity-0', 'pointer-events-none');
+      launchModal.classList.add('opacity-100');
+      launchModalContent.classList.remove('scale-95');
+      launchModalContent.classList.add('scale-100');
+      document.body.classList.add('overflow-hidden');
+      launchModal.setAttribute('aria-hidden', 'false');
+      window.setTimeout(() => launchModalOk.focus(), 150);
+    }
+
+    function closeLaunchModal() {
+      launchModalIsOpen = false;
+      launchModal.classList.add('opacity-0', 'pointer-events-none');
+      launchModal.classList.remove('opacity-100');
+      launchModalContent.classList.remove('scale-100');
+      launchModalContent.classList.add('scale-95');
+      document.body.classList.remove('overflow-hidden');
+      launchModal.setAttribute('aria-hidden', 'true');
+      launchModal.setAttribute('inert', '');
+      if (openLaunchModalBtn) openLaunchModalBtn.focus();
+    }
+
+    openLaunchModalBtn.addEventListener('click', openLaunchModal);
+    launchModalClose.addEventListener('click', closeLaunchModal);
+    launchModalOk.addEventListener('click', closeLaunchModal);
+    launchModal.addEventListener('click', (e) => {
+      if (e.target === launchModal) closeLaunchModal();
+    });
+
     const planModal = document.getElementById('plan-modal');
     const planModalContent = document.getElementById('plan-modal-content');
     const planModalClose = document.getElementById('plan-modal-close');
@@ -1655,15 +1755,19 @@ se construye.</h2>
     document.getElementById('modal-choose-ai').addEventListener('click', () => {
       const titleKey = pendingPlanKey;
       const opener = pendingPlanOpener;
+      const planId = pendingPlanId;
       closePlanModal();
-      selectPlan(titleKey, opener);
+      selectPlan(titleKey, opener, planId);
     });
 
     document.getElementById('modal-choose-email').addEventListener('click', () => {
       const planNameEs = translations.es[pendingPlanKey];
+      const hasWeb = pendingPlanId ? planWebState[pendingPlanId] : false;
+      const basePrice = plansArray.find(p => p.id === pendingPlanId)?.basePrice || 0;
+      const finalTotal = basePrice + (hasWeb ? 200 : 0);
       closePlanModal();
-      const subject = encodeURIComponent(`Interés en contratación - Plan ${planNameEs}`);
-      const body = encodeURIComponent(`Hola,\n\nEstoy interesado/a en el ${planNameEs} para mi proyecto.\n\nNombre de la marca / negocio:\nBreve descripción:\n\n¡Un saludo!`);
+      const subject = encodeURIComponent(`Interés en contratación - Plan ${planNameEs}${hasWeb ? ' con Web' : ''}`);
+      const body = encodeURIComponent(`Hola,\n\nEstoy interesado/a en el ${planNameEs}${hasWeb ? ' incluyendo desarrollo web' : ''} (${finalTotal} € total con descuento de lanzamiento) para mi proyecto.\n\nNombre de la marca / negocio:\nBreve descripción:\n\n¡Un saludo!`);
       window.location.href = `mailto:hola@rebrandyourbrand.es?subject=${subject}&body=${body}`;
     });
 
@@ -1680,6 +1784,10 @@ se construye.</h2>
           mobileMenuToggle.focus();
           return;
         }
+        if (launchModalIsOpen) {
+          closeLaunchModal();
+          return;
+        }
         if (planModalIsOpen) {
           closePlanModal();
           return;
@@ -1690,7 +1798,7 @@ se construye.</h2>
       }
       if (event.key !== 'Tab') return;
 
-      const activeContainer = planModalIsOpen ? planModal : (assistantIsOpen ? assistantPanel : null);
+      const activeContainer = launchModalIsOpen ? launchModal : (planModalIsOpen ? planModal : (assistantIsOpen ? assistantPanel : null));
       if (!activeContainer) return;
       const focusable = activeContainer.querySelectorAll(focusableSelector);
       if (!focusable.length) return;
