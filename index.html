@@ -8,7 +8,6 @@
 <meta name="mobile-web-app-capable" content="yes">
 
 <!-- Optimización de Red: Preconexión para eliminar bloqueo de renderizado -->
-<link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
@@ -18,11 +17,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 </noscript>
 
-<!-- SDK de Cloudflare Turnstile — carga diferida -->
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback&render=explicit" async defer></script>
 
 <!-- Política de Seguridad de Contenido (CSP) blindada -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://challenges.cloudflare.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://rebrandyourbrand-proxy.bernatxd705.workers.dev https://challenges.cloudflare.com; frame-src 'self' https://challenges.cloudflare.com; frame-ancestors 'self'; img-src 'self' data: https://img.lhdigital.cat https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://challenges.cloudflare.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://rebrandyourbrand-proxy.bernatxd705.workers.dev https://challenges.cloudflare.com; frame-src 'self' https://challenges.cloudflare.com; img-src 'self' data: https://img.lhdigital.cat https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self';">
 
 <title>rebrandyourbrand — Rebranding y diseño visual</title>
 <meta name="description" content="Rebranding de marcas y diseño visual: identidad, packaging y dirección de arte con enfoque técnico y artístico.">
@@ -66,31 +63,1793 @@
   })();
 </script>
 
-<script src="https://cdn.tailwindcss.com"></script>
 
-<script>
-  tailwind.config = {
-    theme: {
-      extend: {
-        colors: {
-          ink:        'rgb(var(--color-bg) / <alpha-value>)',
-          panel:      'rgb(var(--color-panel) / <alpha-value>)',
-          line:       'rgb(var(--color-line) / <alpha-value>)',
-          paper:      'rgb(var(--color-text) / <alpha-value>)',
-          muted:      'rgb(var(--color-muted) / <alpha-value>)',
-          brand:      'rgb(var(--color-brand) / <alpha-value>)',
-          'brand-soft': 'rgb(var(--color-brand-soft) / <alpha-value>)',
-          ai:         'rgb(var(--color-ai) / <alpha-value>)',
-          'ai-soft':    'rgb(var(--color-ai-soft) / <alpha-value>)',
-        },
-        fontFamily: {
-          serif: ['"Fraunces"', 'serif'],
-          sans: ['"Inter"', 'sans-serif'],
-        },
-      },
-    },
-  };
-</script>
+<style id="tailwind-static">
+/*
+  1. Prevent padding and border from affecting element width. (https://github.com/mozdevs/cssremedy/issues/4)
+  2. Remove default margins and padding
+  3. Reset all borders.
+*/
+
+*,
+::after,
+::before,
+::backdrop,
+::file-selector-button {
+  box-sizing: border-box; /* 1 */
+  margin: 0; /* 2 */
+  padding: 0; /* 2 */
+  border: 0 solid; /* 3 */
+}
+
+/*
+  1. Use a consistent sensible line-height in all browsers.
+  2. Prevent adjustments of font size after orientation changes in iOS.
+  3. Use a more readable tab size.
+  4. Use the user's configured `sans` font-family by default.
+  5. Use the user's configured `sans` font-feature-settings by default.
+  6. Use the user's configured `sans` font-variation-settings by default.
+  7. Disable tap highlights on iOS.
+*/
+
+html,
+:host {
+  line-height: 1.5; /* 1 */
+  -webkit-text-size-adjust: 100%; /* 2 */
+  tab-size: 4; /* 3 */
+  font-family: --theme(
+    --default-font-family,
+    ui-sans-serif,
+    system-ui,
+    sans-serif,
+    'Apple Color Emoji',
+    'Segoe UI Emoji',
+    'Segoe UI Symbol',
+    'Noto Color Emoji'
+  ); /* 4 */
+  font-feature-settings: --theme(--default-font-feature-settings, normal); /* 5 */
+  font-variation-settings: --theme(--default-font-variation-settings, normal); /* 6 */
+  -webkit-tap-highlight-color: transparent; /* 7 */
+}
+
+/*
+  1. Add the correct height in Firefox.
+  2. Correct the inheritance of border color in Firefox. (https://bugzilla.mozilla.org/show_bug.cgi?id=190655)
+  3. Reset the default border style to a 1px solid border.
+*/
+
+hr {
+  height: 0; /* 1 */
+  color: inherit; /* 2 */
+  border-top-width: 1px; /* 3 */
+}
+
+/*
+  Add the correct text decoration in Chrome, Edge, and Safari.
+*/
+
+abbr:where([title]) {
+  -webkit-text-decoration: underline dotted;
+  text-decoration: underline dotted;
+}
+
+/*
+  Remove the default font size and weight for headings.
+*/
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+/*
+  Reset links to optimize for opt-in styling instead of opt-out.
+*/
+
+a {
+  color: inherit;
+  -webkit-text-decoration: inherit;
+  text-decoration: inherit;
+}
+
+/*
+  Add the correct font weight in Edge and Safari.
+*/
+
+b,
+strong {
+  font-weight: bolder;
+}
+
+/*
+  1. Use the user's configured `mono` font-family by default.
+  2. Use the user's configured `mono` font-feature-settings by default.
+  3. Use the user's configured `mono` font-variation-settings by default.
+  4. Correct the odd `em` font sizing in all browsers.
+*/
+
+code,
+kbd,
+samp,
+pre {
+  font-family: --theme(
+    --default-mono-font-family,
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    'Liberation Mono',
+    'Courier New',
+    monospace
+  ); /* 1 */
+  font-feature-settings: --theme(--default-mono-font-feature-settings, normal); /* 2 */
+  font-variation-settings: --theme(--default-mono-font-variation-settings, normal); /* 3 */
+  font-size: 1em; /* 4 */
+}
+
+/*
+  Add the correct font size in all browsers.
+*/
+
+small {
+  font-size: 80%;
+}
+
+/*
+  Prevent `sub` and `sup` elements from affecting the line height in all browsers.
+*/
+
+sub,
+sup {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+sub {
+  bottom: -0.25em;
+}
+
+sup {
+  top: -0.5em;
+}
+
+/*
+  1. Remove text indentation from table contents in Chrome and Safari. (https://bugs.chromium.org/p/chromium/issues/detail?id=999088, https://bugs.webkit.org/show_bug.cgi?id=201297)
+  2. Correct table border color inheritance in all Chrome and Safari. (https://bugs.chromium.org/p/chromium/issues/detail?id=935729, https://bugs.webkit.org/show_bug.cgi?id=195016)
+  3. Remove gaps between table borders by default.
+*/
+
+table {
+  text-indent: 0; /* 1 */
+  border-color: inherit; /* 2 */
+  border-collapse: collapse; /* 3 */
+}
+
+/*
+  Use the modern Firefox focus style for all focusable elements.
+*/
+
+:-moz-focusring {
+  outline: auto;
+}
+
+/*
+  Add the correct vertical alignment in Chrome and Firefox.
+*/
+
+progress {
+  vertical-align: baseline;
+}
+
+/*
+  Add the correct display in Chrome and Safari.
+*/
+
+summary {
+  display: list-item;
+}
+
+/*
+  Make lists unstyled by default.
+*/
+
+ol,
+ul,
+menu {
+  list-style: none;
+}
+
+/*
+  1. Make replaced elements `display: block` by default. (https://github.com/mozdevs/cssremedy/issues/14)
+  2. Add `vertical-align: middle` to align replaced elements more sensibly by default. (https://github.com/jensimmons/cssremedy/issues/14#issuecomment-634934210)
+      This can trigger a poorly considered lint error in some tools but is included by design.
+*/
+
+img,
+svg,
+video,
+canvas,
+audio,
+iframe,
+embed,
+object {
+  display: block; /* 1 */
+  vertical-align: middle; /* 2 */
+}
+
+/*
+  Constrain images and videos to the parent width and preserve their intrinsic aspect ratio. (https://github.com/mozdevs/cssremedy/issues/14)
+*/
+
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+/*
+  1. Inherit font styles in all browsers.
+  2. Remove border radius in all browsers.
+  3. Remove background color in all browsers.
+  4. Ensure consistent opacity for disabled states in all browsers.
+*/
+
+button,
+input,
+select,
+optgroup,
+textarea,
+::file-selector-button {
+  font: inherit; /* 1 */
+  font-feature-settings: inherit; /* 1 */
+  font-variation-settings: inherit; /* 1 */
+  letter-spacing: inherit; /* 1 */
+  color: inherit; /* 1 */
+  border-radius: 0; /* 2 */
+  background-color: transparent; /* 3 */
+  opacity: 1; /* 4 */
+}
+
+/*
+  Restore default font weight.
+*/
+
+:where(select:is([multiple], [size])) optgroup {
+  font-weight: bolder;
+}
+
+/*
+  Restore indentation.
+*/
+
+:where(select:is([multiple], [size])) optgroup option {
+  padding-inline-start: 20px;
+}
+
+/*
+  Restore space after button.
+*/
+
+::file-selector-button {
+  margin-inline-end: 4px;
+}
+
+/*
+  Reset the default placeholder opacity in Firefox. (https://github.com/tailwindlabs/tailwindcss/issues/3300)
+*/
+
+::placeholder {
+  opacity: 1;
+}
+
+/*
+  Set the default placeholder color to a semi-transparent version of the current text color in browsers that do not
+  crash when using `color-mix(…)` with `currentcolor`. (https://github.com/tailwindlabs/tailwindcss/issues/17194)
+*/
+
+@supports (not (-webkit-appearance: -apple-pay-button)) /* Not Safari */ or
+  (contain-intrinsic-size: 1px) /* Safari 17+ */ {
+  ::placeholder {
+    color: color-mix(in oklab, currentcolor 50%, transparent);
+  }
+}
+
+/*
+  Prevent resizing textareas horizontally by default.
+*/
+
+textarea {
+  resize: vertical;
+}
+
+/*
+  Remove the inner padding in Chrome and Safari on macOS.
+*/
+
+::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+
+/*
+  1. Ensure date/time inputs have the same height when empty in iOS Safari.
+  2. Ensure text alignment can be changed on date/time inputs in iOS Safari.
+*/
+
+::-webkit-date-and-time-value {
+  min-height: 1lh; /* 1 */
+  text-align: inherit; /* 2 */
+}
+
+/*
+  Prevent height from changing on date/time inputs in macOS Safari when the input is set to `display: block`.
+*/
+
+::-webkit-datetime-edit {
+  display: inline-flex;
+}
+
+/*
+  Remove excess padding from pseudo-elements in date/time inputs to ensure consistent height across browsers.
+*/
+
+::-webkit-datetime-edit-fields-wrapper {
+  padding: 0;
+}
+
+::-webkit-datetime-edit,
+::-webkit-datetime-edit-year-field,
+::-webkit-datetime-edit-month-field,
+::-webkit-datetime-edit-day-field,
+::-webkit-datetime-edit-hour-field,
+::-webkit-datetime-edit-minute-field,
+::-webkit-datetime-edit-second-field,
+::-webkit-datetime-edit-millisecond-field,
+::-webkit-datetime-edit-meridiem-field {
+  padding-block: 0;
+}
+
+/*
+  Remove the additional `:invalid` styles in Firefox. (https://github.com/mozilla/gecko-dev/blob/2f9eacd9d3d995c937b4251a5557d95d494c9be1/layout/style/res/forms.css#L728-L737)
+*/
+
+:-moz-ui-invalid {
+  box-shadow: none;
+}
+
+/*
+  Correct the inability to style the border radius in iOS Safari.
+*/
+
+button,
+input:where([type='button'], [type='reset'], [type='submit']),
+::file-selector-button {
+  appearance: button;
+}
+
+/*
+  Correct the cursor style of increment and decrement buttons in Safari.
+*/
+
+::-webkit-inner-spin-button,
+::-webkit-outer-spin-button {
+  height: auto;
+}
+
+/*
+  Make elements with the HTML hidden attribute stay hidden by default.
+*/
+
+[hidden]:where(:not([hidden='until-found'])) {
+  display: none !important;
+}
+
+/*! tailwindcss v4.1.10 | MIT License | https://tailwindcss.com */
+@layer properties;
+:root, :host {
+  --font-sans: "Inter", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
+    monospace;
+  --color-red-400: oklch(70.4% 0.191 22.216);
+  --color-black: #000;
+  --spacing: 0.25rem;
+  --container-md: 28rem;
+  --container-lg: 32rem;
+  --container-xl: 36rem;
+  --container-3xl: 48rem;
+  --container-4xl: 56rem;
+  --container-6xl: 72rem;
+  --text-xs: 0.75rem;
+  --text-xs--line-height: calc(1 / 0.75);
+  --text-sm: 0.875rem;
+  --text-sm--line-height: calc(1.25 / 0.875);
+  --text-base: 1rem;
+  --text-base--line-height: calc(1.5 / 1);
+  --text-lg: 1.125rem;
+  --text-lg--line-height: calc(1.75 / 1.125);
+  --text-xl: 1.25rem;
+  --text-xl--line-height: calc(1.75 / 1.25);
+  --text-2xl: 1.5rem;
+  --text-2xl--line-height: calc(2 / 1.5);
+  --text-3xl: 1.875rem;
+  --text-3xl--line-height: calc(2.25 / 1.875);
+  --text-4xl: 2.25rem;
+  --text-4xl--line-height: calc(2.5 / 2.25);
+  --text-6xl: 3.75rem;
+  --text-6xl--line-height: 1;
+  --text-7xl: 4.5rem;
+  --text-7xl--line-height: 1;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --tracking-tight: -0.025em;
+  --tracking-wide: 0.025em;
+  --tracking-wider: 0.05em;
+  --tracking-widest: 0.1em;
+  --leading-tight: 1.25;
+  --leading-relaxed: 1.625;
+  --radius-sm: 0.25rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --animate-pulse: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --blur-sm: 8px;
+  --blur-md: 12px;
+  --default-transition-duration: 150ms;
+  --default-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  --color-ink: rgb(var(--color-bg) / <alpha-value>);
+  --color-panel: rgb(var(--color-panel) / <alpha-value>);
+  --color-line: rgb(var(--color-line) / <alpha-value>);
+  --color-paper: rgb(var(--color-text) / <alpha-value>);
+  --color-muted: rgb(var(--color-muted) / <alpha-value>);
+  --color-brand: rgb(var(--color-brand) / <alpha-value>);
+  --color-brand-soft: rgb(var(--color-brand-soft) / <alpha-value>);
+  --color-ai: rgb(var(--color-ai) / <alpha-value>);
+  --color-ai-soft: rgb(var(--color-ai-soft) / <alpha-value>);
+}
+.pointer-events-none {
+  pointer-events: none;
+}
+.absolute {
+  position: absolute;
+}
+.fixed {
+  position: fixed;
+}
+.relative {
+  position: relative;
+}
+.inset-0 {
+  inset: calc(var(--spacing) * 0);
+}
+.inset-x-0 {
+  inset-inline: calc(var(--spacing) * 0);
+}
+.-top-3 {
+  top: calc(var(--spacing) * -3);
+}
+.top-0 {
+  top: calc(var(--spacing) * 0);
+}
+.top-1\/2 {
+  top: calc(1/2 * 100%);
+}
+.-right-1 {
+  right: calc(var(--spacing) * -1);
+}
+.right-0 {
+  right: calc(var(--spacing) * 0);
+}
+.right-6 {
+  right: calc(var(--spacing) * 6);
+}
+.-bottom-1 {
+  bottom: calc(var(--spacing) * -1);
+}
+.bottom-6 {
+  bottom: calc(var(--spacing) * 6);
+}
+.left-0 {
+  left: calc(var(--spacing) * 0);
+}
+.z-10 {
+  z-index: 10;
+}
+.z-30 {
+  z-index: 30;
+}
+.z-40 {
+  z-index: 40;
+}
+.z-50 {
+  z-index: 50;
+}
+.z-\[60\] {
+  z-index: 60;
+}
+.mx-auto {
+  margin-inline: auto;
+}
+.mt-0\.5 {
+  margin-top: calc(var(--spacing) * 0.5);
+}
+.mt-1 {
+  margin-top: calc(var(--spacing) * 1);
+}
+.mt-8 {
+  margin-top: calc(var(--spacing) * 8);
+}
+.mt-16 {
+  margin-top: calc(var(--spacing) * 16);
+}
+.mb-1 {
+  margin-bottom: calc(var(--spacing) * 1);
+}
+.mb-2 {
+  margin-bottom: calc(var(--spacing) * 2);
+}
+.mb-3 {
+  margin-bottom: calc(var(--spacing) * 3);
+}
+.mb-4 {
+  margin-bottom: calc(var(--spacing) * 4);
+}
+.mb-6 {
+  margin-bottom: calc(var(--spacing) * 6);
+}
+.mb-8 {
+  margin-bottom: calc(var(--spacing) * 8);
+}
+.mb-12 {
+  margin-bottom: calc(var(--spacing) * 12);
+}
+.ml-auto {
+  margin-left: auto;
+}
+.block {
+  display: block;
+}
+.flex {
+  display: flex;
+}
+.grid {
+  display: grid;
+}
+.hidden {
+  display: none;
+}
+.inline-block {
+  display: inline-block;
+}
+.inline-flex {
+  display: inline-flex;
+}
+.h-1\.5 {
+  height: calc(var(--spacing) * 1.5);
+}
+.h-2 {
+  height: calc(var(--spacing) * 2);
+}
+.h-2\.5 {
+  height: calc(var(--spacing) * 2.5);
+}
+.h-5 {
+  height: calc(var(--spacing) * 5);
+}
+.h-9 {
+  height: calc(var(--spacing) * 9);
+}
+.h-10 {
+  height: calc(var(--spacing) * 10);
+}
+.h-14 {
+  height: calc(var(--spacing) * 14);
+}
+.h-16 {
+  height: calc(var(--spacing) * 16);
+}
+.h-40 {
+  height: calc(var(--spacing) * 40);
+}
+.h-full {
+  height: 100%;
+}
+.max-h-0 {
+  max-height: calc(var(--spacing) * 0);
+}
+.max-h-24 {
+  max-height: calc(var(--spacing) * 24);
+}
+.min-h-\[65px\] {
+  min-height: 65px;
+}
+.w-1\.5 {
+  width: calc(var(--spacing) * 1.5);
+}
+.w-2 {
+  width: calc(var(--spacing) * 2);
+}
+.w-2\.5 {
+  width: calc(var(--spacing) * 2.5);
+}
+.w-9 {
+  width: calc(var(--spacing) * 9);
+}
+.w-10 {
+  width: calc(var(--spacing) * 10);
+}
+.w-14 {
+  width: calc(var(--spacing) * 14);
+}
+.w-fit {
+  width: fit-content;
+}
+.w-full {
+  width: 100%;
+}
+.w-px {
+  width: 1px;
+}
+.max-w-3xl {
+  max-width: var(--container-3xl);
+}
+.max-w-4xl {
+  max-width: var(--container-4xl);
+}
+.max-w-6xl {
+  max-width: var(--container-6xl);
+}
+.max-w-\[88\%\] {
+  max-width: 88%;
+}
+.max-w-lg {
+  max-width: var(--container-lg);
+}
+.max-w-md {
+  max-width: var(--container-md);
+}
+.max-w-xl {
+  max-width: var(--container-xl);
+}
+.flex-1 {
+  flex: 1;
+}
+.shrink-0 {
+  flex-shrink: 0;
+}
+.-translate-y-1\/2 {
+  --tw-translate-y: calc(calc(1/2 * 100%) * -1);
+  translate: var(--tw-translate-x) var(--tw-translate-y);
+}
+.scale-95 {
+  --tw-scale-x: 95%;
+  --tw-scale-y: 95%;
+  --tw-scale-z: 95%;
+  scale: var(--tw-scale-x) var(--tw-scale-y);
+}
+.scale-\[1\.03\] {
+  scale: 1.03;
+}
+.transform {
+  transform: var(--tw-rotate-x,) var(--tw-rotate-y,) var(--tw-rotate-z,) var(--tw-skew-x,) var(--tw-skew-y,);
+}
+.animate-pulse {
+  animation: var(--animate-pulse);
+}
+.cursor-pointer {
+  cursor: pointer;
+}
+.resize-none {
+  resize: none;
+}
+.flex-col {
+  flex-direction: column;
+}
+.items-center {
+  align-items: center;
+}
+.items-start {
+  align-items: flex-start;
+}
+.items-stretch {
+  align-items: stretch;
+}
+.justify-between {
+  justify-content: space-between;
+}
+.justify-center {
+  justify-content: center;
+}
+.justify-start {
+  justify-content: flex-start;
+}
+.gap-1\.5 {
+  gap: calc(var(--spacing) * 1.5);
+}
+.gap-2 {
+  gap: calc(var(--spacing) * 2);
+}
+.gap-2\.5 {
+  gap: calc(var(--spacing) * 2.5);
+}
+.gap-3 {
+  gap: calc(var(--spacing) * 3);
+}
+.gap-4 {
+  gap: calc(var(--spacing) * 4);
+}
+.gap-5 {
+  gap: calc(var(--spacing) * 5);
+}
+.gap-6 {
+  gap: calc(var(--spacing) * 6);
+}
+.gap-8 {
+  gap: calc(var(--spacing) * 8);
+}
+.gap-10 {
+  gap: calc(var(--spacing) * 10);
+}
+.space-y-3 {
+  :where(& > :not(:last-child)) {
+    --tw-space-y-reverse: 0;
+    margin-block-start: calc(calc(var(--spacing) * 3) * var(--tw-space-y-reverse));
+    margin-block-end: calc(calc(var(--spacing) * 3) * calc(1 - var(--tw-space-y-reverse)));
+  }
+}
+.space-y-4 {
+  :where(& > :not(:last-child)) {
+    --tw-space-y-reverse: 0;
+    margin-block-start: calc(calc(var(--spacing) * 4) * var(--tw-space-y-reverse));
+    margin-block-end: calc(calc(var(--spacing) * 4) * calc(1 - var(--tw-space-y-reverse)));
+  }
+}
+.space-y-8 {
+  :where(& > :not(:last-child)) {
+    --tw-space-y-reverse: 0;
+    margin-block-start: calc(calc(var(--spacing) * 8) * var(--tw-space-y-reverse));
+    margin-block-end: calc(calc(var(--spacing) * 8) * calc(1 - var(--tw-space-y-reverse)));
+  }
+}
+.overflow-hidden {
+  overflow: hidden;
+}
+.overflow-x-hidden {
+  overflow-x: hidden;
+}
+.overflow-y-auto {
+  overflow-y: auto;
+}
+.scroll-smooth {
+  scroll-behavior: smooth;
+}
+.rounded-2xl {
+  border-radius: var(--radius-2xl);
+}
+.rounded-full {
+  border-radius: calc(infinity * 1px);
+}
+.rounded-lg {
+  border-radius: var(--radius-lg);
+}
+.rounded-xl {
+  border-radius: var(--radius-xl);
+}
+.rounded-bl-sm {
+  border-bottom-left-radius: var(--radius-sm);
+}
+.border {
+  border-style: var(--tw-border-style);
+  border-width: 1px;
+}
+.border-2 {
+  border-style: var(--tw-border-style);
+  border-width: 2px;
+}
+.border-t {
+  border-top-style: var(--tw-border-style);
+  border-top-width: 1px;
+}
+.border-b {
+  border-bottom-style: var(--tw-border-style);
+  border-bottom-width: 1px;
+}
+.border-l {
+  border-left-style: var(--tw-border-style);
+  border-left-width: 1px;
+}
+.border-l-2 {
+  border-left-style: var(--tw-border-style);
+  border-left-width: 2px;
+}
+.border-none {
+  --tw-border-style: none;
+  border-style: none;
+}
+.border-ai\/30 {
+  border-color: color-mix(in srgb, rgb(var(--color-ai) / <alpha-value>) 30%, transparent);
+  @supports (color: color-mix(in lab, red, red)) {
+    border-color: color-mix(in oklab, var(--color-ai) 30%, transparent);
+  }
+}
+.border-brand\/40 {
+  border-color: color-mix(in srgb, rgb(var(--color-brand) / <alpha-value>) 40%, transparent);
+  @supports (color: color-mix(in lab, red, red)) {
+    border-color: color-mix(in oklab, var(--color-brand) 40%, transparent);
+  }
+}
+.border-line {
+  border-color: var(--color-line);
+}
+.border-line\/40 {
+  border-color: color-mix(in srgb, rgb(var(--color-line) / <alpha-value>) 40%, transparent);
+  @supports (color: color-mix(in lab, red, red)) {
+    border-color: color-mix(in oklab, var(--color-line) 40%, transparent);
+  }
+}
+.border-line\/60 {
+  border-color: color-mix(in srgb, rgb(var(--color-line) / <alpha-value>) 60%, transparent);
+  @supports (color: color-mix(in lab, red, red)) {
+    border-color: color-mix(in oklab, var(--color-line) 60%, transparent);
+  }
+}
+.border-line\/80 {
+  border-color: color-mix(in srgb, rgb(var(--color-line) / <alpha-value>) 80%, transparent);
+  @supports (color: color-mix(in lab, red, red)) {
+    border-color: color-mix(in oklab, var(--color-line) 80%, transparent);
+  }
+}
+.bg-ai {
+  background-color: var(--color-ai);
+}
+.bg-ai\/10 {
+  background-color: color-mix(in srgb, rgb(var(--color-ai) / <alpha-value>) 10%, transparent);
+  @supports (color: color-mix(in lab, red, red)) {
+    background-color: color-mix(in oklab, var(--color-ai) 10%, transparent);
+  }
+}
+.bg-black\/50 {
+  background-color: color-mix(in srgb, #000 50%, transparent);
+  @supports (color: color-mix(in lab, red, red)) {
+    background-color: color-mix(in oklab, var(--color-black) 50%, transparent);
+  }
+}
+.bg-black\/60 {
+  background-color: color-mix(in srgb, #000 60%, transparent);
+  @supports (color: color-mix(in lab, red, red)) {
+    background-color: color-mix(in oklab, var(--color-black) 60%, transparent);
+  }
+}
+.bg-brand {
+  background-color: var(--color-brand);
+}
+.bg-ink {
+  background-color: var(--color-ink);
+}
+.bg-ink\/20 {
+  background-color: color-mix(in srgb, rgb(var(--color-bg) / <alpha-value>) 20%, transparent);
+  @supports (color: color-mix(in lab, red, red)) {
+    background-color: color-mix(in oklab, var(--color-ink) 20%, transparent);
+  }
+}
+.bg-ink\/30 {
+  background-color: color-mix(in srgb, rgb(var(--color-bg) / <alpha-value>) 30%, transparent);
+  @supports (color: color-mix(in lab, red, red)) {
+    background-color: color-mix(in oklab, var(--color-ink) 30%, transparent);
+  }
+}
+.bg-ink\/40 {
+  background-color: color-mix(in srgb, rgb(var(--color-bg) / <alpha-value>) 40%, transparent);
+  @supports (color: color-mix(in lab, red, red)) {
+    background-color: color-mix(in oklab, var(--color-ink) 40%, transparent);
+  }
+}
+.bg-ink\/60 {
+  background-color: color-mix(in srgb, rgb(var(--color-bg) / <alpha-value>) 60%, transparent);
+  @supports (color: color-mix(in lab, red, red)) {
+    background-color: color-mix(in oklab, var(--color-ink) 60%, transparent);
+  }
+}
+.bg-ink\/85 {
+  background-color: color-mix(in srgb, rgb(var(--color-bg) / <alpha-value>) 85%, transparent);
+  @supports (color: color-mix(in lab, red, red)) {
+    background-color: color-mix(in oklab, var(--color-ink) 85%, transparent);
+  }
+}
+.bg-line {
+  background-color: var(--color-line);
+}
+.bg-panel {
+  background-color: var(--color-panel);
+}
+.bg-panel\/30 {
+  background-color: color-mix(in srgb, rgb(var(--color-panel) / <alpha-value>) 30%, transparent);
+  @supports (color: color-mix(in lab, red, red)) {
+    background-color: color-mix(in oklab, var(--color-panel) 30%, transparent);
+  }
+}
+.bg-panel\/80 {
+  background-color: color-mix(in srgb, rgb(var(--color-panel) / <alpha-value>) 80%, transparent);
+  @supports (color: color-mix(in lab, red, red)) {
+    background-color: color-mix(in oklab, var(--color-panel) 80%, transparent);
+  }
+}
+.bg-transparent {
+  background-color: transparent;
+}
+.object-cover {
+  object-fit: cover;
+}
+.p-1 {
+  padding: calc(var(--spacing) * 1);
+}
+.p-1\.5 {
+  padding: calc(var(--spacing) * 1.5);
+}
+.p-2\.5 {
+  padding: calc(var(--spacing) * 2.5);
+}
+.p-4 {
+  padding: calc(var(--spacing) * 4);
+}
+.p-6 {
+  padding: calc(var(--spacing) * 6);
+}
+.p-8 {
+  padding: calc(var(--spacing) * 8);
+}
+.px-0 {
+  padding-inline: calc(var(--spacing) * 0);
+}
+.px-1 {
+  padding-inline: calc(var(--spacing) * 1);
+}
+.px-3 {
+  padding-inline: calc(var(--spacing) * 3);
+}
+.px-4 {
+  padding-inline: calc(var(--spacing) * 4);
+}
+.px-6 {
+  padding-inline: calc(var(--spacing) * 6);
+}
+.py-1 {
+  padding-block: calc(var(--spacing) * 1);
+}
+.py-2 {
+  padding-block: calc(var(--spacing) * 2);
+}
+.py-3 {
+  padding-block: calc(var(--spacing) * 3);
+}
+.py-4 {
+  padding-block: calc(var(--spacing) * 4);
+}
+.py-24 {
+  padding-block: calc(var(--spacing) * 24);
+}
+.py-32 {
+  padding-block: calc(var(--spacing) * 32);
+}
+.pt-2 {
+  padding-top: calc(var(--spacing) * 2);
+}
+.pt-6 {
+  padding-top: calc(var(--spacing) * 6);
+}
+.pt-40 {
+  padding-top: calc(var(--spacing) * 40);
+}
+.pb-1 {
+  padding-bottom: calc(var(--spacing) * 1);
+}
+.pb-28 {
+  padding-bottom: calc(var(--spacing) * 28);
+}
+.pl-3 {
+  padding-left: calc(var(--spacing) * 3);
+}
+.text-center {
+  text-align: center;
+}
+.text-left {
+  text-align: left;
+}
+.font-mono {
+  font-family: var(--font-mono);
+}
+.font-sans {
+  font-family: var(--font-sans);
+}
+.text-2xl {
+  font-size: var(--text-2xl);
+  line-height: var(--tw-leading, var(--text-2xl--line-height));
+}
+.text-3xl {
+  font-size: var(--text-3xl);
+  line-height: var(--tw-leading, var(--text-3xl--line-height));
+}
+.text-4xl {
+  font-size: var(--text-4xl);
+  line-height: var(--tw-leading, var(--text-4xl--line-height));
+}
+.text-base {
+  font-size: var(--text-base);
+  line-height: var(--tw-leading, var(--text-base--line-height));
+}
+.text-lg {
+  font-size: var(--text-lg);
+  line-height: var(--tw-leading, var(--text-lg--line-height));
+}
+.text-sm {
+  font-size: var(--text-sm);
+  line-height: var(--tw-leading, var(--text-sm--line-height));
+}
+.text-xl {
+  font-size: var(--text-xl);
+  line-height: var(--tw-leading, var(--text-xl--line-height));
+}
+.text-xs {
+  font-size: var(--text-xs);
+  line-height: var(--tw-leading, var(--text-xs--line-height));
+}
+.text-\[0\.6rem\] {
+  font-size: 0.6rem;
+}
+.text-\[0\.65rem\] {
+  font-size: 0.65rem;
+}
+.text-\[2\.6rem\] {
+  font-size: 2.6rem;
+}
+.text-\[9px\] {
+  font-size: 9px;
+}
+.text-\[10px\] {
+  font-size: 10px;
+}
+.leading-\[1\.05\] {
+  --tw-leading: 1.05;
+  line-height: 1.05;
+}
+.leading-\[1\.08\] {
+  --tw-leading: 1.08;
+  line-height: 1.08;
+}
+.leading-none {
+  --tw-leading: 1;
+  line-height: 1;
+}
+.leading-relaxed {
+  --tw-leading: var(--leading-relaxed);
+  line-height: var(--leading-relaxed);
+}
+.leading-tight {
+  --tw-leading: var(--leading-tight);
+  line-height: var(--leading-tight);
+}
+.font-bold {
+  --tw-font-weight: var(--font-weight-bold);
+  font-weight: var(--font-weight-bold);
+}
+.font-medium {
+  --tw-font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-medium);
+}
+.font-semibold {
+  --tw-font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-semibold);
+}
+.tracking-tight {
+  --tw-tracking: var(--tracking-tight);
+  letter-spacing: var(--tracking-tight);
+}
+.tracking-wide {
+  --tw-tracking: var(--tracking-wide);
+  letter-spacing: var(--tracking-wide);
+}
+.tracking-wider {
+  --tw-tracking: var(--tracking-wider);
+  letter-spacing: var(--tracking-wider);
+}
+.tracking-widest {
+  --tw-tracking: var(--tracking-widest);
+  letter-spacing: var(--tracking-widest);
+}
+.whitespace-pre-line {
+  white-space: pre-line;
+}
+.text-\[\#0A0A0C\] {
+  color: #0A0A0C;
+}
+.text-ai {
+  color: var(--color-ai);
+}
+.text-ai\/80 {
+  color: color-mix(in srgb, rgb(var(--color-ai) / <alpha-value>) 80%, transparent);
+  @supports (color: color-mix(in lab, red, red)) {
+    color: color-mix(in oklab, var(--color-ai) 80%, transparent);
+  }
+}
+.text-brand {
+  color: var(--color-brand);
+}
+.text-muted {
+  color: var(--color-muted);
+}
+.text-paper {
+  color: var(--color-paper);
+}
+.text-paper\/90 {
+  color: color-mix(in srgb, rgb(var(--color-text) / <alpha-value>) 90%, transparent);
+  @supports (color: color-mix(in lab, red, red)) {
+    color: color-mix(in oklab, var(--color-paper) 90%, transparent);
+  }
+}
+.text-red-400 {
+  color: var(--color-red-400);
+}
+.lowercase {
+  text-transform: lowercase;
+}
+.uppercase {
+  text-transform: uppercase;
+}
+.antialiased {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.opacity-0 {
+  opacity: 0%;
+}
+.opacity-85 {
+  opacity: 85%;
+}
+.shadow-2xl {
+  --tw-shadow: 0 25px 50px -12px var(--tw-shadow-color, rgb(0 0 0 / 0.25));
+  box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+}
+.shadow-lg {
+  --tw-shadow: 0 10px 15px -3px var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 4px 6px -4px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
+  box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+}
+.shadow-md {
+  --tw-shadow: 0 4px 6px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 2px 4px -2px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
+  box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+}
+.shadow-sm {
+  --tw-shadow: 0 1px 3px 0 var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 1px 2px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
+  box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+}
+.shadow-xl {
+  --tw-shadow: 0 20px 25px -5px var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 8px 10px -6px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
+  box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+}
+.shadow-brand\/10 {
+  --tw-shadow-color: color-mix(in srgb, rgb(var(--color-brand) / <alpha-value>) 10%, transparent);
+  @supports (color: color-mix(in lab, red, red)) {
+    --tw-shadow-color: color-mix(in oklab, color-mix(in oklab, var(--color-brand) 10%, transparent) var(--tw-shadow-alpha), transparent);
+  }
+}
+.shadow-brand\/20 {
+  --tw-shadow-color: color-mix(in srgb, rgb(var(--color-brand) / <alpha-value>) 20%, transparent);
+  @supports (color: color-mix(in lab, red, red)) {
+    --tw-shadow-color: color-mix(in oklab, color-mix(in oklab, var(--color-brand) 20%, transparent) var(--tw-shadow-alpha), transparent);
+  }
+}
+.backdrop-blur-md {
+  --tw-backdrop-blur: blur(var(--blur-md));
+  -webkit-backdrop-filter: var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
+  backdrop-filter: var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
+}
+.backdrop-blur-sm {
+  --tw-backdrop-blur: blur(var(--blur-sm));
+  -webkit-backdrop-filter: var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
+  backdrop-filter: var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
+}
+.transition-all {
+  transition-property: all;
+  transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
+  transition-duration: var(--tw-duration, var(--default-transition-duration));
+}
+.transition-colors {
+  transition-property: color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tw-gradient-from, --tw-gradient-via, --tw-gradient-to;
+  transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
+  transition-duration: var(--tw-duration, var(--default-transition-duration));
+}
+.transition-transform {
+  transition-property: transform, translate, scale, rotate;
+  transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
+  transition-duration: var(--tw-duration, var(--default-transition-duration));
+}
+.delay-0 {
+  transition-delay: 0ms;
+}
+.delay-150 {
+  transition-delay: 150ms;
+}
+.delay-300 {
+  transition-delay: 300ms;
+}
+.duration-300 {
+  --tw-duration: 300ms;
+  transition-duration: 300ms;
+}
+.duration-400 {
+  --tw-duration: 400ms;
+  transition-duration: 400ms;
+}
+.duration-500 {
+  --tw-duration: 500ms;
+  transition-duration: 500ms;
+}
+.duration-700 {
+  --tw-duration: 700ms;
+  transition-duration: 700ms;
+}
+.ease-out {
+  --tw-ease: var(--ease-out);
+  transition-timing-function: var(--ease-out);
+}
+.group-hover\:text-paper {
+  &:is(:where(.group):hover *) {
+    @media (hover: hover) {
+      color: var(--color-paper);
+    }
+  }
+}
+.group-hover\:underline {
+  &:is(:where(.group):hover *) {
+    @media (hover: hover) {
+      text-decoration-line: underline;
+    }
+  }
+}
+.placeholder\:text-muted\/60 {
+  &::placeholder {
+    color: color-mix(in srgb, rgb(var(--color-muted) / <alpha-value>) 60%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      color: color-mix(in oklab, var(--color-muted) 60%, transparent);
+    }
+  }
+}
+.focus-within\:border-ai {
+  &:focus-within {
+    border-color: var(--color-ai);
+  }
+}
+.hover\:scale-105 {
+  &:hover {
+    @media (hover: hover) {
+      --tw-scale-x: 105%;
+      --tw-scale-y: 105%;
+      --tw-scale-z: 105%;
+      scale: var(--tw-scale-x) var(--tw-scale-y);
+    }
+  }
+}
+.hover\:scale-110 {
+  &:hover {
+    @media (hover: hover) {
+      --tw-scale-x: 110%;
+      --tw-scale-y: 110%;
+      --tw-scale-z: 110%;
+      scale: var(--tw-scale-x) var(--tw-scale-y);
+    }
+  }
+}
+.hover\:border-ai\/60 {
+  &:hover {
+    @media (hover: hover) {
+      border-color: color-mix(in srgb, rgb(var(--color-ai) / <alpha-value>) 60%, transparent);
+      @supports (color: color-mix(in lab, red, red)) {
+        border-color: color-mix(in oklab, var(--color-ai) 60%, transparent);
+      }
+    }
+  }
+}
+.hover\:border-brand {
+  &:hover {
+    @media (hover: hover) {
+      border-color: var(--color-brand);
+    }
+  }
+}
+.hover\:border-brand\/60 {
+  &:hover {
+    @media (hover: hover) {
+      border-color: color-mix(in srgb, rgb(var(--color-brand) / <alpha-value>) 60%, transparent);
+      @supports (color: color-mix(in lab, red, red)) {
+        border-color: color-mix(in oklab, var(--color-brand) 60%, transparent);
+      }
+    }
+  }
+}
+.hover\:bg-ai-soft {
+  &:hover {
+    @media (hover: hover) {
+      background-color: var(--color-ai-soft);
+    }
+  }
+}
+.hover\:bg-brand-soft {
+  &:hover {
+    @media (hover: hover) {
+      background-color: var(--color-brand-soft);
+    }
+  }
+}
+.hover\:text-brand {
+  &:hover {
+    @media (hover: hover) {
+      color: var(--color-brand);
+    }
+  }
+}
+.hover\:text-paper {
+  &:hover {
+    @media (hover: hover) {
+      color: var(--color-paper);
+    }
+  }
+}
+.hover\:underline {
+  &:hover {
+    @media (hover: hover) {
+      text-decoration-line: underline;
+    }
+  }
+}
+.hover\:opacity-100 {
+  &:hover {
+    @media (hover: hover) {
+      opacity: 100%;
+    }
+  }
+}
+.focus\:outline-none {
+  &:focus {
+    --tw-outline-style: none;
+    outline-style: none;
+  }
+}
+.disabled\:cursor-not-allowed {
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
+.disabled\:opacity-40 {
+  &:disabled {
+    opacity: 40%;
+  }
+}
+.sm\:w-\[480px\] {
+  @media (width >= 40rem) {
+    width: 480px;
+  }
+}
+.sm\:w-auto {
+  @media (width >= 40rem) {
+    width: auto;
+  }
+}
+.sm\:flex-row {
+  @media (width >= 40rem) {
+    flex-direction: row;
+  }
+}
+.sm\:items-end {
+  @media (width >= 40rem) {
+    align-items: flex-end;
+  }
+}
+.sm\:text-6xl {
+  @media (width >= 40rem) {
+    font-size: var(--text-6xl);
+    line-height: var(--tw-leading, var(--text-6xl--line-height));
+  }
+}
+.md\:ml-5 {
+  @media (width >= 48rem) {
+    margin-left: calc(var(--spacing) * 5);
+  }
+}
+.md\:flex {
+  @media (width >= 48rem) {
+    display: flex;
+  }
+}
+.md\:hidden {
+  @media (width >= 48rem) {
+    display: none;
+  }
+}
+.md\:w-\[29\%\] {
+  @media (width >= 48rem) {
+    width: 29%;
+  }
+}
+.md\:w-\[42\%\] {
+  @media (width >= 48rem) {
+    width: 42%;
+  }
+}
+.md\:grid-cols-2 {
+  @media (width >= 48rem) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.md\:flex-row {
+  @media (width >= 48rem) {
+    flex-direction: row;
+  }
+}
+.md\:items-end {
+  @media (width >= 48rem) {
+    align-items: flex-end;
+  }
+}
+.md\:justify-between {
+  @media (width >= 48rem) {
+    justify-content: space-between;
+  }
+}
+.md\:gap-16 {
+  @media (width >= 48rem) {
+    gap: calc(var(--spacing) * 16);
+  }
+}
+.md\:border-l {
+  @media (width >= 48rem) {
+    border-left-style: var(--tw-border-style);
+    border-left-width: 1px;
+  }
+}
+.md\:border-line {
+  @media (width >= 48rem) {
+    border-color: var(--color-line);
+  }
+}
+.md\:p-6 {
+  @media (width >= 48rem) {
+    padding: calc(var(--spacing) * 6);
+  }
+}
+.md\:p-8 {
+  @media (width >= 48rem) {
+    padding: calc(var(--spacing) * 8);
+  }
+}
+.md\:px-10 {
+  @media (width >= 48rem) {
+    padding-inline: calc(var(--spacing) * 10);
+  }
+}
+.md\:px-14 {
+  @media (width >= 48rem) {
+    padding-inline: calc(var(--spacing) * 14);
+  }
+}
+.md\:py-32 {
+  @media (width >= 48rem) {
+    padding-block: calc(var(--spacing) * 32);
+  }
+}
+.md\:py-40 {
+  @media (width >= 48rem) {
+    padding-block: calc(var(--spacing) * 40);
+  }
+}
+.md\:pt-4 {
+  @media (width >= 48rem) {
+    padding-top: calc(var(--spacing) * 4);
+  }
+}
+.md\:pt-52 {
+  @media (width >= 48rem) {
+    padding-top: calc(var(--spacing) * 52);
+  }
+}
+.md\:pb-36 {
+  @media (width >= 48rem) {
+    padding-bottom: calc(var(--spacing) * 36);
+  }
+}
+.md\:pl-5 {
+  @media (width >= 48rem) {
+    padding-left: calc(var(--spacing) * 5);
+  }
+}
+.md\:text-4xl {
+  @media (width >= 48rem) {
+    font-size: var(--text-4xl);
+    line-height: var(--tw-leading, var(--text-4xl--line-height));
+  }
+}
+.md\:text-6xl {
+  @media (width >= 48rem) {
+    font-size: var(--text-6xl);
+    line-height: var(--tw-leading, var(--text-6xl--line-height));
+  }
+}
+.md\:text-7xl {
+  @media (width >= 48rem) {
+    font-size: var(--text-7xl);
+    line-height: var(--tw-leading, var(--text-7xl--line-height));
+  }
+}
+.md\:text-base {
+  @media (width >= 48rem) {
+    font-size: var(--text-base);
+    line-height: var(--tw-leading, var(--text-base--line-height));
+  }
+}
+.md\:text-lg {
+  @media (width >= 48rem) {
+    font-size: var(--text-lg);
+    line-height: var(--tw-leading, var(--text-lg--line-height));
+  }
+}
+.md\:text-sm {
+  @media (width >= 48rem) {
+    font-size: var(--text-sm);
+    line-height: var(--tw-leading, var(--text-sm--line-height));
+  }
+}
+.md\:text-xl {
+  @media (width >= 48rem) {
+    font-size: var(--text-xl);
+    line-height: var(--tw-leading, var(--text-xl--line-height));
+  }
+}
+.lg\:gap-8 {
+  @media (width >= 64rem) {
+    gap: calc(var(--spacing) * 8);
+  }
+}
+@property --tw-translate-x {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
+@property --tw-translate-y {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
+@property --tw-translate-z {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
+@property --tw-scale-x {
+  syntax: "*";
+  inherits: false;
+  initial-value: 1;
+}
+@property --tw-scale-y {
+  syntax: "*";
+  inherits: false;
+  initial-value: 1;
+}
+@property --tw-scale-z {
+  syntax: "*";
+  inherits: false;
+  initial-value: 1;
+}
+@property --tw-rotate-x {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-rotate-y {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-rotate-z {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-skew-x {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-skew-y {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-space-y-reverse {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
+@property --tw-border-style {
+  syntax: "*";
+  inherits: false;
+  initial-value: solid;
+}
+@property --tw-leading {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-font-weight {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-tracking {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-shadow {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0 0 #0000;
+}
+@property --tw-shadow-color {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-shadow-alpha {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 100%;
+}
+@property --tw-inset-shadow {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0 0 #0000;
+}
+@property --tw-inset-shadow-color {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-inset-shadow-alpha {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 100%;
+}
+@property --tw-ring-color {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-ring-shadow {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0 0 #0000;
+}
+@property --tw-inset-ring-color {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-inset-ring-shadow {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0 0 #0000;
+}
+@property --tw-ring-inset {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-ring-offset-width {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+@property --tw-ring-offset-color {
+  syntax: "*";
+  inherits: false;
+  initial-value: #fff;
+}
+@property --tw-ring-offset-shadow {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0 0 #0000;
+}
+@property --tw-backdrop-blur {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-backdrop-brightness {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-backdrop-contrast {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-backdrop-grayscale {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-backdrop-hue-rotate {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-backdrop-invert {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-backdrop-opacity {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-backdrop-saturate {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-backdrop-sepia {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-duration {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-ease {
+  syntax: "*";
+  inherits: false;
+}
+@keyframes pulse {
+  50% {
+    opacity: 0.5;
+  }
+}
+@layer properties {
+  @supports ((-webkit-hyphens: none) and (not (margin-trim: inline))) or ((-moz-orient: inline) and (not (color:rgb(from red r g b)))) {
+    *, ::before, ::after, ::backdrop {
+      --tw-translate-x: 0;
+      --tw-translate-y: 0;
+      --tw-translate-z: 0;
+      --tw-scale-x: 1;
+      --tw-scale-y: 1;
+      --tw-scale-z: 1;
+      --tw-rotate-x: initial;
+      --tw-rotate-y: initial;
+      --tw-rotate-z: initial;
+      --tw-skew-x: initial;
+      --tw-skew-y: initial;
+      --tw-space-y-reverse: 0;
+      --tw-border-style: solid;
+      --tw-leading: initial;
+      --tw-font-weight: initial;
+      --tw-tracking: initial;
+      --tw-shadow: 0 0 #0000;
+      --tw-shadow-color: initial;
+      --tw-shadow-alpha: 100%;
+      --tw-inset-shadow: 0 0 #0000;
+      --tw-inset-shadow-color: initial;
+      --tw-inset-shadow-alpha: 100%;
+      --tw-ring-color: initial;
+      --tw-ring-shadow: 0 0 #0000;
+      --tw-inset-ring-color: initial;
+      --tw-inset-ring-shadow: 0 0 #0000;
+      --tw-ring-inset: initial;
+      --tw-ring-offset-width: 0px;
+      --tw-ring-offset-color: #fff;
+      --tw-ring-offset-shadow: 0 0 #0000;
+      --tw-backdrop-blur: initial;
+      --tw-backdrop-brightness: initial;
+      --tw-backdrop-contrast: initial;
+      --tw-backdrop-grayscale: initial;
+      --tw-backdrop-hue-rotate: initial;
+      --tw-backdrop-invert: initial;
+      --tw-backdrop-opacity: initial;
+      --tw-backdrop-saturate: initial;
+      --tw-backdrop-sepia: initial;
+      --tw-duration: initial;
+      --tw-ease: initial;
+    }
+  }
+}
+
+</style>
 
 <style>
   :root {
@@ -223,6 +1982,25 @@
     50%      { box-shadow: 0 0 0 10px rgba(232, 163, 61, 0); }
   }
   #assistant-trigger { animation: ai-pulse 3s ease-in-out infinite; }
+
+
+  /* Performance: isolate decorative paint and avoid expensive blur on small screens. */
+  .blob-paint,
+  #blob-1 {
+    contain: paint;
+    pointer-events: none;
+  }
+
+  @media (max-width: 767px) {
+    .backdrop-blur-md {
+      -webkit-backdrop-filter: none !important;
+      backdrop-filter: none !important;
+    }
+
+    #assistant-trigger {
+      animation: none;
+    }
+  }
 
   @media (prefers-reduced-motion: reduce) {
     .hero-fade, .reveal, body, header,
@@ -396,7 +2174,7 @@ se construye.</h2>
                   Ganador oficial del cartel conmemorativo de la edición número 100 de las Festes de Primavera de L'Hospitalet de Llobregat (2025).
                 </p>
                 <div class="overflow-hidden border border-line/80 bg-ink">
-                  <img src="https://img.lhdigital.cat/wp-content/uploads/2025/03/GCH0261-1.jpg" alt="Gael Domènech Sevillano, ganador de la edición 100" loading="lazy" class="w-full h-40 object-cover hover:scale-105 transition-transform duration-700">
+                  <img data-src="https://img.lhdigital.cat/wp-content/uploads/2025/03/GCH0261-1.jpg" alt="Gael Domènech Sevillano, ganador de la edición 100" loading="lazy" decoding="async" class="w-full h-40 object-cover hover:scale-105 transition-transform duration-700">
                 </div>
               </div>
             </div>
@@ -1100,12 +2878,17 @@ se construye.</h2>
       renderPlans();
     });
 
+    let wasMobile = window.innerWidth < 768;
     let resizeTimer;
     window.addEventListener('resize', () => {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
-        renderPlans();
-      }, 100);
+        const isMobile = window.innerWidth < 768;
+        if (isMobile !== wasMobile) {
+          wasMobile = isMobile;
+          renderPlans();
+        }
+      }, 120);
     });
 
     function switchLanguage(lang) {
@@ -1170,6 +2953,13 @@ se construye.</h2>
           const content = document.getElementById(btn.getAttribute('data-target'));
           const isOpen = content.classList.contains('is-open');
           const spanText = btn.querySelector('.toggle-text');
+
+          if (!isOpen) {
+            content.querySelectorAll('img[data-src]').forEach(img => {
+              img.src = img.dataset.src;
+              img.removeAttribute('data-src');
+            });
+          }
 
           if (isOpen) {
             content.style.maxHeight = '0px';
@@ -1257,11 +3047,24 @@ se construye.</h2>
     const assistantSubmit = document.getElementById('brand-assistant-submit');
     const assistantStatus = document.getElementById('assistant-status');
 
-    window.onloadTurnstileCallback = function () {
-      if (assistantIsOpen) {
-        renderOrResetTurnstile();
-      }
-    };
+    let turnstileLoadPromise = null;
+
+    function loadTurnstile() {
+      if (window.turnstile) return Promise.resolve();
+      if (turnstileLoadPromise) return turnstileLoadPromise;
+
+      turnstileLoadPromise = new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+        script.async = true;
+        script.defer = true;
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+
+      return turnstileLoadPromise;
+    }
 
     function renderOrResetTurnstile() {
       const container = document.getElementById('turnstile-container');
@@ -1329,7 +3132,15 @@ se construye.</h2>
       assistantTrigger.setAttribute('aria-expanded', 'true');
       assistantPanel.setAttribute('aria-hidden', 'false');
 
-      renderOrResetTurnstile();
+      setAssistantStatus('status-verifying', 'idle');
+      loadTurnstile()
+        .then(() => {
+          if (assistantIsOpen) renderOrResetTurnstile();
+        })
+        .catch(() => {
+          assistantSubmit.disabled = true;
+          setAssistantStatus('status-failed', 'error');
+        });
 
       window.setTimeout(() => assistantPrompt.focus(), 300);
     }
