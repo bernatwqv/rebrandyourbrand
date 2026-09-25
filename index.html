@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-<!-- Google Fonts con carga no bloqueante (elimina los 780ms de bloqueo) -->
+<!-- Google Fonts con carga no bloqueante -->
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -147,23 +147,6 @@
     transition-duration: 250ms;
   }
 
-  /* Fondo dinámico optimizado con will-change */
-  #paint-background {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 0;
-    overflow: hidden;
-    opacity: 0.18;
-    filter: blur(60px);
-    will-change: transform;
-  }
-  .blob-paint {
-    position: absolute;
-    border-radius: 9999px;
-  }
-  html.light #paint-background { opacity: 0.12; }
-
   .lang-trans {
     transition: opacity 250ms ease, transform 250ms cubic-bezier(0.16, 1, 0.3, 1);
   }
@@ -246,7 +229,7 @@
     .lang-trans, #plans-container, .milestone-content, .terms-content,
     #assistant-panel, #assistant-backdrop, #assistant-trigger,
     #plan-modal, #plan-modal-content,
-    .theme-icon, button, a, .bubble-in, .blob-paint {
+    .theme-icon, button, a, .bubble-in {
       transition: none !important;
       animation: none !important;
     }
@@ -255,12 +238,6 @@
 </head>
 
 <body class="bg-ink text-paper antialiased relative overflow-x-hidden">
-
-  <!-- Fondo dinámico con manchas de pintura aleatorias (Math.random) -->
-  <div id="paint-background" aria-hidden="true">
-    <div id="blob-1" class="blob-paint absolute w-[420px] h-[420px] bg-brand"></div>
-    <div id="blob-2" class="blob-paint absolute w-[360px] h-[360px] bg-ai"></div>
-  </div>
 
   <!-- Header -->
   <header class="fixed top-0 inset-x-0 z-40 border-b border-line bg-ink/85 backdrop-blur-md">
@@ -697,17 +674,8 @@ se construye.</h2>
     document.documentElement.classList.remove('no-js');
     document.getElementById('year').textContent = new Date().getFullYear();
 
-    // 1. Manchas de pintura aleatorias con Math.random() de forma eficiente
     window.addEventListener('DOMContentLoaded', () => {
       document.documentElement.classList.add('is-loaded');
-      const b1 = document.getElementById('blob-1');
-      const b2 = document.getElementById('blob-2');
-      if (b1 && b2) {
-        b1.style.top = `${Math.random() * 50}%`;
-        b1.style.left = `${Math.random() * 40}%`;
-        b2.style.bottom = `${Math.random() * 50}%`;
-        b2.style.right = `${Math.random() * 40}%`;
-      }
     });
 
     const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
@@ -1415,7 +1383,7 @@ se construye.</h2>
       planModal.classList.add('opacity-0', 'pointer-events-none');
       planModalContent.classList.remove('scale-100');
       planModalContent.classList.add('scale-95');
-      document.body.classList.add('overflow-hidden');
+      document.body.classList.remove('overflow-hidden');
       planModal.setAttribute('aria-hidden', 'true');
       planModal.setAttribute('inert', '');
       if (planModalOpener && !planModalOpener.disabled) planModalOpener.focus();
