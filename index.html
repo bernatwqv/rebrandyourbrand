@@ -102,6 +102,7 @@ textarea { resize: vertical; }
 .right-0 { right: 0; }
 .right-4 { right: 1rem; }
 .right-6 { right: 1.5rem; }
+.left-6 { left: 1.5rem; }
 .-bottom-1 { bottom: -0.25rem; }
 .bottom-4 { bottom: 1rem; }
 .bottom-6 { bottom: 1.5rem; }
@@ -126,6 +127,7 @@ textarea { resize: vertical; }
 .mb-6 { margin-bottom: 1.5rem; }
 .mb-8 { margin-bottom: 2rem; }
 .mb-12 { margin-bottom: 3rem; }
+.mb-16 { margin-bottom: 4rem; }
 .ml-auto { margin-left: auto; }
 .block { display: block; }
 .flex { display: flex; }
@@ -381,7 +383,7 @@ textarea { resize: vertical; }
   ::selection { background: rgb(var(--color-brand)); color: rgb(var(--color-bg)); }
 
   body, header, .lang-trans, #plans-container, .milestone-content, .terms-content,
-  #assistant-panel, #assistant-backdrop, #plan-modal, #plan-modal-content, #launch-modal, #launch-modal-content, .theme-icon, button, a {
+  #assistant-panel, #assistant-backdrop, #plan-modal, #plan-modal-content, #launch-modal, #launch-modal-content, #recommended-modal, #recommended-modal-content, .theme-icon, button, a {
     transition-property: background-color, border-color, color, opacity;
     transition-duration: 300ms;
     transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
@@ -435,7 +437,7 @@ textarea { resize: vertical; }
 
   #assistant-panel { transition: transform 400ms cubic-bezier(0.16, 1, 0.3, 1); }
   #assistant-backdrop { transition: opacity 300ms ease; }
-  #plan-modal-content, #launch-modal-content { transition: transform 250ms cubic-bezier(0.16, 1, 0.3, 1), opacity 250ms ease; }
+  #plan-modal-content, #launch-modal-content, #recommended-modal-content { transition: transform 250ms cubic-bezier(0.16, 1, 0.3, 1), opacity 250ms ease; }
 
   @keyframes ai-pulse {
     0%, 100% { box-shadow: 0 0 0 0 rgba(232, 163, 61, 0.35); }
@@ -450,7 +452,7 @@ textarea { resize: vertical; }
   @media (prefers-reduced-motion: reduce) {
     .hero-fade, .reveal, body, header, .lang-trans, #plans-container, .milestone-content,
     .terms-content, #assistant-panel, #assistant-backdrop, #assistant-trigger,
-    #plan-modal, #plan-modal-content, #launch-modal, #launch-modal-content, .theme-icon, button, a, .bubble-in {
+    #plan-modal, #plan-modal-content, #launch-modal, #launch-modal-content, #recommended-modal, #recommended-modal-content, .theme-icon, button, a, .bubble-in {
       transition: none !important;
       animation: none !important;
     }
@@ -552,25 +554,18 @@ se construye.</h2>
       </div>
     </section>
 
-    <!-- Planes (Carrusel de Tarjeta Única con Controles Laterales y Cartelito Azul -50%) -->
+    <!-- Planes (Carrusel de Tarjeta Única con Controles Laterales y Cartelito Azul -50% en cada tarjeta) -->
     <section id="planes" class="relative px-6 md:px-10 py-24 md:py-32 border-b border-line overflow-hidden z-10">
       <div class="max-w-6xl mx-auto relative z-10">
-        <div class="reveal max-w-xl mb-12 flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <h2 class="lang-trans lowercase font-display text-3xl md:text-4xl mb-4" data-i18n="plans-heading">planes de rebranding y web</h2>
-            <p class="lang-trans text-muted leading-relaxed" data-i18n="plans-sub">
-              Contrata solo identidad o añade desarrollo web a medida. Sin cuotas mensuales ni ataduras.
-            </p>
-          </div>
-          <!-- Cartelito en azul interactivo para el -50% -->
-          <button id="open-launch-modal" type="button" aria-label="Ver información sobre el descuento del 50%"
-                  class="lang-trans bg-brand text-[#0A0A0C] font-mono text-xs font-bold px-4 py-2 rounded-full uppercase tracking-wider inline-flex items-center gap-1.5 hover:scale-105 hover:bg-brand-soft shadow-md cursor-pointer shrink-0">
-            <span>-50% de descuento</span>
-          </button>
+        <div class="reveal max-w-xl mb-12">
+          <h2 class="lang-trans lowercase font-display text-3xl md:text-4xl mb-4" data-i18n="plans-heading">planes de rebranding y web</h2>
+          <p class="lang-trans text-muted leading-relaxed" data-i18n="plans-sub">
+            Contrata solo identidad o añade desarrollo web a medida. Sin cuotas mensuales ni ataduras.
+          </p>
         </div>
 
-        <!-- Nota de calidad sin .99 -->
-        <div class="reveal mb-10 p-4 bg-panel border border-line flex items-center gap-3 w-full">
+        <!-- Nota de calidad sin .99 con margen inferior ampliado (mb-16) -->
+        <div class="reveal mb-16 p-4 bg-panel border border-line flex items-center gap-3 w-full">
           <span class="w-2 h-2 rounded-full bg-brand shrink-0" aria-hidden="true"></span>
           <p class="lang-trans lowercase text-xs md:text-sm text-paper/90 font-mono tracking-wide" data-i18n="plans-quote">
             nos ahorramos el .99 en trucos de marketing para ofrecerte una calidad innegociable.
@@ -898,6 +893,30 @@ se construye.</h2>
     </div>
   </div>
 
+  <!-- Modal: Popup explicativo del Plan Recomendado -->
+  <div id="recommended-modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="recommended-modal-title" inert
+       class="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 backdrop-blur-sm opacity-0 pointer-events-none px-6 transition-opacity duration-300">
+    <div id="recommended-modal-content" class="bg-panel border-2 border-brand p-8 md:p-10 max-w-xl w-full shadow-2xl transform scale-95 transition-transform duration-300 relative">
+      <div class="flex justify-between items-start mb-6">
+        <div>
+          <span class="lang-trans lowercase block text-xs tracking-widest text-ai font-mono mb-1" data-i18n="recommended-modal-eyebrow">filosofía del estudio</span>
+          <h3 id="recommended-modal-title" class="lang-trans lowercase font-display text-2xl text-paper" data-i18n="recommended-modal-title">¿por qué es nuestra opción recomendada?</h3>
+        </div>
+        <button id="recommended-modal-close" type="button" aria-label="Cerrar" class="text-muted hover:text-paper p-1 shrink-0 text-xl font-mono cursor-pointer">✕</button>
+      </div>
+
+      <div class="space-y-4 text-sm md:text-base text-paper/90 leading-relaxed font-sans mb-8">
+        <p class="lang-trans" data-i18n="recommended-modal-p1">
+          Es la opción recomendada para aquellos que buscan el equilibrio perfecto y la mejor relación calidad-precio para potenciar su marca al máximo nivel, asegurando un sistema visual completo y profesional.
+        </p>
+      </div>
+
+      <button id="recommended-modal-ok" type="button" class="lang-trans lowercase w-full block text-center bg-brand text-[#0A0A0C] hover:bg-brand-soft shadow-lg py-3.5 text-xs font-semibold cursor-pointer tracking-wider">
+        entendido, ¡vamos a crear!
+      </button>
+    </div>
+  </div>
+
   <!-- Modal: ¿Cómo quieres empezar? -->
   <div id="plan-modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="plan-modal-title" inert
        class="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm opacity-0 pointer-events-none px-6">
@@ -1022,7 +1041,13 @@ se construye.</h2>
         "launch-modal-p2": "Por eso, decidimos compensar esto de la forma más honesta posible: reduciendo nuestros precios un 50% de forma temporal. No recortamos en calidad (nos ahorramos los trucos de marketing del .99 para ofrecer excelencia absoluta), sino que invertimos toda nuestra energía y máxima dedicación en cada proyecto para construir relaciones de confianza y casos de éxito memorables junto a ti.",
         "launch-modal-ok": "entendido, ¡vamos a crear!",
 
+        "recommended-modal-eyebrow": "filosofía del estudio",
+        "recommended-modal-title": "¿por qué es nuestra opción recomendada?",
+        "recommended-modal-p1": "Es la opción recomendada para aquellos que buscan el equilibrio perfecto y la mejor relación calidad-precio para potenciar su marca al máximo nivel, asegurando un sistema visual completo y profesional.",
+        "recommended-modal-ok": "entendido, ¡vamos a crear!",
+
         "plans-badge": "recomendado",
+        "plans-discount-badge": "-50% de descuento",
         "plans-cta": "empezar plan",
         "p1-title": "plan esencial",
         "p1-desc": "Identidad visual esencial para autónomos y negocios locales, entregada llave en mano.",
@@ -1128,7 +1153,13 @@ se construye.</h2>
         "launch-modal-p2": "That's why we decided to offset this as honestly as possible: temporarily slashing our prices by 50%. We never compromise on quality (we skip the .99 marketing tricks to deliver absolute excellence), instead pouring all our energy and dedication into every project to build trust and memorable success stories together with you.",
         "launch-modal-ok": "got it, let's build!",
 
+        "recommended-modal-eyebrow": "studio philosophy",
+        "recommended-modal-title": "why is this our recommended choice?",
+        "recommended-modal-p1": "It is the recommended option for those looking for the perfect balance and best value for money to elevate their brand to the highest level, ensuring a complete and professional visual system.",
+        "recommended-modal-ok": "got it, let's build!",
+
         "plans-badge": "recommended",
+        "plans-discount-badge": "-50% discount",
         "plans-cta": "get started",
         "p1-title": "essential plan",
         "p1-desc": "Essential visual identity for freelancers and local businesses, delivered turnkey.",
@@ -1215,6 +1246,7 @@ se construye.</h2>
 
     let currentPlanIndex = 0;
     let activePlanKey = null;
+    let activePlanWebState = false;
     let isPlansAnimating = false;
 
     function buildPlanCardHTML(data) {
@@ -1229,8 +1261,11 @@ se construye.</h2>
       const originalPriceStr = currentLang === 'es' ? `${originalTotalCost} €` : `€${originalTotalCost}`;
       const desc = t[data.descKey];
 
-      const badgeHtml = data.isRecommended
-        ? `<span class="absolute -top-3 right-6 bg-brand text-[#0A0A0C] text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full lang-trans">${t['plans-badge']}</span>`
+      // Badge de -50% a la izquierda de la parte de arriba
+      const discountBadgeHtml = `<button type="button" data-open-launch-modal class="absolute -top-3 left-6 bg-brand text-[#0A0A0C] text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full lang-trans hover:bg-brand-soft shadow-sm cursor-pointer">${t['plans-discount-badge']}</button>`;
+
+      const recommendedBadgeHtml = data.isRecommended
+        ? `<button type="button" data-open-recommended-modal class="absolute -top-3 right-6 bg-brand text-[#0A0A0C] text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full lang-trans hover:bg-brand-soft shadow-sm cursor-pointer">${t['plans-badge']}</button>`
         : '';
 
       let featuresHtml = data.features
@@ -1266,7 +1301,8 @@ se construye.</h2>
       const ctaHtml = `<button type="button" data-plan-key="${data.titleKey}" data-plan-id="${data.id}" class="lang-trans lowercase w-full block text-center bg-brand text-[#0A0A0C] hover:bg-brand-soft shadow-lg py-3.5 text-xs font-semibold cursor-pointer tracking-wide">${t['plans-cta']}</button>`;
 
       return `
-        ${badgeHtml}
+        ${discountBadgeHtml}
+        ${recommendedBadgeHtml}
         <div>
           <div class="flex items-center justify-between mb-4">
             <h3 class="lang-trans lowercase font-display text-2xl md:text-3xl text-paper font-semibold">${title}</h3>
@@ -1300,30 +1336,39 @@ se construye.</h2>
     let pendingPlanId = null;
 
     function selectPlan(titleKey, opener, planId) {
+      const hasWeb = planId ? planWebState[planId] : false;
       const isSamePlan = activePlanKey === titleKey;
+      const webStateChanged = activePlanWebState !== hasWeb;
 
-      if (isSamePlan && chatHistory.length > 0) {
+      if (isSamePlan && !webStateChanged && chatHistory.length > 0) {
         openAssistantPanel(opener);
         return;
       }
 
-      chatHistory.length = 0;
       activePlanKey = titleKey;
-      openAssistantPanel(opener);
+      activePlanWebState = hasWeb;
 
       const pTitleEs = translations.es[titleKey];
       const pTitleEn = translations.en[titleKey];
-      const hasWeb = planId ? planWebState[planId] : false;
       const basePrice = plansArray.find(p => p.id === planId)?.basePrice || 0;
       const finalTotal = basePrice + (hasWeb ? 200 : 0);
 
-      chatHistory.push({
+      const greetingObj = {
         role: 'assistant',
         texts: {
           es: `¡Perfecto! Te decantas por el ${pTitleEs}${hasWeb ? ' con desarrollo web incluido' : ' (solo identidad)'} (${finalTotal} € total con descuento de lanzamiento). ¿Cómo se llama tu marca o proyecto actual para continuar?`,
           en: `Perfect! You're leaning towards the ${pTitleEn}${hasWeb ? ' with web design included' : ' (identity only)'} (€${finalTotal} total with launch discount). What is your current brand or project name to continue?`
         }
-      });
+      };
+
+      if (isSamePlan && webStateChanged && chatHistory.length > 0) {
+        chatHistory[0] = greetingObj;
+      } else {
+        chatHistory.length = 0;
+        chatHistory.push(greetingObj);
+      }
+
+      openAssistantPanel(opener);
       renderHistory();
     }
 
@@ -1366,6 +1411,18 @@ se construye.</h2>
 
     const plansContainerEl = document.getElementById('plans-container');
     plansContainerEl.addEventListener('click', (event) => {
+      const discountBtn = event.target.closest('[data-open-launch-modal]');
+      if (discountBtn) {
+        openLaunchModal();
+        return;
+      }
+
+      const recommendedBtn = event.target.closest('[data-open-recommended-modal]');
+      if (recommendedBtn) {
+        openRecommendedModal();
+        return;
+      }
+
       const toggleBtn = event.target.closest('[data-web-toggle]');
       if (toggleBtn) {
         const planId = toggleBtn.getAttribute('data-web-toggle');
@@ -1685,7 +1742,6 @@ se construye.</h2>
     const launchModalContent = document.getElementById('launch-modal-content');
     const launchModalClose = document.getElementById('launch-modal-close');
     const launchModalOk = document.getElementById('launch-modal-ok');
-    const openLaunchModalBtn = document.getElementById('open-launch-modal');
     let launchModalIsOpen = false;
 
     function openLaunchModal() {
@@ -1709,14 +1765,48 @@ se construye.</h2>
       document.body.classList.remove('overflow-hidden');
       launchModal.setAttribute('aria-hidden', 'true');
       launchModal.setAttribute('inert', '');
-      if (openLaunchModalBtn) openLaunchModalBtn.focus();
     }
 
-    openLaunchModalBtn.addEventListener('click', openLaunchModal);
     launchModalClose.addEventListener('click', closeLaunchModal);
     launchModalOk.addEventListener('click', closeLaunchModal);
     launchModal.addEventListener('click', (e) => {
       if (e.target === launchModal) closeLaunchModal();
+    });
+
+    /* Modal Popup Plan Recomendado */
+    const recommendedModal = document.getElementById('recommended-modal');
+    const recommendedModalContent = document.getElementById('recommended-modal-content');
+    const recommendedModalClose = document.getElementById('recommended-modal-close');
+    const recommendedModalOk = document.getElementById('recommended-modal-ok');
+    let recommendedModalIsOpen = false;
+
+    function openRecommendedModal() {
+      recommendedModalIsOpen = true;
+      recommendedModal.removeAttribute('inert');
+      recommendedModal.classList.remove('opacity-0', 'pointer-events-none');
+      recommendedModal.classList.add('opacity-100');
+      recommendedModalContent.classList.remove('scale-95');
+      recommendedModalContent.classList.add('scale-100');
+      document.body.classList.add('overflow-hidden');
+      recommendedModal.setAttribute('aria-hidden', 'false');
+      window.setTimeout(() => recommendedModalOk.focus(), 150);
+    }
+
+    function closeRecommendedModal() {
+      recommendedModalIsOpen = false;
+      recommendedModal.classList.add('opacity-0', 'pointer-events-none');
+      recommendedModal.classList.remove('opacity-100');
+      recommendedModalContent.classList.remove('scale-100');
+      recommendedModalContent.classList.add('scale-95');
+      document.body.classList.remove('overflow-hidden');
+      recommendedModal.setAttribute('aria-hidden', 'true');
+      recommendedModal.setAttribute('inert', '');
+    }
+
+    recommendedModalClose.addEventListener('click', closeRecommendedModal);
+    recommendedModalOk.addEventListener('click', closeRecommendedModal);
+    recommendedModal.addEventListener('click', (e) => {
+      if (e.target === recommendedModal) closeRecommendedModal();
     });
 
     const planModal = document.getElementById('plan-modal');
@@ -1790,6 +1880,10 @@ se construye.</h2>
           closeLaunchModal();
           return;
         }
+        if (recommendedModalIsOpen) {
+          closeRecommendedModal();
+          return;
+        }
         if (planModalIsOpen) {
           closePlanModal();
           return;
@@ -1800,7 +1894,7 @@ se construye.</h2>
       }
       if (event.key !== 'Tab') return;
 
-      const activeContainer = launchModalIsOpen ? launchModal : (planModalIsOpen ? planModal : (assistantIsOpen ? assistantPanel : null));
+      const activeContainer = launchModalIsOpen ? launchModal : (recommendedModalIsOpen ? recommendedModal : (planModalIsOpen ? planModal : (assistantIsOpen ? assistantPanel : null)));
       if (!activeContainer) return;
       const focusable = activeContainer.querySelectorAll(focusableSelector);
       if (!focusable.length) return;
@@ -1964,9 +2058,17 @@ se construye.</h2>
         const planNameEn = translations.en[activePlanKey];
 
         if (currentLang === 'es') {
-          planContextPrefix = `[Plan actualmente seleccionado por el usuario: ${planName}${hasWeb ? ' con desarrollo web incluido (+200 €)' : ' (solo identidad)'}]\n`;
+          if (hasWeb) {
+            planContextPrefix = `[CONTEXTO OBLIGATORIO - PLAN SELECCIONADO: El usuario ha seleccionado el ${planName} INCLUYENDO desarrollo web a medida (+200 €). Debes presupuestar el rebranding junto con la landing page web y hablar de ambos entregables].\n`;
+          } else {
+            planContextPrefix = `[CONTEXTO OBLIGATORIO - PLAN SELECCIONADO: El usuario ha seleccionado el ${planName} EN MODO SOLO IDENTIDAD (SIN desarrollo web). NO incluyas web en el presupuesto ni hables de desarrollo web a menos que el usuario pida explícitamente añadir la web].\n`;
+          }
         } else {
-          planContextPrefix = `[Plan currently selected by the user: ${planNameEn}${hasWeb ? ' with web development included (€200)' : ' (identity only)'}]\n`;
+          if (hasWeb) {
+            planContextPrefix = `[MANDATORY CONTEXT - SELECTED PLAN: The user selected the ${planNameEn} INCLUDING custom web development (€200). You must quote both rebranding and the web landing page and discuss both deliverables].\n`;
+          } else {
+            planContextPrefix = `[MANDATORY CONTEXT - SELECTED PLAN: The user selected the ${planNameEn} in IDENTITY-ONLY MODE (WITHOUT web development). DO NOT include web in pricing or discuss web development unless the user explicitly asks to add the web].\n`;
+          }
         }
       }
 
