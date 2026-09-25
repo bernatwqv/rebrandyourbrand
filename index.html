@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 
-<!-- SDK de Cloudflare Turnstile — carga en modo explícito -->
+<!-- SDK de Cloudflare Turnstile — carga diferida / async -->
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback&render=explicit" async defer></script>
 
 <!-- Política de Seguridad de Contenido (CSP) blindada -->
@@ -90,12 +90,11 @@
     --color-panel: 30 30 34;
     --color-line: 35 34 38;
     --color-text: 245 242 234;
-    --color-muted: 140 139 146;
+    --color-muted: 156 155 163; /* Contraste mejorado para accesibilidad móvil */
     --color-brand: 140 163 196;
     --color-brand-soft: 183 198 220;
     --color-ai: 232 163 61;
     --color-ai-soft: 240 190 130;
-    --splash-4: #fffeff;
   }
 
   html.light {
@@ -103,12 +102,11 @@
     --color-panel: 237 230 214;
     --color-line: 228 222 208;
     --color-text: 23 23 26;
-    --color-muted: 107 106 112;
+    --color-muted: 88 87 94; /* Contraste mejorado para modo claro */
     --color-brand: 140 163 196;
     --color-brand-soft: 95 122 158;
     --color-ai: 232 163 61;
     --color-ai-soft: 173 118 38;
-    --splash-4: #1a1a1f;
   }
 
   html { background-color: rgb(var(--color-bg)); }
@@ -131,47 +129,47 @@
   button,
   a {
     transition-property: background-color, border-color, color, opacity;
-    transition-duration: 400ms;
+    transition-duration: 300ms;
     transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   button:hover,
   a:hover {
     transition-property: background-color, border-color, color, opacity, transform;
-    transition-duration: 300ms;
+    transition-duration: 250ms;
   }
 
-  /* Fondo dinámico con manchas de pintura aleatorias (Remorph al cargar) */
+  /* Fondo dinámico optimizado con will-change para evitar tirones en móvil */
   #paint-background {
     position: fixed;
     inset: 0;
     pointer-events: none;
     z-index: 0;
     overflow: hidden;
-    opacity: 0.22;
-    filter: blur(80px);
+    opacity: 0.18;
+    filter: blur(60px);
+    will-change: transform;
   }
   .blob-paint {
     position: absolute;
     border-radius: 9999px;
-    transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1), top 1s ease, left 1s ease;
   }
-  html.light #paint-background { opacity: 0.15; }
+  html.light #paint-background { opacity: 0.12; }
 
   .lang-trans {
-    transition: opacity 300ms ease, transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+    transition: opacity 250ms ease, transform 250ms cubic-bezier(0.16, 1, 0.3, 1);
   }
   .is-changing {
     opacity: 0.15;
-    transform: translateY(6px) scale(0.99);
+    transform: translateY(4px) scale(0.99);
   }
 
   .hero-fade {
     transition-property: opacity, transform;
-    transition-duration: 900ms;
+    transition-duration: 700ms;
     transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
     opacity: 0;
-    transform: translateY(18px);
+    transform: translateY(12px);
   }
   html.is-loaded .hero-fade {
     opacity: 1;
@@ -180,9 +178,9 @@
 
   .reveal {
     opacity: 0;
-    transform: translateY(24px);
-    transition: opacity 800ms cubic-bezier(0.16, 1, 0.3, 1),
-                transform 800ms cubic-bezier(0.16, 1, 0.3, 1);
+    transform: translateY(18px);
+    transition: opacity 600ms cubic-bezier(0.16, 1, 0.3, 1),
+                transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
   }
   .reveal.in-view {
     opacity: 1;
@@ -193,7 +191,7 @@
   .no-js .reveal { opacity: 1 !important; transform: none !important; }
 
   #plans-container {
-    transition: opacity 400ms cubic-bezier(0.16, 1, 0.3, 1), transform 400ms cubic-bezier(0.16, 1, 0.3, 1);
+    transition: opacity 300ms cubic-bezier(0.16, 1, 0.3, 1), transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .assistant-output:empty {
@@ -208,32 +206,32 @@
     padding: 0 1rem;
     font-size: 0.85rem;
   }
-  .assistant-status.is-error { color: #c97d7d; }
+  .assistant-status.is-error { color: #e06c6c; }
   .assistant-status.is-ready { color: rgb(var(--color-ai)); }
 
   .chat-bubble { white-space: pre-wrap; word-break: break-word; }
 
   @keyframes bubble-in {
-    from { opacity: 0; transform: translateY(8px); }
+    from { opacity: 0; transform: translateY(6px); }
     to   { opacity: 1; transform: translateY(0); }
   }
-  .bubble-in { animation: bubble-in 350ms cubic-bezier(0.16, 1, 0.3, 1); }
+  .bubble-in { animation: bubble-in 300ms cubic-bezier(0.16, 1, 0.3, 1); }
 
   #assistant-panel {
-    transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
+    transition: transform 400ms cubic-bezier(0.16, 1, 0.3, 1);
   }
   #assistant-backdrop {
-    transition: opacity 400ms ease;
+    transition: opacity 300ms ease;
   }
   #plan-modal-content {
-    transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1), opacity 300ms ease;
+    transition: transform 250ms cubic-bezier(0.16, 1, 0.3, 1), opacity 250ms ease;
   }
 
   @keyframes ai-pulse {
     0%, 100% { box-shadow: 0 0 0 0 rgba(232, 163, 61, 0.35); }
-    50%      { box-shadow: 0 0 0 12px rgba(232, 163, 61, 0); }
+    50%      { box-shadow: 0 0 0 10px rgba(232, 163, 61, 0); }
   }
-  #assistant-trigger { animation: ai-pulse 2.8s ease-in-out infinite; }
+  #assistant-trigger { animation: ai-pulse 3s ease-in-out infinite; }
 
   @media (prefers-reduced-motion: reduce) {
     .hero-fade, .reveal, body, header,
@@ -250,14 +248,14 @@
 
 <body class="bg-ink text-paper antialiased relative overflow-x-hidden">
 
-  <!-- Fondo dinámico con manchas de pintura aleatorias (Remorph al cargar) -->
+  <!-- Fondo dinámico con manchas de pintura aleatorias (Math.random) -->
   <div id="paint-background" aria-hidden="true">
-    <div id="blob-1" class="blob-paint absolute w-[500px] h-[500px] bg-brand"></div>
-    <div id="blob-2" class="blob-paint absolute w-[420px] h-[420px] bg-ai"></div>
+    <div id="blob-1" class="blob-paint absolute w-[420px] h-[420px] bg-brand"></div>
+    <div id="blob-2" class="blob-paint absolute w-[360px] h-[360px] bg-ai"></div>
   </div>
 
   <!-- Header -->
-  <header class="fixed top-0 inset-x-0 z-40 border-b border-line bg-ink/80 backdrop-blur-sm">
+  <header class="fixed top-0 inset-x-0 z-40 border-b border-line bg-ink/85 backdrop-blur-md">
     <div class="max-w-6xl mx-auto px-6 md:px-10 h-16 flex items-center justify-between">
       <a href="#top" class="flex items-center gap-3">
         <span class="font-display text-lg tracking-tight">rebrandyourbrand</span>
@@ -274,7 +272,7 @@
       <div class="flex items-center gap-3 md:ml-5 md:pl-5 md:border-l md:border-line">
         <button id="lang-toggle" type="button" aria-label="Cambiar idioma a Inglés"
                 class="relative w-10 h-10 rounded-full border border-line flex items-center justify-center text-paper font-mono text-xs hover:border-brand/60 hover:scale-105">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;" aria-hidden="true">
             <circle cx="12" cy="12" r="10"></circle>
             <path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"></path>
           </svg>
@@ -284,20 +282,20 @@
         <button id="theme-toggle" type="button" aria-label="Cambiar a modo claro"
                 class="relative w-10 h-10 rounded-full border border-line flex items-center justify-center text-paper hover:border-brand/60 hover:scale-105">
           <svg class="theme-icon icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-               stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-               style="position:absolute;top:50%;left:50%;width:18px;height:18px;margin:-9px 0 0 -9px;opacity:0;transform:rotate(-90deg) scale(0.5);transition:opacity 700ms cubic-bezier(.4,0,.2,1),transform 700ms cubic-bezier(.4,0,.2,1);">
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+               style="position:absolute;top:50%;left:50%;width:18px;height:18px;margin:-9px 0 0 -9px;opacity:0;transform:rotate(-90deg) scale(0.5);transition:opacity 500ms cubic-bezier(.4,0,.2,1),transform 500ms cubic-bezier(.4,0,.2,1);">
             <circle cx="12" cy="12" r="4"></circle>
             <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
           </svg>
-          <svg class="theme-icon icon-moon" viewBox="0 0 24 24" fill="currentColor" stroke="none"
-               style="position:absolute;top:50%;left:50%;width:18px;height:18px;margin:-9px 0 0 -9px;opacity:1;transform:rotate(0deg) scale(1);transition:opacity 700ms cubic-bezier(.4,0,.2,1),transform 700ms cubic-bezier(.4,0,.2,1);">
+          <svg class="theme-icon icon-moon" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"
+               style="position:absolute;top:50%;left:50%;width:18px;height:18px;margin:-9px 0 0 -9px;opacity:1;transform:rotate(0deg) scale(1);transition:opacity 500ms cubic-bezier(.4,0,.2,1),transform 500ms cubic-bezier(.4,0,.2,1);">
             <path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 1020.354 15.354z"></path>
           </svg>
         </button>
 
         <button id="mobile-menu-toggle" type="button" aria-label="Abrir menú de navegación" aria-expanded="false" aria-controls="mobile-nav"
                 class="md:hidden relative w-10 h-10 rounded-full border border-line flex items-center justify-center text-paper hover:border-brand/60">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;" aria-hidden="true">
             <line x1="3" y1="12" x2="21" y2="12"></line>
             <line x1="3" y1="6" x2="21" y2="6"></line>
             <line x1="3" y1="18" x2="21" y2="18"></line>
@@ -314,239 +312,242 @@
     </div>
   </header>
 
-  <!-- Hero -->
-  <section id="top" class="relative pt-40 pb-28 md:pt-52 md:pb-36 px-6 md:px-10 border-b border-line overflow-hidden z-10">
-    <div class="max-w-6xl mx-auto relative z-10">
-      <p class="hero-fade lang-trans delay-0 lowercase text-xs tracking-wide text-muted mb-6" data-i18n="hero-tag">estudio de rebranding y diseño visual</p>
+  <!-- Main Landmark corregido para accesibilidad -->
+  <main id="main-content">
+    <!-- Hero -->
+    <section id="top" class="relative pt-40 pb-28 md:pt-52 md:pb-36 px-6 md:px-10 border-b border-line overflow-hidden z-10">
+      <div class="max-w-6xl mx-auto relative z-10">
+        <p class="hero-fade lang-trans delay-0 lowercase text-xs tracking-wide text-muted mb-6" data-i18n="hero-tag">estudio de rebranding y diseño visual</p>
 
-      <h1 class="hero-fade lang-trans delay-150 lowercase font-display text-[2.6rem] leading-[1.08] sm:text-6xl md:text-7xl max-w-3xl" data-i18n="hero-title">
-        marcas que dejan de pasar desapercibidas.
-      </h1>
+        <h1 class="hero-fade lang-trans delay-150 lowercase font-display text-[2.6rem] leading-[1.08] sm:text-6xl md:text-7xl max-w-3xl" data-i18n="hero-title">
+          marcas que dejan de pasar desapercibidas.
+        </h1>
 
-      <p class="hero-fade lang-trans delay-300 mt-8 max-w-md text-muted text-base md:text-lg leading-relaxed" data-i18n="hero-desc">
-        Rediseñamos identidades visuales combinando dirección de arte y precisión técnica, para marcas que necesitan verse tan bien como lo que hacen.
-      </p>
-    </div>
-  </section>
+        <p class="hero-fade lang-trans delay-300 mt-8 max-w-md text-muted text-base md:text-lg leading-relaxed" data-i18n="hero-desc">
+          Rediseñamos identidades visuales combinando dirección de arte y precisión técnica, para marcas que necesitan verse tan bien como lo que hacen.
+        </p>
+      </div>
+    </section>
 
-  <!-- Manifiesto -->
-  <section id="manifiesto" class="relative px-6 md:px-10 py-32 md:py-40 border-b border-line overflow-hidden z-10">
-    <div class="max-w-6xl mx-auto relative z-10">
-      <div class="reveal grid md:grid-cols-2 gap-10 md:gap-16 items-start">
-        <h2 class="lang-trans lowercase font-display text-4xl md:text-6xl leading-[1.05] whitespace-pre-line" data-i18n="manifesto-title">una marca no se decora.
+    <!-- Manifiesto -->
+    <section id="manifiesto" class="relative px-6 md:px-10 py-32 md:py-40 border-b border-line overflow-hidden z-10">
+      <div class="max-w-6xl mx-auto relative z-10">
+        <div class="reveal grid md:grid-cols-2 gap-10 md:gap-16 items-start">
+          <h2 class="lang-trans lowercase font-display text-4xl md:text-6xl leading-[1.05] whitespace-pre-line" data-i18n="manifesto-title">una marca no se decora.
 se construye.</h2>
-        <p class="lang-trans text-muted text-base md:text-lg leading-relaxed md:pt-4" data-i18n="manifesto-desc">
-          Cada proyecto empieza señalando lo esencial y descartando lo superfluo. No perseguimos tendencias: buscamos un sistema que siga siendo cierto dentro de cinco años.
-        </p>
+          <p class="lang-trans text-muted text-base md:text-lg leading-relaxed md:pt-4" data-i18n="manifesto-desc">
+            Cada proyecto empieza señalando lo esencial y descartando lo superfluo. No perseguimos tendencias: buscamos un sistema que siga siendo cierto dentro de cinco años.
+          </p>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Planes -->
-  <section id="planes" class="relative px-6 md:px-10 py-24 md:py-32 border-b border-line overflow-hidden z-10">
-    <div class="max-w-6xl mx-auto relative z-10">
-      <div class="reveal max-w-xl mb-12">
-        <h2 class="lang-trans lowercase font-display text-3xl md:text-4xl mb-4" data-i18n="plans-heading">planes de rebranding y web</h2>
-        <p class="lang-trans text-muted leading-relaxed" data-i18n="plans-sub">
-          Inversión única por el proyecto completo de diseño y desarrollo. Sin cuotas mensuales ni ataduras.
-        </p>
-      </div>
-
-      <div class="reveal mb-12 p-4 bg-panel border border-line flex items-center gap-3 w-full">
-        <span class="w-2 h-2 rounded-full bg-brand shrink-0"></span>
-        <p class="lang-trans lowercase text-xs md:text-sm text-paper/90 font-mono tracking-wide" data-i18n="plans-quote">
-          nos ahorramos el .99 en trucos de marketing para ofrecerte una calidad innegociable.
-        </p>
-      </div>
-
-      <div class="relative px-0 md:px-14 flex flex-col md:flex-row items-center justify-center gap-6">
-        <button id="plans-prev" type="button" aria-label="Plan anterior"
-                class="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full border border-line bg-panel text-paper items-center justify-center shadow-lg hover:border-brand hover:scale-110 transition-all duration-300">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path d="M15 18l-6-6 6-6"/></svg>
-        </button>
-
-        <div id="plans-container" aria-live="polite" class="w-full flex flex-col md:flex-row items-stretch justify-center gap-6">
-          <!-- Renderizado dinámico vía JavaScript -->
+    <!-- Planes -->
+    <section id="planes" class="relative px-6 md:px-10 py-24 md:py-32 border-b border-line overflow-hidden z-10">
+      <div class="max-w-6xl mx-auto relative z-10">
+        <div class="reveal max-w-xl mb-12">
+          <h2 class="lang-trans lowercase font-display text-3xl md:text-4xl mb-4" data-i18n="plans-heading">planes de rebranding y web</h2>
+          <p class="lang-trans text-muted leading-relaxed" data-i18n="plans-sub">
+            Inversión única por el proyecto completo de diseño y desarrollo. Sin cuotas mensuales ni ataduras.
+          </p>
         </div>
 
-        <button id="plans-next" type="button" aria-label="Plan siguiente"
-                class="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full border border-line bg-panel text-paper items-center justify-center shadow-lg hover:border-brand hover:scale-110 transition-all duration-300">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path d="M9 18l6-6-6-6"/></svg>
-        </button>
-      </div>
-    </div>
-  </section>
+        <div class="reveal mb-12 p-4 bg-panel border border-line flex items-center gap-3 w-full">
+          <span class="w-2 h-2 rounded-full bg-brand shrink-0" aria-hidden="true"></span>
+          <p class="lang-trans lowercase text-xs md:text-sm text-paper/90 font-mono tracking-wide" data-i18n="plans-quote">
+            nos ahorramos el .99 en trucos de marketing para ofrecerte una calidad innegociable.
+          </p>
+        </div>
 
-  <!-- Sobre nosotros -->
-  <section id="sobre-nosotros" class="relative px-6 md:px-10 py-24 md:py-32 border-b border-line overflow-hidden z-10">
-    <div class="max-w-6xl mx-auto relative z-10">
-      <div class="reveal mb-12">
-        <h2 class="lang-trans lowercase font-display text-3xl md:text-4xl mb-3" data-i18n="studio-heading">sobre nosotros</h2>
-        <p class="lang-trans text-muted leading-relaxed max-w-lg" data-i18n="studio-sub">
-          Dirección de arte, desarrollo web en el edge e ingeniería aplicada.
-        </p>
-      </div>
+        <div class="relative px-0 md:px-14 flex flex-col md:flex-row items-center justify-center gap-6">
+          <button id="plans-prev" type="button" aria-label="Plan anterior"
+                  class="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full border border-line bg-panel text-paper items-center justify-center shadow-lg hover:border-brand hover:scale-110 transition-all duration-300">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
 
-      <div class="reveal grid md:grid-cols-2 gap-8 items-start">
-        
-        <div class="bg-panel border border-line p-8 flex flex-col justify-between h-full">
-          <div>
-            <div class="flex items-center justify-between mb-3">
-              <span class="lang-trans lowercase block text-xs tracking-wider text-ai font-mono" data-i18n="studio-card-1-tag">trayectoria & formación</span>
-              <button type="button" class="milestone-toggle text-xs font-mono text-ai hover:underline inline-flex items-center gap-1.5 cursor-pointer" aria-expanded="false" aria-controls="gael-milestones" data-target="gael-milestones">
-                <span class="toggle-text" data-i18n="milestone-btn-show">+ ver hitos</span>
-              </button>
+          <div id="plans-container" aria-live="polite" class="w-full flex flex-col md:flex-row items-stretch justify-center gap-6">
+            <!-- Renderizado dinámico vía JavaScript -->
+          </div>
+
+          <button id="plans-next" type="button" aria-label="Plan siguiente"
+                  class="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full border border-line bg-panel text-paper items-center justify-center shadow-lg hover:border-brand hover:scale-110 transition-all duration-300">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sobre nosotros -->
+    <section id="sobre-nosotros" class="relative px-6 md:px-10 py-24 md:py-32 border-b border-line overflow-hidden z-10">
+      <div class="max-w-6xl mx-auto relative z-10">
+        <div class="reveal mb-12">
+          <h2 class="lang-trans lowercase font-display text-3xl md:text-4xl mb-3" data-i18n="studio-heading">sobre nosotros</h2>
+          <p class="lang-trans text-muted leading-relaxed max-w-lg" data-i18n="studio-sub">
+            Dirección de arte, desarrollo web en el edge e ingeniería aplicada.
+          </p>
+        </div>
+
+        <div class="reveal grid md:grid-cols-2 gap-8 items-start">
+          
+          <div class="bg-panel border border-line p-8 flex flex-col justify-between h-full">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <span class="lang-trans lowercase block text-xs tracking-wider text-ai font-mono" data-i18n="studio-card-1-tag">trayectoria & formación</span>
+                <button type="button" class="milestone-toggle text-xs font-mono text-ai hover:underline inline-flex items-center gap-1.5 cursor-pointer" aria-expanded="false" aria-controls="gael-milestones" data-target="gael-milestones">
+                  <span class="toggle-text" data-i18n="milestone-btn-show">+ ver hitos</span>
+                </button>
+              </div>
+
+              <h3 class="lang-trans lowercase font-display text-2xl text-paper mb-4" data-i18n="studio-card-1-title">gael domènech sevillano</h3>
+              <p class="lang-trans text-muted text-sm leading-relaxed mb-6" data-i18n="studio-card-1-desc">
+                Diseñador gráfico nacido en 2004. Ex-estudiante de ilustración en la Escola d’Arts Serra i Abella.
+              </p>
             </div>
 
-            <h3 class="lang-trans lowercase font-display text-2xl text-paper mb-4" data-i18n="studio-card-1-title">gael domènech sevillano</h3>
-            <p class="lang-trans text-muted text-sm leading-relaxed mb-6" data-i18n="studio-card-1-desc">
-              Diseñador gráfico nacido en 2004. Ex-estudiante de ilustración en la Escola d’Arts Serra i Abella.
+            <div id="gael-milestones" class="milestone-content overflow-hidden transition-all duration-400 max-h-0 opacity-0 space-y-4 pt-2 border-t border-line/40 mb-6">
+              <div class="pt-2">
+                <h4 class="lang-trans lowercase font-display text-lg text-paper mb-1" data-i18n="gael-milestone-1-title">edición 100 · festes de primavera</h4>
+                <p class="lang-trans text-muted text-xs leading-relaxed mb-3" data-i18n="gael-milestone-1-desc">
+                  Ganador oficial del cartel conmemorativo de la edición número 100 de las Festes de Primavera de L'Hospitalet de Llobregat (2025).
+                </p>
+                <div class="overflow-hidden border border-line/80 bg-ink">
+                  <img src="https://img.lhdigital.cat/wp-content/uploads/2025/03/GCH0261-1.jpg" alt="Gael Domènech Sevillano, ganador de la edición 100" loading="lazy" class="w-full h-40 object-cover hover:scale-105 transition-transform duration-700">
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-6 border-t border-line/60 text-xs text-ai font-mono">
+              <span class="lang-trans" data-i18n="studio-card-1-role">dirección de arte & diseño visual</span>
+            </div>
+          </div>
+
+          <div class="bg-panel border border-line p-8 flex flex-col justify-between h-full">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <span class="lang-trans lowercase block text-xs tracking-wider text-ai font-mono" data-i18n="studio-card-2-tag">trayectoria & formación</span>
+                <button type="button" class="milestone-toggle text-xs font-mono text-ai hover:underline inline-flex items-center gap-1.5 cursor-pointer" aria-expanded="false" aria-controls="bernat-milestones" data-target="bernat-milestones">
+                  <span class="toggle-text" data-i18n="milestone-btn-show">+ ver hitos</span>
+                </button>
+              </div>
+
+              <h3 class="lang-trans lowercase font-display text-2xl text-paper mb-4" data-i18n="studio-card-2-title">bernat domènech sevillano</h3>
+              <p class="lang-trans text-muted text-sm leading-relaxed mb-6" data-i18n="studio-card-2-desc">
+                Nacido en 2008. Estudiante de Ingenieria Electrónica Industrial y Automática.
+              </p>
+            </div>
+
+            <div id="bernat-milestones" class="milestone-content overflow-hidden transition-all duration-400 max-h-0 opacity-0 space-y-4 pt-2 border-t border-line/40 mb-6">
+              <div class="pt-2">
+                <h4 class="lang-trans lowercase font-display text-lg text-paper mb-1" data-i18n="bernat-milestone-1-title">creación de esta web</h4>
+                <p class="lang-trans text-muted text-xs leading-relaxed" data-i18n="bernat-milestone-1-desc">
+                  Diseño de la arquitectura técnica, despliegue full-stack en Cloudflare Workers e integración del asistente de IA Brandi para la captación automatizada de leads del estudio.
+                </p>
+              </div>
+            </div>
+
+            <div class="pt-6 border-t border-line/60 text-xs text-ai font-mono">
+              <span class="lang-trans" data-i18n="studio-card-2-role">creador de webs</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Términos y Condiciones de Servicio -->
+    <section id="terminos" class="relative px-6 md:px-10 py-24 md:py-32 border-b border-line overflow-hidden bg-panel/30 z-10">
+      <div class="max-w-4xl mx-auto relative z-10">
+        <div class="reveal mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div>
+            <span class="lang-trans lowercase block text-xs tracking-widest text-brand font-mono mb-2" data-i18n="terms-eyebrow">marco legal y operativo</span>
+            <h2 class="lang-trans lowercase font-display text-3xl md:text-4xl mb-4" data-i18n="terms-heading">condiciones de servicio</h2>
+            <p class="lang-trans text-muted text-sm leading-relaxed max-w-xl" data-i18n="terms-sub">
+              Reglas claras, metodología por fases y protección mutua para garantizar el éxito y la transparencia de cada proyecto en rebrandyourbrand.
+            </p>
+          </div>
+          <button type="button" class="terms-toggle text-xs font-mono text-brand hover:underline inline-flex items-center gap-1.5 cursor-pointer shrink-0 pb-1" aria-expanded="false" aria-controls="terms-content" data-target="terms-content">
+            <span class="toggle-text" data-i18n="terms-btn-show">+ ver condiciones</span>
+          </button>
+        </div>
+
+        <div id="terms-content" class="terms-content overflow-hidden transition-all duration-400 max-h-0 opacity-0 space-y-8 text-sm md:text-base text-paper/90 leading-relaxed font-sans pt-2">
+          
+          <div class="bg-panel border border-line p-6 md:p-8 space-y-3">
+            <h3 class="lang-trans lowercase font-display text-lg md:text-xl text-paper font-semibold" data-i18n="t1-title">1. naturaleza de los servicios y alcance de los planes</h3>
+            <p class="lang-trans" data-i18n="t1-p">
+              rebrandyourbrand ofrece servicios cerrados de rebranding y desarrollo web bajo pago único. Cada plan detalla estrictamente sus entregables. Cualquier característica, sección adicional, funcionalidad de comercio electrónico (e-commerce), base de datos compleja o desarrollo a medida que no esté especificado explícitamente en el plan contratado quedará excluido del precio base y requerirá la contratación de un plan superior (Upsell) o un presupuesto extraordinario por hora de ingeniería.
             </p>
           </div>
 
-          <div id="gael-milestones" class="milestone-content overflow-hidden transition-all duration-500 max-h-0 opacity-0 space-y-4 pt-2 border-t border-line/40 mb-6">
-            <div class="pt-2">
-              <h4 class="lang-trans lowercase font-display text-lg text-paper mb-1" data-i18n="gael-milestone-1-title">edición 100 · festes de primavera</h4>
-              <p class="lang-trans text-muted text-xs leading-relaxed mb-3" data-i18n="gael-milestone-1-desc">
-                Ganador oficial del cartel conmemorativo de la edición número 100 de las Festes de Primavera de L'Hospitalet de Llobregat (2025).
-              </p>
-              <div class="overflow-hidden border border-line/80 bg-ink">
-                <img src="https://img.lhdigital.cat/wp-content/uploads/2025/03/GCH0261-1.jpg" alt="Gael Domènech Sevillano, ganador de la edición 100" loading="lazy" class="w-full h-40 object-cover hover:scale-105 transition-transform duration-700">
+          <div class="bg-panel border border-line p-6 md:p-8 space-y-4">
+            <h3 class="lang-trans lowercase font-display text-lg md:text-xl text-paper font-semibold" data-i18n="t2-title">2. metodología de trabajo por fases y límite de revisiones</h3>
+            <p class="lang-trans" data-i18n="t2-intro">
+              Para evitar discrepancias de alcance y garantizar la agilidad, todos los proyectos se ejecutan bajo un estricto proceso secuencial de 3 fases con validación obligatoria por escrito (vía correo electrónico, WhatsApp o mensajería corporativa):
+            </p>
+            
+            <div class="space-y-3 pl-3 border-l-2 border-brand/40">
+              <div>
+                <strong class="text-paper font-semibold lang-trans" data-i18n="t2-f1-title">Fase 1 (Identidad y Dirección de Arte):</strong>
+                <p class="text-muted text-sm md:text-base lang-trans mt-1" data-i18n="t2-f1-desc">
+                  Gael presenta las propuestas de logotipo, paleta cromática y directrices tipográficas. El cliente evalúa y selecciona una opción definitiva. Cada fase incluye un máximo de 2 rondas de revisiones o ajustes menores sobre la propuesta inicial. Una vez que el cliente otorga su visto bueno ("Aprobado"), el diseño del logotipo y la identidad visual se consideran cerrados e inalterables. Si con posterioridad (incluso durante el desarrollo web) el cliente solicita modificar el logotipo, cambiar colores principales o rediseñar la identidad, este cambio constituirá un trabajo extraordinario tarificado a 50 €/hora.
+                </p>
+              </div>
+
+              <div>
+                <strong class="text-paper font-semibold lang-trans" data-i18n="t2-f2-title">Fase 2 (Estructura y Desarrollo Web):</strong>
+                <p class="text-muted text-sm md:text-base lang-trans mt-1" data-i18n="t2-f2-desc">
+                  Se implementa la estructura web (landing page scrolleable o web multicapa según plan) con los textos y materiales aportados por el cliente. El cliente revisa la versión provisional y valida la distribución y el diseño base (incluyendo hasta 2 rondas de ajustes menores). Con el OK a esta fase, la estructura queda firme. Modificaciones estructurales mayores o reordenaciones profundas solicitadas tras esta aprobación implicarán costes adicionales.
+                </p>
+              </div>
+
+              <div>
+                <strong class="text-paper font-semibold lang-trans" data-i18n="t2-f3-title">Fase 3 (Despliegue y Entrega Llave en Mano):</strong>
+                <p class="text-muted text-sm md:text-base lang-trans mt-1" data-i18n="t2-f3-desc">
+                  Una vez superadas las fases anteriores, Bernat efectúa el despliegue técnico definitivo en GitHub y Cloudflare, realizando la entrega formal llave en mano y transfiriendo la propiedad técnica acordada al cliente.
+                </p>
               </div>
             </div>
           </div>
 
-          <div class="pt-6 border-t border-line/60 text-xs text-ai font-mono">
-            <span class="lang-trans" data-i18n="studio-card-1-role">dirección de arte & diseño visual</span>
-          </div>
-        </div>
-
-        <div class="bg-panel border border-line p-8 flex flex-col justify-between h-full">
-          <div>
-            <div class="flex items-center justify-between mb-3">
-              <span class="lang-trans lowercase block text-xs tracking-wider text-ai font-mono" data-i18n="studio-card-2-tag">trayectoria & formación</span>
-              <button type="button" class="milestone-toggle text-xs font-mono text-ai hover:underline inline-flex items-center gap-1.5 cursor-pointer" aria-expanded="false" aria-controls="bernat-milestones" data-target="bernat-milestones">
-                <span class="toggle-text" data-i18n="milestone-btn-show">+ ver hitos</span>
-              </button>
-            </div>
-
-            <h3 class="lang-trans lowercase font-display text-2xl text-paper mb-4" data-i18n="studio-card-2-title">bernat domènech sevillano</h3>
-            <p class="lang-trans text-muted text-sm leading-relaxed mb-6" data-i18n="studio-card-2-desc">
-              Nacido en 2008. Estudiante de Ingenieria Electrónica Industrial y Automática.
+          <div class="bg-panel border border-line p-6 md:p-8 space-y-3">
+            <h3 class="lang-trans lowercase font-display text-lg md:text-xl text-paper font-semibold" data-i18n="t3-title">3. aportación de materiales, dominios y plazos del cliente</h3>
+            <p class="lang-trans" data-i18n="t3-p">
+              El cliente es el único propietario y responsable de la compra, renovación y titularidad de su dominio web. El cliente se compromete a suministrar los textos, imágenes corporativas, logotipos previos (si los hubiera) y los accesos de gestión DNS necesarios a rebrandyourbrand en un plazo máximo de 15 días naturales desde la contratación. Si el cliente experimenta retrasos superiores a 30 días naturales sin previo aviso, el proyecto se considerará suspendido temporalmente; su reactivación posterior estará sujeta a la disponibilidad del estudio en la agenda de trabajo. rebrandyourbrand no se hace responsable de erratas tipográficas o errores en textos facilitados directamente por el cliente.
             </p>
           </div>
 
-          <div id="bernat-milestones" class="milestone-content overflow-hidden transition-all duration-500 max-h-0 opacity-0 space-y-4 pt-2 border-t border-line/40 mb-6">
-            <div class="pt-2">
-              <h4 class="lang-trans lowercase font-display text-lg text-paper mb-1" data-i18n="bernat-milestone-1-title">creación de esta web</h4>
-              <p class="lang-trans text-muted text-xs leading-relaxed" data-i18n="bernat-milestone-1-desc">
-                Diseño de la arquitectura técnica, despliegue full-stack en Cloudflare Workers e integración del asistente de IA Brandi para la captación automatizada de leads del estudio.
-              </p>
-            </div>
+          <div class="bg-panel border border-line p-6 md:p-8 space-y-3">
+            <h3 class="lang-trans lowercase font-display text-lg md:text-xl text-paper font-semibold" data-i18n="t4-title">4. propiedad intelectual, pagos y política de reembolsos</h3>
+            <p class="lang-trans" data-i18n="t4-p">
+              La propiedad intelectual y comercial de los diseños, logotipos y desarrollos web creados se transfiere íntegramente al cliente una vez abonado el 100% de la tarifa del plan correspondiente. Al tratarse de servicios personalizados de creación intelectual y técnica desarrollados a medida, no se admiten devoluciones ni reembolsos económicos una vez iniciada formalmente la Fase 1 del proyecto. Las tarifas son de pago único, sin cuotas mensuales ocultas por parte de rebrandyourbrand.
+            </p>
           </div>
 
-          <div class="pt-6 border-t border-line/60 text-xs text-ai font-mono">
-            <span class="lang-trans" data-i18n="studio-card-2-role">creador de webs</span>
+          <div class="bg-panel border border-line p-6 md:p-8 space-y-3">
+            <h3 class="lang-trans lowercase font-display text-lg md:text-xl text-paper font-semibold" data-i18n="t5-title">5. limitaciones de responsabilidad técnica</h3>
+            <p class="lang-trans" data-i18n="t5-p">
+              rebrandyourbrand diseña e implementa soluciones web de alto rendimiento optimizadas para entornos modernos (Cloudflare, GitHub Pages). El estudio no asume responsabilidad por caídas de servidores de terceros, modificaciones no autorizadas realizadas por terceros en el código fuente tras la entrega, ni por el incumplimiento normativo de cookies, LSSI o RGPD en los textos legales particulares que el cliente decida incorporar de forma independiente en su sitio web.
+            </p>
           </div>
-        </div>
 
-      </div>
-    </div>
-  </section>
-
-  <!-- Términos y Condiciones de Servicio -->
-  <section id="terminos" class="relative px-6 md:px-10 py-24 md:py-32 border-b border-line overflow-hidden bg-panel/30 z-10">
-    <div class="max-w-4xl mx-auto relative z-10">
-      <div class="reveal mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-        <div>
-          <span class="lang-trans lowercase block text-xs tracking-widest text-brand font-mono mb-2" data-i18n="terms-eyebrow">marco legal y operativo</span>
-          <h2 class="lang-trans lowercase font-display text-3xl md:text-4xl mb-4" data-i18n="terms-heading">condiciones de servicio</h2>
-          <p class="lang-trans text-muted text-sm leading-relaxed max-w-xl" data-i18n="terms-sub">
-            Reglas claras, metodología por fases y protección mutua para garantizar el éxito y la transparencia de cada proyecto en rebrandyourbrand.
-          </p>
-        </div>
-        <button type="button" class="terms-toggle text-xs font-mono text-brand hover:underline inline-flex items-center gap-1.5 cursor-pointer shrink-0 pb-1" aria-expanded="false" aria-controls="terms-content" data-target="terms-content">
-          <span class="toggle-text" data-i18n="terms-btn-show">+ ver condiciones</span>
-        </button>
-      </div>
-
-      <div id="terms-content" class="terms-content overflow-hidden transition-all duration-500 max-h-0 opacity-0 space-y-8 text-sm md:text-base text-paper/90 leading-relaxed font-sans pt-2">
-        
-        <div class="bg-panel border border-line p-6 md:p-8 space-y-3">
-          <h3 class="lang-trans lowercase font-display text-lg md:text-xl text-paper font-semibold" data-i18n="t1-title">1. naturaleza de los servicios y alcance de los planes</h3>
-          <p class="lang-trans" data-i18n="t1-p">
-            rebrandyourbrand ofrece servicios cerrados de rebranding y desarrollo web bajo pago único. Cada plan detalla estrictamente sus entregables. Cualquier característica, sección adicional, funcionalidad de comercio electrónico (e-commerce), base de datos compleja o desarrollo a medida que no esté especificado explícitamente en el plan contratado quedará excluido del precio base y requerirá la contratación de un plan superior (Upsell) o un presupuesto extraordinario por hora de ingeniería.
-          </p>
-        </div>
-
-        <div class="bg-panel border border-line p-6 md:p-8 space-y-4">
-          <h3 class="lang-trans lowercase font-display text-lg md:text-xl text-paper font-semibold" data-i18n="t2-title">2. metodología de trabajo por fases y límite de revisiones</h3>
-          <p class="lang-trans" data-i18n="t2-intro">
-            Para evitar discrepancias de alcance y garantizar la agilidad, todos los proyectos se ejecutan bajo un estricto proceso secuencial de 3 fases con validación obligatoria por escrito (vía correo electrónico, WhatsApp o mensajería corporativa):
-          </p>
-          
-          <div class="space-y-3 pl-3 border-l-2 border-brand/40">
-            <div>
-              <strong class="text-paper font-semibold lang-trans" data-i18n="t2-f1-title">Fase 1 (Identidad y Dirección de Arte):</strong>
-              <p class="text-muted text-sm md:text-base lang-trans mt-1" data-i18n="t2-f1-desc">
-                Gael presenta las propuestas de logotipo, paleta cromática y directrices tipográficas. El cliente evalúa y selecciona una opción definitiva. Cada fase incluye un máximo de 2 rondas de revisiones o ajustes menores sobre la propuesta inicial. Una vez que el cliente otorga su visto bueno ("Aprobado"), el diseño del logotipo y la identidad visual se consideran cerrados e inalterables. Si con posterioridad (incluso durante el desarrollo web) el cliente solicita modificar el logotipo, cambiar colores principales o rediseñar la identidad, este cambio constituirá un trabajo extraordinario tarificado a 50 €/hora.
-              </p>
-            </div>
-
-            <div>
-              <strong class="text-paper font-semibold lang-trans" data-i18n="t2-f2-title">Fase 2 (Estructura y Desarrollo Web):</strong>
-              <p class="text-muted text-sm md:text-base lang-trans mt-1" data-i18n="t2-f2-desc">
-                Se implementa la estructura web (landing page scrolleable o web multicapa según plan) con los textos y materiales aportados por el cliente. El cliente revisa la versión provisional y valida la distribución y el diseño base (incluyendo hasta 2 rondas de ajustes menores). Con el OK a esta fase, la estructura queda firme. Modificaciones estructurales mayores o reordenaciones profundas solicitadas tras esta aprobación implicarán costes adicionales.
-              </p>
-            </div>
-
-            <div>
-              <strong class="text-paper font-semibold lang-trans" data-i18n="t2-f3-title">Fase 3 (Despliegue y Entrega Llave en Mano):</strong>
-              <p class="text-muted text-sm md:text-base lang-trans mt-1" data-i18n="t2-f3-desc">
-                Una vez superadas las fases anteriores, Bernat efectúa el despliegue técnico definitivo en GitHub y Cloudflare, realizando la entrega formal llave en mano y transfiriendo la propiedad técnica acordada al cliente.
-              </p>
-            </div>
+          <div class="bg-panel border border-line p-6 md:p-8 space-y-3">
+            <h3 class="lang-trans lowercase font-display text-lg md:text-xl text-paper font-semibold" data-i18n="t6-title">6. garantía técnica post-entrega</h3>
+            <p class="lang-trans" data-i18n="t6-p">
+              Se establece un periodo de garantía técnica de 14 días naturales tras la entrega final, destinado exclusivamente a solventar posibles errores de visualización o fallos técnicos imputables directamente al desarrollo inicial. Transcurrido este plazo, cualquier intervención, soporte o modificación posterior se gestionará bajo la tarifa de horas estipulada.
+            </p>
           </div>
-        </div>
 
-        <div class="bg-panel border border-line p-6 md:p-8 space-y-3">
-          <h3 class="lang-trans lowercase font-display text-lg md:text-xl text-paper font-semibold" data-i18n="t3-title">3. aportación de materiales, dominios y plazos del cliente</h3>
-          <p class="lang-trans" data-i18n="t3-p">
-            El cliente es el único propietario y responsable de la compra, renovación y titularidad de su dominio web. El cliente se compromete a suministrar los textos, imágenes corporativas, logotipos previos (si los hubiera) y los accesos de gestión DNS necesarios a rebrandyourbrand en un plazo máximo de 15 días naturales desde la contratación. Si el cliente experimenta retrasos superiores a 30 días naturales sin previo aviso, el proyecto se considerará suspendido temporalmente; su reactivación posterior estará sujeta a la disponibilidad del estudio en la agenda de trabajo. rebrandyourbrand no se hace responsable de erratas tipográficas o errores en textos facilitados directamente por el cliente.
-          </p>
-        </div>
+          <div class="bg-panel border border-line p-6 md:p-8 space-y-3">
+            <h3 class="lang-trans lowercase font-display text-lg md:text-xl text-paper font-semibold" data-i18n="t7-title">7. ley aplicable y jurisdicción</h3>
+            <p class="lang-trans" data-i18n="t7-p">
+              Para cualquier controversia o disputa legal derivada de la interpretación o cumplimiento de estas condiciones, ambas partes se someten expresamente a la jurisdicción de los Juzgados y Tribunales de Barcelona, renunciando a cualquier otro fuero que pudiera corresponderles.
+            </p>
+          </div>
 
-        <div class="bg-panel border border-line p-6 md:p-8 space-y-3">
-          <h3 class="lang-trans lowercase font-display text-lg md:text-xl text-paper font-semibold" data-i18n="t4-title">4. propiedad intelectual, pagos y política de reembolsos</h3>
-          <p class="lang-trans" data-i18n="t4-p">
-            La propiedad intelectual y comercial de los diseños, logotipos y desarrollos web creados se transfiere íntegramente al cliente una vez abonado el 100% de la tarifa del plan correspondiente. Al tratarse de servicios personalizados de creación intelectual y técnica desarrollados a medida, no se admiten devoluciones ni reembolsos económicos una vez iniciada formalmente la Fase 1 del proyecto. Las tarifas son de pago único, sin cuotas mensuales ocultas por parte de rebrandyourbrand.
-          </p>
         </div>
-
-        <div class="bg-panel border border-line p-6 md:p-8 space-y-3">
-          <h3 class="lang-trans lowercase font-display text-lg md:text-xl text-paper font-semibold" data-i18n="t5-title">5. limitaciones de responsabilidad técnica</h3>
-          <p class="lang-trans" data-i18n="t5-p">
-            rebrandyourbrand diseña e implementa soluciones web de alto rendimiento optimizadas para entornos modernos (Cloudflare, GitHub Pages). El estudio no asume responsabilidad por caídas de servidores de terceros, modificaciones no autorizadas realizadas por terceros en el código fuente tras la entrega, ni por el incumplimiento normativo de cookies, LSSI o RGPD en los textos legales particulares que el cliente decida incorporar de forma independiente en su sitio web.
-          </p>
-        </div>
-
-        <div class="bg-panel border border-line p-6 md:p-8 space-y-3">
-          <h3 class="lang-trans lowercase font-display text-lg md:text-xl text-paper font-semibold" data-i18n="t6-title">6. garantía técnica post-entrega</h3>
-          <p class="lang-trans" data-i18n="t6-p">
-            Se establece un periodo de garantía técnica de 14 días naturales tras la entrega final, destinado exclusivamente a solventar posibles errores de visualización o fallos técnicos imputables directamente al desarrollo inicial. Transcurrido este plazo, cualquier intervención, soporte o modificación posterior se gestionará bajo la tarifa de horas estipulada.
-          </p>
-        </div>
-
-        <div class="bg-panel border border-line p-6 md:p-8 space-y-3">
-          <h3 class="lang-trans lowercase font-display text-lg md:text-xl text-paper font-semibold" data-i18n="t7-title">7. ley aplicable y jurisdicción</h3>
-          <p class="lang-trans" data-i18n="t7-p">
-            Para cualquier controversia o disputa legal derivada de la interpretación o cumplimiento de estas condiciones, ambas partes se someten expresamente a la jurisdicción de los Juzgados y Tribunales de Barcelona, renunciando a cualquier otro fuero que pudiera corresponderles.
-          </p>
-        </div>
-
       </div>
-    </div>
-  </section>
+    </section>
+  </main>
 
   <!-- Footer / Contacto -->
   <footer id="contacto" class="relative px-6 md:px-10 py-24 md:py-32 overflow-hidden z-10">
@@ -587,13 +588,13 @@ se construye.</h2>
          aria-haspopup="dialog" aria-expanded="false" aria-controls="assistant-panel"
          aria-label="Abrir a brandi, el asistente de marca"
          class="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-ai text-[#0A0A0C] flex items-center justify-center shadow-lg hover:scale-110">
-    <svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;">
+    <svg viewBox="0 0 24 24" fill="currentColor" style="width:22px;height:22px;" aria-hidden="true">
       <path d="M12 2l1.8 5.6L19.4 9.4 13.8 11.2 12 17l-1.8-5.8L4.6 9.4l5.6-1.8L12 2z"></path>
     </svg>
   </button>
 
   <div id="assistant-backdrop"
-       class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 opacity-0 pointer-events-none"></div>
+       class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 opacity-0 pointer-events-none" aria-hidden="true"></div>
 
   <!-- Panel lateral con chat avanzado -->
   <aside id="assistant-panel" role="dialog" aria-modal="true" aria-hidden="true" inert aria-labelledby="assistant-panel-title"
@@ -602,7 +603,7 @@ se construye.</h2>
     
     <div class="p-6 border-b border-line/60 flex items-center justify-between shrink-0 bg-panel/80 backdrop-blur-sm">
       <div class="flex items-center gap-3">
-        <span class="w-2.5 h-2.5 rounded-full bg-ai animate-pulse"></span>
+        <span class="w-2.5 h-2.5 rounded-full bg-ai animate-pulse" aria-hidden="true"></span>
         <div>
           <h2 id="assistant-panel-title" class="lang-trans lowercase font-display text-lg tracking-tight leading-none mb-1" data-i18n="panel-title">brandi · asistente creativo</h2>
           <span class="lang-trans text-[0.65rem] text-muted lowercase tracking-wider" data-i18n="panel-subtitle">inteligencia artificial de marca</span>
@@ -630,7 +631,7 @@ se construye.</h2>
         
         <button id="brand-assistant-submit" type="submit" disabled
                 class="lang-trans inline-flex items-center justify-center bg-ai text-[#0A0A0C] p-2.5 rounded-lg hover:bg-ai-soft hover:scale-105 disabled:cursor-not-allowed disabled:opacity-40 shrink-0" aria-label="Enviar mensaje">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;" aria-hidden="true">
             <line x1="22" y1="2" x2="11" y2="13"></line>
             <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
           </svg>
@@ -639,12 +640,12 @@ se construye.</h2>
 
       <div class="flex items-center justify-between text-[0.65rem]">
         <p id="assistant-status" class="assistant-status lang-trans lowercase text-muted" data-i18n="status-waiting">en espera</p>
-        <p id="assistant-error" class="text-xs" style="color:#c97d7d;" aria-live="assertive"></p>
+        <p id="assistant-error" class="text-xs text-red-400" aria-live="assertive"></p>
       </div>
     </form>
   </aside>
 
-  <!-- Modal: ¿Cómo quieres empezar? (Brandi vs. email tradicional) -->
+  <!-- Modal: ¿Cómo quieres empezar? -->
   <div id="plan-modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="plan-modal-title" inert
        class="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm opacity-0 pointer-events-none px-6">
     <div id="plan-modal-content" class="bg-panel border border-line p-8 max-w-md w-full shadow-2xl transform scale-95">
@@ -663,7 +664,7 @@ se construye.</h2>
       <div class="space-y-3">
         <button id="modal-choose-ai" type="button" class="w-full text-left p-4 bg-ink/40 border border-line hover:border-ai/60 transition-colors group">
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 shrink-0 rounded-full bg-ai text-[#0A0A0C] flex items-center justify-center font-bold">B</div>
+            <div class="w-10 h-10 shrink-0 rounded-full bg-ai text-[#0A0A0C] flex items-center justify-center font-bold" aria-hidden="true">B</div>
             <div>
               <div class="lang-trans text-paper text-sm font-medium group-hover:underline" data-i18n="modal-ai-title">charlar con brandi (ia)</div>
               <div class="lang-trans text-xs text-muted mt-0.5" data-i18n="modal-ai-desc">briefing guiado, rápido y sin fricción</div>
@@ -673,7 +674,7 @@ se construye.</h2>
 
         <button id="modal-choose-email" type="button" class="w-full text-left p-4 bg-ink/20 border border-line hover:border-brand/60 transition-colors group">
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 shrink-0 rounded-full bg-panel border border-line text-muted flex items-center justify-center">@</div>
+            <div class="w-10 h-10 shrink-0 rounded-full bg-panel border border-line text-muted flex items-center justify-center" aria-hidden="true">@</div>
             <div>
               <div class="lang-trans text-paper/90 text-sm font-medium group-hover:text-paper" data-i18n="modal-email-title">forma tradicional (correo)</div>
               <div class="lang-trans text-xs text-muted mt-0.5" data-i18n="modal-email-desc">enviar un email directo al estudio</div>
@@ -688,16 +689,16 @@ se construye.</h2>
     document.documentElement.classList.remove('no-js');
     document.getElementById('year').textContent = new Date().getFullYear();
 
-    // 1. Manchas de pintura aleatorias (Remorph al cargar)
+    // 1. Manchas de pintura aleatorias con Math.random() de forma eficiente
     window.addEventListener('DOMContentLoaded', () => {
       document.documentElement.classList.add('is-loaded');
       const b1 = document.getElementById('blob-1');
       const b2 = document.getElementById('blob-2');
       if (b1 && b2) {
-        b1.style.top = `${Math.random() * 60}%`;
-        b1.style.left = `${Math.random() * 50}%`;
-        b2.style.bottom = `${Math.random() * 60}%`;
-        b2.style.right = `${Math.random() * 50}%`;
+        b1.style.top = `${Math.random() * 50}%`;
+        b1.style.left = `${Math.random() * 40}%`;
+        b2.style.bottom = `${Math.random() * 50}%`;
+        b2.style.right = `${Math.random() * 40}%`;
       }
     });
 
@@ -924,6 +925,7 @@ se construye.</h2>
         "t2-f2-desc": "The web structure is implemented (scrollable landing page or multi-page site depending on the plan) using the texts and materials provided by the client. The client reviews the provisional version and validates layout and base design (including up to 2 rounds of minor adjustments). With the OK for this phase, the structure becomes firm. Major structural modifications or deep reorderings requested after this approval will incur additional costs.",
         "t2-f3-title": "Phase 3 (Deployment & Turnkey Delivery):",
         "t2-f3-desc": "Once previous phases are cleared, Bernat executes the final technical deployment on GitHub and Cloudflare, performing formal turnkey delivery and transferring agreed technical ownership to the client.",
+        "3-provision": "provision of materials, domains, and client deadlines",
         "t3-title": "3. provision of materials, domains, and client deadlines",
         "t3-p": "The client is the sole owner and responsible for the purchase, renewal, and ownership of their web domain. The client agrees to supply texts, corporate images, previous logos (if any), and necessary DNS management access to rebrandyourbrand within a maximum of 15 calendar days from contracting. If the client experiences delays exceeding 30 calendar days without notice, the project will be considered temporarily suspended; subsequent reactivation will be subject to the studio's workload availability. rebrandyourbrand is not responsible for typos or errors in texts directly provided by the client.",
         "t4-title": "4. intellectual property, payments, and refund policy",
@@ -1066,7 +1068,7 @@ se construye.</h2>
       if (isPlansAnimating) return;
       isPlansAnimating = true;
       container.style.opacity = '0';
-      container.style.transform = 'translateY(8px)';
+      container.style.transform = 'translateY(6px)';
 
       setTimeout(() => {
         if (window.innerWidth < 768) {
@@ -1092,8 +1094,8 @@ se construye.</h2>
           const isCenter = i === 1;
           const card = document.createElement('div');
           card.className = isCenter
-            ? 'reveal in-view border-2 border-brand p-8 flex flex-col justify-between bg-panel relative shadow-2xl shadow-brand/20 z-20 w-full md:w-[42%] scale-[1.03] transition-all duration-700 ease-out'
-            : 'reveal in-view border border-line p-8 flex flex-col justify-between bg-panel w-full md:w-[29%] opacity-85 hover:opacity-100 scale-95 transition-all duration-700 ease-out';
+            ? 'reveal in-view border-2 border-brand p-8 flex flex-col justify-between bg-panel relative shadow-2xl shadow-brand/20 z-20 w-full md:w-[42%] scale-[1.03] transition-all duration-500 ease-out'
+            : 'reveal in-view border border-line p-8 flex flex-col justify-between bg-panel w-full md:w-[29%] opacity-85 hover:opacity-100 scale-95 transition-all duration-500 ease-out';
           card.innerHTML = buildPlanCardHTML(data, { highlighted: isCenter, showCta: isCenter });
           fragment.appendChild(card);
         });
@@ -1102,7 +1104,7 @@ se construye.</h2>
         container.style.opacity = '1';
         container.style.transform = 'translateY(0)';
         isPlansAnimating = false;
-      }, 400);
+      }, 300);
     }
 
     document.getElementById('plans-container').addEventListener('click', (event) => {
@@ -1128,7 +1130,7 @@ se construye.</h2>
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
         renderPlans();
-      }, 150);
+      }, 100);
     });
 
     function switchLanguage(lang) {
@@ -1169,7 +1171,7 @@ se construye.</h2>
         }
 
         elements.forEach(el => el.classList.remove('is-changing'));
-      }, 300);
+      }, 250);
     }
 
     langToggle.addEventListener('click', () => {
@@ -1211,8 +1213,8 @@ se construye.</h2>
       });
     }
 
-    bindToggleGroup('.milestone-toggle', 'milestone-btn-show', 'milestone-btn-hide', 800);
-    bindToggleGroup('.terms-toggle', 'terms-btn-show', 'terms-btn-hide', 2000);
+    bindToggleGroup('.milestone-toggle', 'milestone-btn-show', 'milestone-btn-hide', 600);
+    bindToggleGroup('.terms-toggle', 'terms-btn-show', 'terms-btn-hide', 1500);
 
     const revealEls = document.querySelectorAll('.reveal');
     if ('IntersectionObserver' in window) {
@@ -1223,7 +1225,7 @@ se construye.</h2>
             io.unobserve(entry.target);
           }
         });
-      }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+      }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
       revealEls.forEach((el) => io.observe(el));
     } else {
       revealEls.forEach((el) => el.classList.add('in-view'));
@@ -1354,7 +1356,7 @@ se construye.</h2>
 
       renderOrResetTurnstile();
 
-      window.setTimeout(() => assistantPrompt.focus(), 400);
+      window.setTimeout(() => assistantPrompt.focus(), 300);
     }
 
     function closeAssistantPanel() {
@@ -1398,7 +1400,7 @@ se construye.</h2>
       window.setTimeout(() => {
         const firstBtn = document.getElementById('modal-choose-ai');
         if (firstBtn) firstBtn.focus();
-      }, 200);
+      }, 150);
     }
 
     function closePlanModal() {
@@ -1553,7 +1555,7 @@ se construye.</h2>
         phraseIndex += 1;
       };
       updatePhrase();
-      thinkingPhraseInterval = setInterval(updatePhrase, 2200);
+      thinkingPhraseInterval = setInterval(updatePhrase, 2000);
 
       thinkingStart = performance.now();
       thinkingTimerInterval = setInterval(() => {
