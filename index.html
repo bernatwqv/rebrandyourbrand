@@ -118,6 +118,7 @@ textarea { resize: vertical; }
 .mx-5 { margin-inline: 1.25rem; }
 .mt-0\.5 { margin-top: 0.125rem; }
 .mt-1 { margin-top: 0.25rem; }
+.mt-2 { margin-top: 0.5rem; }
 .mt-8 { margin-top: 2rem; }
 .mt-16 { margin-top: 4rem; }
 .mb-1 { margin-bottom: 0.25rem; }
@@ -192,6 +193,7 @@ textarea { resize: vertical; }
 .gap-8 { gap: 2rem; }
 .gap-10 { gap: 2.5rem; }
 
+.space-y-2 > :not(:last-child) { margin-bottom: 0.5rem; }
 .space-y-3 > :not(:last-child) { margin-bottom: 0.75rem; }
 .space-y-4 > :not(:last-child) { margin-bottom: 1rem; }
 .space-y-8 > :not(:last-child) { margin-bottom: 2rem; }
@@ -268,6 +270,7 @@ textarea { resize: vertical; }
 .tracking-wider { letter-spacing: 0.05em; }
 .tracking-widest { letter-spacing: 0.1em; }
 .whitespace-pre-line { white-space: pre-line; }
+.whitespace-nowrap { white-space: nowrap; }
 .antialiased { -webkit-font-smoothing: antialiased; }
 
 .opacity-0 { opacity: 0; }
@@ -554,7 +557,7 @@ se construye.</h2>
       </div>
     </section>
 
-    <!-- Planes (Carrusel de Tarjeta Única con Controles Laterales y Cartelito Azul -50% en cada tarjeta) -->
+    <!-- Planes (Carrusel con botones integrados dentro de la tarjeta) -->
     <section id="planes" class="relative px-6 md:px-10 py-24 md:py-32 border-b border-line overflow-hidden z-10">
       <div class="max-w-6xl mx-auto relative z-10">
         <div class="reveal max-w-xl mb-12">
@@ -572,21 +575,11 @@ se construye.</h2>
           </p>
         </div>
 
-        <!-- Carrusel de tarjeta única con flechas de navegación -->
-        <div class="relative px-0 md:px-16 flex items-center justify-center">
-          <button id="plans-prev" type="button" aria-label="Plan anterior"
-                  class="absolute left-0 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full border border-line bg-panel text-paper flex items-center justify-center shadow-lg hover:border-brand hover:scale-110 transition-all duration-300">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
-          </button>
-
+        <!-- Carrusel con tarjeta única -->
+        <div class="relative w-full flex items-center justify-center">
           <div id="plans-container" aria-live="polite" class="w-full flex items-center justify-center">
             <!-- Renderizado dinámico de la tarjeta activa -->
           </div>
-
-          <button id="plans-next" type="button" aria-label="Plan siguiente"
-                  class="absolute right-0 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full border border-line bg-panel text-paper flex items-center justify-center shadow-lg hover:border-brand hover:scale-110 transition-all duration-300">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
-          </button>
         </div>
 
         <!-- Indicador de página (puntos) -->
@@ -1065,6 +1058,11 @@ se construye.</h2>
         "p3-f2": "sistema visual avanzado y directrices exclusivas",
         "p3-f3": "entrega llave en mano con propiedad total (cero cuotas)",
 
+        "recount-base": "Precio base identidad:",
+        "recount-web": "Desarrollo web a medida:",
+        "recount-discount": "Descuento lanzamiento (-50%):",
+        "recount-total": "Total:",
+
         "modal-eyebrow": "onboarding",
         "modal-title": "plan seleccionado",
         "modal-intro": "elige cómo prefieres que empecemos a perfilar los detalles de tu proyecto:",
@@ -1177,6 +1175,11 @@ se construye.</h2>
         "p3-f2": "advanced visual system and exclusive guidelines",
         "p3-f3": "turnkey delivery with full ownership (zero retainers)",
 
+        "recount-base": "Base identity price:",
+        "recount-web": "Custom web development:",
+        "recount-discount": "Launch discount (-50%):",
+        "recount-total": "Total:",
+
         "modal-eyebrow": "onboarding",
         "modal-title": "plan selected",
         "modal-intro": "choose how you'd like us to start scoping out your project:",
@@ -1254,19 +1257,34 @@ se construye.</h2>
       const title = t[data.titleKey];
       const webIncluded = planWebState[data.id];
       
+      const regularPrice = data.originalPrice;
       const totalCost = data.basePrice + (webIncluded ? 200 : 0);
-      const originalTotalCost = data.originalPrice + (webIncluded ? 200 : 0);
 
-      const priceStr = currentLang === 'es' ? `${totalCost} €` : `€${totalCost}`;
-      const originalPriceStr = currentLang === 'es' ? `${originalTotalCost} €` : `€${originalTotalCost}`;
+      const regularPriceStr = currentLang === 'es' ? `${regularPrice}&nbsp;€` : `€${regularPrice}`;
+      const discountStr = currentLang === 'es' ? `-${regularPrice - data.basePrice}&nbsp;€` : `-€${regularPrice - data.basePrice}`;
+      const totalStr = currentLang === 'es' ? `${totalCost}&nbsp;€` : `€${totalCost}`;
+      const webPriceStr = currentLang === 'es' ? `+200&nbsp;€` : `+€200`;
+
       const desc = t[data.descKey];
 
-      // Badge de -50% a la izquierda de la parte de arriba
       const discountBadgeHtml = `<button type="button" data-open-launch-modal class="absolute -top-3 left-6 bg-brand text-[#0A0A0C] text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full lang-trans hover:bg-brand-soft shadow-sm cursor-pointer">${t['plans-discount-badge']}</button>`;
 
       const recommendedBadgeHtml = data.isRecommended
         ? `<button type="button" data-open-recommended-modal class="absolute -top-3 right-6 bg-brand text-[#0A0A0C] text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full lang-trans hover:bg-brand-soft shadow-sm cursor-pointer">${t['plans-badge']}</button>`
         : '';
+
+      const integratedNavHtml = `
+        <div class="flex items-center justify-center gap-3 mb-6">
+          <button type="button" data-plan-prev aria-label="Plan anterior"
+                  class="w-10 h-10 rounded-full border border-line bg-ink/50 text-paper flex items-center justify-center hover:border-brand hover:scale-105 transition-all cursor-pointer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <button type="button" data-plan-next aria-label="Plan siguiente"
+                  class="w-10 h-10 rounded-full border border-line bg-ink/50 text-paper flex items-center justify-center hover:border-brand hover:scale-105 transition-all cursor-pointer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+      `;
 
       let featuresHtml = data.features
         .map(fKey => `<li class="flex items-center gap-2.5"><span class="text-brand font-bold">✓</span> <span class="lang-trans">${t[fKey]}</span></li>`)
@@ -1281,7 +1299,7 @@ se construye.</h2>
       const webToggleSub = currentLang === 'es' ? 'landing page lista para producción (precio fijo)' : 'production-ready landing page (fixed price)';
       
       const webToggleHtml = `
-        <div class="mb-8 pt-6 border-t border-line/60">
+        <div class="mb-6 pt-2">
           <button type="button" data-web-toggle="${data.id}"
                   class="w-full flex items-center justify-between p-4 rounded-xl border transition-all duration-300 group cursor-pointer ${webIncluded ? 'bg-brand/10 border-brand shadow-md shadow-brand/10' : 'bg-ink/40 border-line hover:border-brand/50'}">
             <div class="flex items-center gap-3">
@@ -1293,8 +1311,32 @@ se construye.</h2>
                 <span class="lang-trans text-[10px] text-muted block mt-0.5 lowercase">${webToggleSub}</span>
               </div>
             </div>
-            <span class="font-mono text-xs md:text-sm ${webIncluded ? 'text-brand font-bold' : 'text-muted'}">+200 €</span>
+            <span class="font-mono text-xs md:text-sm whitespace-nowrap ${webIncluded ? 'text-brand font-bold' : 'text-muted'}">+200&nbsp;€</span>
           </button>
+        </div>
+      `;
+
+      // Recuento de precio debajo del desarrollo web con el total en color text-paper
+      const recountHtml = `
+        <div class="mb-8 p-4 bg-ink/50 border border-line rounded-xl space-y-2 text-xs font-mono">
+          <div class="flex justify-between text-muted">
+            <span class="lang-trans" data-i18n="recount-base">${t['recount-base']}</span>
+            <span>${regularPriceStr}</span>
+          </div>
+          ${webIncluded ? `
+          <div class="flex justify-between text-muted bubble-in">
+            <span class="lang-trans" data-i18n="recount-web">${t['recount-web']}</span>
+            <span>${webPriceStr}</span>
+          </div>
+          ` : ''}
+          <div class="flex justify-between text-brand">
+            <span class="lang-trans" data-i18n="recount-discount">${t['recount-discount']}</span>
+            <span>${discountStr}</span>
+          </div>
+          <div class="pt-2 border-t border-line/60 flex justify-between text-paper font-bold text-sm">
+            <span class="lang-trans" data-i18n="recount-total">${t['recount-total']}</span>
+            <span class="text-paper text-base">${totalStr}</span>
+          </div>
         </div>
       `;
 
@@ -1304,21 +1346,19 @@ se construye.</h2>
         ${discountBadgeHtml}
         ${recommendedBadgeHtml}
         <div>
+          ${integratedNavHtml}
           <div class="flex items-center justify-between mb-4">
             <h3 class="lang-trans lowercase font-display text-2xl md:text-3xl text-paper font-semibold">${title}</h3>
-            <div class="text-right flex items-center gap-3">
-              <span class="font-mono text-muted text-base line-through decoration-brand/60">${originalPriceStr}</span>
-              <div>
-                <span class="lang-trans font-mono text-brand font-bold text-2xl">${priceStr}</span>
-                ${webIncluded ? `<span class="block text-[10px] text-muted font-mono">(${data.basePrice}€ brand + 200€ web)</span>` : ''}
-              </div>
+            <div class="text-right">
+              <span class="lang-trans font-mono text-paper font-bold text-2xl md:text-3xl whitespace-nowrap">${regularPriceStr}</span>
             </div>
           </div>
           <p class="lang-trans text-muted text-sm leading-relaxed mb-6">${desc}</p>
-          <ul class="space-y-3 text-xs md:text-sm text-paper/90 mb-2">
+          <ul class="space-y-3 text-xs md:text-sm text-paper/90 mb-4">
             ${featuresHtml}
           </ul>
           ${webToggleHtml}
+          ${recountHtml}
         </div>
         ${ctaHtml}
       `;
@@ -1423,6 +1463,22 @@ se construye.</h2>
         return;
       }
 
+      const prevBtn = event.target.closest('[data-plan-prev]');
+      if (prevBtn) {
+        if (isPlansAnimating) return;
+        currentPlanIndex = (currentPlanIndex - 1 + plansArray.length) % plansArray.length;
+        renderPlans();
+        return;
+      }
+
+      const nextBtn = event.target.closest('[data-plan-next]');
+      if (nextBtn) {
+        if (isPlansAnimating) return;
+        currentPlanIndex = (currentPlanIndex + 1) % plansArray.length;
+        renderPlans();
+        return;
+      }
+
       const toggleBtn = event.target.closest('[data-web-toggle]');
       if (toggleBtn) {
         const planId = toggleBtn.getAttribute('data-web-toggle');
@@ -1435,18 +1491,6 @@ se construye.</h2>
       if (planBtn) {
         openPlanChoice(planBtn.getAttribute('data-plan-key'), planBtn, planBtn.getAttribute('data-plan-id'));
       }
-    });
-
-    document.getElementById('plans-prev').addEventListener('click', () => {
-      if (isPlansAnimating) return;
-      currentPlanIndex = (currentPlanIndex - 1 + plansArray.length) % plansArray.length;
-      renderPlans();
-    });
-
-    document.getElementById('plans-next').addEventListener('click', () => {
-      if (isPlansAnimating) return;
-      currentPlanIndex = (currentPlanIndex + 1) % plansArray.length;
-      renderPlans();
     });
 
     document.getElementById('plans-dots').addEventListener('click', (e) => {
