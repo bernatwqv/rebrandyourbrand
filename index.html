@@ -582,11 +582,11 @@ se construye.</h2>
           </div>
         </div>
 
-        <!-- Indicador de página (puntos) -->
+        <!-- Indicador de página (puntos con accesibilidad corregida) -->
         <div class="flex items-center justify-center gap-2 mt-8" id="plans-dots">
-          <button type="button" data-dot-index="0" class="w-2.5 h-2.5 rounded-full bg-brand transition-all"></button>
-          <button type="button" data-dot-index="1" class="w-2 h-2 rounded-full bg-line hover:bg-muted transition-all"></button>
-          <button type="button" data-dot-index="2" class="w-2 h-2 rounded-full bg-line hover:bg-muted transition-all"></button>
+          <button type="button" data-dot-index="0" aria-label="Ir al plan esencial" aria-current="true" class="w-2.5 h-2.5 rounded-full bg-brand transition-all"></button>
+          <button type="button" data-dot-index="1" aria-label="Ir al plan evolución" class="w-2 h-2 rounded-full bg-line hover:bg-muted transition-all"></button>
+          <button type="button" data-dot-index="2" aria-label="Ir al plan partner" class="w-2 h-2 rounded-full bg-line hover:bg-muted transition-all"></button>
         </div>
       </div>
     </section>
@@ -1416,11 +1416,19 @@ se construye.</h2>
       const dotsContainer = document.getElementById('plans-dots');
       if (!dotsContainer) return;
       const dotButtons = dotsContainer.querySelectorAll('[data-dot-index]');
+      
+      const planNames = currentLang === 'es' 
+        ? ['Ir al plan esencial', 'Ir al plan evolución', 'Ir al plan partner']
+        : ['Go to essential plan', 'Go to evolution plan', 'Go to partner plan'];
+
       dotButtons.forEach((btn, idx) => {
+        btn.setAttribute('aria-label', planNames[idx] || `Plan ${idx + 1}`);
         if (idx === currentPlanIndex) {
           btn.className = 'w-2.5 h-2.5 rounded-full bg-brand transition-all';
+          btn.setAttribute('aria-current', 'true');
         } else {
           btn.className = 'w-2 h-2 rounded-full bg-line hover:bg-muted transition-all';
+          btn.removeAttribute('aria-current');
         }
       });
     }
