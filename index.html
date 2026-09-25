@@ -1211,6 +1211,8 @@ se construye.</h2>
     ];
 
     const planWebState = { esencial: false, evolucion: false, partner: false };
+    const titleKeyToId = { 'p1-title': 'esencial', 'p2-title': 'evolucion', 'p3-title': 'partner' };
+
     let currentPlanIndex = 0;
     let activePlanKey = null;
     let isPlansAnimating = false;
@@ -1956,11 +1958,16 @@ se construye.</h2>
 
       let planContextPrefix = '';
       if (activePlanKey) {
+        const planId = titleKeyToId[activePlanKey];
+        const hasWeb = planId ? planWebState[planId] : false;
         const planName = translations.es[activePlanKey];
         const planNameEn = translations.en[activePlanKey];
-        planContextPrefix = currentLang === 'es' 
-          ? `[Plan actualmente seleccionado por el usuario: ${planName}]\n` 
-          : `[Plan currently selected by the user: ${planNameEn}]\n`;
+
+        if (currentLang === 'es') {
+          planContextPrefix = `[Plan actualmente seleccionado por el usuario: ${planName}${hasWeb ? ' con desarrollo web incluido (+200 €)' : ' (solo identidad)'}]\n`;
+        } else {
+          planContextPrefix = `[Plan currently selected by the user: ${planNameEn}${hasWeb ? ' with web development included (€200)' : ' (identity only)'}]\n`;
+        }
       }
 
       const finalPrompt = planContextPrefix + question;
