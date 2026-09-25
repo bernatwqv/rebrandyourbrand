@@ -7,7 +7,18 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 
-<!-- SDK de Cloudflare Turnstile — carga diferida / async -->
+<!-- Optimización de Red: Preconexión para eliminar bloqueo de renderizado -->
+<link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<!-- Google Fonts con carga no bloqueante (elimina los 780ms de bloqueo) -->
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</noscript>
+
+<!-- SDK de Cloudflare Turnstile — carga diferida -->
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback&render=explicit" async defer></script>
 
 <!-- Política de Seguridad de Contenido (CSP) blindada -->
@@ -56,9 +67,6 @@
 </script>
 
 <script src="https://cdn.tailwindcss.com"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
 <script>
   tailwind.config = {
@@ -90,7 +98,7 @@
     --color-panel: 30 30 34;
     --color-line: 35 34 38;
     --color-text: 245 242 234;
-    --color-muted: 156 155 163; /* Contraste mejorado para accesibilidad móvil */
+    --color-muted: 156 155 163;
     --color-brand: 140 163 196;
     --color-brand-soft: 183 198 220;
     --color-ai: 232 163 61;
@@ -102,7 +110,7 @@
     --color-panel: 237 230 214;
     --color-line: 228 222 208;
     --color-text: 23 23 26;
-    --color-muted: 88 87 94; /* Contraste mejorado para modo claro */
+    --color-muted: 88 87 94;
     --color-brand: 140 163 196;
     --color-brand-soft: 95 122 158;
     --color-ai: 232 163 61;
@@ -139,7 +147,7 @@
     transition-duration: 250ms;
   }
 
-  /* Fondo dinámico optimizado con will-change para evitar tirones en móvil */
+  /* Fondo dinámico optimizado con will-change */
   #paint-background {
     position: fixed;
     inset: 0;
@@ -312,7 +320,7 @@
     </div>
   </header>
 
-  <!-- Main Landmark corregido para accesibilidad -->
+  <!-- Main Landmark -->
   <main id="main-content">
     <!-- Hero -->
     <section id="top" class="relative pt-40 pb-28 md:pt-52 md:pb-36 px-6 md:px-10 border-b border-line overflow-hidden z-10">
@@ -925,7 +933,6 @@ se construye.</h2>
         "t2-f2-desc": "The web structure is implemented (scrollable landing page or multi-page site depending on the plan) using the texts and materials provided by the client. The client reviews the provisional version and validates layout and base design (including up to 2 rounds of minor adjustments). With the OK for this phase, the structure becomes firm. Major structural modifications or deep reorderings requested after this approval will incur additional costs.",
         "t2-f3-title": "Phase 3 (Deployment & Turnkey Delivery):",
         "t2-f3-desc": "Once previous phases are cleared, Bernat executes the final technical deployment on GitHub and Cloudflare, performing formal turnkey delivery and transferring agreed technical ownership to the client.",
-        "3-provision": "provision of materials, domains, and client deadlines",
         "t3-title": "3. provision of materials, domains, and client deadlines",
         "t3-p": "The client is the sole owner and responsible for the purchase, renewal, and ownership of their web domain. The client agrees to supply texts, corporate images, previous logos (if any), and necessary DNS management access to rebrandyourbrand within a maximum of 15 calendar days from contracting. If the client experiences delays exceeding 30 calendar days without notice, the project will be considered temporarily suspended; subsequent reactivation will be subject to the studio's workload availability. rebrandyourbrand is not responsible for typos or errors in texts directly provided by the client.",
         "t4-title": "4. intellectual property, payments, and refund policy",
@@ -1408,7 +1415,7 @@ se construye.</h2>
       planModal.classList.add('opacity-0', 'pointer-events-none');
       planModalContent.classList.remove('scale-100');
       planModalContent.classList.add('scale-95');
-      document.body.classList.remove('overflow-hidden');
+      document.body.classList.add('overflow-hidden');
       planModal.setAttribute('aria-hidden', 'true');
       planModal.setAttribute('inert', '');
       if (planModalOpener && !planModalOpener.disabled) planModalOpener.focus();
