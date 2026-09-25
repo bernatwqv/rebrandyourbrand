@@ -432,7 +432,6 @@ textarea { resize: vertical; }
   #assistant-trigger { animation: ai-pulse 3s ease-in-out infinite; }
 
   @media (max-width: 767px) {
-    .backdrop-blur-md { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
     #assistant-trigger { animation: none; }
   }
 
@@ -449,7 +448,7 @@ textarea { resize: vertical; }
 
 <body class="bg-ink text-paper antialiased relative overflow-x-hidden">
 
-  <!-- Header -->
+  <!-- Header con difuminado activo tanto en móvil como en escritorio -->
   <header class="fixed top-0 inset-x-0 z-40 border-b border-line bg-ink/85 backdrop-blur-md">
     <div class="max-w-6xl mx-auto px-6 md:px-10 h-16 flex items-center justify-between">
       <a href="#top" class="flex items-center gap-3">
@@ -502,7 +501,8 @@ textarea { resize: vertical; }
       </div>
     </div>
 
-    <div id="mobile-nav" class="md:hidden hidden border-t border-line bg-panel px-6 py-4 flex flex-col gap-3 text-sm">
+    <!-- Menú desplegable móvil con su propio difuminado -->
+    <div id="mobile-nav" class="md:hidden hidden border-t border-line bg-panel/95 backdrop-blur-md px-6 py-4 flex flex-col gap-3 text-sm">
       <a href="#planes" class="mobile-nav-link lang-trans lowercase text-muted hover:text-paper py-1" data-i18n="nav-planes">planes</a>
       <a href="#sobre-nosotros" class="mobile-nav-link lang-trans lowercase text-muted hover:text-paper py-1" data-i18n="nav-about">sobre nosotros</a>
       <a href="#terminos" class="mobile-nav-link lang-trans lowercase text-muted hover:text-paper py-1" data-i18n="nav-terms">términos</a>
