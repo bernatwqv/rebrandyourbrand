@@ -125,6 +125,8 @@
   .terms-content,
   #assistant-panel,
   #assistant-backdrop,
+  #plan-modal,
+  #plan-modal-content,
   .theme-icon,
   button,
   a {
@@ -139,26 +141,28 @@
     transition-duration: 300ms;
   }
 
-  .paint-splash-container {
+  /* Fondo de blobs ligero (sustituye al generador de salpicaduras):
+     solo 2 elementos por sección en vez de ~10 nodos, con la paleta
+     de marca en vez de colores genéricos. */
+  .blob-background {
     position: absolute;
+    inset: 0;
     pointer-events: none;
     z-index: 0;
-    opacity: 0.22;
+    overflow: hidden;
   }
-  html.light .paint-splash-container {
-    opacity: 0.18;
-    mix-blend-mode: multiply;
-  }
-
-  .main-splatter {
+  .blob {
     position: absolute;
+    width: 420px;
+    height: 420px;
+    border-radius: 9999px;
+    filter: blur(80px);
+    opacity: 0.18;
     transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
-
-  .satellite-drop {
-    position: absolute;
-    border-radius: 50%;
-  }
+  html.light .blob { opacity: 0.14; }
+  .blob-brand { background: rgb(var(--color-brand)); }
+  .blob-ai { background: rgb(var(--color-ai)); }
 
   .lang-trans {
     transition: opacity 300ms ease, transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
@@ -227,6 +231,9 @@
   #assistant-backdrop {
     transition: opacity 400ms ease;
   }
+  #plan-modal-content {
+    transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1), opacity 300ms ease;
+  }
 
   @keyframes ai-pulse {
     0%, 100% { box-shadow: 0 0 0 0 rgba(232, 163, 61, 0.35); }
@@ -238,7 +245,8 @@
     .hero-fade, .reveal, body, header,
     .lang-trans, #plans-container, .milestone-content, .terms-content,
     #assistant-panel, #assistant-backdrop, #assistant-trigger,
-    .theme-icon, button, a, .bubble-in {
+    #plan-modal, #plan-modal-content,
+    .theme-icon, button, a, .bubble-in, .blob {
       transition: none !important;
       animation: none !important;
     }
@@ -256,7 +264,6 @@
         <span class="inline-block w-px h-5 bg-line" aria-hidden="true"></span>
       </a>
 
-      <!-- Menú desktop -->
       <nav class="hidden md:flex items-center gap-5 lg:gap-8 ml-auto text-sm text-muted">
         <a href="#planes" class="lang-trans lowercase hover:text-paper" data-i18n="nav-planes">planes</a>
         <a href="#sobre-nosotros" class="lang-trans lowercase hover:text-paper" data-i18n="nav-about">sobre nosotros</a>
@@ -265,7 +272,6 @@
       </nav>
 
       <div class="flex items-center gap-3 md:ml-5 md:pl-5 md:border-l md:border-line">
-        <!-- Botón de cambio de idioma -->
         <button id="lang-toggle" type="button" aria-label="Cambiar idioma a Inglés"
                 class="relative w-10 h-10 rounded-full border border-line flex items-center justify-center text-paper font-mono text-xs hover:border-brand/60 hover:scale-105">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;">
@@ -275,7 +281,6 @@
           <span id="lang-indicator" class="absolute -bottom-1 -right-1 bg-brand text-[#0A0A0C] text-[9px] font-bold px-1 rounded-full uppercase">es</span>
         </button>
 
-        <!-- Botón de tema -->
         <button id="theme-toggle" type="button" aria-label="Cambiar a modo claro"
                 class="relative w-10 h-10 rounded-full border border-line flex items-center justify-center text-paper hover:border-brand/60 hover:scale-105">
           <svg class="theme-icon icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -290,7 +295,6 @@
           </svg>
         </button>
 
-        <!-- Botón menú móvil (hamburguesa) -->
         <button id="mobile-menu-toggle" type="button" aria-label="Abrir menú de navegación" aria-expanded="false" aria-controls="mobile-nav"
                 class="md:hidden relative w-10 h-10 rounded-full border border-line flex items-center justify-center text-paper hover:border-brand/60">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;">
@@ -302,7 +306,6 @@
       </div>
     </div>
 
-    <!-- Panel de navegación móvil desplegable -->
     <div id="mobile-nav" class="md:hidden hidden border-t border-line bg-panel px-6 py-4 flex flex-col gap-3 text-sm">
       <a href="#planes" class="mobile-nav-link lang-trans lowercase text-muted hover:text-paper py-1" data-i18n="nav-planes">planes</a>
       <a href="#sobre-nosotros" class="mobile-nav-link lang-trans lowercase text-muted hover:text-paper py-1" data-i18n="nav-about">sobre nosotros</a>
@@ -313,8 +316,10 @@
 
   <!-- Hero -->
   <section id="top" class="relative pt-40 pb-28 md:pt-52 md:pb-36 px-6 md:px-10 border-b border-line overflow-hidden">
-    <div class="paint-splash-container dynamic-splash-group" data-color="#06a3d0" style="top: 15%; right: 10%;"></div>
-    <div class="paint-splash-container dynamic-splash-group" data-color="#eed933" style="bottom: 12%; left: 12%;"></div>
+    <div class="blob-background">
+      <div class="blob blob-brand" style="top: 5%; right: 5%;"></div>
+      <div class="blob blob-ai" style="bottom: 5%; left: 5%;"></div>
+    </div>
 
     <div class="max-w-6xl mx-auto relative z-10">
       <p class="hero-fade lang-trans delay-0 lowercase text-xs tracking-wide text-muted mb-6" data-i18n="hero-tag">estudio de rebranding y diseño visual</p>
@@ -331,7 +336,9 @@
 
   <!-- Manifiesto -->
   <section id="manifiesto" class="relative px-6 md:px-10 py-32 md:py-40 border-b border-line overflow-hidden">
-    <div class="paint-splash-container dynamic-splash-group" data-color="#d1251e" style="bottom: 15%; right: 8%;"></div>
+    <div class="blob-background">
+      <div class="blob blob-ai" style="bottom: 10%; right: 8%;"></div>
+    </div>
 
     <div class="max-w-6xl mx-auto relative z-10">
       <div class="reveal grid md:grid-cols-2 gap-10 md:gap-16 items-start">
@@ -391,7 +398,6 @@ se construye.</h2>
 
       <div class="reveal grid md:grid-cols-2 gap-8 items-start">
         
-        <!-- GAEL -->
         <div class="bg-panel border border-line p-8 flex flex-col justify-between h-full">
           <div>
             <div class="flex items-center justify-between mb-3">
@@ -424,7 +430,6 @@ se construye.</h2>
           </div>
         </div>
 
-        <!-- BERNAT -->
         <div class="bg-panel border border-line p-8 flex flex-col justify-between h-full">
           <div>
             <div class="flex items-center justify-between mb-3">
@@ -554,7 +559,9 @@ se construye.</h2>
 
   <!-- Footer / Contacto -->
   <footer id="contacto" class="relative px-6 md:px-10 py-24 md:py-32 overflow-hidden">
-    <div class="paint-splash-container dynamic-splash-group" data-color="var(--splash-4)" style="top: 10%; right: 8%;"></div>
+    <div class="blob-background">
+      <div class="blob blob-brand" style="top: 8%; right: 6%;"></div>
+    </div>
 
     <div class="max-w-6xl mx-auto relative z-10">
       <div class="reveal flex flex-col md:flex-row md:items-end md:justify-between gap-10">
@@ -606,7 +613,6 @@ se construye.</h2>
          class="fixed top-0 right-0 h-full w-full sm:w-[480px] z-50 bg-panel border-l border-line flex flex-col shadow-2xl"
          style="transform: translateX(100%);">
     
-    <!-- Cabecera del Chat -->
     <div class="p-6 border-b border-line/60 flex items-center justify-between shrink-0 bg-panel/80 backdrop-blur-sm">
       <div class="flex items-center gap-3">
         <span class="w-2.5 h-2.5 rounded-full bg-ai animate-pulse"></span>
@@ -621,13 +627,10 @@ se construye.</h2>
       </button>
     </div>
 
-    <!-- Historial de Conversación -->
     <div id="assistant-output" class="assistant-output flex-1 overflow-y-auto p-6 flex flex-col gap-4" aria-live="polite" data-placeholder="inicia la conversación con brandi o selecciona un plan."></div>
 
-    <!-- Barra Inferior de Entrada -->
     <form id="brand-assistant-form" class="p-4 md:p-6 border-t border-line/60 bg-ink/30 shrink-0 space-y-3">
       
-      <!-- Bloque de verificación Turnstile -->
       <div class="flex flex-col sm:flex-row items-center justify-between gap-2 px-3 py-2 bg-ink/20 border border-line/60">
         <span class="lang-trans text-[0.6rem] text-muted uppercase font-mono shrink-0" data-i18n="turnstile-label">verificación humana</span>
         <div id="turnstile-container" class="w-full sm:w-auto min-h-[65px] flex items-center justify-center"></div>
@@ -638,8 +641,8 @@ se construye.</h2>
                 placeholder="escribe un mensaje a brandi..."
                 class="lang-trans w-full bg-transparent resize-none border-none px-3 py-2 text-xs md:text-sm text-paper placeholder:text-muted/60 focus:outline-none max-h-24" data-i18n-placeholder="panel-placeholder"></textarea>
         
-        <button id="brand-assistant-submit" type="submit"
-                class="lang-trans inline-flex items-center justify-center bg-ai text-[#0A0A0C] p-2.5 rounded-lg hover:bg-ai-soft hover:scale-105 disabled:cursor-wait disabled:opacity-50 shrink-0" aria-label="Enviar mensaje">
+        <button id="brand-assistant-submit" type="submit" disabled
+                class="lang-trans inline-flex items-center justify-center bg-ai text-[#0A0A0C] p-2.5 rounded-lg hover:bg-ai-soft hover:scale-105 disabled:cursor-not-allowed disabled:opacity-40 shrink-0" aria-label="Enviar mensaje">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;">
             <line x1="22" y1="2" x2="11" y2="13"></line>
             <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
@@ -653,6 +656,46 @@ se construye.</h2>
       </div>
     </form>
   </aside>
+
+  <!-- Modal: ¿Cómo quieres empezar? (Brandi vs. email tradicional) -->
+  <div id="plan-modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="plan-modal-title" inert
+       class="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm opacity-0 pointer-events-none px-6">
+    <div id="plan-modal-content" class="bg-panel border border-line p-8 max-w-md w-full shadow-2xl transform scale-95">
+      <div class="flex justify-between items-start mb-6">
+        <div>
+          <span class="lang-trans lowercase block text-xs tracking-widest text-muted font-mono mb-1" data-i18n="modal-eyebrow">onboarding</span>
+          <h3 id="plan-modal-title" class="lang-trans lowercase font-display text-xl text-paper" data-i18n="modal-title">plan seleccionado</h3>
+        </div>
+        <button id="plan-modal-close" type="button" aria-label="Cerrar" class="text-muted hover:text-paper p-1 shrink-0">✕</button>
+      </div>
+
+      <p class="lang-trans text-muted text-sm leading-relaxed mb-6" data-i18n="modal-intro">
+        elige cómo prefieres que empecemos a perfilar los detalles de tu proyecto:
+      </p>
+
+      <div class="space-y-3">
+        <button id="modal-choose-ai" type="button" class="w-full text-left p-4 bg-ink/40 border border-line hover:border-ai/60 transition-colors group">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 shrink-0 rounded-full bg-ai text-[#0A0A0C] flex items-center justify-center font-bold">B</div>
+            <div>
+              <div class="lang-trans text-paper text-sm font-medium group-hover:underline" data-i18n="modal-ai-title">charlar con brandi (ia)</div>
+              <div class="lang-trans text-xs text-muted mt-0.5" data-i18n="modal-ai-desc">briefing guiado, rápido y sin fricción</div>
+            </div>
+          </div>
+        </button>
+
+        <button id="modal-choose-email" type="button" class="w-full text-left p-4 bg-ink/20 border border-line hover:border-brand/60 transition-colors group">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 shrink-0 rounded-full bg-panel border border-line text-muted flex items-center justify-center">@</div>
+            <div>
+              <div class="lang-trans text-paper/90 text-sm font-medium group-hover:text-paper" data-i18n="modal-email-title">forma tradicional (correo)</div>
+              <div class="lang-trans text-xs text-muted mt-0.5" data-i18n="modal-email-desc">enviar un email directo al estudio</div>
+            </div>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
 
   <script>
     document.documentElement.classList.remove('no-js');
@@ -696,54 +739,6 @@ se construye.</h2>
         toggleMobileMenu();
       }
     });
-
-    (function generatePaintSplatterClusters() {
-      const groups = document.querySelectorAll('.dynamic-splash-group');
-      groups.forEach(group => {
-        const color = group.getAttribute('data-color');
-        const width = Math.floor(Math.random() * 60) + 260;
-        const height = width - Math.floor(Math.random() * 40);
-
-        group.style.width = width + 'px';
-        group.style.height = height + 'px';
-
-        const main = document.createElement('div');
-        main.className = 'main-splatter';
-        main.style.backgroundColor = color;
-        main.style.width = '100%';
-        main.style.height = '100%';
-
-        const rx1 = Math.floor(Math.random() * 40) + 20;
-        const rx2 = Math.floor(Math.random() * 40) + 20;
-        const rx3 = Math.floor(Math.random() * 40) + 25;
-        const rx4 = Math.floor(Math.random() * 40) + 25;
-        const ry1 = Math.floor(Math.random() * 40) + 25;
-        const ry2 = Math.floor(Math.random() * 40) + 20;
-        const ry3 = Math.floor(Math.random() * 40) + 20;
-        const ry4 = Math.floor(Math.random() * 40) + 25;
-
-        main.style.borderRadius = `${rx1}% ${rx2}% ${rx3}% ${rx4}% / ${ry1}% ${ry2}% ${ry3}% ${ry4}%`;
-        main.style.transform = `rotate(${Math.floor(Math.random() * 360)}deg)`;
-        group.appendChild(main);
-
-        const numSatellites = Math.floor(Math.random() * 4) + 5;
-        for (let i = 0; i < numSatellites; i++) {
-          const sat = document.createElement('div');
-          sat.className = 'satellite-drop';
-          sat.style.backgroundColor = color;
-          const satSize = Math.floor(Math.random() * 12) + 6;
-          sat.style.width = satSize + 'px';
-          sat.style.height = satSize + 'px';
-
-          const angle = Math.random() * Math.PI * 2;
-          const distance = (width / 2) + Math.random() * 60;
-          sat.style.left = ((width / 2) + Math.cos(angle) * distance - (satSize / 2)) + 'px';
-          sat.style.top = ((height / 2) + Math.sin(angle) * distance - (satSize / 2)) + 'px';
-          sat.style.borderRadius = `${Math.floor(Math.random() * 30) + 40}% ${Math.floor(Math.random() * 30) + 40}% ${Math.floor(Math.random() * 30) + 40}% ${Math.floor(Math.random() * 30) + 40}%`;
-          group.appendChild(sat);
-        }
-      });
-    })();
 
     document.addEventListener('DOMContentLoaded', () => {
       document.documentElement.classList.add('is-loaded');
@@ -804,6 +799,14 @@ se construye.</h2>
         "p3-f3": "arquitectura técnica personalizada y escalable",
         "p3-f4": "entrega llave en mano con propiedad total (cero cuotas)",
 
+        "modal-eyebrow": "onboarding",
+        "modal-title": "plan seleccionado",
+        "modal-intro": "elige cómo prefieres que empecemos a perfilar los detalles de tu proyecto:",
+        "modal-ai-title": "charlar con brandi (ia)",
+        "modal-ai-desc": "briefing guiado, rápido y sin fricción",
+        "modal-email-title": "forma tradicional (correo)",
+        "modal-email-desc": "enviar un email directo al estudio",
+
         "terms-eyebrow": "marco legal y operativo",
         "terms-heading": "condiciones de servicio",
         "terms-sub": "Reglas claras, metodología por fases y protección mutua para garantizar el éxito y la transparencia de cada proyecto en rebrandyourbrand.",
@@ -838,6 +841,7 @@ se construye.</h2>
         "panel-placeholder": "escribe un mensaje a brandi...",
         "turnstile-label": "verificación humana",
         "status-waiting": "en espera",
+        "status-verifying": "verificando seguridad...",
         "status-consulting": "consultando con brandi...",
         "status-completed": "completado",
         "status-failed": "fallido",
@@ -901,6 +905,14 @@ se construye.</h2>
         "p3-f3": "customizable and scalable technical architecture",
         "p3-f4": "turnkey delivery with full ownership (zero retainers)",
 
+        "modal-eyebrow": "onboarding",
+        "modal-title": "plan selected",
+        "modal-intro": "choose how you'd like us to start scoping out your project:",
+        "modal-ai-title": "chat with brandi (ai)",
+        "modal-ai-desc": "guided briefing, fast and frictionless",
+        "modal-email-title": "traditional way (email)",
+        "modal-email-desc": "send a direct email to the studio",
+
         "terms-eyebrow": "legal & operational framework",
         "terms-heading": "terms of service",
         "terms-sub": "Clear rules, phased methodology, and mutual protection to ensure success and transparency for every project at rebrandyourbrand.",
@@ -935,6 +947,7 @@ se construye.</h2>
         "panel-placeholder": "type a message to brandi...",
         "turnstile-label": "human verification",
         "status-waiting": "standing by",
+        "status-verifying": "verifying security...",
         "status-consulting": "consulting brandi...",
         "status-completed": "completed",
         "status-failed": "failed",
@@ -950,6 +963,10 @@ se construye.</h2>
     const langToggle = document.getElementById('lang-toggle');
     const langIndicator = document.getElementById('lang-indicator');
 
+    function randInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
     const plansArray = [
       { id: 'esencial', titleKey: 'p1-title', priceKey: 'p1-price', descKey: 'p1-desc', features: ['p1-f1', 'p1-f2', 'p1-f3', 'p1-f4'] },
       { id: 'evolucion', titleKey: 'p2-title', priceKey: 'p2-price', descKey: 'p2-desc', features: ['p2-f1', 'p2-f2', 'p2-f3', 'p2-f4'], badgeKey: 'plans-badge', isRecommended: true },
@@ -959,6 +976,70 @@ se construye.</h2>
     let currentPlanIndex = 1;
     let activePlanKey = null;
     let isPlansAnimating = false;
+
+    function buildPlanCardHTML(data, { highlighted, showCta }) {
+      const t = translations[currentLang];
+      const title = t[data.titleKey];
+      const price = t[data.priceKey];
+      const desc = t[data.descKey];
+
+      const badgeHtml = data.isRecommended
+        ? `<span class="absolute -top-3 right-6 bg-brand text-[#0A0A0C] text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full lang-trans">${t['plans-badge']}</span>`
+        : '';
+
+      const featuresHtml = data.features
+        .map(fKey => `<li class="flex items-center gap-2"><span class="text-brand">✓</span> <span class="lang-trans">${t[fKey]}</span></li>`)
+        .join('');
+
+      const ctaHtml = showCta
+        ? `<button type="button" data-plan-key="${data.titleKey}" class="lang-trans lowercase w-full block text-center bg-brand text-[#0A0A0C] hover:bg-brand-soft shadow-md py-3 text-xs font-medium cursor-pointer">${t['plans-cta']}</button>`
+        : '';
+
+      return `
+        ${badgeHtml}
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="lang-trans lowercase font-display text-2xl ${highlighted ? 'text-paper font-semibold' : ''}">${title}</h3>
+            <span class="lang-trans font-mono text-base ${highlighted ? 'text-brand font-bold text-lg' : 'text-muted'}">${price}</span>
+          </div>
+          <p class="lang-trans text-muted text-sm leading-relaxed mb-6">${desc}</p>
+          <ul class="space-y-3 text-xs md:text-sm ${highlighted ? 'text-paper' : 'text-paper/80'} mb-8">
+            ${featuresHtml}
+          </ul>
+        </div>
+        ${ctaHtml}
+      `;
+    }
+
+    // Abre el modal de elección de flujo en vez de ir directo al asistente.
+    function openPlanChoice(titleKey, opener) {
+      pendingPlanKey = titleKey;
+      pendingPlanOpener = opener;
+      const t = translations[currentLang];
+      document.getElementById('plan-modal-title').textContent = t[titleKey];
+      openPlanModal();
+    }
+
+    // Cuando el usuario elige "charlar con Brandi": abre el asistente y
+    // añade el saludo contextual (comportamiento que antes iba directo).
+    function selectPlan(titleKey, opener) {
+      activePlanKey = titleKey;
+      openAssistantPanel(opener);
+
+      const pTitleEs = translations.es[titleKey];
+      const pTitleEn = translations.en[titleKey];
+      const pPriceEs = translations.es[titleKey.replace('title', 'price')];
+      const pPriceEn = translations.en[titleKey.replace('title', 'price')];
+
+      chatHistory.push({
+        role: 'assistant',
+        texts: {
+          es: `¡Perfecto! Entonces te decantas por el ${pTitleEs} (${pPriceEs} pago único). ¿Cómo se llama tu marca o proyecto actual para continuar?`,
+          en: `Perfect! So you're leaning towards the ${pTitleEn} (${pPriceEn} one-time payment). What is your current brand or project name to continue?`
+        }
+      });
+      renderHistory();
+    }
 
     function renderPlans() {
       const container = document.getElementById('plans-container');
@@ -971,68 +1052,17 @@ se construye.</h2>
         container.style.opacity = '1';
         container.style.transform = 'translateY(0)';
 
+        const fragment = document.createDocumentFragment();
         plansArray.forEach((data, index) => {
           const isFeatured = index === 1;
           const card = document.createElement('div');
-          
           card.className = isFeatured
             ? 'reveal in-view border-2 border-brand p-8 flex flex-col justify-between bg-panel relative shadow-xl shadow-brand/10 w-full'
             : 'reveal in-view border border-line p-8 flex flex-col justify-between bg-panel w-full';
-
-          const t = translations[currentLang];
-          const title = t[data.titleKey];
-          const price = t[data.priceKey];
-          const desc = t[data.descKey];
-          const ctaText = t['plans-cta'];
-
-          let badgeHtml = '';
-          if (data.isRecommended) {
-            badgeHtml = `<span class="absolute -top-3 right-6 bg-brand text-[#0A0A0C] text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full lang-trans">${t['plans-badge']}</span>`;
-          }
-
-          let featuresHtml = '';
-          data.features.forEach(fKey => {
-            featuresHtml += `<li class="flex items-center gap-2"><span class="text-brand">✓</span> <span class="lang-trans">${t[fKey]}</span></li>`;
-          });
-
-          card.innerHTML = `
-            ${badgeHtml}
-            <div>
-              <div class="flex items-center justify-between mb-4">
-                <h3 class="lang-trans lowercase font-display text-2xl ${isFeatured ? 'text-paper font-semibold' : ''}">${title}</h3>
-                <span class="lang-trans font-mono text-base ${isFeatured ? 'text-brand font-bold text-lg' : 'text-muted'}">${price}</span>
-              </div>
-              <p class="lang-trans text-muted text-sm leading-relaxed mb-6">${desc}</p>
-              <ul class="space-y-3 text-xs text-paper mb-8">
-                ${featuresHtml}
-              </ul>
-            </div>
-            <button type="button" data-plan-key="${data.titleKey}" class="lang-trans lowercase w-full block text-center bg-brand text-[#0A0A0C] hover:bg-brand-soft shadow-md py-3 text-xs font-medium cursor-pointer">${ctaText}</button>
-          `;
-          container.appendChild(card);
+          card.innerHTML = buildPlanCardHTML(data, { highlighted: isFeatured, showCta: true });
+          fragment.appendChild(card);
         });
-
-        container.querySelectorAll('[data-plan-key]').forEach(btn => {
-          btn.addEventListener('click', () => {
-            const titleKey = btn.getAttribute('data-plan-key');
-            activePlanKey = titleKey;
-            openAssistantPanel(btn);
-
-            const pTitleEs = translations.es[titleKey];
-            const pTitleEn = translations.en[titleKey];
-            const pPriceEs = translations.es[titleKey.replace('title', 'price')];
-            const pPriceEn = translations.en[titleKey.replace('title', 'price')];
-
-            const greetingEs = `¡Perfecto! Entonces te decantas por el ${pTitleEs} (${pPriceEs} pago único). ¿Cómo se llama tu marca o proyecto actual para continuar?`;
-            const greetingEn = `Perfect! So you're leaning towards the ${pTitleEn} (${pPriceEn} one-time payment). What is your current brand or project name to continue?`;
-
-            chatHistory.push({
-              role: 'assistant',
-              texts: { es: greetingEs, en: greetingEn }
-            });
-            renderHistory();
-          });
-        });
+        container.appendChild(fragment);
         return;
       }
 
@@ -1055,91 +1085,36 @@ se construye.</h2>
         const rightIndex = (currentPlanIndex + 1) % 3;
 
         const displayOrder = [
-          { data: plansArray[leftIndex], position: 'left' },
-          { data: plansArray[centerIndex], position: 'center' },
-          { data: plansArray[rightIndex], position: 'right' }
+          plansArray[leftIndex],
+          plansArray[centerIndex],
+          plansArray[rightIndex]
         ];
 
-        displayOrder.forEach(({ data, position }) => {
-          const isCenter = position === 'center';
+        const fragment = document.createDocumentFragment();
+        displayOrder.forEach((data, i) => {
+          const isCenter = i === 1;
           const card = document.createElement('div');
-
-          if (isCenter) {
-            card.className = 'reveal in-view border-2 border-brand p-8 flex flex-col justify-between bg-panel relative shadow-2xl shadow-brand/20 z-20 w-full md:w-[42%] scale-[1.03] transition-all duration-700 ease-out';
-          } else {
-            card.className = 'reveal in-view border border-line p-8 flex flex-col justify-between bg-panel w-full md:w-[29%] opacity-85 hover:opacity-100 scale-95 transition-all duration-700 ease-out';
-          }
-
-          const t = translations[currentLang];
-          const title = t[data.titleKey];
-          const price = t[data.priceKey];
-          const desc = t[data.descKey];
-          const ctaText = t['plans-cta'];
-
-          let badgeHtml = '';
-          if (data.isRecommended) {
-            badgeHtml = `<span class="absolute -top-3 right-6 bg-brand text-[#0A0A0C] text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full lang-trans">${t['plans-badge']}</span>`;
-          }
-
-          let featuresHtml = '';
-          data.features.forEach(fKey => {
-            featuresHtml += `<li class="flex items-center gap-2"><span class="text-brand">✓</span> <span class="lang-trans">${t[fKey]}</span></li>`;
-          });
-
-          const ctaHtml = isCenter 
-            ? `<button type="button" data-plan-key="${data.titleKey}" class="lang-trans lowercase w-full block text-center bg-brand text-[#0A0A0C] hover:bg-brand-soft shadow-md py-3 text-xs font-medium cursor-pointer">${ctaText}</button>`
-            : '';
-
-          card.innerHTML = `
-            ${badgeHtml}
-            <div>
-              <div class="flex items-center justify-between mb-4">
-                <h3 class="lang-trans lowercase font-display text-2xl ${isCenter ? 'text-paper font-semibold' : ''}">${title}</h3>
-                <span class="lang-trans font-mono text-base ${isCenter ? 'text-brand font-bold text-lg' : 'text-muted'}">${price}</span>
-              </div>
-              <p class="lang-trans text-muted text-sm leading-relaxed mb-6">${desc}</p>
-              <ul class="space-y-3 text-xs md:text-sm ${isCenter ? 'text-paper' : 'text-paper/80'} mb-8">
-                ${featuresHtml}
-              </ul>
-            </div>
-            ${ctaHtml}
-          `;
-          container.appendChild(card);
+          card.className = isCenter
+            ? 'reveal in-view border-2 border-brand p-8 flex flex-col justify-between bg-panel relative shadow-2xl shadow-brand/20 z-20 w-full md:w-[42%] scale-[1.03] transition-all duration-700 ease-out'
+            : 'reveal in-view border border-line p-8 flex flex-col justify-between bg-panel w-full md:w-[29%] opacity-85 hover:opacity-100 scale-95 transition-all duration-700 ease-out';
+          card.innerHTML = buildPlanCardHTML(data, { highlighted: isCenter, showCta: isCenter });
+          fragment.appendChild(card);
         });
-
-        container.querySelectorAll('[data-plan-key]').forEach(btn => {
-          btn.addEventListener('click', () => {
-            const titleKey = btn.getAttribute('data-plan-key');
-
-            if (activePlanKey === titleKey) {
-              openAssistantPanel(btn);
-              return;
-            }
-
-            activePlanKey = titleKey;
-            openAssistantPanel(btn);
-
-            const pTitleEs = translations.es[titleKey];
-            const pTitleEn = translations.en[titleKey];
-            const pPriceEs = translations.es[titleKey.replace('title', 'price')];
-            const pPriceEn = translations.en[titleKey.replace('title', 'price')];
-
-            const greetingEs = `¡Perfecto! Entonces te decantas por el ${pTitleEs} (${pPriceEs} pago único). ¿Cómo se llama tu marca o proyecto actual para continuar?`;
-            const greetingEn = `Perfect! So you're leaning towards the ${pTitleEn} (${pPriceEn} one-time payment). What is your current brand or project name to continue?`;
-
-            chatHistory.push({
-              role: 'assistant',
-              texts: { es: greetingEs, en: greetingEn }
-            });
-            renderHistory();
-          });
-        });
+        container.appendChild(fragment);
 
         container.style.opacity = '1';
         container.style.transform = 'translateY(0)';
         isPlansAnimating = false;
       }, 400);
     }
+
+    // Delegación de eventos: un listener en el contenedor, registrado una
+    // vez, en vez de re-vincular listeners en cada renderPlans().
+    document.getElementById('plans-container').addEventListener('click', (event) => {
+      const btn = event.target.closest('[data-plan-key]');
+      if (!btn) return;
+      openPlanChoice(btn.getAttribute('data-plan-key'), btn);
+    });
 
     document.getElementById('plans-prev').addEventListener('click', () => {
       if (isPlansAnimating || window.innerWidth < 768) return;
@@ -1182,23 +1157,8 @@ se construye.</h2>
           }
         });
 
-        document.querySelectorAll('.milestone-toggle').forEach(btn => {
-          const content = document.getElementById(btn.getAttribute('data-target'));
-          const isOpen = content.classList.contains('is-open');
-          const spanText = btn.querySelector('.toggle-text');
-          if (spanText) {
-            spanText.textContent = isOpen ? translations[lang]['milestone-btn-hide'] : translations[lang]['milestone-btn-show'];
-          }
-        });
-
-        document.querySelectorAll('.terms-toggle').forEach(btn => {
-          const content = document.getElementById(btn.getAttribute('data-target'));
-          const isOpen = content.classList.contains('is-open');
-          const spanText = btn.querySelector('.toggle-text');
-          if (spanText) {
-            spanText.textContent = isOpen ? translations[lang]['terms-btn-hide'] : translations[lang]['terms-btn-show'];
-          }
-        });
+        setToggleLabels('.milestone-toggle', 'milestone-btn-show', 'milestone-btn-hide');
+        setToggleLabels('.terms-toggle', 'terms-btn-show', 'terms-btn-hide');
 
         renderPlans();
 
@@ -1209,6 +1169,9 @@ se construye.</h2>
         if (chatHistory.length) {
           renderHistory();
         }
+        if (pendingPlanKey) {
+          document.getElementById('plan-modal-title').textContent = translations[lang][pendingPlanKey];
+        }
 
         elements.forEach(el => el.classList.remove('is-changing'));
       }, 300);
@@ -1218,51 +1181,46 @@ se construye.</h2>
       switchLanguage(currentLang === 'es' ? 'en' : 'es');
     });
 
-    document.querySelectorAll('.milestone-toggle').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const targetId = btn.getAttribute('data-target');
-        const content = document.getElementById(targetId);
+    function setToggleLabels(selector, showKey, hideKey) {
+      document.querySelectorAll(selector).forEach(btn => {
+        const content = document.getElementById(btn.getAttribute('data-target'));
         const isOpen = content.classList.contains('is-open');
         const spanText = btn.querySelector('.toggle-text');
-
-        if (isOpen) {
-          content.style.maxHeight = '0px';
-          content.classList.remove('is-open');
-          content.style.opacity = '0';
-          spanText.textContent = translations[currentLang]['milestone-btn-show'];
-          btn.setAttribute('aria-expanded', 'false');
-        } else {
-          content.style.maxHeight = content.scrollHeight + 800 + 'px';
-          content.classList.add('is-open');
-          content.style.opacity = '1';
-          spanText.textContent = translations[currentLang]['milestone-btn-hide'];
-          btn.setAttribute('aria-expanded', 'true');
+        if (spanText) {
+          spanText.textContent = isOpen ? translations[currentLang][hideKey] : translations[currentLang][showKey];
         }
       });
-    });
+    }
 
-    document.querySelectorAll('.terms-toggle').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const targetId = btn.getAttribute('data-target');
-        const content = document.getElementById(targetId);
-        const isOpen = content.classList.contains('is-open');
-        const spanText = btn.querySelector('.toggle-text');
+    // Manejador genérico para los desplegables de "hitos" y "condiciones":
+    // misma lógica de expandir/colapsar, solo cambian las claves de
+    // traducción y el margen extra de altura.
+    function bindToggleGroup(selector, showKey, hideKey, extraHeight) {
+      document.querySelectorAll(selector).forEach(btn => {
+        btn.addEventListener('click', () => {
+          const content = document.getElementById(btn.getAttribute('data-target'));
+          const isOpen = content.classList.contains('is-open');
+          const spanText = btn.querySelector('.toggle-text');
 
-        if (isOpen) {
-          content.style.maxHeight = '0px';
-          content.classList.remove('is-open');
-          content.style.opacity = '0';
-          spanText.textContent = translations[currentLang]['terms-btn-show'];
-          btn.setAttribute('aria-expanded', 'false');
-        } else {
-          content.style.maxHeight = content.scrollHeight + 2000 + 'px';
-          content.classList.add('is-open');
-          content.style.opacity = '1';
-          spanText.textContent = translations[currentLang]['terms-btn-hide'];
-          btn.setAttribute('aria-expanded', 'true');
-        }
+          if (isOpen) {
+            content.style.maxHeight = '0px';
+            content.classList.remove('is-open');
+            content.style.opacity = '0';
+            spanText.textContent = translations[currentLang][showKey];
+            btn.setAttribute('aria-expanded', 'false');
+          } else {
+            content.style.maxHeight = content.scrollHeight + extraHeight + 'px';
+            content.classList.add('is-open');
+            content.style.opacity = '1';
+            spanText.textContent = translations[currentLang][hideKey];
+            btn.setAttribute('aria-expanded', 'true');
+          }
+        });
       });
-    });
+    }
+
+    bindToggleGroup('.milestone-toggle', 'milestone-btn-show', 'milestone-btn-hide', 800);
+    bindToggleGroup('.terms-toggle', 'terms-btn-show', 'terms-btn-hide', 2000);
 
     const revealEls = document.querySelectorAll('.reveal');
     if ('IntersectionObserver' in window) {
@@ -1323,12 +1281,14 @@ se construye.</h2>
     const assistantPrompt = document.getElementById('brand-prompt');
     let assistantOpener = null;
     let assistantIsOpen = false;
-    const assistantFocusableSelector = 'button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), a[href]';
+    const focusableSelector = 'button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), a[href]';
 
     const TURNSTILE_SITEKEY = '0x4AAAAAAFAc6AhM84k_7AQk';
     let turnstileWidgetId = null;
+    const assistantSubmit = document.getElementById('brand-assistant-submit');
+    const assistantStatus = document.getElementById('assistant-status');
 
-    // Callback global de Turnstile
+    // Callback global que dispara Cloudflare cuando api.js termina de cargar.
     window.onloadTurnstileCallback = function () {
       if (assistantIsOpen) {
         renderOrResetTurnstile();
@@ -1339,12 +1299,29 @@ se construye.</h2>
       const container = document.getElementById('turnstile-container');
       if (!container || !window.turnstile) return;
 
+      // Mientras no haya verificación, el botón de envío permanece
+      // deshabilitado — no basta con comprobar el token al hacer submit.
+      assistantSubmit.disabled = true;
+      setAssistantStatus('status-verifying', 'idle');
+
       if (turnstileWidgetId === null) {
         try {
           turnstileWidgetId = window.turnstile.render(container, {
             sitekey: TURNSTILE_SITEKEY,
-            size: 'flexible', // Modo flexible para que se adapte perfectamente a móviles y contenedores
+            size: 'flexible',
             language: currentLang,
+            callback: function () {
+              assistantSubmit.disabled = false;
+              setAssistantStatus('status-waiting', 'ready');
+            },
+            'expired-callback': function () {
+              assistantSubmit.disabled = true;
+              setAssistantStatus('status-verifying', 'error');
+            },
+            'error-callback': function () {
+              assistantSubmit.disabled = true;
+              setAssistantStatus('status-failed', 'error');
+            }
           });
         } catch (e) {
           console.error('Error al renderizar Turnstile:', e);
@@ -1363,6 +1340,7 @@ se construye.</h2>
         } catch (e) {}
       }
       turnstileWidgetId = null;
+      assistantSubmit.disabled = true;
     }
 
     function getTurnstileToken() {
@@ -1385,7 +1363,6 @@ se construye.</h2>
       assistantTrigger.setAttribute('aria-expanded', 'true');
       assistantPanel.setAttribute('aria-hidden', 'false');
 
-      // Renderizar o resetear el widget al abrir
       renderOrResetTurnstile();
 
       window.setTimeout(() => assistantPrompt.focus(), 400);
@@ -1412,6 +1389,63 @@ se construye.</h2>
     assistantClose.addEventListener('click', closeAssistantPanel);
     assistantBackdrop.addEventListener('click', closeAssistantPanel);
 
+    // --- Modal de elección de flujo (Brandi vs. email) ---------------------
+    const planModal = document.getElementById('plan-modal');
+    const planModalContent = document.getElementById('plan-modal-content');
+    const planModalClose = document.getElementById('plan-modal-close');
+    let planModalOpener = null;
+    let planModalIsOpen = false;
+    let pendingPlanKey = null;
+    let pendingPlanOpener = null;
+
+    function openPlanModal() {
+      planModalOpener = pendingPlanOpener;
+      planModalIsOpen = true;
+      planModal.removeAttribute('inert');
+      planModal.classList.remove('opacity-0', 'pointer-events-none');
+      planModalContent.classList.remove('scale-95');
+      planModalContent.classList.add('scale-100');
+      document.body.classList.add('overflow-hidden');
+      planModal.setAttribute('aria-hidden', 'false');
+      window.setTimeout(() => {
+        const firstBtn = document.getElementById('modal-choose-ai');
+        if (firstBtn) firstBtn.focus();
+      }, 200);
+    }
+
+    function closePlanModal() {
+      planModalIsOpen = false;
+      planModal.classList.add('opacity-0', 'pointer-events-none');
+      planModalContent.classList.remove('scale-100');
+      planModalContent.classList.add('scale-95');
+      document.body.classList.remove('overflow-hidden');
+      planModal.setAttribute('aria-hidden', 'true');
+      planModal.setAttribute('inert', '');
+      if (planModalOpener && !planModalOpener.disabled) planModalOpener.focus();
+      planModalOpener = null;
+    }
+
+    document.getElementById('modal-choose-ai').addEventListener('click', () => {
+      const titleKey = pendingPlanKey;
+      const opener = pendingPlanOpener;
+      closePlanModal();
+      selectPlan(titleKey, opener);
+    });
+
+    document.getElementById('modal-choose-email').addEventListener('click', () => {
+      const planNameEs = translations.es[pendingPlanKey];
+      closePlanModal();
+      const subject = encodeURIComponent(`Interés en contratación - Plan ${planNameEs}`);
+      const body = encodeURIComponent(`Hola,\n\nEstoy interesado/a en el ${planNameEs} para mi proyecto.\n\nNombre de la marca / negocio:\nBreve descripción:\n\n¡Un saludo!`);
+      window.location.href = `mailto:hola@rebrandyourbrand.es?subject=${subject}&body=${body}`;
+    });
+
+    planModalClose.addEventListener('click', closePlanModal);
+    planModal.addEventListener('click', (e) => {
+      if (e.target === planModal) closePlanModal();
+    });
+    // -------------------------------------------------------------------------
+
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') {
         const isMenuOpen = !mobileNav.classList.contains('hidden');
@@ -1420,13 +1454,19 @@ se construye.</h2>
           mobileMenuToggle.focus();
           return;
         }
+        if (planModalIsOpen) {
+          closePlanModal();
+          return;
+        }
         if (!assistantIsOpen) return;
         closeAssistantPanel();
         return;
       }
-      if (!assistantIsOpen) return;
       if (event.key !== 'Tab') return;
-      const focusable = assistantPanel.querySelectorAll(assistantFocusableSelector);
+
+      const activeContainer = planModalIsOpen ? planModal : (assistantIsOpen ? assistantPanel : null);
+      if (!activeContainer) return;
+      const focusable = activeContainer.querySelectorAll(focusableSelector);
       if (!focusable.length) return;
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
@@ -1441,8 +1481,6 @@ se construye.</h2>
 
     const assistantForm = document.getElementById('brand-assistant-form');
     const assistantOutput = document.getElementById('assistant-output');
-    const assistantStatus = document.getElementById('assistant-status');
-    const assistantSubmit = document.getElementById('brand-assistant-submit');
 
     function setAssistantStatus(key, state) {
       assistantStatus.textContent = translations[currentLang][key];
@@ -1457,6 +1495,8 @@ se construye.</h2>
       return 'brandi';
     }
 
+    // Los mensajes se pintan con textContent, nunca con innerHTML: ni el
+    // texto del usuario ni la respuesta de la IA pueden inyectar markup.
     function renderHistory() {
       assistantOutput.innerHTML = '';
       if (!chatHistory.length) return;
@@ -1477,7 +1517,7 @@ se construye.</h2>
 
         const text = document.createElement('span');
         text.className = 'block text-xs md:text-sm leading-relaxed';
-        
+
         const displayText = entry.texts ? (entry.texts[currentLang] || Object.values(entry.texts)[0]) : entry.text;
         text.textContent = displayText;
 
@@ -1633,13 +1673,14 @@ se construye.</h2>
         }
       } finally {
         hideThinkingBubble();
-        assistantSubmit.disabled = false;
-
+        // Tras cada intento (éxito o error), reseteamos Turnstile y volvemos
+        // a deshabilitar el envío hasta la próxima verificación en verde.
         if (turnstileWidgetId !== null && window.turnstile) {
           try {
             window.turnstile.reset(turnstileWidgetId);
           } catch (e) {}
         }
+        assistantSubmit.disabled = true;
       }
     });
 
