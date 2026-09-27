@@ -301,6 +301,10 @@ textarea { resize: vertical; }
 .lowercase { text-transform: lowercase; }
 .uppercase { text-transform: uppercase; }
 
+/* Estilos personalizados para las zonas laterales interactivas en ordenador */
+.side-zone-left:hover .side-arrow { opacity: 0.5; transform: scale(1.05); }
+.side-zone-right:hover .side-arrow { opacity: 0.5; transform: scale(1.05); }
+
 /* Media queries para escritorio */
 @media (min-width: 48rem) { /* md */
   .md\:flex { display: flex; }
@@ -557,7 +561,7 @@ se construye.</h2>
       </div>
     </section>
 
-    <!-- Planes (Carrusel con botones integrados dentro de la tarjeta) -->
+    <!-- Planes (Carrusel con zonas laterales interactivas en ordenador y swipe táctil en móvil) -->
     <section id="planes" class="relative px-6 md:px-10 py-24 md:py-32 border-b border-line overflow-hidden z-10">
       <div class="max-w-6xl mx-auto relative z-10">
         <div class="reveal max-w-xl mb-12">
@@ -575,11 +579,28 @@ se construye.</h2>
           </p>
         </div>
 
-        <!-- Carrusel con tarjeta única -->
-        <div class="relative w-full flex items-center justify-center">
-          <div id="plans-container" aria-live="polite" class="w-full flex items-center justify-center">
+        <!-- Contenedor del Carrusel con áreas laterales interactivas en escritorio -->
+        <div class="relative w-full max-w-4xl mx-auto flex items-center justify-center">
+          <!-- Zona lateral izquierda (Ordenador: click en cualquier parte de la izquierda va al previo) -->
+          <button type="button" data-plan-prev aria-label="Plan anterior"
+                  class="side-zone-left absolute inset-y-0 left-0 w-1/3 hidden md:flex items-center justify-start pl-6 cursor-pointer z-20 bg-transparent border-none">
+            <span class="side-arrow w-10 h-10 rounded-full border border-line bg-ink/50 text-paper flex items-center justify-center opacity-0 transition-all duration-300">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+            </span>
+          </button>
+
+          <!-- Tarjeta central -->
+          <div id="plans-container" aria-live="polite" class="w-full max-w-lg mx-auto flex items-center justify-center z-10">
             <!-- Renderizado dinámico de la tarjeta activa -->
           </div>
+
+          <!-- Zona lateral derecha (Ordenador: click en cualquier parte de la derecha va al posterior) -->
+          <button type="button" data-plan-next aria-label="Plan siguiente"
+                  class="side-zone-right absolute inset-y-0 right-0 w-1/3 hidden md:flex items-center justify-end pr-6 cursor-pointer z-20 bg-transparent border-none">
+            <span class="side-arrow w-10 h-10 rounded-full border border-line bg-ink/50 text-paper flex items-center justify-center opacity-0 transition-all duration-300">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+            </span>
+          </button>
         </div>
 
         <!-- Indicador de página (puntos con accesibilidad corregida) -->
@@ -1239,19 +1260,6 @@ se construye.</h2>
         ? `<button type="button" data-open-recommended-modal class="absolute -top-3 right-6 bg-brand text-[#0A0A0C] text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full lang-trans hover:bg-brand-soft shadow-sm cursor-pointer">${t['plans-badge']}</button>`
         : '';
 
-      const integratedNavHtml = `
-        <div class="flex items-center justify-center gap-3 mb-6">
-          <button type="button" data-plan-prev aria-label="Plan anterior"
-                  class="w-10 h-10 rounded-full border border-line bg-ink/50 text-paper flex items-center justify-center hover:border-brand hover:scale-105 transition-all cursor-pointer">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
-          </button>
-          <button type="button" data-plan-next aria-label="Plan siguiente"
-                  class="w-10 h-10 rounded-full border border-line bg-ink/50 text-paper flex items-center justify-center hover:border-brand hover:scale-105 transition-all cursor-pointer">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
-          </button>
-        </div>
-      `;
-
       let featuresHtml = data.features
         .map(fKey => `<li class="flex items-center gap-2.5"><span class="text-brand font-bold">✓</span> <span class="lang-trans">${t[fKey]}</span></li>`)
         .join('');
@@ -1311,8 +1319,7 @@ se construye.</h2>
         ${discountBadgeHtml}
         ${recommendedBadgeHtml}
         <div>
-          ${integratedNavHtml}
-          <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center justify-between mb-4 pt-2">
             <h3 class="lang-trans lowercase font-display text-2xl md:text-3xl text-paper font-semibold">${title}</h3>
             <div class="text-right">
               <span class="lang-trans font-mono text-paper font-bold text-2xl md:text-3xl whitespace-nowrap">${regularPriceStr}</span>
@@ -1422,7 +1429,51 @@ se construye.</h2>
       }, 250);
     }
 
+    // Navegación por zonas laterales (Escritorio)
+    document.querySelectorAll('[data-plan-prev]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (isPlansAnimating) return;
+        currentPlanIndex = (currentPlanIndex - 1 + plansArray.length) % plansArray.length;
+        renderPlans();
+      });
+    });
+
+    document.querySelectorAll('[data-plan-next]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (isPlansAnimating) return;
+        currentPlanIndex = (currentPlanIndex + 1) % plansArray.length;
+        renderPlans();
+      });
+    });
+
+    // Soporte para Swipe táctil en móvil
+    let touchStartX = 0;
+    let touchEndX = 0;
     const plansContainerEl = document.getElementById('plans-container');
+
+    plansContainerEl.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    plansContainerEl.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      handleSwipe();
+    }, { passive: true });
+
+    function handleSwipe() {
+      const threshold = 50;
+      if (touchEndX < touchStartX - threshold) {
+        if (isPlansAnimating) return;
+        currentPlanIndex = (currentPlanIndex + 1) % plansArray.length;
+        renderPlans();
+      }
+      if (touchEndX > touchStartX + threshold) {
+        if (isPlansAnimating) return;
+        currentPlanIndex = (currentPlanIndex - 1 + plansArray.length) % plansArray.length;
+        renderPlans();
+      }
+    }
+
     plansContainerEl.addEventListener('click', (event) => {
       const discountBtn = event.target.closest('[data-open-launch-modal]');
       if (discountBtn) {
@@ -1433,22 +1484,6 @@ se construye.</h2>
       const recommendedBtn = event.target.closest('[data-open-recommended-modal]');
       if (recommendedBtn) {
         openRecommendedModal();
-        return;
-      }
-
-      const prevBtn = event.target.closest('[data-plan-prev]');
-      if (prevBtn) {
-        if (isPlansAnimating) return;
-        currentPlanIndex = (currentPlanIndex - 1 + plansArray.length) % plansArray.length;
-        renderPlans();
-        return;
-      }
-
-      const nextBtn = event.target.closest('[data-plan-next]');
-      if (nextBtn) {
-        if (isPlansAnimating) return;
-        currentPlanIndex = (currentPlanIndex + 1) % plansArray.length;
-        renderPlans();
         return;
       }
 
