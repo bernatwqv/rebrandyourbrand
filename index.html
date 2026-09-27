@@ -385,7 +385,7 @@ textarea { resize: vertical; }
 
   ::selection { background: rgb(var(--color-brand)); color: rgb(var(--color-bg)); }
 
-  body, header, .lang-trans, #plans-container, .milestone-content, .terms-content,
+  body, header, .lang-trans, #plans-container, .terms-content,
   #assistant-panel, #assistant-backdrop, #plan-modal, #plan-modal-content, #launch-modal, #launch-modal-content, #recommended-modal, #recommended-modal-content, .theme-icon, button, a {
     transition-property: background-color, border-color, color, opacity;
     transition-duration: 300ms;
@@ -453,7 +453,7 @@ textarea { resize: vertical; }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .hero-fade, .reveal, body, header, .lang-trans, #plans-container, .milestone-content,
+    .hero-fade, .reveal, body, header, .lang-trans, #plans-container,
     .terms-content, #assistant-panel, #assistant-backdrop, #assistant-trigger,
     #plan-modal, #plan-modal-content, #launch-modal, #launch-modal-content, #recommended-modal, #recommended-modal-content, .theme-icon, button, a, .bubble-in {
       transition: none !important;
@@ -607,27 +607,15 @@ se construye.</h2>
             <div>
               <div class="flex items-center justify-between mb-3">
                 <span class="lang-trans lowercase block text-xs tracking-wider text-ai font-mono" data-i18n="studio-card-1-tag">trayectoria & formación</span>
-                <button type="button" class="milestone-toggle text-xs font-mono text-ai hover:underline inline-flex items-center gap-1.5 cursor-pointer" aria-expanded="false" aria-controls="gael-milestones" data-target="gael-milestones">
-                  <span class="toggle-text" data-i18n="milestone-btn-show">+ ver hitos</span>
-                </button>
+                <a href="https://gaeldomenech.framer.website/" target="_blank" rel="noopener noreferrer" class="text-xs font-mono text-ai hover:underline inline-flex items-center gap-1.5 cursor-pointer">
+                  <span class="lang-trans" data-i18n="portfolio-btn">+ portfolio</span>
+                </a>
               </div>
 
               <h3 class="lang-trans lowercase font-display text-2xl text-paper mb-4" data-i18n="studio-card-1-title">gael domènech sevillano</h3>
               <p class="lang-trans text-muted text-sm leading-relaxed mb-6" data-i18n="studio-card-1-desc">
-                Diseñador gráfico nacido en 2004. Ex-estudiante de ilustración en la Escola d’Arts Serra i Abella.
+                Nacido en 2004. Graduado en ilustración en la EASD Josep Serra i Abella.
               </p>
-            </div>
-
-            <div id="gael-milestones" class="milestone-content overflow-hidden transition-all duration-400 max-h-0 opacity-0 space-y-4 pt-2 border-t border-line/40 mb-6">
-              <div class="pt-2">
-                <h4 class="lang-trans lowercase font-display text-lg text-paper mb-1" data-i18n="gael-milestone-1-title">imagen gráfica · festes de primavera</h4>
-                <p class="lang-trans text-muted text-xs leading-relaxed mb-3" data-i18n="gael-milestone-1-desc">
-                  Ganador oficial del cartel conmemorativo de les Festes de Primavera del centenari de L'Hospitalet de Llobregat (2025).
-                </p>
-                <div class="overflow-hidden border border-line/80 bg-ink">
-                  <img data-src="https://img.lhdigital.cat/wp-content/uploads/2025/03/GCH0261-1.jpg" alt="Gael Domènech Sevillano, ganador de la edición 100" loading="lazy" decoding="async" class="w-full h-40 object-cover hover:scale-105 transition-transform duration-700">
-                </div>
-              </div>
             </div>
 
             <div class="pt-6 border-t border-line/60 text-xs text-ai font-mono">
@@ -639,24 +627,12 @@ se construye.</h2>
             <div>
               <div class="flex items-center justify-between mb-3">
                 <span class="lang-trans lowercase block text-xs tracking-wider text-ai font-mono" data-i18n="studio-card-2-tag">trayectoria & formación</span>
-                <button type="button" class="milestone-toggle text-xs font-mono text-ai hover:underline inline-flex items-center gap-1.5 cursor-pointer" aria-expanded="false" aria-controls="bernat-milestones" data-target="bernat-milestones">
-                  <span class="toggle-text" data-i18n="milestone-btn-show">+ ver hitos</span>
-                </button>
               </div>
 
               <h3 class="lang-trans lowercase font-display text-2xl text-paper mb-4" data-i18n="studio-card-2-title">bernat domènech sevillano</h3>
               <p class="lang-trans text-muted text-sm leading-relaxed mb-6" data-i18n="studio-card-2-desc">
                 Nacido en 2008. Estudiante de Ingenieria Electrónica Industrial y Automática.
               </p>
-            </div>
-
-            <div id="bernat-milestones" class="milestone-content overflow-hidden transition-all duration-400 max-h-0 opacity-0 space-y-4 pt-2 border-t border-line/40 mb-6">
-              <div class="pt-2">
-                <h4 class="lang-trans lowercase font-display text-lg text-paper mb-1" data-i18n="bernat-milestone-1-title">creación de esta web</h4>
-                <p class="lang-trans text-muted text-xs leading-relaxed" data-i18n="bernat-milestone-1-desc">
-                  Diseño de la arquitectura técnica, despliegue full-stack en Cloudflare Workers e integración del asistente de IA Brandi para la captación automatizada de leads del estudio.
-                </p>
-              </div>
             </div>
 
             <div class="pt-6 border-t border-line/60 text-xs text-ai font-mono">
@@ -1012,18 +988,13 @@ se construye.</h2>
         "studio-sub": "Dirección de arte, desarrollo web en el edge e ingeniería aplicada.",
         "studio-card-1-tag": "trayectoria & formación",
         "studio-card-1-title": "gael domènech sevillano",
-        "studio-card-1-desc": "Diseñador gráfico nacido en 2004. Ex-estudiante de ilustración en la Escola d’Arts Serra i Abella.",
+        "studio-card-1-desc": "Nacido en 2004. Graduado en ilustración en la EASD Josep Serra i Abella.",
         "studio-card-1-role": "dirección de arte & diseño visual",
-        "gael-milestone-1-title": "imagen gráfica · festes de primavera",
-        "gael-milestone-1-desc": "Ganador oficial del cartel conmemorativo de les Festes de Primavera del centenari de L'Hospitalet de Llobregat (2025).",
+        "portfolio-btn": "+ portfolio",
         "studio-card-2-tag": "trayectoria & formación",
         "studio-card-2-title": "bernat domènech sevillano",
         "studio-card-2-desc": "Nacido en 2008. Estudiante de Ingenieria Electrónica Industrial y Automática.",
         "studio-card-2-role": "creador de webs",
-        "bernat-milestone-1-title": "creación de esta web",
-        "bernat-milestone-1-desc": "Diseño de la arquitectura técnica, despliegue full-stack en Cloudflare Workers e integración del asistente de IA Brandi para la captación automatizada de leads del estudio.",
-        "milestone-btn-show": "+ ver hitos",
-        "milestone-btn-hide": "- ocultar hitos",
 
         "plans-heading": "planes de rebranding y web",
         "plans-sub": "Contrata solo identidad o añade desarrollo web a medida. Sin cuotas mensuales ni ataduras.",
@@ -1129,18 +1100,13 @@ se construye.</h2>
         "studio-sub": "Art direction, edge web development, and applied engineering.",
         "studio-card-1-tag": "background & training",
         "studio-card-1-title": "gael domènech sevillano",
-        "studio-card-1-desc": "Graphic designer born in 2004. Former illustration student at Escola d’Arts Serra i Abella.",
+        "studio-card-1-desc": "Born in 2004. Illustration graduate at EASD Josep Serra i Abella.",
         "studio-card-1-role": "art direction & visual design",
-        "gael-milestone-1-title": "graphic imagery · festes de primavera",
-        "gael-milestone-1-desc": "Official winner of the commemorative poster for the centennial Festes de Primavera in L'Hospitalet de Llobregat (2025).",
+        "portfolio-btn": "+ portfolio",
         "studio-card-2-tag": "background & training",
         "studio-card-2-title": "bernat domènech sevillano",
         "studio-card-2-desc": "Born in 2008. Industrial Electronic and Automatic Engineering student.",
         "studio-card-2-role": "web creator",
-        "bernat-milestone-1-title": "creation of this website",
-        "bernat-milestone-1-desc": "Technical architecture design, full-stack edge deployment on Cloudflare Workers, and integration of Brandi AI assistant for automated studio lead capture.",
-        "milestone-btn-show": "+ view milestones",
-        "milestone-btn-hide": "- hide milestones",
 
         "plans-heading": "rebranding & web plans",
         "plans-sub": "Hire identity only or add custom web development. No monthly retainers or lock-ins.",
@@ -1316,7 +1282,6 @@ se construye.</h2>
         </div>
       `;
 
-      // Recuento de precio debajo del desarrollo web con el total en color text-paper
       const recountHtml = `
         <div class="mb-8 p-4 bg-ink/50 border border-line rounded-xl space-y-2 text-xs font-mono">
           <div class="flex justify-between text-muted">
@@ -1529,7 +1494,6 @@ se construye.</h2>
           }
         });
 
-        setToggleLabels('.milestone-toggle', 'milestone-btn-show', 'milestone-btn-hide');
         setToggleLabels('.terms-toggle', 'terms-btn-show', 'terms-btn-hide');
 
         renderPlans();
@@ -1595,7 +1559,6 @@ se construye.</h2>
       });
     }
 
-    bindToggleGroup('.milestone-toggle', 'milestone-btn-show', 'milestone-btn-hide', 600);
     bindToggleGroup('.terms-toggle', 'terms-btn-show', 'terms-btn-hide', 1500);
 
     const revealEls = document.querySelectorAll('.reveal');
