@@ -1047,7 +1047,7 @@ se construye.</h2>
         "p1-title": "plan esencial",
         "p1-desc": "Identidad visual esencial para autónomos y negocios locales, entregada llave en mano.",
         "p1-f1": "logotipo principal + paleta cromática y directrices tipográficas",
-        "p1-f2": "proceso guiado por fases (aprobación visual paso a paso)",
+        "p1-f2": "proceso guiado por fases (aprovación visual paso a paso)",
         "p1-f3": "entrega llave en mano con propiedad total (cero cuotas)",
         "p2-title": "plan evolución",
         "p2-desc": "Rebranding integral y sistema visual completo para marcas que exigen impacto.",
@@ -1115,7 +1115,8 @@ se construye.</h2>
         "err-empty": "por favor, escribe un mensaje antes de enviar.",
         "err-turnstile": "por favor, completa la verificación humana.",
         "err-network": "error al conectar con el servidor seguro",
-        "thinking-phrases": ["pensando...", "analizando territorios visuales...", "sintetizando concepto de marca...", "afinando dirección de arte..."]
+        "thinking-phrases": ["pensando...", "analizando territorios visuales...", "sintetizando concepto de marca...", "afinando dirección de arte..."],
+        "lead-closed-badge": "briefing enviado al estudio con éxito"
       },
       en: {
         "nav-planes": "plans",
@@ -1227,7 +1228,8 @@ se construye.</h2>
         "err-empty": "please drop a message before sending.",
         "err-turnstile": "please complete the human verification.",
         "err-network": "error connecting to the secure server",
-        "thinking-phrases": ["thinking it over...", "synthesizing brand architecture...", "shaping visual direction...", "fine-tuning design parameters..."]
+        "thinking-phrases": ["thinking it over...", "synthesizing brand architecture...", "shaping visual direction...", "fine-tuning design parameters..."],
+        "lead-closed-badge": "briefing successfully sent to the studio"
       },
       ca: {
         "nav-planes": "plans",
@@ -1279,7 +1281,7 @@ se construye.</h2>
         "p2-f2": "procés guiat per fases i validació pas a pas",
         "p2-f3": "lliurament clau en mà amb propietat total (zero quotes)",
         "p3-title": "pla partner",
-        "p3-desc": "Ecosistema de marca profund amb direcció d'art exclusiva i avançada.",
+        "p3-desc": "Ecosistema de marca profundo con dirección de arte exclusiva y avanzada.",
         "p3-f1": "rebranding profund i direcció d'art a mida",
         "p3-f2": "sistema visual avançat i directrius exclusives",
         "p3-f3": "lliurament clau en mà amb propietat total (zero quotes)",
@@ -1339,7 +1341,8 @@ se construye.</h2>
         "err-empty": "si us plau, escriu un missatge abans d'enviar.",
         "err-turnstile": "si us plau, completa la verificació humana.",
         "err-network": "error en connectar amb el servidor segur",
-        "thinking-phrases": ["pensant...", "analitzant territoris visuals...", "sintetitzant concepte de marca...", "afinant direcció d'art..."]
+        "thinking-phrases": ["pensant...", "analitzant territoris visuals...", "sintetitzant concepte de marca...", "afinant direcció d'art..."],
+        "lead-closed-badge": "briefing enviat a l'estudi amb èxit"
       }
     };
 
@@ -1672,8 +1675,6 @@ se construye.</h2>
           document.getElementById('plan-modal-title').textContent = translations[lang][pendingPlanKey];
         }
 
-        // Si el chat está abierto y el widget de Turnstile ya existe, lo recreamos
-        // en el nuevo idioma en vez de dejarlo congelado en el idioma inicial.
         if (assistantIsOpen && window.turnstile) {
           renderOrResetTurnstile();
         }
@@ -1824,8 +1825,6 @@ se construye.</h2>
       assistantSubmit.disabled = true;
       setAssistantStatus('status-verifying', 'idle');
 
-      // Si el widget existe pero en otro idioma, lo destruimos para recrearlo:
-      // Turnstile no permite cambiar el idioma de un widget ya renderizado.
       if (turnstileWidgetId !== null && turnstileWidgetLang !== currentLang) {
         try { window.turnstile.remove(turnstileWidgetId); } catch (e) {}
         turnstileWidgetId = null;
@@ -1932,8 +1931,6 @@ se construye.</h2>
     assistantClose.addEventListener('click', closeAssistantPanel);
     assistantBackdrop.addEventListener('click', closeAssistantPanel);
 
-    /* Utilidad genérica de modal centrado (evita repetir 3 veces la misma lógica
-       de apertura/cierre para launch-modal, recommended-modal y plan-modal) */
     function makeModal(modal, content, { onOpenFocus, onClose } = {}) {
       let isOpen = false;
       function open() {
@@ -1962,7 +1959,6 @@ se construye.</h2>
       return { open, close, isOpen: () => isOpen };
     }
 
-    /* Modal Popup Descuento -50% con blur y control total */
     const launchModal = document.getElementById('launch-modal');
     const launchModalContent = document.getElementById('launch-modal-content');
     const launchModalClose = document.getElementById('launch-modal-close');
@@ -1976,7 +1972,6 @@ se construye.</h2>
     launchModalClose.addEventListener('click', closeLaunchModal);
     launchModalOk.addEventListener('click', closeLaunchModal);
 
-    /* Modal Popup Plan Recomendado */
     const recommendedModal = document.getElementById('recommended-modal');
     const recommendedModalContent = document.getElementById('recommended-modal-content');
     const recommendedModalClose = document.getElementById('recommended-modal-close');
@@ -2132,6 +2127,15 @@ se construye.</h2>
 
         bubble.appendChild(label);
         bubble.appendChild(text);
+
+        // Feedback visual elegante cuando Brandi cierra un lead exitosamente
+        if (!isUser && entry.leadClosed) {
+          const badge = document.createElement('div');
+          badge.className = 'mt-2.5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono lowercase w-fit bubble-in';
+          badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span><span>${translations[currentLang]["lead-closed-badge"]}</span>`;
+          bubble.appendChild(badge);
+        }
+
         row.appendChild(bubble);
         assistantOutput.appendChild(row);
       });
@@ -2290,7 +2294,8 @@ se construye.</h2>
           role: 'assistant',
           texts: {
             [currentLang]: data.reply
-          }
+          },
+          leadClosed: data.leadClosed
         });
         renderHistory();
         assistantPrompt.value = '';
