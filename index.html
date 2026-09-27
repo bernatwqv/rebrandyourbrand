@@ -10,6 +10,7 @@
 <!-- Optimización de Red: Preconexión -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@400;500;600&display=swap">
 
 <!-- Google Fonts con carga no bloqueante -->
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
@@ -464,6 +465,15 @@ textarea { resize: vertical; }
       animation: none !important;
     }
   }
+
+  /* Soporte de "safe area" para notch / barra inferior en iOS (viewport-fit=cover) */
+  :root {
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  header { padding-top: env(safe-area-inset-top, 0px); }
+  #assistant-trigger { bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px)); }
+  #assistant-panel { padding-bottom: env(safe-area-inset-bottom, 0px); }
 </style>
 </head>
 
@@ -488,7 +498,7 @@ textarea { resize: vertical; }
       <span class="hidden md:inline-block w-px h-5 bg-line mx-5" aria-hidden="true"></span>
 
       <div class="flex items-center gap-3">
-        <button id="lang-toggle" type="button" aria-label="Cambiar idioma a Inglés"
+        <button id="lang-toggle" type="button" aria-label="Cambiar idioma"
                 class="relative w-10 h-10 rounded-full border border-line flex items-center justify-center text-paper font-mono text-xs hover:border-brand/60 hover:scale-105">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;" aria-hidden="true">
             <circle cx="12" cy="12" r="10"></circle>
@@ -1218,6 +1228,118 @@ se construye.</h2>
         "err-turnstile": "please complete the human verification.",
         "err-network": "error connecting to the secure server",
         "thinking-phrases": ["thinking it over...", "synthesizing brand architecture...", "shaping visual direction...", "fine-tuning design parameters..."]
+      },
+      ca: {
+        "nav-planes": "plans",
+        "nav-about": "sobre nosaltres",
+        "nav-terms": "termes",
+        "nav-contacto": "contacte",
+        "hero-tag": "estudi de rebranding i disseny visual",
+        "hero-title": "marques que deixen de passar desapercebudes.",
+        "hero-desc": "Redissenyem identitats visuals combinant direcció d'art i precisió tècnica, per a marques que necessiten veure's tan bé com el que fan.",
+        "manifesto-title": "una marca no es decora.\nes construeix.",
+        "manifesto-desc": "Cada projecte comença assenyalant l'essencial i descartant el superflu. No perseguim tendències: busquem un sistema que segueixi sent cert d'aquí a cinc anys.",
+        "studio-heading": "sobre nosaltres",
+        "studio-sub": "Direcció d'art, desenvolupament web al edge i enginyeria aplicada.",
+        "studio-card-1-tag": "trajectòria & formació",
+        "studio-card-1-title": "gael domènech sevillano",
+        "studio-card-1-desc": "Nascut el 2004. Graduat en il·lustració a l'EASD Josep Serra i Abella.",
+        "studio-card-1-role": "direcció d'art & disseny visual",
+        "portfolio-btn": "+ portfolio",
+        "studio-card-2-tag": "trajectòria & formació",
+        "studio-card-2-title": "bernat domènech sevillano",
+        "studio-card-2-desc": "Nascut el 2008. Estudiant d'Enginyeria Electrònica Industrial i Automàtica.",
+        "studio-card-2-role": "creador de webs",
+
+        "plans-heading": "plans de rebranding i web",
+        "plans-sub": "Contracta només identitat o afegeix desenvolupament web a mida. Sense quotes mensuals ni lligams.",
+        "plans-quote": "ens estalviem el .99 en trucos de màrqueting per oferir-te una qualitat innegociable.",
+        "launch-modal-eyebrow": "filosofia de l'estudi",
+        "launch-modal-title": "per què oferim un -50% de descompte?",
+        "launch-modal-p1": "Com a estudi emergent fundat per joves apassionats, sabem que comencem el nostre camí sense un portfolio històric gegant ni la veterania de les grans agències tradicionals.",
+        "launch-modal-p2": "Per això, vam decidir compensar això de la manera més honesta possible: reduint els nostres preus un 50% de manera temporal. No retallem en qualitat (ens estalviem els trucos de màrqueting del .99 per oferir excel·lència absoluta), sinó que invertim tota la nostra energia i màxima dedicació en cada projecte per construir relacions de confiança i casos d'èxit memorables juntament amb tu.",
+        "launch-modal-ok": "entès, anem a crear!",
+
+        "recommended-modal-eyebrow": "filosofia de l'estudi",
+        "recommended-modal-title": "per què és la nostra opció recomanada?",
+        "recommended-modal-p1": "És l'opció recomanada per a aquells que busquen l'equilibri perfecte i la millor relació qualitat-preu per potenciar la seva marca al màxim nivell, assegurant un sistema visual complet i professional.",
+        "recommended-modal-ok": "entès, anem a crear!",
+
+        "plans-badge": "recomanat",
+        "plans-discount-badge": "-50% de descompte",
+        "plans-cta": "començar pla",
+        "p1-title": "pla essencial",
+        "p1-desc": "Identitat visual essencial per a autònoms i negocis locals, lliurada clau en mà.",
+        "p1-f1": "logotip principal + paleta cromàtica i directrius tipogràfiques",
+        "p1-f2": "procés guiat per fases (aprovació visual pas a pas)",
+        "p1-f3": "lliurament clau en mà amb propietat total (zero quotes)",
+        "p2-title": "pla evolució",
+        "p2-desc": "Rebranding integral i sistema visual complet per a marques que exigeixen impacte.",
+        "p2-f1": "rebranding integral (sistema visual complet i guia d'estil)",
+        "p2-f2": "procés guiat per fases i validació pas a pas",
+        "p2-f3": "lliurament clau en mà amb propietat total (zero quotes)",
+        "p3-title": "pla partner",
+        "p3-desc": "Ecosistema de marca profund amb direcció d'art exclusiva i avançada.",
+        "p3-f1": "rebranding profund i direcció d'art a mida",
+        "p3-f2": "sistema visual avançat i directrius exclusives",
+        "p3-f3": "lliurament clau en mà amb propietat total (zero quotes)",
+
+        "recount-base": "Preu base identitat:",
+        "recount-web": "Desenvolupament web a mida:",
+        "recount-discount": "Descompte llançament (-50%):",
+        "recount-total": "Total:",
+
+        "modal-eyebrow": "onboarding",
+        "modal-title": "pla seleccionat",
+        "modal-intro": "tria com prefereixes que comencem a perfilar els detalls del teu projecte:",
+        "modal-ai-title": "xarlar amb brandi (ia)",
+        "modal-ai-desc": "briefing guiat, ràpid i sense fricció",
+        "modal-email-title": "forma tradicional (correu)",
+        "modal-email-desc": "enviar un email directe a l'estudi",
+
+        "terms-eyebrow": "marc legal i operatiu",
+        "terms-heading": "condicions de servei",
+        "terms-sub": "Regles clares, metodologia per fases i protecció mútua per garantir l'èxit i la transparència de cada projecte a rebrandyourbrand.",
+        "terms-btn-show": "+ veure condicions",
+        "terms-btn-hide": "- amagar condicions",
+        "t1-title": "1. naturalesa dels serveis i abast dels plans",
+        "t1-p": "rebrandyourbrand ofereix serveis tancats de rebranding i desenvolupament web sota pagament únic. Cada pla detalla estrictament els seus lliurables. Qualsevol característica, secció addicional, funcionalitat de comerç electrònic (e-commerce), base de dades complexa o desenvolupament a mida que no estigui especificat explícitament en el pla contractat quedarà exclòs del preu base i requerirà la contractació d'un pla superior (Upsell) o un pressupost extraordinari per hora d'enginyeria.",
+        "t2-title": "2. metodologia de treball per fases i límit de revisions",
+        "t2-intro": "Per evitar discrepàncies d'abast i garantir l'agilitat, tots els projectes s'executen sota un estricte procés seqüencial de 3 fases amb validació obligatòria per escrit (via correu electrònic, WhatsApp o missatgeria corporativa):",
+        "t2-f1-title": "Fase 1 (Identitat i Direcció d'Art):",
+        "t2-f1-desc": "Gael presenta les propostes de logotip, paleta cromàtica i directrius tipogràfiques. El client avalua i selecciona una opció definitiva. Cada fase inclou un màxim de 2 rondes de revisions o ajustos menors sobre la proposta inicial. Un cop el client atorga el seu vist plau (\"Aprovat\"), el disseny del logotip i la identitat visual es consideren tancats i inalterables. Si amb posterioritat (fins i tot durant el desenvolupament web) el client sol·licita modificar el logotip, canviar colors principals o redissenyar la identitat, aquest canvi constituirà un treball extraordinari tarifat a 50 €/hora.",
+        "t2-f2-title": "Fase 2 (Estructura i Desenvolupament Web):",
+        "t2-f2-desc": "S'implementa l'estructura web (landing page scrollable o web multicapa segons el pla) amb els textos i materials aportats pel client. El client revisa la versió provisional i valida la distribució i el disseny base (incloent fins a 2 rondas d'ajustos menors). Amb el OK a aquesta fase, l'estructura queda ferma. Modificacions estructurals majors o reordenacions profundes sol·licitades després d'aquesta aprovació implicaran costos addicionals.",
+        "t2-f3-title": "Fase 3 (Desplegament i Lliurament Clau en Mà):",
+        "t2-f3-desc": "Un cop superades les fases anteriors, Bernat efectua el desplegament tècnic definitiu a GitHub i Cloudflare, realitzant el lliurament formal clau en mà i transferint la propietat tècnica acordada al client.",
+        "t3-title": "3. aportació de materials, dominis i terminis del client",
+        "t3-p": "El client és l'únic propietari i responsable de la compra, renovació i titularitat del seu domini web. El client es compromet a subministrar els textos, imatges corporatives, logotips previs (si n'hi hagués) i els accessos de gestió DNS necessaris a rebrandyourbrand en un termini màxim de 15 dies naturals des de la contractació. Si el client experimenta retards superiors a 30 dies naturals sense previ avís, el projecte es considerarà suspès temporalment; la seva reactivació posterior estarà subjecta a la disponibilitat de l'estudi a l'agenda de treball. rebrandyourbrand no es fa responsable d'errates tipogràfiques o errors en textos facilitats directament pel client.",
+        "t4-title": "4. propietat intel·lectual, pagaments i política de reemborsaments",
+        "t4-p": "La propietat intel·lectual i comercial dels dissenys, logotips i desenvolupaments web creats es transfereix íntegrament al client un cop abonat el 100% de la tarifa del pla corresponent. En tractar-se de serveis personalitzats de creació intel·lectual i tècnica desenvolupats a mida, no s'admeten devolucions ni reemborsaments econòmics un cop iniciada formalment la Fase 1 del projecte. Les tarifes són de pagament únic, sense quotes mensuals ocultes per part de rebrandyourbrand.",
+        "t5-title": "5. limitacions de responsabilitat tècnica",
+        "t5-p": "rebrandyourbrand dissenya i implementa solucions web d'alt rendiment optimitzades per a entorns moderns (Cloudflare, GitHub Pages). L'estudi no assumeix responsabilitat per caigudes de servidors de tercers, modificacions no autoritzades realitzades per tercers al codi font després del lliurament, ni per l'incompliment normatiu de cookies, LSSI o RGPD en els textos legals particulars que el client decideixi incorporar de manera independent al seu lloc web.",
+        "t6-title": "6. garantia tècnica post-lliurament",
+        "t6-p": "S'estableix un període de garantia tècnica de 14 dies naturals després del lliurament final, destinat exclusivamente a solucionar possibles errors de visualització o fallades tècniques imputables directament al desenvolupament inicial. Transcorregut aquest termini, qualsevol intervenció, suport o modificació posterior es gestionarà sota la tarifa d'hores estipulada.",
+        "t7-title": "7. llei aplicable i jurisdicció",
+        "t7-p": "Per a qualsevol controvèrsia o disputa legal derivada de la interpretació o compliment d'aquestes condicions, ambdues parts se sotmeten expressament a la jurisdicció dels Jutjats i Tribunals de Barcelona, renunciant a qualsevol altre fur que pogués correspondre-ls.",
+
+        "footer-title": "parlem de la teva marca.",
+        "footer-copy": "rebrandyourbrand — rebranding i disseny visual",
+        "footer-rights": "Tots els drets reservats",
+        "panel-title": "brandi · assistent creatiu",
+        "panel-subtitle": "intel·ligència artificial de marca",
+        "panel-placeholder": "escriu un missatge a brandi...",
+        "turnstile-label": "verificació humana",
+        "status-waiting": "en espera",
+        "status-verifying": "verificant seguretat...",
+        "status-consulting": "consultant amb brandi...",
+        "status-completed": "completat",
+        "status-failed": "fallit",
+        "output-placeholder": "inicia la conversa com brandi o selecciona un pla.",
+        "err-empty": "si us plau, escriu un missatge abans d'enviar.",
+        "err-turnstile": "si us plau, completa la verificació humana.",
+        "err-network": "error en connectar amb el servidor segur",
+        "thinking-phrases": ["pensant...", "analitzant territoris visuals...", "sintetitzant concepte de marca...", "afinant direcció d'art..."]
       }
     };
 
@@ -1247,10 +1369,10 @@ se construye.</h2>
       const regularPrice = data.originalPrice;
       const totalCost = data.basePrice + (webIncluded ? 200 : 0);
 
-      const regularPriceStr = currentLang === 'es' ? `${regularPrice}&nbsp;€` : `€${regularPrice}`;
-      const discountStr = currentLang === 'es' ? `-${regularPrice - data.basePrice}&nbsp;€` : `-€${regularPrice - data.basePrice}`;
-      const totalStr = currentLang === 'es' ? `${totalCost}&nbsp;€` : `€${totalCost}`;
-      const webPriceStr = currentLang === 'es' ? `+200&nbsp;€` : `+€200`;
+      const regularPriceStr = currentLang === 'es' || currentLang === 'ca' ? `${regularPrice}&nbsp;€` : `€${regularPrice}`;
+      const discountStr = currentLang === 'es' || currentLang === 'ca' ? `-${regularPrice - data.basePrice}&nbsp;€` : `-€${regularPrice - data.basePrice}`;
+      const totalStr = currentLang === 'es' || currentLang === 'ca' ? `${totalCost}&nbsp;€` : `€${totalCost}`;
+      const webPriceStr = currentLang === 'es' || currentLang === 'ca' ? `+200&nbsp;€` : `+€200`;
 
       const desc = t[data.descKey];
 
@@ -1265,12 +1387,12 @@ se construye.</h2>
         .join('');
 
       if (webIncluded) {
-        const webFeatureText = currentLang === 'es' ? 'landing page de alto rendimiento (GitHub + Cloudflare)' : 'high-performance landing page (GitHub + Cloudflare)';
+        const webFeatureText = currentLang === 'es' ? 'landing page de alto rendimiento (GitHub + Cloudflare)' : (currentLang === 'ca' ? 'landing page d\'alt rendiment (GitHub + Cloudflare)' : 'high-performance landing page (GitHub + Cloudflare)');
         featuresHtml += `<li class="flex items-center gap-2.5 bubble-in"><span class="text-brand font-bold">✓</span> <span class="text-paper font-medium">${webFeatureText}</span></li>`;
       }
 
-      const webToggleLabel = currentLang === 'es' ? 'añadir desarrollo web' : 'add custom web development';
-      const webToggleSub = currentLang === 'es' ? 'landing page lista para producción (precio fijo)' : 'production-ready landing page (fixed price)';
+      const webToggleLabel = currentLang === 'es' ? 'añadir desarrollo web' : (currentLang === 'ca' ? 'afegir desenvolupament web' : 'add custom web development');
+      const webToggleSub = currentLang === 'es' ? 'landing page lista para producción (precio fijo)' : (currentLang === 'ca' ? 'landing page llesta per a producció (preu fix)' : 'production-ready landing page (fixed price)');
       
       const webToggleHtml = `
         <div class="mb-6 pt-2">
@@ -1362,6 +1484,7 @@ se construye.</h2>
 
       const pTitleEs = translations.es[titleKey];
       const pTitleEn = translations.en[titleKey];
+      const pTitleCa = translations.ca[titleKey];
       const basePrice = plansArray.find(p => p.id === planId)?.basePrice || 0;
       const finalTotal = basePrice + (hasWeb ? 200 : 0);
 
@@ -1369,7 +1492,8 @@ se construye.</h2>
         role: 'assistant',
         texts: {
           es: `¡Perfecto! Te decantas por el ${pTitleEs}${hasWeb ? ' con desarrollo web incluido' : ' (solo identidad)'} (${finalTotal} € total con descuento de lanzamiento). ¿Cómo se llama tu marca o proyecto actual para continuar?`,
-          en: `Perfect! You're leaning towards the ${pTitleEn}${hasWeb ? ' with web design included' : ' (identity only)'} (€${finalTotal} total with launch discount). What is your current brand or project name to continue?`
+          en: `Perfect! You're leaning towards the ${pTitleEn}${hasWeb ? ' with web design included' : ' (identity only)'} (€${finalTotal} total with launch discount). What is your current brand or project name to continue?`,
+          ca: `¡Perfecte! T'atures pel ${pTitleCa}${hasWeb ? ' amb desenvolupament web inclòs' : ' (només identitat)'} (${finalTotal} € total amb descompte de llançament). Com es diu la teva marca o projecte actual per continuar?`
         }
       };
 
@@ -1391,7 +1515,7 @@ se construye.</h2>
       
       const planNames = currentLang === 'es' 
         ? ['Ir al plan esencial', 'Ir al plan evolución', 'Ir al plan partner']
-        : ['Go to essential plan', 'Go to evolution plan', 'Go to partner plan'];
+        : (currentLang === 'ca' ? ['Anar al pla essencial', 'Anar al pla evolució', 'Anar al pla partner'] : ['Go to essential plan', 'Go to evolution plan', 'Go to partner plan']);
 
       dotButtons.forEach((btn, idx) => {
         btn.setAttribute('aria-label', planNames[idx] || `Plan ${idx + 1}`);
@@ -1429,16 +1553,14 @@ se construye.</h2>
       }, 250);
     }
 
-    // Función para cambiar de plan y resetear la web del plan que se deja atrás
     function goToPlan(newIndex) {
       if (isPlansAnimating || newIndex === currentPlanIndex) return;
       const oldPlanId = plansArray[currentPlanIndex].id;
-      planWebState[oldPlanId] = false; // Desactiva la web del plan anterior
+      planWebState[oldPlanId] = false;
       currentPlanIndex = newIndex;
       renderPlans();
     }
 
-    // Navegación por zonas laterales (Escritorio)
     document.querySelectorAll('[data-plan-prev]').forEach(btn => {
       btn.addEventListener('click', () => {
         const newIndex = (currentPlanIndex - 1 + plansArray.length) % plansArray.length;
@@ -1453,7 +1575,6 @@ se construye.</h2>
       });
     });
 
-    // Soporte para Swipe táctil en móvil
     let touchStartX = 0;
     let touchEndX = 0;
     const plansContainerEl = document.getElementById('plans-container');
@@ -1517,7 +1638,9 @@ se construye.</h2>
       currentLang = lang;
       langIndicator.textContent = lang;
       document.documentElement.lang = lang;
-      langToggle.setAttribute('aria-label', lang === 'es' ? 'Cambiar idioma a Inglés' : 'Change language to Spanish');
+      
+      const langLabels = { es: 'Cambiar idioma a Inglés', en: 'Canviar idioma a Català', ca: 'Cambiar idioma a Español' };
+      langToggle.setAttribute('aria-label', langLabels[lang]);
 
       const elements = document.querySelectorAll('.lang-trans');
       elements.forEach(el => el.classList.add('is-changing'));
@@ -1549,12 +1672,19 @@ se construye.</h2>
           document.getElementById('plan-modal-title').textContent = translations[lang][pendingPlanKey];
         }
 
+        // Si el chat está abierto y el widget de Turnstile ya existe, lo recreamos
+        // en el nuevo idioma en vez de dejarlo congelado en el idioma inicial.
+        if (assistantIsOpen && window.turnstile) {
+          renderOrResetTurnstile();
+        }
+
         elements.forEach(el => el.classList.remove('is-changing'));
       }, 250);
     }
 
     langToggle.addEventListener('click', () => {
-      switchLanguage(currentLang === 'es' ? 'en' : 'es');
+      const nextLang = currentLang === 'es' ? 'en' : (currentLang === 'en' ? 'ca' : 'es');
+      switchLanguage(nextLang);
     });
 
     function setToggleLabels(selector, showKey, hideKey) {
@@ -1664,6 +1794,7 @@ se construye.</h2>
 
     const TURNSTILE_SITEKEY = '0x4AAAAAAFAc6AhM84k_7AQk';
     let turnstileWidgetId = null;
+    let turnstileWidgetLang = null;
     const assistantSubmit = document.getElementById('brand-assistant-submit');
     const assistantStatus = document.getElementById('assistant-status');
 
@@ -1693,6 +1824,13 @@ se construye.</h2>
       assistantSubmit.disabled = true;
       setAssistantStatus('status-verifying', 'idle');
 
+      // Si el widget existe pero en otro idioma, lo destruimos para recrearlo:
+      // Turnstile no permite cambiar el idioma de un widget ya renderizado.
+      if (turnstileWidgetId !== null && turnstileWidgetLang !== currentLang) {
+        try { window.turnstile.remove(turnstileWidgetId); } catch (e) {}
+        turnstileWidgetId = null;
+      }
+
       if (turnstileWidgetId === null) {
         try {
           turnstileWidgetId = window.turnstile.render(container, {
@@ -1712,6 +1850,7 @@ se construye.</h2>
               setAssistantStatus('status-failed', 'error');
             }
           });
+          turnstileWidgetLang = currentLang;
         } catch (e) {
           console.error('Error al renderizar Turnstile:', e);
         }
@@ -1729,6 +1868,7 @@ se construye.</h2>
         } catch (e) {}
       }
       turnstileWidgetId = null;
+      turnstileWidgetLang = null;
       assistantSubmit.disabled = true;
     }
 
@@ -1792,77 +1932,63 @@ se construye.</h2>
     assistantClose.addEventListener('click', closeAssistantPanel);
     assistantBackdrop.addEventListener('click', closeAssistantPanel);
 
+    /* Utilidad genérica de modal centrado (evita repetir 3 veces la misma lógica
+       de apertura/cierre para launch-modal, recommended-modal y plan-modal) */
+    function makeModal(modal, content, { onOpenFocus, onClose } = {}) {
+      let isOpen = false;
+      function open() {
+        isOpen = true;
+        modal.removeAttribute('inert');
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+        modal.classList.add('opacity-100');
+        content.classList.remove('scale-95');
+        content.classList.add('scale-100');
+        document.body.classList.add('overflow-hidden');
+        modal.setAttribute('aria-hidden', 'false');
+        if (onOpenFocus) window.setTimeout(onOpenFocus, 150);
+      }
+      function close() {
+        isOpen = false;
+        modal.classList.add('opacity-0', 'pointer-events-none');
+        modal.classList.remove('opacity-100');
+        content.classList.remove('scale-100');
+        content.classList.add('scale-95');
+        document.body.classList.remove('overflow-hidden');
+        modal.setAttribute('aria-hidden', 'true');
+        modal.setAttribute('inert', '');
+        if (onClose) onClose();
+      }
+      modal.addEventListener('click', (e) => { if (e.target === modal) close(); });
+      return { open, close, isOpen: () => isOpen };
+    }
+
     /* Modal Popup Descuento -50% con blur y control total */
     const launchModal = document.getElementById('launch-modal');
     const launchModalContent = document.getElementById('launch-modal-content');
     const launchModalClose = document.getElementById('launch-modal-close');
     const launchModalOk = document.getElementById('launch-modal-ok');
-    let launchModalIsOpen = false;
 
-    function openLaunchModal() {
-      launchModalIsOpen = true;
-      launchModal.removeAttribute('inert');
-      launchModal.classList.remove('opacity-0', 'pointer-events-none');
-      launchModal.classList.add('opacity-100');
-      launchModalContent.classList.remove('scale-95');
-      launchModalContent.classList.add('scale-100');
-      document.body.classList.add('overflow-hidden');
-      launchModal.setAttribute('aria-hidden', 'false');
-      window.setTimeout(() => launchModalOk.focus(), 150);
-    }
-
-    function closeLaunchModal() {
-      launchModalIsOpen = false;
-      launchModal.classList.add('opacity-0', 'pointer-events-none');
-      launchModal.classList.remove('opacity-100');
-      launchModalContent.classList.remove('scale-100');
-      launchModalContent.classList.add('scale-95');
-      document.body.classList.remove('overflow-hidden');
-      launchModal.setAttribute('aria-hidden', 'true');
-      launchModal.setAttribute('inert', '');
-    }
-
+    const launchModalCtrl = makeModal(launchModal, launchModalContent, {
+      onOpenFocus: () => launchModalOk.focus()
+    });
+    function openLaunchModal() { launchModalCtrl.open(); }
+    function closeLaunchModal() { launchModalCtrl.close(); }
     launchModalClose.addEventListener('click', closeLaunchModal);
     launchModalOk.addEventListener('click', closeLaunchModal);
-    launchModal.addEventListener('click', (e) => {
-      if (e.target === launchModal) closeLaunchModal();
-    });
 
     /* Modal Popup Plan Recomendado */
     const recommendedModal = document.getElementById('recommended-modal');
     const recommendedModalContent = document.getElementById('recommended-modal-content');
     const recommendedModalClose = document.getElementById('recommended-modal-close');
     const recommendedModalOk = document.getElementById('recommended-modal-ok');
-    let recommendedModalIsOpen = false;
 
-    function openRecommendedModal() {
-      recommendedModalIsOpen = true;
-      recommendedModal.removeAttribute('inert');
-      recommendedModal.classList.remove('opacity-0', 'pointer-events-none');
-      recommendedModal.classList.add('opacity-100');
-      recommendedModalContent.classList.remove('scale-95');
-      recommendedModalContent.classList.add('scale-100');
-      document.body.classList.add('overflow-hidden');
-      recommendedModal.setAttribute('aria-hidden', 'false');
-      window.setTimeout(() => recommendedModalOk.focus(), 150);
-    }
-
-    function closeRecommendedModal() {
-      recommendedModalIsOpen = false;
-      recommendedModal.classList.add('opacity-0', 'pointer-events-none');
-      recommendedModal.classList.remove('opacity-100');
-      recommendedModalContent.classList.remove('scale-100');
-      recommendedModalContent.classList.add('scale-95');
-      document.body.classList.remove('overflow-hidden');
-      recommendedModal.setAttribute('aria-hidden', 'true');
-      recommendedModal.setAttribute('inert', '');
-    }
-
+    const recommendedModalCtrl = makeModal(recommendedModal, recommendedModalContent, {
+      onOpenFocus: () => recommendedModalOk.focus()
+    });
+    function openRecommendedModal() { recommendedModalCtrl.open(); }
+    function closeRecommendedModal() { recommendedModalCtrl.close(); }
     recommendedModalClose.addEventListener('click', closeRecommendedModal);
     recommendedModalOk.addEventListener('click', closeRecommendedModal);
-    recommendedModal.addEventListener('click', (e) => {
-      if (e.target === recommendedModal) closeRecommendedModal();
-    });
 
     const planModal = document.getElementById('plan-modal');
     const planModalContent = document.getElementById('plan-modal-content');
@@ -1908,7 +2034,7 @@ se construye.</h2>
     });
 
     document.getElementById('modal-choose-email').addEventListener('click', () => {
-      const planNameEs = translations.es[pendingPlanKey];
+      const planNameEs = translations[currentLang][pendingPlanKey];
       const hasWeb = pendingPlanId ? planWebState[pendingPlanId] : false;
       const basePrice = plansArray.find(p => p.id === pendingPlanId)?.basePrice || 0;
       const finalTotal = basePrice + (hasWeb ? 200 : 0);
@@ -1931,11 +2057,11 @@ se construye.</h2>
           mobileMenuToggle.focus();
           return;
         }
-        if (launchModalIsOpen) {
+        if (launchModalCtrl.isOpen()) {
           closeLaunchModal();
           return;
         }
-        if (recommendedModalIsOpen) {
+        if (recommendedModalCtrl.isOpen()) {
           closeRecommendedModal();
           return;
         }
@@ -1949,7 +2075,7 @@ se construye.</h2>
       }
       if (event.key !== 'Tab') return;
 
-      const activeContainer = launchModalIsOpen ? launchModal : (recommendedModalIsOpen ? recommendedModal : (planModalIsOpen ? planModal : (assistantIsOpen ? assistantPanel : null)));
+      const activeContainer = launchModalCtrl.isOpen() ? launchModal : (recommendedModalCtrl.isOpen() ? recommendedModal : (planModalIsOpen ? planModal : (assistantIsOpen ? assistantPanel : null)));
       if (!activeContainer) return;
       const focusable = activeContainer.querySelectorAll(focusableSelector);
       if (!focusable.length) return;
@@ -1976,7 +2102,7 @@ se construye.</h2>
 
     const chatHistory = [];
     function roleLabel(role) {
-      if (role === 'user') return currentLang === 'es' ? 'tú' : 'you';
+      if (role === 'user') return currentLang === 'es' ? 'tú' : (currentLang === 'ca' ? 'tu' : 'you');
       return 'brandi';
     }
 
@@ -2111,12 +2237,19 @@ se construye.</h2>
         const hasWeb = planId ? planWebState[planId] : false;
         const planName = translations.es[activePlanKey];
         const planNameEn = translations.en[activePlanKey];
+        const planNameCa = translations.ca[activePlanKey];
 
         if (currentLang === 'es') {
           if (hasWeb) {
             planContextPrefix = `[CONTEXTO OBLIGATORIO - PLAN SELECCIONADO: El usuario ha seleccionado el ${planName} INCLUYENDO desarrollo web a medida (+200 €). Debes presupuestar el rebranding junto con la landing page web y hablar de ambos entregables].\n`;
           } else {
             planContextPrefix = `[CONTEXTO OBLIGATORIO - PLAN SELECCIONADO: El usuario ha seleccionado el ${planName} EN MODO SOLO IDENTIDAD (SIN desarrollo web). NO incluyas web en el presupuesto ni hables de desarrollo web a menos que el usuario pida explícitamente añadir la web].\n`;
+          }
+        } else if (currentLang === 'ca') {
+          if (hasWeb) {
+            planContextPrefix = `[CONTEXT OBLIGATORI - PLA SELECCIONAT: L'usuari ha seleccionat el ${planNameCa} INCLOENT desenvolupament web a mida (+200 €). Has de pressupostar el rebranding juntament amb la landing page web i parlar de tots dos lliurables].\n`;
+          } else {
+            planContextPrefix = `[CONTEXT OBLIGATORI - PLA SELECCIONAT: L'usuari ha seleccionat el ${planNameCa} EN MODE NOMÉS IDENTITAT (SENSE desenvolupament web). NO incloguis web al pressupost ni parlis de desenvolupament web a menys que l'usuari demani explícitament afegir la web].\n`;
           }
         } else {
           if (hasWeb) {
