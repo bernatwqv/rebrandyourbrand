@@ -1429,20 +1429,27 @@ se construye.</h2>
       }, 250);
     }
 
+    // Función para cambiar de plan y resetear la web del plan que se deja atrás
+    function goToPlan(newIndex) {
+      if (isPlansAnimating || newIndex === currentPlanIndex) return;
+      const oldPlanId = plansArray[currentPlanIndex].id;
+      planWebState[oldPlanId] = false; // Desactiva la web del plan anterior
+      currentPlanIndex = newIndex;
+      renderPlans();
+    }
+
     // Navegación por zonas laterales (Escritorio)
     document.querySelectorAll('[data-plan-prev]').forEach(btn => {
       btn.addEventListener('click', () => {
-        if (isPlansAnimating) return;
-        currentPlanIndex = (currentPlanIndex - 1 + plansArray.length) % plansArray.length;
-        renderPlans();
+        const newIndex = (currentPlanIndex - 1 + plansArray.length) % plansArray.length;
+        goToPlan(newIndex);
       });
     });
 
     document.querySelectorAll('[data-plan-next]').forEach(btn => {
       btn.addEventListener('click', () => {
-        if (isPlansAnimating) return;
-        currentPlanIndex = (currentPlanIndex + 1) % plansArray.length;
-        renderPlans();
+        const newIndex = (currentPlanIndex + 1 + plansArray.length) % plansArray.length;
+        goToPlan(newIndex);
       });
     });
 
@@ -1463,14 +1470,12 @@ se construye.</h2>
     function handleSwipe() {
       const threshold = 50;
       if (touchEndX < touchStartX - threshold) {
-        if (isPlansAnimating) return;
-        currentPlanIndex = (currentPlanIndex + 1) % plansArray.length;
-        renderPlans();
+        const newIndex = (currentPlanIndex + 1 + plansArray.length) % plansArray.length;
+        goToPlan(newIndex);
       }
       if (touchEndX > touchStartX + threshold) {
-        if (isPlansAnimating) return;
-        currentPlanIndex = (currentPlanIndex - 1 + plansArray.length) % plansArray.length;
-        renderPlans();
+        const newIndex = (currentPlanIndex - 1 + plansArray.length) % plansArray.length;
+        goToPlan(newIndex);
       }
     }
 
@@ -1503,9 +1508,9 @@ se construye.</h2>
 
     document.getElementById('plans-dots').addEventListener('click', (e) => {
       const dot = e.target.closest('[data-dot-index]');
-      if (!dot || isPlansAnimating) return;
-      currentPlanIndex = parseInt(dot.getAttribute('data-dot-index'), 10);
-      renderPlans();
+      if (!dot) return;
+      const newIndex = parseInt(dot.getAttribute('data-dot-index'), 10);
+      goToPlan(newIndex);
     });
 
     function switchLanguage(lang) {
