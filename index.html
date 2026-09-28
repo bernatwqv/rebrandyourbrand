@@ -2234,36 +2234,16 @@ se construye.</h2>
         return;
       }
 
-      let planContextPrefix = '';
-      if (activePlanKey) {
-        const planId = titleKeyToId[activePlanKey];
-        const hasWeb = planId ? planWebState[planId] : false;
-        const planName = translations.es[activePlanKey];
-        const planNameEn = translations.en[activePlanKey];
-        const planNameCa = translations.ca[activePlanKey];
+      // Plan seleccionado (estructurado; el worker lo valida y lo convierte en contexto)
+      const activePlanId = activePlanKey ? titleKeyToId[activePlanKey] : null;
+      const plan = activePlanId ? { id: activePlanId, web: !!activePlanWebState } : null;
 
-        if (currentLang === 'es') {
-          if (hasWeb) {
-            planContextPrefix = `[CONTEXTO OBLIGATORIO - PLAN SELECCIONADO: El usuario ha seleccionado el ${planName} INCLUYENDO desarrollo web a medida (+200 €). Debes presupuestar el rebranding junto con la landing page web y hablar de ambos entregables].\n`;
-          } else {
-            planContextPrefix = `[CONTEXTO OBLIGATORIO - PLAN SELECCIONADO: El usuario ha seleccionado el ${planName} EN MODO SOLO IDENTIDAD (SIN desarrollo web). NO incluyas web en el presupuesto ni hables de desarrollo web a menos que el usuario pida explícitamente añadir la web].\n`;
-          }
-        } else if (currentLang === 'ca') {
-          if (hasWeb) {
-            planContextPrefix = `[CONTEXT OBLIGATORI - PLA SELECCIONAT: L'usuari ha seleccionat el ${planNameCa} INCLOENT desenvolupament web a mida (+200 €). Has de pressupostar el rebranding juntament amb la landing page web i parlar de tots dos lliurables].\n`;
-          } else {
-            planContextPrefix = `[CONTEXT OBLIGATORI - PLA SELECCIONAT: L'usuari ha seleccionat el ${planNameCa} EN MODE NOMÉS IDENTITAT (SENSE desenvolupament web). NO incloguis web al pressupost ni parlis de desenvolupament web a menys que l'usuari demani explícitament afegir la web].\n`;
-          }
-        } else {
-          if (hasWeb) {
-            planContextPrefix = `[MANDATORY CONTEXT - SELECTED PLAN: The user selected the ${planNameEn} INCLUDING custom web development (€200). You must quote both rebranding and the web landing page and discuss both deliverables].\n`;
-          } else {
-            planContextPrefix = `[MANDATORY CONTEXT - SELECTED PLAN: The user selected the ${planNameEn} in IDENTITY-ONLY MODE (WITHOUT web development). DO NOT include web in pricing or discuss web development unless the user explicitly asks to add the web].\n`;
-          }
-        }
-      }
-
-      const finalPrompt = planContextPrefix + question;
+      // Historial completo + mensaje nuevo
+      const history = chatHistory.map((e) => ({
+        role: e.role,
+        text: e.texts ? (e.texts[currentLang] || Object.values(e.texts)[0] || '') : (e.text || '')
+      }));
+      const messages = [...history, { role: 'user', text: question }];
 
       assistantSubmit.disabled = true;
       setAssistantStatus('status-consulting', 'idle');
@@ -2275,25 +2255,18 @@ se construye.</h2>
       try {
         const response = await fetch('https://rebrandyourbrand-proxy.bernatxd705.workers.dev', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ prompt: finalPrompt, token: turnstileToken, lang: currentLang }),
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages, plan, token: turnstileToken, lang: currentLang }),
           signal: activeAbortController.signal
         });
 
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || translations[currentLang]["err-network"]);
 
-        chatHistory.push({
-          role: 'user',
-          texts: { [currentLang]: question }
-        });
+        chatHistory.push({ role: 'user', texts: { [currentLang]: question } });
         chatHistory.push({
           role: 'assistant',
-          texts: {
-            [currentLang]: data.reply
-          },
+          texts: { [currentLang]: data.reply },
           leadClosed: data.leadClosed
         });
         renderHistory();
@@ -2307,9 +2280,7 @@ se construye.</h2>
       } finally {
         hideThinkingBubble();
         if (turnstileWidgetId !== null && window.turnstile) {
-          try {
-            window.turnstile.reset(turnstileWidgetId);
-          } catch (e) {}
+          try { window.turnstile.reset(turnstileWidgetId); } catch (e) {}
         }
         assistantSubmit.disabled = true;
       }
