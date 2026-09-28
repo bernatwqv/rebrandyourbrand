@@ -82,7 +82,7 @@ sub, sup { font-size: 75%; line-height: 0; position: relative; vertical-align: b
 sub { bottom: -0.25em; } sup { top: -0.5em; }
 table { text-indent: 0; border-color: inherit; border-collapse: collapse; }
 ol, ul, menu { list-style: none; }
-img, svg, video, canvas, audio, iframe, embed, object { display: block; vertical-align: middle; }
+img, svg, video, canvas, audio, iframe, embed, object { display: block; }
 img, video { max-width: 100%; height: auto; }
 button, input, select, optgroup, textarea { font: inherit; color: inherit; border-radius: 0; background-color: transparent; opacity: 1; }
 textarea { resize: vertical; }
@@ -161,6 +161,7 @@ textarea { resize: vertical; }
 .w-px { width: 1px; }
 .max-w-3xl { max-width: 48rem; }
 .max-w-4xl { max-width: 56rem; }
+.max-w-5xl { max-width: 64rem; }
 .max-w-6xl { max-width: 72rem; }
 .max-w-\[88\%\] { max-width: 88%; }
 .max-w-lg { max-width: 32rem; }
@@ -184,6 +185,7 @@ textarea { resize: vertical; }
 .justify-between { justify-content: space-between; }
 .justify-center { justify-content: center; }
 .justify-start { justify-content: flex-start; }
+.justify-end { justify-content: flex-end; }
 .gap-1\.5 { gap: 0.375rem; }
 .gap-2 { gap: 0.5rem; }
 .gap-2\.5 { gap: 0.625rem; }
@@ -244,6 +246,8 @@ textarea { resize: vertical; }
 .pb-1 { padding-bottom: 0.25rem; }
 .pb-28 { padding-bottom: 7rem; }
 .pl-3 { padding-left: 0.75rem; }
+.pl-8 { padding-left: 2rem; }
+.pr-8 { padding-right: 2rem; }
 
 .text-center { text-align: center; }
 .text-left { text-align: left; }
@@ -302,9 +306,16 @@ textarea { resize: vertical; }
 .lowercase { text-transform: lowercase; }
 .uppercase { text-transform: uppercase; }
 
-/* Estilos personalizados para las zonas laterales interactivas en ordenador */
-.side-zone-left:hover .side-arrow { opacity: 0.5; transform: scale(1.05); }
-.side-zone-right:hover .side-arrow { opacity: 0.5; transform: scale(1.05); }
+/* Grid robusto para el carrusel de planes en escritorio */
+.plans-carousel-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 48rem) {
+  .plans-carousel-grid {
+    grid-template-columns: 1fr minmax(0, 32rem) 1fr;
+  }
+}
 
 /* Media queries para escritorio */
 @media (min-width: 48rem) { /* md */
@@ -332,7 +343,6 @@ textarea { resize: vertical; }
   .md\:text-sm { font-size: 0.875rem; line-height: 1.25rem; }
   .md\:text-xl { font-size: 1.25rem; line-height: 1.75rem; }
   
-  /* Clases responsive para el panel de IA flotante en escritorio */
   .sm\:inset-y-4 { top: 1rem; bottom: 1rem; }
   .sm\:right-4 { right: 1rem; }
   .sm\:w-\[440px\] { width: 440px; }
@@ -367,7 +377,6 @@ textarea { resize: vertical; }
     --color-ai-soft: 173 118 38;
   }
 
-  /* Clases de utilidad con variables RGB estables */
   .bg-ink { background-color: rgb(var(--color-bg)); }
   .bg-panel { background-color: rgb(var(--color-panel)); }
   .bg-line { background-color: rgb(var(--color-line)); }
@@ -466,7 +475,6 @@ textarea { resize: vertical; }
     }
   }
 
-  /* Soporte de "safe area" para notch / barra inferior en iOS (viewport-fit=cover) */
   :root {
     padding-top: env(safe-area-inset-top, 0px);
     padding-bottom: env(safe-area-inset-bottom, 0px);
@@ -475,12 +483,16 @@ textarea { resize: vertical; }
   #assistant-trigger { bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px)); }
   #assistant-panel { padding-bottom: env(safe-area-inset-bottom, 0px); }
 
-  /* === Utilidades faltantes === */
+  /* Reglas explícitas para group-hover */
+  .group:hover .group-hover\:opacity-100 { opacity: 1 !important; }
+  .group:hover .group-hover\:scale-110 { transform: scale(1.1) !important; }
+
+  /* === Utilidades y clases adicionales === */
   @keyframes pulse{50%{opacity:.4}}
   .bg-ink\/20{background:rgb(var(--color-bg)/.2)}.bg-ink\/30{background:rgb(var(--color-bg)/.3)}
   .bg-ink\/40{background:rgb(var(--color-bg)/.4)}.bg-ink\/50{background:rgb(var(--color-bg)/.5)}
-  .bg-ink\/60{background:rgb(var(--color-bg)/.6)}.bg-ink\/85{background:rgb(var(--color-bg)/.85)}
-  .bg-panel\/30{background:rgb(var(--color-panel)/.3)}.bg-panel\/80{background:rgb(var(--color-panel)/.8)}
+  .bg-ink\/60{background:rgb(var(--color-bg)/.6)}.bg-ink\/80{background:rgb(var(--color-bg)/.8)}.bg-ink\/85{background:rgb(var(--color-bg)/.85)}
+  .bg-panel\/30{background:rgb(var(--color-panel)/.3)}.bg-panel\/40{background:rgb(var(--color-panel)/.4)}.bg-panel\/80{background:rgb(var(--color-panel)/.8)}
   .bg-panel\/95{background:rgb(var(--color-panel)/.95)}
   .bg-black\/50{background:rgb(0 0 0/.5)}.bg-black\/60{background:rgb(0 0 0/.6)}
   .bg-brand\/10{background:rgb(var(--color-brand)/.1)}.bg-ai\/10{background:rgb(var(--color-ai)/.1)}
@@ -511,7 +523,6 @@ textarea { resize: vertical; }
   .placeholder\:text-muted\/60::placeholder{color:rgb(var(--color-muted)/.6)}
   .disabled\:opacity-40:disabled{opacity:.4}.disabled\:cursor-not-allowed:disabled{cursor:not-allowed}
   :focus-visible{outline:2px solid rgb(var(--color-ai));outline-offset:2px}
-  .side-zone-left:focus-visible .side-arrow,.side-zone-right:focus-visible .side-arrow{opacity:.6}
   @media (min-width:40rem){
     .sm\:flex-row{flex-direction:row}.sm\:items-end{align-items:flex-end}.sm\:w-auto{width:auto}
     .sm\:text-6xl{font-size:3.75rem;line-height:1}.sm\:border-line{border-color:rgb(var(--color-line))}
@@ -523,7 +534,7 @@ textarea { resize: vertical; }
 
 <body class="bg-ink text-paper antialiased relative overflow-x-hidden">
 
-  <!-- Header con difuminado activo tanto en móvil como en escritorio -->
+  <!-- Header -->
   <header class="fixed top-0 inset-x-0 z-40 border-b border-line bg-ink/85 backdrop-blur-md">
     <div class="max-w-6xl mx-auto px-6 md:px-10 h-16 flex items-center justify-between">
       <a href="#top" class="flex items-center gap-3">
@@ -538,7 +549,6 @@ textarea { resize: vertical; }
         <a href="#redes" class="lang-trans lowercase hover:text-paper" data-i18n="nav-redes">redes</a>
       </nav>
 
-      <!-- Barra vertical elegante idéntica a la del logo -->
       <span class="hidden md:inline-block w-px h-5 bg-line mx-5" aria-hidden="true"></span>
 
       <div class="flex items-center gap-3">
@@ -576,7 +586,7 @@ textarea { resize: vertical; }
       </div>
     </div>
 
-    <!-- Menú desplegable móvil con su propio difuminado -->
+    <!-- Menú desplegable móvil -->
     <div id="mobile-nav" class="md:hidden hidden border-t border-line bg-panel/95 backdrop-blur-md px-6 py-4 flex flex-col gap-3 text-sm">
       <a href="#planes" class="mobile-nav-link lang-trans lowercase text-muted hover:text-paper py-1" data-i18n="nav-planes">planes</a>
       <a href="#sobre-nosotros" class="mobile-nav-link lang-trans lowercase text-muted hover:text-paper py-1" data-i18n="nav-about">sobre nosotros</a>
@@ -615,7 +625,7 @@ se construye.</h2>
       </div>
     </section>
 
-    <!-- Planes (Carrusel con zonas laterales interactivas en ordenador y swipe táctil en móvil) -->
+    <!-- Planes -->
     <section id="planes" class="relative px-6 md:px-10 py-24 md:py-32 border-b border-line overflow-hidden z-10">
       <div class="max-w-6xl mx-auto relative z-10">
         <div class="reveal max-w-xl mb-12">
@@ -625,7 +635,6 @@ se construye.</h2>
           </p>
         </div>
 
-        <!-- Nota de calidad con margen inferior ampliado (mb-16) -->
         <div class="reveal mb-16 p-4 bg-panel border border-line flex items-center gap-3 w-full">
           <span class="w-2 h-2 rounded-full bg-brand shrink-0" aria-hidden="true"></span>
           <p class="lang-trans lowercase text-xs md:text-sm text-paper/90 font-mono tracking-wide" data-i18n="plans-quote">
@@ -633,31 +642,34 @@ se construye.</h2>
           </p>
         </div>
 
-        <!-- Contenedor del Carrusel con áreas laterales interactivas en escritorio -->
-        <div class="relative w-full max-w-4xl mx-auto flex items-center justify-center">
-          <!-- Zona lateral izquierda -->
-          <button type="button" data-plan-prev aria-label="Plan anterior"
-                  class="side-zone-left absolute inset-y-0 left-0 w-1/3 hidden md:flex items-center justify-start pl-6 cursor-pointer z-20 bg-transparent border-none">
-            <span class="side-arrow w-10 h-10 rounded-full border border-line bg-ink/50 text-paper flex items-center justify-center opacity-0 transition-all duration-300">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
-            </span>
-          </button>
+        <!-- Contenedor del Carrusel con grid estructurado -->
+        <div class="relative w-full max-w-5xl mx-auto">
+          <div class="plans-carousel-grid items-center">
+            
+            <!-- ZONA LATERAL IZQUIERDA: Centrada y solo flecha limpia -->
+            <button type="button" data-plan-prev aria-label="Plan anterior"
+                    class="hidden md:flex h-full min-h-[420px] items-center justify-center cursor-pointer bg-transparent border-none group">
+              <span class="opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-95 group-hover:scale-110 text-paper flex items-center justify-center">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:36px;height:36px;" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+              </span>
+            </button>
 
-          <!-- Tarjeta central -->
-          <div id="plans-container" aria-live="polite" class="w-full max-w-lg mx-auto flex items-center justify-center z-10">
-            <!-- Renderizado dinámico de la tarjeta activa -->
+            <!-- Tarjeta central -->
+            <div id="plans-container" aria-live="polite" class="w-full flex items-center justify-center z-10">
+              <!-- Renderizado dinámico -->
+            </div>
+
+            <!-- ZONA LATERAL DERECHA: Centrada y solo flecha limpia -->
+            <button type="button" data-plan-next aria-label="Plan siguiente"
+                    class="hidden md:flex h-full min-h-[420px] items-center justify-center cursor-pointer bg-transparent border-none group">
+              <span class="opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-95 group-hover:scale-110 text-paper flex items-center justify-center">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:36px;height:36px;" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+              </span>
+            </button>
+
           </div>
-
-          <!-- Zona lateral derecha -->
-          <button type="button" data-plan-next aria-label="Plan siguiente"
-                  class="side-zone-right absolute inset-y-0 right-0 w-1/3 hidden md:flex items-center justify-end pr-6 cursor-pointer z-20 bg-transparent border-none">
-            <span class="side-arrow w-10 h-10 rounded-full border border-line bg-ink/50 text-paper flex items-center justify-center opacity-0 transition-all duration-300">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
-            </span>
-          </button>
         </div>
 
-        <!-- Indicador de página (puntos con accesibilidad corregida) -->
         <div class="flex items-center justify-center gap-2 mt-8" id="plans-dots">
           <button type="button" data-dot-index="0" aria-label="Ir al plan esencial" aria-current="true" class="w-2.5 h-2.5 rounded-full bg-brand transition-all"></button>
           <button type="button" data-dot-index="1" aria-label="Ir al plan evolución" class="w-2 h-2 rounded-full bg-line hover:bg-muted transition-all"></button>
@@ -666,7 +678,7 @@ se construye.</h2>
       </div>
     </section>
 
-    <!-- Sobre nosotros (Gael y Bernat en horizontal, uno al lado del otro) -->
+    <!-- Sobre nosotros -->
     <section id="sobre-nosotros" class="relative px-6 md:px-10 py-24 md:py-32 border-b border-line overflow-hidden z-10">
       <div class="max-w-6xl mx-auto relative z-10">
         <div class="reveal mb-12">
@@ -719,7 +731,7 @@ se construye.</h2>
       </div>
     </section>
 
-    <!-- Términos y Condiciones de Servicio -->
+    <!-- Términos y Condiciones -->
     <section id="terminos" class="relative px-6 md:px-10 py-24 md:py-32 border-b border-line overflow-hidden bg-panel/30 z-10">
       <div class="max-w-4xl mx-auto relative z-10">
         <div class="reveal mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
@@ -904,7 +916,7 @@ se construye.</h2>
     </form>
   </aside>
 
-  <!-- Modal: Popup explicativo del descuento -50% con blur completo -->
+  <!-- Modal: Popup explicativo del descuento -50% -->
   <div id="launch-modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="launch-modal-title" inert
        class="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 backdrop-blur-sm opacity-0 pointer-events-none px-6 transition-opacity duration-300">
     <div id="launch-modal-content" class="bg-panel border-2 border-brand p-8 md:p-10 max-w-xl w-full shadow-2xl transform scale-95 transition-transform duration-300 relative">
@@ -1058,7 +1070,7 @@ se construye.</h2>
         "studio-card-1-tag": "trayectoria & formación",
         "studio-card-1-title": "gael domènech sevillano",
         "studio-card-1-desc": "Nacido en 2004. Graduado en ilustración en la EASD Josep Serra i Abella.",
-        "studio-card-1-role": "dirección de arte & diseño visual",
+        "studio-card-1-role": "dirección d'arte & diseño visual",
         "portfolio-btn": "+ portfolio",
         "studio-card-2-tag": "trayectoria & formación",
         "studio-card-2-title": "bernat domènech sevillano",
@@ -1312,7 +1324,7 @@ se construye.</h2>
 
         "recommended-modal-eyebrow": "filosofia de l'estudi",
         "recommended-modal-title": "per què és la nostra opció recomanada?",
-        "recommended-modal-p1": "És l'opció recomanada per a aquells que busquen l'equilibri perfecte i la millor relació qualitat-preu per potenciar la seva marca al màxim nivell, assegurant un sistema visual complet i professional.",
+        "recommended-modal-p1": "És l'opció recomanada per a aquells que busquen l'equilibri perfecte i la millor relació qualitat-preu per potenciar la seva marca al màxim nivel, assegurant un sistema visual complet i professional.",
 
         "plans-badge": "recomanat",
         "plans-discount-badge": "-50% de descompte",
@@ -1362,7 +1374,7 @@ se construye.</h2>
         "t2-f1-title": "Fase 1 (Identitat i Direcció d'Art):",
         "t2-f1-desc": "Gael presenta les propostes de logotip, paleta cromàtica i directrius tipogràfiques. El client avalua i selecciona una opció definitiva. Cada fase inclou un màxim de 2 rondes de revisions o ajustos menors sobre la proposta inicial. Un cop el client atorga el seu vist plau (\"Aprovat\"), el disseny del logotip i la identitat visual es consideren tancats i inalterables. Si amb posterioritat (fins i tot durant el desenvolupament web) el client sol·licita modificar el logotip, canviar colors principals o redissenyar la identitat, aquest canvi constituirà un treball extraordinari tarifat a 50 €/hora.",
         "t2-f2-title": "Fase 2 (Estructura i Desenvolupament Web):",
-        "t2-f2-desc": "S'implementa l'estructura web (landing page scrollable o web multicapa segons el pla) amb els textos i materials aportats pel client. El client revisa la versió provisional i valida la distribució i el disseny base (incloent fins a 2 rondes d'ajustos menors). Amb l'aprovació d'aquesta fase, l'estructura queda ferma. Modificacions estructurals majors o reordenacions profundes sol·licitades després d'aquesta aprovació implicaran costos addicionals.",
+        "t2-f2-desc": "S'implementa l'estructura web (landing page scrollable o web multicapa segons el pla) amb els textos i materials aportats pel client. El client revisa la versió provisional i valida la distribució i el disseny base (incloent fins a 2 rondas d'ajustos menors). Amb l'aprovació d'aquesta fase, l'estructura queda ferma. Modificacions estructurals majors o reordenacions profundes sol·licitades després d'aquesta aprovació implicaran costos addicionals.",
         "t2-f3-title": "Fase 3 (Desplegament i Lliurament Clau en Mà):",
         "t2-f3-desc": "Un cop superades les fases anteriors, Bernat efectua el desplegament tècnic definitiu a GitHub i Cloudflare, realitzant el lliurament formal clau en mà i transferint la propietat tècnica acordada al client.",
         "t3-title": "3. aportació de materials, dominis i terminis del client",
@@ -1845,7 +1857,6 @@ se construye.</h2>
     const assistantPrompt = document.getElementById('brand-prompt');
     let assistantOpener = null;
     let assistantIsOpen = false;
-    const focusableSelector = 'button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), a[href]';
 
     const TURNSTILE_SITEKEY = '0x4AAAAAAFAc6AhM84k_7AQk';
     let turnstileWidgetId = null;
@@ -2143,7 +2154,7 @@ se construye.</h2>
 
       const activeContainer = launchModalCtrl.isOpen() ? launchModal : (recommendedModalCtrl.isOpen() ? recommendedModal : (planModalIsOpen ? planModal : (assistantIsOpen ? assistantPanel : null)));
       if (!activeContainer) return;
-      const focusable = activeContainer.querySelectorAll(focusableSelector);
+      const focusable = activeContainer.querySelectorAll('button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), a[href]');
       if (!focusable.length) return;
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
