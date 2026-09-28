@@ -137,6 +137,7 @@ textarea { resize: vertical; }
 .hidden { display: none; }
 .inline-block { display: inline-block; }
 .inline-flex { display: inline-flex; }
+.h-1 { height: 0.25rem; }
 .h-1\.5 { height: 0.375rem; }
 .h-2 { height: 0.5rem; }
 .h-2\.5 { height: 0.625rem; }
@@ -150,6 +151,7 @@ textarea { resize: vertical; }
 .max-h-0 { max-height: 0; }
 .max-h-24 { max-height: 6rem; }
 .min-h-\[65px\] { min-height: 65px; }
+.w-1 { width: 0.25rem; }
 .w-1\.5 { width: 0.375rem; }
 .w-2 { width: 0.5rem; }
 .w-2\.5 { width: 0.625rem; }
@@ -238,7 +240,9 @@ textarea { resize: vertical; }
 .py-3 { padding-block: 0.75rem; }
 .py-3\.5 { padding-block: 0.875rem; }
 .py-4 { padding-block: 1rem; }
+.py-20 { padding-block: 5rem; }
 .py-24 { padding-block: 6rem; }
+.py-28 { padding-block: 7rem; }
 .py-32 { padding-block: 8rem; }
 .pt-2 { padding-top: 0.5rem; }
 .pt-6 { padding-top: 1.5rem; }
@@ -330,6 +334,7 @@ textarea { resize: vertical; }
   .md\:p-8 { padding: 2rem; }
   .md\:p-10 { padding: 2.5rem; }
   .md\:px-14 { padding-inline: 3.5rem; }
+  .md\:py-28 { padding-block: 7rem; }
   .md\:py-32 { padding-block: 8rem; }
   .md\:py-40 { padding-block: 10rem; }
   .md\:pt-4 { padding-top: 1rem; }
@@ -487,6 +492,14 @@ textarea { resize: vertical; }
   .group:hover .group-hover\:opacity-100 { opacity: 1 !important; }
   .group:hover .group-hover\:scale-110 { transform: scale(1.1) !important; }
 
+  /* Aura luminosa para el idioma activo en el menú desplegable */
+  .lang-option.is-active {
+    background-color: rgb(var(--color-brand) / 0.15);
+    color: rgb(var(--color-brand-soft));
+    box-shadow: 0 0 12px rgba(140, 163, 196, 0.25);
+    font-weight: 600;
+  }
+
   /* === Utilidades y clases adicionales === */
   @keyframes pulse{50%{opacity:.4}}
   .bg-ink\/20{background:rgb(var(--color-bg)/.2)}.bg-ink\/30{background:rgb(var(--color-bg)/.3)}
@@ -552,14 +565,33 @@ textarea { resize: vertical; }
       <span class="hidden md:inline-block w-px h-5 bg-line mx-5" aria-hidden="true"></span>
 
       <div class="flex items-center gap-3">
-        <button id="lang-toggle" type="button" aria-label="Cambiar idioma"
-                class="relative w-10 h-10 rounded-full border border-line flex items-center justify-center text-paper font-mono text-xs hover:border-brand/60 hover:scale-105">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;" aria-hidden="true">
-            <circle cx="12" cy="12" r="10"></circle>
-            <path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"></path>
-          </svg>
-          <span id="lang-indicator" class="absolute -bottom-1 -right-1 bg-brand text-[#0A0A0C] text-[9px] font-bold px-1 rounded-full uppercase">es</span>
-        </button>
+        <!-- Selector de idioma con menú desplegable vertical y posiciones fijas -->
+        <div class="relative">
+          <button id="lang-toggle" type="button" aria-label="Cambiar idioma" aria-expanded="false" aria-controls="lang-dropdown"
+                  class="relative w-10 h-10 rounded-full border border-line flex items-center justify-center text-paper font-mono text-xs hover:border-brand/60 hover:scale-105 cursor-pointer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"></path>
+            </svg>
+            <span id="lang-indicator" class="absolute -bottom-1 -right-1 bg-brand text-[#0A0A0C] text-[9px] font-bold px-1 rounded-full uppercase">es</span>
+          </button>
+
+          <!-- Menú desplegable vertical (posiciones fijas: 1. es, 2. en, 3. ca) -->
+          <div id="lang-dropdown" class="hidden absolute right-0 mt-2 w-36 bg-panel border border-line rounded-xl shadow-xl py-2 z-50 flex flex-col gap-1">
+            <button type="button" data-lang-choice="es" class="lang-option w-full text-left px-4 py-2 text-xs font-mono flex items-center justify-between hover:bg-ink/40 transition-colors cursor-pointer" role="menuitem">
+              <span>español</span>
+              <span class="lang-dot w-1.5 h-1.5 rounded-full bg-transparent"></span>
+            </button>
+            <button type="button" data-lang-choice="en" class="lang-option w-full text-left px-4 py-2 text-xs font-mono flex items-center justify-between hover:bg-ink/40 transition-colors cursor-pointer" role="menuitem">
+              <span>english</span>
+              <span class="lang-dot w-1.5 h-1.5 rounded-full bg-transparent"></span>
+            </button>
+            <button type="button" data-lang-choice="ca" class="lang-option w-full text-left px-4 py-2 text-xs font-mono flex items-center justify-between hover:bg-ink/40 transition-colors cursor-pointer" role="menuitem">
+              <span>català</span>
+              <span class="lang-dot w-1.5 h-1.5 rounded-full bg-transparent"></span>
+            </button>
+          </div>
+        </div>
 
         <button id="theme-toggle" type="button" aria-label="Cambiar a modo claro"
                 class="relative w-10 h-10 rounded-full border border-line flex items-center justify-center text-paper hover:border-brand/60 hover:scale-105">
@@ -856,11 +888,18 @@ se construye.</h2>
     </section>
   </main>
 
-  <!-- Footer Minimal -->
-  <footer class="relative px-6 md:px-10 py-12 overflow-hidden z-10 bg-panel/20">
-    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-muted">
-      <span class="lang-trans lowercase" data-i18n="footer-copy">rebrandyourbrand — rebranding y diseño visual</span>
-      <span>&copy; <span id="year"></span> <span class="lang-trans" data-i18n="footer-rights">Todos los derechos reservados</span></span>
+  <!-- Footer Espacioso -->
+  <footer class="relative px-6 md:px-10 py-20 md:py-28 overflow-hidden z-10 bg-panel border-t border-line">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
+      <div class="space-y-2">
+        <span class="font-display text-xl md:text-2xl text-paper tracking-tight">rebrandyourbrand</span>
+        <p class="lang-trans text-xs md:text-sm text-muted lowercase" data-i18n="footer-copy">rebrandyourbrand — rebranding y diseño visual</p>
+      </div>
+      <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 text-xs md:text-sm text-muted">
+        <span>&copy; <span id="year"></span> <span class="lang-trans" data-i18n="footer-rights">Todos los derechos reservados</span></span>
+        <span class="hidden sm:inline-block w-1 h-1 rounded-full bg-muted/60" aria-hidden="true"></span>
+        <a href="#top" class="lang-trans lowercase hover:text-paper transition-colors">↑ <span data-i18n="footer-top">volver arriba</span></a>
+      </div>
     </div>
   </footer>
 
@@ -1173,6 +1212,7 @@ se construye.</h2>
 
         "footer-copy": "rebrandyourbrand — rebranding y diseño visual",
         "footer-rights": "Todos los derechos reservados",
+        "footer-top": "volver arriba",
         "panel-title": "brandi · asistente creativo",
         "panel-subtitle": "inteligencia artificial de marca",
         "panel-placeholder": "escribe un mensaje a brandi...",
@@ -1298,6 +1338,7 @@ se construye.</h2>
 
         "footer-copy": "rebrandyourbrand — rebranding & visual design",
         "footer-rights": "All rights reserved",
+        "footer-top": "back to top",
         "panel-title": "brandi · creative assistant",
         "panel-subtitle": "brand artificial intelligence",
         "panel-placeholder": "type a message to brandi...",
@@ -1423,6 +1464,7 @@ se construye.</h2>
 
         "footer-copy": "rebrandyourbrand — rebranding i disseny visual",
         "footer-rights": "Tots els drets reservats",
+        "footer-top": "tornar a dalt",
         "panel-title": "brandi · assistent creatiu",
         "panel-subtitle": "intel·ligència artificial de marca",
         "panel-placeholder": "escriu un missatge a brandi...",
@@ -1445,7 +1487,56 @@ se construye.</h2>
 
     let currentLang = 'es';
     const langToggle = document.getElementById('lang-toggle');
+    const langDropdown = document.getElementById('lang-dropdown');
     const langIndicator = document.getElementById('lang-indicator');
+
+    function updateLangDropdownUI() {
+      document.querySelectorAll('[data-lang-choice]').forEach(btn => {
+        const langCode = btn.getAttribute('data-lang-choice');
+        const dot = btn.querySelector('.lang-dot');
+        if (langCode === currentLang) {
+          btn.classList.add('is-active');
+          dot.className = 'lang-dot w-1.5 h-1.5 rounded-full bg-brand shadow-sm';
+        } else {
+          btn.classList.remove('is-active');
+          dot.className = 'lang-dot w-1.5 h-1.5 rounded-full bg-transparent';
+        }
+      });
+    }
+
+    function toggleLangDropdown() {
+      const isHidden = langDropdown.classList.contains('hidden');
+      if (isHidden) {
+        langDropdown.classList.remove('hidden');
+        langToggle.setAttribute('aria-expanded', 'true');
+      } else {
+        langDropdown.classList.add('hidden');
+        langToggle.setAttribute('aria-expanded', 'false');
+      }
+    }
+
+    langToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleLangDropdown();
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!langToggle.contains(e.target) && !langDropdown.contains(e.target)) {
+        langDropdown.classList.add('hidden');
+        langToggle.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    document.querySelectorAll('[data-lang-choice]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetLang = btn.getAttribute('data-lang-choice');
+        langDropdown.classList.add('hidden');
+        langToggle.setAttribute('aria-expanded', 'false');
+        if (targetLang !== currentLang) {
+          switchLanguage(targetLang);
+        }
+      });
+    });
 
     const plansArray = [
       { id: 'esencial', titleKey: 'p1-title', basePrice: 200, originalPrice: 400, descKey: 'p1-desc', features: ['p1-f1', 'p1-f2', 'p1-f3'] },
@@ -1541,9 +1632,9 @@ se construye.</h2>
         ${discountBadgeHtml}
         ${recommendedBadgeHtml}
         <div>
-          <div class="flex items-center justify-between mb-4 pt-2">
-            <h3 class="lang-trans lowercase font-display text-2xl md:text-3xl text-paper font-semibold">${title}</h3>
-            <div class="text-right">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 pt-2 gap-2">
+            <h3 class="lang-trans lowercase font-display text-2xl md:text-3xl text-paper font-semibold whitespace-normal">${title}</h3>
+            <div class="text-left sm:text-right">
               <span class="lang-trans font-mono text-paper font-bold text-2xl md:text-3xl whitespace-nowrap">${regularPriceStr}</span>
             </div>
           </div>
@@ -1739,6 +1830,7 @@ se construye.</h2>
       currentLang = lang;
       langIndicator.textContent = lang;
       document.documentElement.lang = lang;
+      updateLangDropdownUI();
       
       const langLabels = { es: 'Cambiar idioma a Inglés', en: 'Canviar idioma a Català', ca: 'Cambiar idioma a Español' };
       langToggle.setAttribute('aria-label', langLabels[lang]);
@@ -1781,10 +1873,7 @@ se construye.</h2>
       }, 250);
     }
 
-    langToggle.addEventListener('click', () => {
-      const nextLang = currentLang === 'es' ? 'en' : (currentLang === 'en' ? 'ca' : 'es');
-      switchLanguage(nextLang);
-    });
+    updateLangDropdownUI();
 
     function setToggleLabels(selector, showKey, hideKey) {
       document.querySelectorAll(selector).forEach(btn => {
