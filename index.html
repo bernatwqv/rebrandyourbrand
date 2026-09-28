@@ -2034,7 +2034,7 @@ se construye.</h2>
       const basePrice = plansArray.find(p => p.id === pendingPlanId)?.basePrice || 0;
       const finalTotal = basePrice + (hasWeb ? 200 : 0);
       closePlanModal();
-      const subject = encodeURIComponent(`Interés en contratación - Plan ${planNameEs}${hasWeb ? ' con Web' : ''}`);
+      const subject = encodeURIComponent(`Interés en la contratación del ${planNameEs}${hasWeb ? ' con Web' : ''}`);
       const body = encodeURIComponent(`Hola,\n\nEstoy interesado/a en el ${planNameEs}${hasWeb ? ' incluyendo desarrollo web' : ''} (${finalTotal} € total con descuento de lanzamiento) para mi proyecto.\n\nNombre de la marca / negocio:\nBreve descripción:\n\n¡Un saludo!`);
       window.location.href = `mailto:hola@rebrandyourbrand.es?subject=${subject}&body=${body}`;
     });
