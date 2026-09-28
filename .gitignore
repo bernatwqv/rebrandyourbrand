@@ -3,6 +3,10 @@
 .env.*
 *.local
 
+# Cloudflare & Node
+.wrangler/
+node_modules/
+
 # Python and editor artifacts
 __pycache__/
 .vscode/
