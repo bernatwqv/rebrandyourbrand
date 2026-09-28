@@ -474,6 +474,50 @@ textarea { resize: vertical; }
   header { padding-top: env(safe-area-inset-top, 0px); }
   #assistant-trigger { bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px)); }
   #assistant-panel { padding-bottom: env(safe-area-inset-bottom, 0px); }
+
+  /* === Utilidades faltantes === */
+  @keyframes pulse{50%{opacity:.4}}
+  .bg-ink\/20{background:rgb(var(--color-bg)/.2)}.bg-ink\/30{background:rgb(var(--color-bg)/.3)}
+  .bg-ink\/40{background:rgb(var(--color-bg)/.4)}.bg-ink\/50{background:rgb(var(--color-bg)/.5)}
+  .bg-ink\/60{background:rgb(var(--color-bg)/.6)}.bg-ink\/85{background:rgb(var(--color-bg)/.85)}
+  .bg-panel\/30{background:rgb(var(--color-panel)/.3)}.bg-panel\/80{background:rgb(var(--color-panel)/.8)}
+  .bg-panel\/95{background:rgb(var(--color-panel)/.95)}
+  .bg-black\/50{background:rgb(0 0 0/.5)}.bg-black\/60{background:rgb(0 0 0/.6)}
+  .bg-brand\/10{background:rgb(var(--color-brand)/.1)}.bg-ai\/10{background:rgb(var(--color-ai)/.1)}
+  .bg-emerald-500\/10{background:rgb(16 185 129/.1)}.border-emerald-500\/30{border-color:rgb(16 185 129/.3)}
+  .text-emerald-400{color:#34d399}.text-red-400{color:#f87171}
+  .border-line\/60{border-color:rgb(var(--color-line)/.6)}.border-brand\/40{border-color:rgb(var(--color-brand)/.4)}
+  .border-ai\/30{border-color:rgb(var(--color-ai)/.3)}
+  .text-paper\/80{color:rgb(var(--color-text)/.8)}.text-paper\/90{color:rgb(var(--color-text)/.9)}
+  .text-ai\/80{color:rgb(var(--color-ai)/.8)}.text-transparent{color:transparent}
+  .text-\[\#0A0A0C\]{color:#0A0A0C}.text-\[\#0A0A0C\]\/75{color:rgb(10 10 12/.75)}
+  .shadow-brand\/10{box-shadow:0 4px 6px -1px rgb(var(--color-brand)/.1)}
+  .shadow-brand\/15{box-shadow:0 25px 50px -12px rgb(var(--color-brand)/.15)}
+  .w-1\/3{width:33.333%}.w-6{width:1.5rem}.h-6{height:1.5rem}.rounded-br-sm{border-bottom-right-radius:.25rem}
+  .leading-none{line-height:1}.leading-tight{line-height:1.25}.leading-relaxed{line-height:1.625}
+  .leading-\[1\.08\]{line-height:1.08}.leading-\[1\.05\]{line-height:1.05}
+  .hover\:text-paper:hover{color:rgb(var(--color-text))}.hover\:text-brand:hover{color:rgb(var(--color-brand))}
+  .hover\:underline:hover{text-decoration:underline}.hover\:bg-muted:hover{background:rgb(var(--color-muted))}
+  .hover\:bg-brand-soft:hover{background:rgb(var(--color-brand-soft))}
+  .hover\:bg-ai-soft:hover{background:rgb(var(--color-ai-soft))}
+  .hover\:border-brand\/50:hover{border-color:rgb(var(--color-brand)/.5)}
+  .hover\:border-brand\/60:hover{border-color:rgb(var(--color-brand)/.6)}
+  .hover\:border-ai\/60:hover{border-color:rgb(var(--color-ai)/.6)}
+  .hover\:scale-105:hover{transform:scale(1.05)}.hover\:scale-110:hover{transform:scale(1.1)}
+  .group:hover .group-hover\:underline{text-decoration:underline}
+  .group:hover .group-hover\:text-paper{color:rgb(var(--color-text))}
+  .group:hover .group-hover\:border-brand{border-color:rgb(var(--color-brand))}
+  .focus\:outline-none:focus{outline:none}.focus-within\:border-ai:focus-within{border-color:rgb(var(--color-ai))}
+  .placeholder\:text-muted\/60::placeholder{color:rgb(var(--color-muted)/.6)}
+  .disabled\:opacity-40:disabled{opacity:.4}.disabled\:cursor-not-allowed:disabled{cursor:not-allowed}
+  :focus-visible{outline:2px solid rgb(var(--color-ai));outline-offset:2px}
+  .side-zone-left:focus-visible .side-arrow,.side-zone-right:focus-visible .side-arrow{opacity:.6}
+  @media (min-width:40rem){
+    .sm\:flex-row{flex-direction:row}.sm\:items-end{align-items:flex-end}.sm\:w-auto{width:auto}
+    .sm\:text-6xl{font-size:3.75rem;line-height:1}.sm\:border-line{border-color:rgb(var(--color-line))}
+  }
+  @media (min-width:48rem){.md\:px-10{padding-inline:2.5rem}.md\:text-3xl{font-size:1.875rem;line-height:2.25rem}}
+  @media (min-width:64rem){.lg\:gap-8{gap:2rem}}
 </style>
 </head>
 
@@ -662,7 +706,7 @@ se construye.</h2>
 
               <h3 class="lang-trans lowercase font-display text-2xl text-paper mb-4" data-i18n="studio-card-2-title">bernat domènech sevillano</h3>
               <p class="lang-trans text-muted text-sm leading-relaxed mb-6" data-i18n="studio-card-2-desc">
-                Nacido en 2008. Estudiante de Ingenieria Electrónica Industrial y Automática.
+                Nacido en 2008. Estudiante de Ingeniería Electrónica Industrial y Automática.
               </p>
             </div>
 
@@ -829,7 +873,7 @@ se construye.</h2>
       </button>
     </div>
 
-    <div id="assistant-output" class="assistant-output flex-1 overflow-y-auto p-6 flex flex-col gap-4" aria-live="polite" data-placeholder="inicia la conversación con brandi o selecciona un plan."></div>
+    <div id="assistant-output" class="assistant-output flex-1 overflow-y-auto p-6 flex flex-col gap-4" role="log" aria-relevant="additions" data-placeholder="inicia la conversación con brandi o selecciona un plan."></div>
 
     <form id="brand-assistant-form" class="p-4 md:p-6 border-t border-line/60 bg-ink/30 shrink-0 space-y-3">
       
@@ -840,6 +884,7 @@ se construye.</h2>
 
       <div class="relative flex items-center bg-ink/60 border border-line rounded-xl p-1.5 focus-within:border-ai">
         <textarea id="brand-prompt" rows="1" maxlength="500"
+                aria-label="mensaje para brandi"
                 placeholder="escribe un mensaje a brandi..."
                 class="lang-trans w-full bg-transparent resize-none border-none px-3 py-2 text-xs md:text-sm text-paper placeholder:text-muted/60 focus:outline-none max-h-24" data-i18n-placeholder="panel-placeholder"></textarea>
         
@@ -1017,7 +1062,7 @@ se construye.</h2>
         "portfolio-btn": "+ portfolio",
         "studio-card-2-tag": "trayectoria & formación",
         "studio-card-2-title": "bernat domènech sevillano",
-        "studio-card-2-desc": "Nacido en 2008. Estudiante de Ingenieria Electrónica Industrial y Automática.",
+        "studio-card-2-desc": "Nacido en 2008. Estudiante de Ingeniería Electrónica Industrial y Automática.",
         "studio-card-2-role": "creador de webs",
 
         "plans-heading": "planes de rebranding y web",
@@ -1111,7 +1156,9 @@ se construye.</h2>
         "err-empty": "por favor, escribe un mensaje antes de enviar.",
         "err-turnstile": "por favor, completa la verificación humana.",
         "err-network": "error al conectar con el servidor seguro",
-        "thinking-phrases": ["pensando...", "analizando territorios visuales...", "sintetizando concepto de marca...", "afinando dirección de arte..."],
+        "err-rate": "demasiadas solicitudes, espera un minuto.",
+        "err-busy": "brandi está saturada, inténtalo de nuevo.",
+        "thinking-phrases": ["pensando...", "analizando territorios visuals...", "sintetizando concepto de marca...", "afinando dirección de arte..."],
         "lead-closed-badge": "briefing enviado al estudio con éxito"
       },
       en: {
@@ -1227,6 +1274,8 @@ se construye.</h2>
         "err-empty": "please drop a message before sending.",
         "err-turnstile": "please complete the human verification.",
         "err-network": "error connecting to the secure server",
+        "err-rate": "too many requests, please wait a minute.",
+        "err-busy": "brandi is busy, please try again.",
         "thinking-phrases": ["thinking it over...", "synthesizing brand architecture...", "shaping visual direction...", "fine-tuning design parameters..."],
         "lead-closed-badge": "briefing successfully sent to the studio"
       },
@@ -1313,7 +1362,7 @@ se construye.</h2>
         "t2-f1-title": "Fase 1 (Identitat i Direcció d'Art):",
         "t2-f1-desc": "Gael presenta les propostes de logotip, paleta cromàtica i directrius tipogràfiques. El client avalua i selecciona una opció definitiva. Cada fase inclou un màxim de 2 rondes de revisions o ajustos menors sobre la proposta inicial. Un cop el client atorga el seu vist plau (\"Aprovat\"), el disseny del logotip i la identitat visual es consideren tancats i inalterables. Si amb posterioritat (fins i tot durant el desenvolupament web) el client sol·licita modificar el logotip, canviar colors principals o redissenyar la identitat, aquest canvi constituirà un treball extraordinari tarifat a 50 €/hora.",
         "t2-f2-title": "Fase 2 (Estructura i Desenvolupament Web):",
-        "t2-f2-desc": "S'implementa l'estructura web (landing page scrollable o web multicapa segons el pla) amb els textos i materials aportats pel client. El client revisa la versió provisional i valida la distribució i el disseny base (incloent fins a 2 rondas d'ajustos menors). Amb l'aprovació d'aquesta fase, l'estructura queda ferma. Modificacions estructurals majors o reordenacions profundes sol·licitades després d'aquesta aprovació implicaran costos addicionals.",
+        "t2-f2-desc": "S'implementa l'estructura web (landing page scrollable o web multicapa segons el pla) amb els textos i materials aportats pel client. El client revisa la versió provisional i valida la distribució i el disseny base (incloent fins a 2 rondes d'ajustos menors). Amb l'aprovació d'aquesta fase, l'estructura queda ferma. Modificacions estructurals majors o reordenacions profundes sol·licitades després d'aquesta aprovació implicaran costos addicionals.",
         "t2-f3-title": "Fase 3 (Desplegament i Lliurament Clau en Mà):",
         "t2-f3-desc": "Un cop superades les fases anteriors, Bernat efectua el desplegament tècnic definitiu a GitHub i Cloudflare, realitzant el lliurament formal clau en mà i transferint la propietat tècnica acordada al client.",
         "t3-title": "3. aportació de materials, dominis i terminis del client",
@@ -1343,6 +1392,8 @@ se construye.</h2>
         "err-empty": "si us plau, escriu un missatge abans d'enviar.",
         "err-turnstile": "si us plau, completa la verificació humana.",
         "err-network": "error en connectar amb el servidor segur",
+        "err-rate": "massa sol·licituds, espera un minut.",
+        "err-busy": "brandi està saturada, torna-ho a provar.",
         "thinking-phrases": ["pensant...", "analitzant territoris visuals...", "sintetitzant concepte de marca...", "afinant direcció d'art..."],
         "lead-closed-badge": "briefing enviat a l'estudi amb èxit"
       }
@@ -1495,10 +1546,11 @@ se construye.</h2>
 
       const greetingObj = {
         role: 'assistant',
+        greeting: true,
         texts: {
           es: `¡Perfecto! Te decantas por el ${pTitleEs}${hasWeb ? ' con desarrollo web incluido' : ' (solo identidad)'} (${finalTotal} € total con descuento de lanzamiento). ¿Cómo se llama tu marca o proyecto actual para continuar?`,
           en: `Perfect! You're leaning towards the ${pTitleEn}${hasWeb ? ' with web design included' : ' (identity only)'} (€${finalTotal} total with launch discount). What is your current brand or project name to continue?`,
-          ca: `¡Perfecte! T'atures pel ${pTitleCa}${hasWeb ? ' amb desenvolupament web inclòs' : ' (només identitat)'} (${finalTotal} € total amb descompte de llançament). Com es diu la teva marca o projecte actual per continuar?`
+          ca: `Perfecte! T'atures pel ${pTitleCa}${hasWeb ? ' amb desenvolupament web inclòs' : ' (només identitat)'} (${finalTotal} € total amb descompte de llançament). Com es diu la teva marca o projecte actual per continuar?`
         }
       };
 
@@ -1813,7 +1865,7 @@ se construye.</h2>
         script.async = true;
         script.defer = true;
         script.onload = resolve;
-        script.onerror = reject;
+        script.onerror = () => { script.remove(); turnstileLoadPromise = null; reject(new Error('turnstile_load_failed')); };
         document.head.appendChild(script);
       });
 
@@ -1836,6 +1888,8 @@ se construye.</h2>
         try {
           turnstileWidgetId = window.turnstile.render(container, {
             sitekey: TURNSTILE_SITEKEY,
+            action: 'brandi-chat',
+            theme: currentIsLight() ? 'light' : 'dark',
             size: 'flexible',
             language: currentLang,
             callback: function () {
@@ -2139,7 +2193,7 @@ se construye.</h2>
         const text = document.createElement('span');
         text.className = 'block text-xs md:text-sm leading-relaxed';
 
-        const displayText = entry.texts ? (entry.texts[currentLang] || Object.values(entry.texts)[0]) : entry.text;
+        const displayText = entry.texts ? (entry.texts[currentLang] || Object.values(entry.texts)[0]) : (entry.text || '');
         text.textContent = displayText;
 
         bubble.appendChild(label);
@@ -2180,6 +2234,7 @@ se construye.</h2>
 
       const timer = document.createElement('span');
       timer.id = 'thinking-timer';
+      timer.setAttribute('aria-hidden', 'true');
       timer.className = 'font-mono text-xs text-ai/80 ml-auto pl-3 shrink-0';
       timer.textContent = '0.0s';
 
@@ -2254,11 +2309,10 @@ se construye.</h2>
       const activePlanId = activePlanKey ? titleKeyToId[activePlanKey] : null;
       const plan = activePlanId ? { id: activePlanId, web: !!activePlanWebState } : null;
 
-      const history = chatHistory.map((e) => ({
-        role: e.role,
-        text: e.texts ? (e.texts[currentLang] || Object.values(e.texts)[0] || '') : (e.text || '')
-      }));
-      const messages = [...history, { role: 'user', text: question }];
+      const messages = [
+        ...chatHistory.filter((e) => !e.greeting).map((e) => ({ role: e.role, text: e.text || '', sig: e.sig })),
+        { role: 'user', text: question }
+      ];
 
       assistantSubmit.disabled = true;
       setAssistantStatus('status-consulting', 'idle');
@@ -2275,21 +2329,18 @@ se construye.</h2>
           signal: activeAbortController.signal
         });
 
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || translations[currentLang]["err-network"]);
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw Object.assign(new Error(data.error || 'http_' + response.status), { code: data.error });
 
-        chatHistory.push({ role: 'user', texts: { [currentLang]: question } });
-        chatHistory.push({
-          role: 'assistant',
-          texts: { [currentLang]: data.reply },
-          leadClosed: data.leadClosed
-        });
+        chatHistory.push({ role: 'user', text: question });
+        chatHistory.push({ role: 'assistant', text: data.reply, sig: data.sig, leadClosed: data.leadClosed });
         renderHistory();
         assistantPrompt.value = '';
         setAssistantStatus('status-completed', 'ready');
       } catch (error) {
         if (error.name !== 'AbortError') {
-          assistantError.textContent = 'error: ' + error.message;
+          const ERR = { rate_limited: 'err-rate', captcha_failed: 'err-turnstile', upstream_busy: 'err-busy' };
+          assistantError.textContent = translations[currentLang][ERR[error.code]] || translations[currentLang]['err-network'];
           setAssistantStatus('status-failed', 'error');
         }
       } finally {
