@@ -1065,6 +1065,10 @@ se construye.</h2>
         "recount-discount": "Descuento lanzamiento (-50%):",
         "recount-total": "Total:",
 
+        "email-subject": "Interés en la contratación del {plan}",
+        "email-web": " incluyendo desarrollo web",
+        "email-body": "Hola,\n\nEstoy interesado/a en el {plan}{web} ({total} € total con descuento de lanzamiento) para mi proyecto.\n\nNombre de la marca / negocio:\nBreve descripción:\n\n¡Un saludo!",
+
         "modal-eyebrow": "onboarding",
         "modal-title": "plan seleccionado",
         "modal-intro": "elige cómo prefieres que empecemos a perfilar los detalles de tu proyecto:",
@@ -1178,6 +1182,10 @@ se construye.</h2>
         "recount-discount": "Launch discount (-50%):",
         "recount-total": "Total:",
 
+        "email-subject": "Interest in hiring the {plan}",
+        "email-web": " including custom web development",
+        "email-body": "Hello,\n\nI am interested in the {plan}{web} (€{total} total with launch discount) for my project.\n\nBrand / business name:\nShort description:\n\nBest regards!",
+
         "modal-eyebrow": "onboarding",
         "modal-title": "plan selected",
         "modal-intro": "choose how you'd like us to start scoping out your project:",
@@ -1290,6 +1298,10 @@ se construye.</h2>
         "recount-web": "Desenvolupament web a mida:",
         "recount-discount": "Descompte llançament (-50%):",
         "recount-total": "Total:",
+
+        "email-subject": "Interès en la contractació del {plan}",
+        "email-web": " amb desenvolupament web inclòs",
+        "email-body": "Hola,\n\nEstic interessat/ada en el {plan}{web} ({total} € total amb descompte de llançament) per al meu projecte.\n\nNom de la marca / negoci:\nBreu descripció:\n\nUn salut!",
 
         "modal-eyebrow": "onboarding",
         "modal-title": "pla seleccionat",
@@ -2029,13 +2041,28 @@ se construye.</h2>
     });
 
     document.getElementById('modal-choose-email').addEventListener('click', () => {
-      const planNameEs = translations[currentLang][pendingPlanKey];
+      const t = translations[currentLang];
+      const planName = t[pendingPlanKey];
       const hasWeb = pendingPlanId ? planWebState[pendingPlanId] : false;
       const basePrice = plansArray.find(p => p.id === pendingPlanId)?.basePrice || 0;
       const finalTotal = basePrice + (hasWeb ? 200 : 0);
+
+      const webText = hasWeb ? t["email-web"] : "";
+      const subjectTemplate = t["email-subject"];
+      const bodyTemplate = t["email-body"];
+
+      const subject = encodeURIComponent(
+        subjectTemplate.replace("{plan}", planName)
+      );
+      
+      const body = encodeURIComponent(
+        bodyTemplate
+          .replace("{plan}", planName)
+          .replace("{web}", webText)
+          .replace("{total}", finalTotal)
+      );
+
       closePlanModal();
-      const subject = encodeURIComponent(`Interés en la contratación del ${planNameEs}${hasWeb ? ' con Web' : ''}`);
-      const body = encodeURIComponent(`Hola,\n\nEstoy interesado/a en el ${planNameEs}${hasWeb ? ' incluyendo desarrollo web' : ''} (${finalTotal} € total con descuento de lanzamiento) para mi proyecto.\n\nNombre de la marca / negocio:\nBreve descripción:\n\n¡Un saludo!`);
       window.location.href = `mailto:hola@rebrandyourbrand.es?subject=${subject}&body=${body}`;
     });
 
@@ -2234,11 +2261,9 @@ se construye.</h2>
         return;
       }
 
-      // Plan seleccionado (estructurado; el worker lo valida y lo convierte en contexto)
       const activePlanId = activePlanKey ? titleKeyToId[activePlanKey] : null;
       const plan = activePlanId ? { id: activePlanId, web: !!activePlanWebState } : null;
 
-      // Historial completo + mensaje nuevo
       const history = chatHistory.map((e) => ({
         role: e.role,
         text: e.texts ? (e.texts[currentLang] || Object.values(e.texts)[0] || '') : (e.text || '')
