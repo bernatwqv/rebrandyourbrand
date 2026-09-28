@@ -492,6 +492,7 @@ textarea { resize: vertical; }
   .bg-ink\/20{background:rgb(var(--color-bg)/.2)}.bg-ink\/30{background:rgb(var(--color-bg)/.3)}
   .bg-ink\/40{background:rgb(var(--color-bg)/.4)}.bg-ink\/50{background:rgb(var(--color-bg)/.5)}
   .bg-ink\/60{background:rgb(var(--color-bg)/.6)}.bg-ink\/80{background:rgb(var(--color-bg)/.8)}.bg-ink\/85{background:rgb(var(--color-bg)/.85)}
+  .bg-panel\/20{background:rgb(var(--color-panel)/.2)}
   .bg-panel\/30{background:rgb(var(--color-panel)/.3)}.bg-panel\/40{background:rgb(var(--color-panel)/.4)}.bg-panel\/80{background:rgb(var(--color-panel)/.8)}
   .bg-panel\/95{background:rgb(var(--color-panel)/.95)}
   .bg-black\/50{background:rgb(0 0 0/.5)}.bg-black\/60{background:rgb(0 0 0/.6)}
@@ -546,7 +547,6 @@ textarea { resize: vertical; }
         <a href="#planes" class="lang-trans lowercase hover:text-paper" data-i18n="nav-planes">planes</a>
         <a href="#sobre-nosotros" class="lang-trans lowercase hover:text-paper" data-i18n="nav-about">sobre nosotros</a>
         <a href="#terminos" class="lang-trans lowercase hover:text-paper" data-i18n="nav-terms">términos</a>
-        <a href="#redes" class="lang-trans lowercase hover:text-paper" data-i18n="nav-redes">redes</a>
       </nav>
 
       <span class="hidden md:inline-block w-px h-5 bg-line mx-5" aria-hidden="true"></span>
@@ -591,7 +591,6 @@ textarea { resize: vertical; }
       <a href="#planes" class="mobile-nav-link lang-trans lowercase text-muted hover:text-paper py-1" data-i18n="nav-planes">planes</a>
       <a href="#sobre-nosotros" class="mobile-nav-link lang-trans lowercase text-muted hover:text-paper py-1" data-i18n="nav-about">sobre nosotros</a>
       <a href="#terminos" class="mobile-nav-link lang-trans lowercase text-muted hover:text-paper py-1" data-i18n="nav-terms">términos</a>
-      <a href="#redes" class="mobile-nav-link lang-trans lowercase text-muted hover:text-paper py-1" data-i18n="nav-redes">redes</a>
     </div>
   </header>
 
@@ -731,7 +730,7 @@ se construye.</h2>
       </div>
     </section>
 
-    <!-- Términos y Condiciones (Con sub-apartados estructurados) -->
+    <!-- Términos y Condiciones (Última sección principal) -->
     <section id="terminos" class="relative px-6 md:px-10 py-24 md:py-32 border-b border-line overflow-hidden bg-panel/30 z-10">
       <div class="max-w-4xl mx-auto relative z-10">
         <div class="reveal mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
@@ -857,30 +856,11 @@ se construye.</h2>
     </section>
   </main>
 
-  <!-- Footer / Redes -->
-  <footer id="redes" class="relative px-6 md:px-10 py-24 md:py-32 overflow-hidden z-10">
-    <div class="max-w-6xl mx-auto relative z-10">
-      <div class="reveal flex flex-col md:flex-row md:items-end md:justify-between gap-10">
-        <div>
-          <h2 class="lang-trans lowercase font-display text-3xl md:text-4xl max-w-md leading-tight mb-4" data-i18n="footer-title">
-            nuestras redes.
-          </h2>
-        </div>
-
-        <div class="flex gap-6 text-sm text-muted">
-          <a href="https://instagram.com/rebrandyourbrand" target="_blank" rel="noopener noreferrer"
-             class="lowercase hover:text-brand">instagram</a>
-          <a href="https://linkedin.com/company/rebrandyourbrand" target="_blank" rel="noopener noreferrer"
-             class="lowercase hover:text-brand">linkedin</a>
-          <a href="https://behance.net/rebrandyourbrand" target="_blank" rel="noopener noreferrer"
-             class="lowercase hover:text-brand">behance</a>
-        </div>
-      </div>
-
-      <div class="mt-16 pt-6 border-t border-line flex flex-col sm:flex-row justify-between gap-2 text-xs text-muted">
-        <span class="lang-trans lowercase" data-i18n="footer-copy">rebrandyourbrand — rebranding y diseño visual</span>
-        <span>&copy; <span id="year"></span> <span class="lang-trans" data-i18n="footer-rights">Todos los derechos reservados</span></span>
-      </div>
+  <!-- Footer Minimal -->
+  <footer class="relative px-6 md:px-10 py-12 overflow-hidden z-10 bg-panel/20">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-muted">
+      <span class="lang-trans lowercase" data-i18n="footer-copy">rebrandyourbrand — rebranding y diseño visual</span>
+      <span>&copy; <span id="year"></span> <span class="lang-trans" data-i18n="footer-rights">Todos los derechos reservados</span></span>
     </div>
   </footer>
 
@@ -1090,7 +1070,6 @@ se construye.</h2>
         "nav-planes": "planes",
         "nav-about": "sobre nosotros",
         "nav-terms": "términos",
-        "nav-redes": "redes",
         "hero-tag": "estudio de rebranding y diseño visual",
         "hero-title": "marcas que dejan de pasar desapercibidas.",
         "hero-desc": "Rediseñamos identidades visuales combinando dirección de arte y precisión técnica, para marcas que necesitan verse tan bien como lo que hacen.",
@@ -1192,7 +1171,6 @@ se construye.</h2>
         "t6-title": "6. ley aplicable y jurisdicción",
         "t6-p": "Para cualquier controversia o disputa legal derivada de la interpretación o cumplimiento de estas condiciones, ambas partes se someten expresamente a la jurisdicción de los Juzgados y Tribunales de Barcelona, renunciando a cualquier otro fuero que pudiera corresponderles.",
 
-        "footer-title": "nuestras redes.",
         "footer-copy": "rebrandyourbrand — rebranding y diseño visual",
         "footer-rights": "Todos los derechos reservados",
         "panel-title": "brandi · asistente creativo",
@@ -1217,7 +1195,6 @@ se construye.</h2>
         "nav-planes": "plans",
         "nav-about": "about us",
         "nav-terms": "terms",
-        "nav-redes": "socials",
         "hero-tag": "rebranding & visual design studio",
         "hero-title": "brands that refuse to fade into the background.",
         "hero-desc": "We reshape visual identities marrying razor-sharp art direction with rock-solid engineering, for brands that mean business.",
@@ -1319,7 +1296,6 @@ se construye.</h2>
         "t6-title": "6. governing law and jurisdiction",
         "t6-p": "For any controversy or legal dispute arising from the interpretation or compliance of these conditions, both parties expressly submit to the jurisdiction of the Courts and Tribunals of Barcelona, waiving any other forum that might correspond to them.",
 
-        "footer-title": "our socials.",
         "footer-copy": "rebrandyourbrand — rebranding & visual design",
         "footer-rights": "All rights reserved",
         "panel-title": "brandi · creative assistant",
@@ -1344,9 +1320,8 @@ se construye.</h2>
         "nav-planes": "plans",
         "nav-about": "sobre nosaltres",
         "nav-terms": "termes",
-        "nav-redes": "xarxes",
         "hero-tag": "estudi de rebranding i disseny visual",
-        "hero-title": "marques que deixen de passar desapercebudes.",
+        "hero-title": "marques que deixen de passar desapercibudes.",
         "hero-desc": "Redissenyem identitats visuals combinant direcció d'art i precisió tècnica, per a marques que necessiten veure's tan bé com el que fan.",
         "manifesto-title": "una marca no es decora.\nes construeix.",
         "manifesto-desc": "Cada projecte comença assenyalant l'essencial i descartant el superflu. No perseguim tendències: busquem un sistema que segueixi sent cert d'aquí a cinc anys.",
@@ -1426,7 +1401,7 @@ se construye.</h2>
         "t2-f1-title": "2.1. Fase 1 (Identitat i Direcció d'Art):",
         "t2-f1-desc": "Gael presenta les propostes de logotip, paleta cromàtica i directrius tipogràfiques. Inclou un màxim de 2 rondes de revisions menors. Un cop atorgat el vist plau (\"Aprovat\"), el disseny es considera tancat i inalterable. Modificacions posteriors en el logotip o colors principals constituiran treball extraordinari a 50 €/hora.",
         "t2-f2-title": "2.2. Fase 2 (Estructura i Desenvolupament Web):",
-        "t2-f2-desc": "S'implementa l'estructura web (landing page o web multicapa) amb els materials aportats. El client revisa la versió provisional i valida el disseny base (fins a 2 rondes d'ajustos menors). Amb l'aprovació, l'estructura queda ferma; canvis estructurals profunds posteriors implicaran costos addicionals.",
+        "t2-f2-desc": "S'implementa l'estructura web (landing page o web multicapa) amb els materials aportats. El client revisa la versió provisional i valida el disseny base (fins a 2 rondas d'ajustos menors). Amb l'aprovació, l'estructura queda ferma; canvis estructurals profunds posteriors implicaran costos addicionals.",
         "t2-f3-title": "2.3. Fase 3 (Desplegament i Lliurament Clau en Mà):",
         "t2-f3-desc": "Bernat efectua el desplegament tècnic definitiu a GitHub i Cloudflare, realitzant el lliurament formal clau en mà i transferint la propietat tècnica acordada al client.",
         
@@ -1446,7 +1421,6 @@ se construye.</h2>
         "t6-title": "6. llei aplicable i jurisdicció",
         "t6-p": "Per a qualsevol controvèrsia o disputa legal derivada de la interpretació o compliment d'aquestes condicions, ambdues parts se sotmeten expressament a la jurisdicció dels Jutjats i Tribunals de Barcelona, renunciant a qualsevol altre fur que pogués correspondre-ls.",
 
-        "footer-title": "les nostres xarxes.",
         "footer-copy": "rebrandyourbrand — rebranding i disseny visual",
         "footer-rights": "Tots els drets reservats",
         "panel-title": "brandi · assistent creatiu",
