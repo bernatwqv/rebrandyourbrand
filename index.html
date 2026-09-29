@@ -1179,8 +1179,10 @@ se construye.</h2>
         "err-busy": "brandi está saturada, inténtalo de nuevo.",
         "thinking-phrases": ["pensando...", "analizando territorios visuals...", "sintetizando concepto de marca...", "afinando dirección de arte..."],
         "lead-closed-badge": "briefing enviado al estudio con éxito",
-        "confirm-btn": "✓ Confirmar y enviar briefing",
-        "confirm-user-msg": "Sí, confirmo el resumen y envío el briefing."
+        "confirm-yes": "Sí",
+        "confirm-no": "No",
+        "confirm-user-msg": "Sí",
+        "deny-user-msg": "No"
       },
       en: {
         "nav-planes": "plans",
@@ -1308,8 +1310,10 @@ se construye.</h2>
         "err-busy": "brandi is busy, please try again.",
         "thinking-phrases": ["thinking it over...", "synthesizing brand architecture...", "shaping visual direction...", "fine-tuning design parameters..."],
         "lead-closed-badge": "briefing successfully sent to the studio",
-        "confirm-btn": "✓ Confirm and send briefing",
-        "confirm-user-msg": "Yes, I confirm the summary and send the briefing."
+        "confirm-yes": "Yes",
+        "confirm-no": "No",
+        "confirm-user-msg": "Yes",
+        "deny-user-msg": "No"
       },
       ca: {
         "nav-planes": "plans",
@@ -1437,8 +1441,10 @@ se construye.</h2>
         "err-busy": "brandi està saturada, torna-ho a provar.",
         "thinking-phrases": ["pensant...", "analitzant territoris visuals...", "sintetitzant concepte de marca...", "afinant direcció d'art..."],
         "lead-closed-badge": "briefing enviat a l'estudi amb èxit",
-        "confirm-btn": "✓ Confirmar i enviar briefing",
-        "confirm-user-msg": "Sí, confirmo el resum i envio el briefing."
+        "confirm-yes": "Sí",
+        "confirm-no": "No",
+        "confirm-user-msg": "Sí",
+        "deny-user-msg": "No"
       }
     };
 
@@ -2402,14 +2408,28 @@ se construye.</h2>
 
         const isLast = index === chatHistory.length - 1;
         if (!isUser && entry.canConfirm && !entry.leadClosed && !isLeadClosedGlobally()) {
-          const btnConfirm = document.createElement('button');
-          btnConfirm.type = 'button';
-          btnConfirm.className = 'mt-3 w-full py-2.5 px-4 bg-brand text-[#0A0A0C] font-semibold rounded-xl text-xs hover:bg-brand-soft transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm bubble-in';
-          btnConfirm.innerHTML = `<span>✓</span> <span>${translations[currentLang]["confirm-btn"]}</span>`;
-          btnConfirm.addEventListener('click', () => {
+          const actionsDiv = document.createElement('div');
+          actionsDiv.className = 'mt-3 flex items-center gap-2 bubble-in';
+
+          const btnYes = document.createElement('button');
+          btnYes.type = 'button';
+          btnYes.className = 'flex-1 py-2.5 px-4 bg-brand text-[#0A0A0C] font-semibold rounded-xl text-xs hover:bg-brand-soft transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm';
+          btnYes.innerHTML = `<span>✓</span> <span>${translations[currentLang]["confirm-yes"]}</span>`;
+          btnYes.addEventListener('click', () => {
             triggerLeadConfirmation();
           });
-          bubble.appendChild(btnConfirm);
+
+          const btnNo = document.createElement('button');
+          btnNo.type = 'button';
+          btnNo.className = 'py-2.5 px-4 bg-ink/40 border border-line text-paper font-semibold rounded-xl text-xs hover:border-brand/60 transition-all flex items-center justify-center gap-2 cursor-pointer';
+          btnNo.innerHTML = `<span>✕</span> <span>${translations[currentLang]["confirm-no"]}</span>`;
+          btnNo.addEventListener('click', () => {
+            handleUserDenial();
+          });
+
+          actionsDiv.appendChild(btnYes);
+          actionsDiv.appendChild(btnNo);
+          bubble.appendChild(actionsDiv);
         }
 
         if (!isUser && entry.leadClosed) {
@@ -2551,6 +2571,59 @@ se construye.</h2>
       }
     }
 
+    async function handleUserDenial() {
+      const turnstileToken = getTurnstileToken();
+      if (!turnstileToken) {
+        assistantError.textContent = translations[currentLang]["err-turnstile"];
+        setAssistantStatus('status-failed', 'error');
+        return;
+      }
+
+      const denyText = translations[currentLang]["deny-user-msg"];
+      chatHistory.push({ role: 'user', text: denyText });
+      renderHistory();
+
+      const activePlanId = activePlanKey ? titleKeyToId[activePlanKey] : null;
+      const plan = activePlanId ? { id: activePlanId, web: !!activePlanWebState } : null;
+
+      const messages = chatHistory.filter((e) => !e.greeting).map((e) => ({ role: e.role, text: e.text || '', sig: e.sig }));
+
+      assistantSubmit.disabled = true;
+      setAssistantStatus('status-consulting', 'idle');
+      showThinkingBubble();
+
+      if (activeAbortController) activeAbortController.abort();
+      activeAbortController = new AbortController();
+
+      try {
+        const response = await fetch('https://rebrandyourbrand-proxy.bernatxd705.workers.dev', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages, plan, token: turnstileToken, lang: currentLang }),
+          signal: activeAbortController.signal
+        });
+
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw Object.assign(new Error(data.error || 'http_' + response.status), { code: data.error });
+
+        chatHistory.push({ role: 'assistant', text: data.reply, sig: data.sig, leadClosed: data.leadClosed, canConfirm: data.canConfirm });
+        renderHistory();
+        setAssistantStatus('status-completed', 'ready');
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          const ERR = { rate_limited: 'err-rate', captcha_failed: 'err-turnstile', upstream_busy: 'err-busy' };
+          assistantError.textContent = translations[currentLang][ERR[error.code]] || translations[currentLang]['err-network'];
+          setAssistantStatus('status-failed', 'error');
+        }
+      } finally {
+        hideThinkingBubble();
+        if (turnstileWidgetId !== null && window.turnstile) {
+          try { window.turnstile.reset(turnstileWidgetId); } catch (e) {}
+        }
+        assistantSubmit.disabled = false;
+      }
+    }
+
     assistantForm.addEventListener('submit', async (event) => {
       event.preventDefault();
 
@@ -2613,26 +2686,9 @@ se construye.</h2>
         if (turnstileWidgetId !== null && window.turnstile) {
           try { window.turnstile.reset(turnstileWidgetId); } catch (e) {}
         }
-        assistantSubmit.disabled = true;
+        assistantSubmit.disabled = false;
       }
     });
-
-    if (currentLang !== 'es') {
-      currentLang = currentLang;
-      langIndicator.textContent = currentLang;
-      document.documentElement.lang = currentLang;
-      updateLangDropdownUI();
-      updateNavHrefs();
-      const lang = currentLang;
-      const elements = document.querySelectorAll('.lang-trans');
-      elements.forEach(el => {
-        const key = el.getAttribute('data-i18n');
-        if (key && translations[lang][key]) {
-          el.innerHTML = translations[lang][key];
-        }
-      });
-      setToggleLabels('.terms-toggle', 'terms-btn-show', 'terms-btn-hide');
-    }
 
     renderPlans();
 
