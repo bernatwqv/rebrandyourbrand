@@ -870,7 +870,7 @@ se construye.</h2>
           <div class="bg-panel border border-line p-6 md:p-8 space-y-3">
             <h3 class="lang-trans lowercase font-display text-lg md:text-xl text-paper font-semibold" data-i18n="t6-title">6. ley aplicable y jurisdicción (ámbito b2b)</h3>
             <p class="lang-trans" data-i18n="t6-p">
-              Al tratarse de una relación contractual estrictamente profesional y entre empresas (B2B), para cualquier controversia o disputa legal derivada de la interpretación o cumplimiento de estas condiciones, ambas partes se someten expresamente a la jurisdicción de los Juzgados y Tribunales de Barcelona, renunciando a cualquier otro fuero que pudiera corresponderles.
+              Al tratarse de una relación contractual estrictamente profesional y entre empresas (B2B), para cualquier controversia o disputa legal derivada de la interpretación o cumplimiento de estas condiciones, ambas partes se someten expresamente la jurisdicción de los Juzgados y Tribunales de Barcelona, renunciando a cualquier otro fuero que pudiera corresponderles.
             </p>
           </div>
 
@@ -1178,7 +1178,9 @@ se construye.</h2>
         "err-rate": "demasiadas solicitudes, espera un minuto.",
         "err-busy": "brandi está saturada, inténtalo de nuevo.",
         "thinking-phrases": ["pensando...", "analizando territorios visuals...", "sintetizando concepto de marca...", "afinando dirección de arte..."],
-        "lead-closed-badge": "briefing enviado al estudio con éxito"
+        "lead-closed-badge": "briefing enviado al estudio con éxito",
+        "confirm-btn": "✓ Confirmar y enviar briefing",
+        "confirm-user-msg": "Sí, confirmo el resumen y envío el briefing."
       },
       en: {
         "nav-planes": "plans",
@@ -1305,7 +1307,9 @@ se construye.</h2>
         "err-rate": "too many requests, please wait a minute.",
         "err-busy": "brandi is busy, please try again.",
         "thinking-phrases": ["thinking it over...", "synthesizing brand architecture...", "shaping visual direction...", "fine-tuning design parameters..."],
-        "lead-closed-badge": "briefing successfully sent to the studio"
+        "lead-closed-badge": "briefing successfully sent to the studio",
+        "confirm-btn": "✓ Confirm and send briefing",
+        "confirm-user-msg": "Yes, I confirm the summary and send the briefing."
       },
       ca: {
         "nav-planes": "plans",
@@ -1333,7 +1337,7 @@ se construye.</h2>
         "plans-quote": "ens estalviem el .99 en trucs de màrqueting per oferir-te una qualitat innegociable.",
         "launch-modal-eyebrow": "filosofia de l'estudi",
         "launch-modal-title": "per què oferim un -50% de descompte?",
-        "launch-modal-p1": "Com a estudi emergent fundat per joves apassionats, sabem que comencem el nostre camí sense un portfolio històric gegant ni la veterania de les grans agències tradicionals.",
+        "launch-modal-p1": "Com a estudi emergent fundat por joves apassionats, sabem que comencem el nostre camí sense un portfolio històric gegant ni la veterania de les grans agències tradicionals.",
         "launch-modal-p2": "Per això, vam compensar això de la manera més honesta possible: reduint els nostres preus un 50% de manera temporal. No retallem en qualitat (ens estalviem els trucs de màrqueting del .99 per oferir excel·lència absoluta), sinó que invertim tota la nostra energia i màxima dedicació en cada projecte per construir relacions de confiança i casos d'èxit memorables juntament amb tu.",
         "modal-ok-btn": "entès, anem a crear!",
 
@@ -1432,7 +1436,9 @@ se construye.</h2>
         "err-rate": "massa sol·licituds, espera un minut.",
         "err-busy": "brandi està saturada, torna-ho a provar.",
         "thinking-phrases": ["pensant...", "analitzant territoris visuals...", "sintetitzant concepte de marca...", "afinant direcció d'art..."],
-        "lead-closed-badge": "briefing enviat a l'estudi amb èxit"
+        "lead-closed-badge": "briefing enviat a l'estudi amb èxit",
+        "confirm-btn": "✓ Confirmar i enviar briefing",
+        "confirm-user-msg": "Sí, confirmo el resum i envio el briefing."
       }
     };
 
@@ -2363,11 +2369,15 @@ se construye.</h2>
       return 'brandi';
     }
 
+    function isLeadClosedGlobally() {
+      return chatHistory.some(e => e.leadClosed);
+    }
+
     function renderHistory() {
       assistantOutput.innerHTML = '';
       if (!chatHistory.length) return;
 
-      chatHistory.forEach((entry) => {
+      chatHistory.forEach((entry, index) => {
         const isUser = entry.role === 'user';
         const row = document.createElement('div');
         row.className = 'flex bubble-in ' + (isUser ? 'justify-end' : 'justify-start');
@@ -2389,6 +2399,18 @@ se construye.</h2>
 
         bubble.appendChild(label);
         bubble.appendChild(text);
+
+        const isLast = index === chatHistory.length - 1;
+        if (!isUser && entry.canConfirm && !entry.leadClosed && !isLeadClosedGlobally()) {
+          const btnConfirm = document.createElement('button');
+          btnConfirm.type = 'button';
+          btnConfirm.className = 'mt-3 w-full py-2.5 px-4 bg-brand text-[#0A0A0C] font-semibold rounded-xl text-xs hover:bg-brand-soft transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm bubble-in';
+          btnConfirm.innerHTML = `<span>✓</span> <span>${translations[currentLang]["confirm-btn"]}</span>`;
+          btnConfirm.addEventListener('click', () => {
+            triggerLeadConfirmation();
+          });
+          bubble.appendChild(btnConfirm);
+        }
 
         if (!isUser && entry.leadClosed) {
           const badge = document.createElement('div');
@@ -2477,6 +2499,58 @@ se construye.</h2>
     const assistantError = document.getElementById('assistant-error');
     let activeAbortController = null;
 
+    async function triggerLeadConfirmation() {
+      const turnstileToken = getTurnstileToken();
+      if (!turnstileToken) {
+        assistantError.textContent = translations[currentLang]["err-turnstile"];
+        setAssistantStatus('status-failed', 'error');
+        return;
+      }
+
+      const confirmText = translations[currentLang]["confirm-user-msg"];
+      chatHistory.push({ role: 'user', text: confirmText });
+      renderHistory();
+
+      const activePlanId = activePlanKey ? titleKeyToId[activePlanKey] : null;
+      const plan = activePlanId ? { id: activePlanId, web: !!activePlanWebState } : null;
+
+      const messages = chatHistory.filter((e) => !e.greeting).map((e) => ({ role: e.role, text: e.text || '', sig: e.sig }));
+
+      assistantSubmit.disabled = true;
+      setAssistantStatus('status-consulting', 'idle');
+      showThinkingBubble();
+
+      if (activeAbortController) activeAbortController.abort();
+      activeAbortController = new AbortController();
+
+      try {
+        const response = await fetch('https://rebrandyourbrand-proxy.bernatxd705.workers.dev', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages, plan, token: turnstileToken, lang: currentLang, confirm: true }),
+          signal: activeAbortController.signal
+        });
+
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw Object.assign(new Error(data.error || 'http_' + response.status), { code: data.error });
+
+        chatHistory.push({ role: 'assistant', text: data.reply, sig: data.sig, leadClosed: data.leadClosed, canConfirm: data.canConfirm });
+        renderHistory();
+        setAssistantStatus('status-completed', 'ready');
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          const ERR = { rate_limited: 'err-rate', captcha_failed: 'err-turnstile', upstream_busy: 'err-busy' };
+          assistantError.textContent = translations[currentLang][ERR[error.code]] || translations[currentLang]['err-network'];
+          setAssistantStatus('status-failed', 'error');
+        }
+      } finally {
+        hideThinkingBubble();
+        if (turnstileWidgetId !== null && window.turnstile) {
+          try { window.turnstile.reset(turnstileWidgetId); } catch (e) {}
+        }
+      }
+    }
+
     assistantForm.addEventListener('submit', async (event) => {
       event.preventDefault();
 
@@ -2524,7 +2598,7 @@ se construye.</h2>
         if (!response.ok) throw Object.assign(new Error(data.error || 'http_' + response.status), { code: data.error });
 
         chatHistory.push({ role: 'user', text: question });
-        chatHistory.push({ role: 'assistant', text: data.reply, sig: data.sig, leadClosed: data.leadClosed });
+        chatHistory.push({ role: 'assistant', text: data.reply, sig: data.sig, leadClosed: data.leadClosed, canConfirm: data.canConfirm });
         renderHistory();
         assistantPrompt.value = '';
         setAssistantStatus('status-completed', 'ready');
