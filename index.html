@@ -708,7 +708,7 @@ se construye.</h2>
                   <p class="lang-trans mt-1" data-i18n="t1-p1">rebrandyourbrand ofrece servicios cerrados de rebranding y desarrollo web bajo un modelo de pago fraccionado: un 50% en concepto de anticipo al aceptar el presupuesto para iniciar formalmente la Fase 1, y el 50% restante obligatorio antes de acometer el despliegue técnico de la Fase 3. Cada plan detalla estrictamente sus entregables sin cuotas mensuales ocultas.</p>
                 </div>
                 <div>
-                  <strong class="lang-trans text-paper font-medium" data-i18n="t1-l2">1.2. Exclusions y trabajos extraordinarios:</strong>
+                  <strong class="lang-trans text-paper font-medium" data-i18n="t1-l2">1.2. Exclusiones y trabajos extraordinarios:</strong>
                   <p class="lang-trans mt-1" data-i18n="t1-p2">Cualquier característica, sección adicional, pasarela de comercio electrónico (e-commerce), base de datos compleja o desarrollo a medida no especificado en el plan contratado quedará excluido del precio base y requerirá la contratación de un plan superior (Upsell) o un presupuesto extraordinario tarificado a 50 €/hora.</p>
                 </div>
               </div>
@@ -1235,7 +1235,7 @@ se construye.</h2>
         "testimonials-success": "Ressenya enviada correctament! Queda pendent de moderació per verificar que procedeix d'un negoci real.",
         "plans-heading": "plans de rebranding i web",
         "plans-sub": "Contracta només identitat o afegeix desenvolupament web a mida. Sense quotes mensuals ni lligams.",
-        "plans-quote": "ens estalviem el .99 en trucs de màrqueting per oferir-te una qual qualitat innegociable.",
+        "plans-quote": "ens estalviem el .99 en trucs de màrqueting per oferir-te una qualitat innegociable.",
         "launch-modal-eyebrow": "filosofia de l'estudi",
         "launch-modal-title": "en què consisteix el programa de clients fundadors?",
         "launch-modal-p1": "Com a estudi emergent fundat per joves apassionats, sabem que comencem el nostre camí sense un portfolio històric gegant ni la veterania de les grans agències tradicionals.",
@@ -1333,7 +1333,7 @@ se construye.</h2>
         "status-consulting": "consultant amb brandi...",
         "status-completed": "completat",
         "status-failed": "fallit",
-        "output-placeholder": "inicia la conversa compta amb brandi o selecciona un pla.",
+        "output-placeholder": "inicia la conversa amb brandi o selecciona un pla.",
         "err-empty": "si us plau, escriu un missatge abans d'enviar.",
         "err-turnstile": "si us plau, completa la verificació humana.",
         "err-network": "error en connectar amb el servidor segur",
@@ -1522,6 +1522,8 @@ se construye.</h2>
     document.querySelectorAll('[data-open-testimonial-modal]').forEach((btn) => btn.addEventListener('click', () => testimonialModal.open(btn)));
     const testimonialForm = $('testimonial-form');
     const testimonialMsg = $('testimonial-msg');
+    const ERR = { rate_limited: 'err-rate', email_cooldown: 'err-cooldown', captcha_failed: 'err-turnstile', upstream_busy: 'err-busy' };
+
     testimonialForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const name = $('reviewer-name').value.trim();
@@ -1532,7 +1534,7 @@ se construye.</h2>
 
       const submitBtn = testimonialForm.querySelector('button[type="submit"]');
       submitBtn.disabled = true;
-      testimonialMsg.textContent = translations[currentLang]['status-consulting'] || 'enviando...';
+      testimonialMsg.textContent = translations[currentLang]['status-verifying'] || 'enviando...';
       testimonialMsg.className = 'text-xs text-muted font-mono';
 
       try {
@@ -1542,14 +1544,15 @@ se construye.</h2>
           body: JSON.stringify({ action: 'submit', name, business, rating, comment })
         });
 
-        if (!res.ok) throw new Error('error_submitting');
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw Object.assign(new Error('error_submitting'), { code: data.error });
 
         testimonialMsg.textContent = translations[currentLang]['testimonials-success'];
         testimonialMsg.className = 'text-xs text-emerald-400 font-mono';
         testimonialForm.reset();
         setTimeout(() => { testimonialModal.close(); testimonialMsg.textContent = ''; submitBtn.disabled = false; }, 3500);
       } catch (err) {
-        testimonialMsg.textContent = translations[currentLang]['err-network'] || 'error al enviar';
+        testimonialMsg.textContent = translations[currentLang][ERR[err.code]] || translations[currentLang]['err-network'];
         testimonialMsg.className = 'text-xs text-red-400 font-mono';
         submitBtn.disabled = false;
       }
@@ -1986,8 +1989,6 @@ se construye.</h2>
       thinkingTimer = thinkingPhraseTimer = null;
       $('thinking-row')?.remove();
     }
-
-    const ERR = { rate_limited: 'err-rate', email_cooldown: 'err-cooldown', captcha_failed: 'err-turnstile', upstream_busy: 'err-busy' };
 
     async function askBrandi(text, { confirm = false } = {}) {
       if (busy) return false;
