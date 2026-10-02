@@ -708,7 +708,7 @@ se construye.</h2>
                   <p class="lang-trans mt-1" data-i18n="t1-p1">rebrandyourbrand ofrece servicios cerrados de rebranding y desarrollo web bajo un modelo de pago fraccionado: un 50% en concepto de anticipo al aceptar el presupuesto para iniciar formalmente la Fase 1, y el 50% restante obligatorio antes de acometer el despliegue técnico de la Fase 3. Cada plan detalla estrictamente sus entregables sin cuotas mensuales ocultas.</p>
                 </div>
                 <div>
-                  <strong class="lang-trans text-paper font-medium" data-i18n="t1-l2">1.2. Exclusiones y trabajos extraordinarios:</strong>
+                  <strong class="lang-trans text-paper font-medium" data-i18n="t1-l2">1.2. Exclusions y trabajos extraordinarios:</strong>
                   <p class="lang-trans mt-1" data-i18n="t1-p2">Cualquier característica, sección adicional, pasarela de comercio electrónico (e-commerce), base de datos compleja o desarrollo a medida no especificado en el plan contratado quedará excluido del precio base y requerirá la contratación de un plan superior (Upsell) o un presupuesto extraordinario tarificado a 50 €/hora.</p>
                 </div>
               </div>
@@ -1001,7 +1001,6 @@ se construye.</h2>
     $('year').textContent = new Date().getFullYear();
 
     // ───────── Traducciones ─────────
-    // El español de todo lo que ya está en el HTML se lee del DOM (no se duplica aquí).
     const translations = {
       es: {
         "testimonials-empty": "Aún no hay testimonios públicos publicados. ¡Sé el primer negocio en dejar tu valoración de 5 estrellas!",
@@ -1236,7 +1235,7 @@ se construye.</h2>
         "testimonials-success": "Ressenya enviada correctament! Queda pendent de moderació per verificar que procedeix d'un negoci real.",
         "plans-heading": "plans de rebranding i web",
         "plans-sub": "Contracta només identitat o afegeix desenvolupament web a mida. Sense quotes mensuals ni lligams.",
-        "plans-quote": "ens estalviem el .99 en trucs de màrqueting per oferir-te una qualitat innegociable.",
+        "plans-quote": "ens estalviem el .99 en trucs de màrqueting per oferir-te una qual qualitat innegociable.",
         "launch-modal-eyebrow": "filosofia de l'estudi",
         "launch-modal-title": "en què consisteix el programa de clients fundadors?",
         "launch-modal-p1": "Com a estudi emergent fundat per joves apassionats, sabem que comencem el nostre camí sense un portfolio històric gegant ni la veterania de les grans agències tradicionals.",
@@ -1334,7 +1333,7 @@ se construye.</h2>
         "status-consulting": "consultant amb brandi...",
         "status-completed": "completat",
         "status-failed": "fallit",
-        "output-placeholder": "inicia la conversa amb brandi o selecciona un pla.",
+        "output-placeholder": "inicia la conversa compta amb brandi o selecciona un pla.",
         "err-empty": "si us plau, escriu un missatge abans d'enviar.",
         "err-turnstile": "si us plau, completa la verificació humana.",
         "err-network": "error en connectar amb el servidor segur",
@@ -1490,33 +1489,40 @@ se construye.</h2>
     const planModal = makeModal($('plan-modal'), { focus: 'modal-choose-ai' });
     const modals = [launchModal, recommendedModal, testimonialModal, planModal];
 
-    // ───────── Testimonios (almacenados solo en este navegador) ─────────
-    function renderApprovedTestimonials() {
+    // ───────── Testimonios (Cargados y enviados vía Worker) ─────────
+    async function renderApprovedTestimonials() {
       const container = $('approved-testimonials-container');
-      const list = store.get('rybb-approved-testimonials', []);
-      if (!list.length) {
-        container.innerHTML = `<div class="col-span-full bg-panel border border-line p-8 text-center text-muted text-sm">${esc(translations[currentLang]['testimonials-empty'])}</div>`;
-        return;
-      }
-      container.innerHTML = list.map((item) => {
-        const r = Math.min(5, Math.max(1, Number(item.rating) || 5));
-        return `<div class="reveal in-view bg-panel border border-line p-6 flex flex-col justify-between h-full shadow-lg">
-          <div>
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-ai text-sm">${'★'.repeat(r)}${'☆'.repeat(5 - r)}</span>
-              <span class="text-[10px] font-mono text-muted uppercase tracking-wider bg-ink/40 px-2 py-1 rounded">${esc(item.business)}</span>
+      try {
+        const res = await fetch(WORKER_URL);
+        const list = await res.json();
+        
+        if (!list.length) {
+          container.innerHTML = `<div class="col-span-full bg-panel border border-line p-8 text-center text-muted text-sm">${esc(translations[currentLang]['testimonials-empty'])}</div>`;
+          return;
+        }
+        
+        container.innerHTML = list.map((item) => {
+          const r = Math.min(5, Math.max(1, Number(item.rating) || 5));
+          return `<div class="reveal in-view bg-panel border border-line p-6 flex flex-col justify-between h-full shadow-lg">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-ai text-sm">${'★'.repeat(r)}${'☆'.repeat(5 - r)}</span>
+                <span class="text-[10px] font-mono text-muted uppercase tracking-wider bg-ink/40 px-2 py-1 rounded">${esc(item.business)}</span>
+              </div>
+              <p class="text-paper/90 text-sm leading-relaxed mb-6 italic">"${esc(item.comment)}"</p>
             </div>
-            <p class="text-paper/90 text-sm leading-relaxed mb-6 italic">"${esc(item.comment)}"</p>
-          </div>
-          <div class="pt-4 border-t border-line/60 text-xs font-mono text-brand">— ${esc(item.name)}</div>
-        </div>`;
-      }).join('');
+            <div class="pt-4 border-t border-line/60 text-xs font-mono text-brand">— ${esc(item.name)}</div>
+          </div>`;
+        }).join('');
+      } catch (e) {
+        container.innerHTML = `<div class="col-span-full bg-panel border border-line p-8 text-center text-muted text-sm">${esc(translations[currentLang]['testimonials-empty'])}</div>`;
+      }
     }
 
     document.querySelectorAll('[data-open-testimonial-modal]').forEach((btn) => btn.addEventListener('click', () => testimonialModal.open(btn)));
     const testimonialForm = $('testimonial-form');
     const testimonialMsg = $('testimonial-msg');
-    testimonialForm.addEventListener('submit', (e) => {
+    testimonialForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const name = $('reviewer-name').value.trim();
       const business = $('reviewer-business').value.trim();
@@ -1524,14 +1530,29 @@ se construye.</h2>
       const comment = $('reviewer-comment').value.trim();
       if (!name || !business || !comment) return;
 
-      // Cola de moderación local. Aprobar desde la consola:
-      // const p=JSON.parse(localStorage.getItem('rybb-pending-testimonials')),a=JSON.parse(localStorage.getItem('rybb-approved-testimonials')||'[]');a.push(p.pop());localStorage.setItem('rybb-approved-testimonials',JSON.stringify(a));localStorage.setItem('rybb-pending-testimonials',JSON.stringify(p));location.reload();
-      store.set('rybb-pending-testimonials', [...store.get('rybb-pending-testimonials', []), { id: Date.now(), name, business, rating, comment }]);
+      const submitBtn = testimonialForm.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      testimonialMsg.textContent = translations[currentLang]['status-consulting'] || 'enviando...';
+      testimonialMsg.className = 'text-xs text-muted font-mono';
 
-      testimonialMsg.textContent = translations[currentLang]['testimonials-success'];
-      testimonialMsg.className = 'text-xs text-emerald-400 font-mono';
-      testimonialForm.reset();
-      setTimeout(() => { testimonialModal.close(); testimonialMsg.textContent = ''; }, 3500);
+      try {
+        const res = await fetch(WORKER_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'submit', name, business, rating, comment })
+        });
+
+        if (!res.ok) throw new Error('error_submitting');
+
+        testimonialMsg.textContent = translations[currentLang]['testimonials-success'];
+        testimonialMsg.className = 'text-xs text-emerald-400 font-mono';
+        testimonialForm.reset();
+        setTimeout(() => { testimonialModal.close(); testimonialMsg.textContent = ''; submitBtn.disabled = false; }, 3500);
+      } catch (err) {
+        testimonialMsg.textContent = translations[currentLang]['err-network'] || 'error al enviar';
+        testimonialMsg.className = 'text-xs text-red-400 font-mono';
+        submitBtn.disabled = false;
+      }
     });
 
     // ───────── Planes ─────────
@@ -1798,7 +1819,6 @@ se construye.</h2>
       if (turnstileWidgetId === null || !window.turnstile) return '';
       try { return window.turnstile.getResponse(turnstileWidgetId) || ''; } catch (e) { return ''; }
     }
-    // Tras cada envío el token se consume: se pide uno nuevo y el envío queda bloqueado hasta tenerlo
     function resetTurnstileToken() {
       assistantSubmit.disabled = true;
       if (turnstileWidgetId !== null && window.turnstile) { try { window.turnstile.reset(turnstileWidgetId); } catch (e) {} }
@@ -1891,7 +1911,6 @@ se construye.</h2>
       text.textContent = entryText(entry);
       bubble.append(label, text);
 
-      // Los botones de confirmar solo viven en el último mensaje
       if (!isUser && isLast && entry.canConfirm && !entry.leadClosed && !closed) {
         const actions = document.createElement('div');
         actions.className = 'mt-3 flex items-center gap-2';
@@ -1920,7 +1939,6 @@ se construye.</h2>
       return row;
     }
 
-    // Solo el último mensaje se anima; el resto se repinta sin parpadeo
     function renderHistory(animateLast = false) {
       const closed = isLeadClosed();
       const last = chatHistory.length - 1;
@@ -1971,7 +1989,6 @@ se construye.</h2>
 
     const ERR = { rate_limited: 'err-rate', email_cooldown: 'err-cooldown', captcha_failed: 'err-turnstile', upstream_busy: 'err-busy' };
 
-    // Único punto de envío: mensaje normal, confirmación («Sí») o rechazo («No»)
     async function askBrandi(text, { confirm = false } = {}) {
       if (busy) return false;
       assistantError.textContent = '';
