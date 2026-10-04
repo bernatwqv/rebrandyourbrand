@@ -507,8 +507,15 @@ textarea { resize: vertical; }
   }
   body {
     letter-spacing: -.01em;
+  }
+  /* Degradados de fondo solo aplicados en modo claro (html.light) para mantener el modo oscuro completamente limpio y plano */
+  html.light body {
     background-image: radial-gradient(circle at 88% 8%, rgb(var(--color-brand) / .07), transparent 28rem);
   }
+  html.light #top {
+    background: radial-gradient(circle at 72% 42%, rgb(var(--color-brand) / .1), transparent 25rem);
+  }
+
   body::before {
     content: "";
     position: fixed;
@@ -545,7 +552,6 @@ textarea { resize: vertical; }
     backdrop-filter: blur(18px);
   }
   section { scroll-margin-top: 5rem; }
-  #top { background: radial-gradient(circle at 72% 42%, rgb(var(--color-brand) / .1), transparent 25rem); }
   #top h1 { letter-spacing: -.045em; }
   #top p, #manifiesto p { letter-spacing: -.005em; }
   section > div > .reveal > h2, section > div > .reveal h2 { letter-spacing: -.035em; }
@@ -1155,7 +1161,6 @@ se construye.</h2>
     $('year').textContent = new Date().getFullYear();
 
     // ───────── Traducciones ─────────
-    // El español de todo lo que ya está en el HTML se lee del DOM (no se duplica aquí).
     const translations = {
       es: {
         "testimonials-empty": "Aún no hay testimonios públicos publicados. ¡Sé el primer negocio en dejar tu valoración de 5 estrellas!",
@@ -1360,7 +1365,7 @@ se construye.</h2>
       ca: {
         "nav-planes": "plans", "nav-about": "sobre nosaltres", "nav-testimonials": "testimonis", "nav-terms": "termes",
         "hero-tag": "estudi de rebranding i disseny visual",
-        "hero-title": "marques que deixen de passar desapercebudes.",
+        "hero-title": "marques que deixen de passar desapercibudes.",
         "hero-desc": "Redissenyem identitats visuals combinant direcció d'art i precisió tècnica, per a marques que necessiten veure's tan bé com el que fan.",
         "manifesto-title": "una marca no es decora.\nes construeix.",
         "manifesto-desc": "Cada projecte comença assenyalant l'essencial i descartant el superflu. No perseguim tendències: busquem un sistema que segueixi sent cert d'aquí a cinc anys.",
@@ -1488,7 +1493,7 @@ se construye.</h2>
         "status-consulting": "consultant amb brandi...",
         "status-completed": "completat",
         "status-failed": "fallit",
-        "output-placeholder": "inicia la conversa amb brandi o selecciona un pla.",
+        "output-placeholder": "inicia la conversa con brandi o selecciona un pla.",
         "err-empty": "si us plau, escriu un missatge abans d'enviar.",
         "err-turnstile": "si us plau, completa la verificació humana.",
         "err-network": "error en connectar amb el servidor segur",
@@ -1504,7 +1509,6 @@ se construye.</h2>
         "dot-label": "Anar al {plan}"
       }
     };
-    // Español = texto del HTML (fuente única)
     document.querySelectorAll('[data-i18n]').forEach((el) => { translations.es[el.dataset.i18n] = el.textContent.trim(); });
     document.querySelectorAll('[data-i18n-placeholder]').forEach((el) => { translations.es[el.dataset.i18nPlaceholder] = el.placeholder; });
 
@@ -1589,7 +1593,6 @@ se construye.</h2>
       });
     }
 
-    // Navegación por anclas con slugs localizados
     document.addEventListener('click', (e) => {
       const anchor = e.target.closest('a[href^="#"]');
       if (!anchor) return;
@@ -1602,7 +1605,7 @@ se construye.</h2>
       setHash(id, true);
     });
 
-    // ───────── Modales (con contador de bloqueo de scroll) ─────────
+    // ───────── Modales ─────────
     let scrollLocks = 0;
     const lockScroll = () => { scrollLocks++; document.body.classList.add('overflow-hidden'); };
     const unlockScroll = () => { scrollLocks = Math.max(0, scrollLocks - 1); if (!scrollLocks) document.body.classList.remove('overflow-hidden'); };
@@ -1644,7 +1647,7 @@ se construye.</h2>
     const planModal = makeModal($('plan-modal'), { focus: 'modal-choose-ai' });
     const modals = [launchModal, recommendedModal, testimonialModal, planModal];
 
-    // ───────── Testimonios (cargados y enviados vía Worker) ─────────
+    // ───────── Testimonios ─────────
     async function renderApprovedTestimonials() {
       const container = $('approved-testimonials-container');
       const empty = () => { container.innerHTML = `<div class="col-span-full bg-panel border border-line p-8 text-center text-muted text-sm">${esc(translations[currentLang]['testimonials-empty'])}</div>`; };
@@ -1771,7 +1774,6 @@ se construye.</h2>
       updateDots();
     }
 
-    // animate=true solo al cambiar de plan; los toggles y el cambio de idioma repintan al instante
     function renderPlans(animate = false) {
       if (!animate) { paintPlan(); return; }
       if (isPlansAnimating) return;
@@ -1852,7 +1854,7 @@ se construye.</h2>
       location.href = `mailto:hola@rebrandyourbrand.es?subject=${subject}&body=${body}`;
     });
 
-    // ───────── Idioma: aplicar traducciones ─────────
+    // ───────── Idioma ─────────
     function setToggleLabel() {
       const open = $('terms-content').classList.contains('is-open');
       document.querySelector('#terms-toggle .toggle-text').textContent = translations[currentLang][open ? 'terms-btn-hide' : 'terms-btn-show'];
@@ -1970,7 +1972,6 @@ se construye.</h2>
       if (turnstileWidgetId === null || !window.turnstile) return '';
       try { return window.turnstile.getResponse(turnstileWidgetId) || ''; } catch (e) { return ''; }
     }
-    // Tras cada envío el token se consume: se pide uno nuevo y el envío queda bloqueado hasta tenerlo
     function resetTurnstileToken() {
       assistantSubmit.disabled = true;
       if (turnstileWidgetId !== null && window.turnstile) { try { window.turnstile.reset(turnstileWidgetId); } catch (e) {} }
@@ -2063,7 +2064,6 @@ se construye.</h2>
       text.textContent = entryText(entry);
       bubble.append(label, text);
 
-      // Los botones de confirmar solo viven en el último mensaje
       if (!isUser && isLast && entry.canConfirm && !entry.leadClosed && !closed) {
         const actions = document.createElement('div');
         actions.className = 'mt-3 flex items-center gap-2';
@@ -2092,7 +2092,6 @@ se construye.</h2>
       return row;
     }
 
-    // Solo el último mensaje se anima; el resto se repinta sin parpadeo
     function renderHistory(animateLast = false) {
       const closed = isLeadClosed();
       const last = chatHistory.length - 1;
@@ -2218,7 +2217,7 @@ se construye.</h2>
       if (!ok) { assistantPrompt.value = prev; autoGrow(); }
     });
 
-    // ───────── Teclado: Escape + trampa de foco ─────────
+    // ───────── Teclado ─────────
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         if (!mobileNav.classList.contains('hidden')) { toggleMobileMenu(false); mobileMenuToggle.focus(); return; }
