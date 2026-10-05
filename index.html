@@ -2,6 +2,7 @@
 <html lang="es" class="scroll-smooth no-js">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://challenges.cloudflare.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://rebrandyourbrand-proxy.bernatxd705.workers.dev https://challenges.cloudflare.com; frame-src 'self' https://challenges.cloudflare.com; img-src 'self' data: https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self';">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#0A0A0C">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -10,14 +11,11 @@
 <!-- Red: preconexión + fuentes no bloqueantes (solo los pesos/ejes que se usan) -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..600&family=Inter:wght@400..600&display=swap">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..600&family=Inter:wght@400..600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400..600&family=Inter:wght@400..600&display=swap">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400..600&family=Inter:wght@400..600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..600&family=Inter:wght@400..600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400..600&family=Inter:wght@400..600&display=swap" rel="stylesheet">
 </noscript>
-
-<!-- CSP -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://challenges.cloudflare.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://rebrandyourbrand-proxy.bernatxd705.workers.dev https://challenges.cloudflare.com; frame-src 'self' https://challenges.cloudflare.com; img-src 'self' data: https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self';">
 
 <title>rebrandyourbrand — Rebranding y diseño visual</title>
 <meta name="description" content="Rebranding de marcas y diseño visual: identidad, packaging y dirección de arte con enfoque técnico y artístico.">
@@ -280,6 +278,11 @@ textarea { resize: vertical; }
   .sm\:inline-block { display: inline-block; }
   .sm\:w-auto { width: auto; }
   .sm\:text-6xl { font-size: 3.75rem; line-height: 1; }
+  .sm\:inset-y-4 { top: 1rem; bottom: 1rem; }
+  .sm\:right-4 { right: 1rem; }
+  .sm\:w-\[440px\] { width: 440px; }
+  .sm\:rounded-2xl { border-radius: 1rem; }
+  .sm\:border { border-width: 1px; border-style: solid; }
 }
 @media (min-width: 48rem) {
   .md\:flex { display: flex; }
@@ -306,11 +309,9 @@ textarea { resize: vertical; }
   .md\:text-lg { font-size: 1.125rem; line-height: 1.75rem; }
   .md\:text-sm { font-size: 0.875rem; line-height: 1.25rem; }
   .md\:text-xl { font-size: 1.25rem; line-height: 1.75rem; }
-  .sm\:inset-y-4 { top: 1rem; bottom: 1rem; }
-  .sm\:right-4 { right: 1rem; }
-  .sm\:w-\[440px\] { width: 440px; }
-  .sm\:rounded-2xl { border-radius: 1rem; }
-  .sm\:border { border-width: 1px; border-style: solid; }
+  .md\:items-center { align-items: center; }
+  .md\:py-28 { padding-block: 7rem; }
+  .md\:text-2xl { font-size: 1.5rem; line-height: 2rem; }
 }
 @media (min-width: 64rem) {
   .lg\:gap-8 { gap: 2rem; }
@@ -464,7 +465,7 @@ textarea { resize: vertical; }
   .border-line\/60{border-color:rgb(var(--color-line)/.6)}.border-brand\/40{border-color:rgb(var(--color-brand)/.4)}
   .border-ai\/30{border-color:rgb(var(--color-ai)/.3)}
   .text-paper\/80{color:rgb(var(--color-text)/.8)}.text-paper\/90{color:rgb(var(--color-text)/.9)}
-  .text-ai\/80{color:rgb(var(--color-ai)/.8)}.text-transparent{color:transparent}
+  .text-ai\/80{color:rgb(var(--color-ai) / .8)}.text-transparent{color:transparent}
   .text-\[\#0A0A0C\]{color:#0A0A0C}.text-\[\#0A0A0C\]\/75{color:rgb(10 10 12/.75)}
   .shadow-brand\/10{box-shadow:0 4px 6px -1px rgb(var(--color-brand)/.1)}
   .shadow-brand\/15{box-shadow:0 25px 50px -12px rgb(var(--color-brand)/.15)}
@@ -651,10 +652,23 @@ textarea { resize: vertical; }
     .plans-carousel-grid > [data-plan-prev], .plans-carousel-grid > [data-plan-next] { display: none; }
     #plans-container > div { border-radius: 1rem; }
   }
+
+  /* Auditoría: contraste en modo claro */
+  html.light { --color-brand-text: 61 90 133; --color-ai-text: 130 80 8; }
+  html.light .text-brand, html.light .hover\:text-brand:hover { color: rgb(var(--color-brand-text)); }
+  html.light .text-ai { color: rgb(var(--color-ai-text)); }
+  html.light .text-ai\/80 { color: rgb(var(--color-ai-text) / .8); }
+  /* Auditoría: teclado en el carrusel */
+  [data-plan-prev]:focus-visible span, [data-plan-next]:focus-visible span { opacity: 1; }
+  #plans-dots button { position: relative; }
+  #plans-dots button::after { content: ""; position: absolute; inset: -9px; }
+  .skip-link { position: absolute; left: -999px; top: 0; z-index: 100; }
+  .skip-link:focus { left: 1rem; top: 1rem; padding: .5rem 1rem; background: rgb(var(--color-bg)); color: rgb(var(--color-text)); border: 1px solid rgb(var(--color-brand)); border-radius: .5rem; }
 </style>
 </head>
 
 <body class="bg-ink text-paper antialiased relative overflow-x-hidden">
+  <a href="#main-content" class="skip-link">saltar al contenido</a>
 
   <header class="fixed top-0 inset-x-0 z-40 border-b border-line bg-ink/85 backdrop-blur-md">
     <div class="max-w-6xl mx-auto px-6 md:px-10 h-16 flex items-center justify-between">
@@ -711,7 +725,7 @@ textarea { resize: vertical; }
         </button>
 
         <button id="mobile-menu-toggle" type="button" aria-label="Abrir menú de navegación" aria-expanded="false" aria-controls="mobile-nav"
-                class="md:hidden relative w-10 h-10 rounded-full border border-line flex items-center justify-center text-paper hover:border-brand/60">
+              class="md:hidden relative w-10 h-10 rounded-full border border-line flex items-center justify-center text-paper hover:border-brand/60">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;" aria-hidden="true">
             <line x1="3" y1="12" x2="21" y2="12"></line>
             <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -945,7 +959,7 @@ se construye.</h2>
 
             <div class="bg-panel border border-line p-6 md:p-8 space-y-3">
               <h3 class="lang-trans lowercase font-display text-lg md:text-xl text-paper font-semibold" data-i18n="t6-title">6. ley aplicable y jurisdicción (ámbito b2b)</h3>
-              <p class="lang-trans" data-i18n="t6-p">Al tratarse de una relación contractual estrictamente profesional y entre empresas (B2B), para cualquier controversia o disputa legal derivada de la interpretación o cumplimiento de estas condiciones, ambas partes se someten expresamente la jurisdicción de los Juzgados y Tribunales de Barcelona, renunciando a cualquier otro fuero que pudiera corresponderles.</p>
+              <p class="lang-trans" data-i18n="t6-p">Al tratarse de una relación contractual estrictamente profesional y entre empresas (B2B), para cualquier controversia o disputa legal derivada de la interpretación o cumplimiento de estas condiciones, ambas partes se someten expressamente la jurisdicción de los Juzgados y Tribunales de Barcelona, renunciando a cualquier otro fuero que pudiera corresponderles.</p>
             </div>
 
           </div>
@@ -1037,11 +1051,11 @@ se construye.</h2>
       <form id="testimonial-form" class="space-y-4">
         <div>
           <label for="reviewer-name" class="lang-trans block text-xs font-mono lowercase text-muted mb-1.5" data-i18n="testimonials-name">tu nombre y apellidos</label>
-          <input type="text" id="reviewer-name" required maxlength="80" class="w-full bg-ink/50 border border-line rounded-xl px-4 py-2.5 text-sm text-paper focus:outline-none focus:border-brand" placeholder="ej. Anna Puig">
+          <input type="text" id="reviewer-name" autocomplete="name" required maxlength="80" class="w-full bg-ink/50 border border-line rounded-xl px-4 py-2.5 text-sm text-paper focus:outline-none focus:border-brand" placeholder="ej. Anna Puig">
         </div>
         <div>
           <label for="reviewer-business" class="lang-trans block text-xs font-mono lowercase text-muted mb-1.5" data-i18n="testimonials-business">nombre de tu negocio o marca real</label>
-          <input type="text" id="reviewer-business" required maxlength="80" class="w-full bg-ink/50 border border-line rounded-xl px-4 py-2.5 text-sm text-paper focus:outline-none focus:border-brand" placeholder="ej. Cafetera Lleidatana">
+          <input type="text" id="reviewer-business" autocomplete="organization" required maxlength="80" class="w-full bg-ink/50 border border-line rounded-xl px-4 py-2.5 text-sm text-paper focus:outline-none focus:border-brand" placeholder="ej. Cafetera Lleidatana">
         </div>
         <div>
           <label for="reviewer-rating" class="lang-trans block text-xs font-mono lowercase text-muted mb-1.5" data-i18n="testimonials-rating">valoración (1 a 5 estrellas)</label>
@@ -1057,6 +1071,7 @@ se construye.</h2>
           <label for="reviewer-comment" class="lang-trans block text-xs font-mono lowercase text-muted mb-1.5" data-i18n="testimonials-comment">tu opinión sobre el servicio</label>
           <textarea id="reviewer-comment" required rows="3" maxlength="300" class="w-full bg-ink/50 border border-line rounded-xl px-4 py-2.5 text-sm text-paper focus:outline-none focus:border-brand resize-none"></textarea>
         </div>
+        <div id="testimonial-turnstile" class="min-h-[65px] flex items-center justify-center"></div>
         <p id="testimonial-msg" class="text-xs text-muted" aria-live="polite"></p>
         <button type="submit" class="lang-trans lowercase w-full block text-center bg-brand text-[#0A0A0C] hover:bg-brand-soft shadow-lg py-3.5 text-xs font-semibold cursor-pointer tracking-wider">
           <span data-i18n="testimonials-submit">enviar reseña para moderación</span>
@@ -1493,7 +1508,7 @@ se construye.</h2>
         "status-consulting": "consultant amb brandi...",
         "status-completed": "completat",
         "status-failed": "fallit",
-        "output-placeholder": "inicia la conversa con brandi o selecciona un pla.",
+        "output-placeholder": "inicia la conversa amb brandi o selecciona un pla.",
         "err-empty": "si us plau, escriu un missatge abans d'enviar.",
         "err-turnstile": "si us plau, completa la verificació humana.",
         "err-network": "error en connectar amb el servidor segur",
@@ -1524,7 +1539,7 @@ se construye.</h2>
     }
 
     const initialHash = location.hash.slice(1);
-    let currentLang = reverseSlugMap[initialHash]?.lang || 'es';
+    let currentLang = reverseSlugMap[initialHash]?.lang || (() => { try { const l = localStorage.getItem('rybb-lang'); return translations[l] ? l : 'es'; } catch (e) { return 'es'; } })();
     const initialSectionId = reverseSlugMap[initialHash]?.id || null;
     let currentSectionId = 'top';
 
@@ -1648,12 +1663,13 @@ se construye.</h2>
     const modals = [launchModal, recommendedModal, testimonialModal, planModal];
 
     // ───────── Testimonios ─────────
+    let testimonialsCache = null;
     async function renderApprovedTestimonials() {
       const container = $('approved-testimonials-container');
       const empty = () => { container.innerHTML = `<div class="col-span-full bg-panel border border-line p-8 text-center text-muted text-sm">${esc(translations[currentLang]['testimonials-empty'])}</div>`; };
       try {
-        const res = await fetch(WORKER_URL);
-        const list = await res.json();
+        if (testimonialsCache === null) { const res = await fetch(WORKER_URL); testimonialsCache = res.ok ? await res.json() : []; }
+        const list = testimonialsCache;
         if (!Array.isArray(list) || !list.length) { empty(); return; }
         container.innerHTML = list.map((item) => {
           const r = Math.min(5, Math.max(1, Number(item.rating) || 5));
@@ -1671,10 +1687,17 @@ se construye.</h2>
       } catch (e) { empty(); }
     }
 
-    document.querySelectorAll('[data-open-testimonial-modal]').forEach((btn) => btn.addEventListener('click', () => testimonialModal.open(btn)));
+    let reviewWidgetId = null;
+    function renderReviewTurnstile() {
+      loadTurnstile().then(() => {
+        if (reviewWidgetId !== null) { try { window.turnstile.reset(reviewWidgetId); } catch (e) {} return; }
+        reviewWidgetId = window.turnstile.render($('testimonial-turnstile'), { sitekey: TURNSTILE_SITEKEY, action: 'testimonial', theme: isLight() ? 'light' : 'dark', language: currentLang });
+      }).catch(() => {});
+    }
+    document.querySelectorAll('[data-open-testimonial-modal]').forEach((btn) => btn.addEventListener('click', () => { testimonialModal.open(btn); renderReviewTurnstile(); }));
     const testimonialForm = $('testimonial-form');
     const testimonialMsg = $('testimonial-msg');
-    const ERR = { rate_limited: 'err-rate', email_cooldown: 'err-cooldown', captcha_failed: 'err-turnstile', upstream_busy: 'err-busy' };
+    const ERR = { rate_limited: 'err-rate', email_cooldown: 'err-cooldown', captcha_failed: 'err-turnstile', captcha_unavailable: 'err-turnstile', upstream_busy: 'err-busy', upstream_error: 'err-busy', email_error: 'err-busy', payload_too_large: 'err-busy', invalid_confirmation: 'err-busy', invalid_messages: 'err-busy' };
 
     testimonialForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -1683,6 +1706,13 @@ se construye.</h2>
       const rating = parseInt($('reviewer-rating').value, 10);
       const comment = $('reviewer-comment').value.trim();
       if (!name || !business || !comment) return;
+      let reviewToken = '';
+      try { reviewToken = reviewWidgetId !== null ? window.turnstile.getResponse(reviewWidgetId) : ''; } catch (e) {}
+      if (!reviewToken) {
+        testimonialMsg.textContent = translations[currentLang]['err-turnstile'];
+        testimonialMsg.className = 'text-xs text-red-400 font-mono';
+        return;
+      }
 
       const submitBtn = testimonialForm.querySelector('button[type="submit"]');
       submitBtn.disabled = true;
@@ -1693,7 +1723,7 @@ se construye.</h2>
         const res = await fetch(WORKER_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'submit', name, business, rating, comment })
+          body: JSON.stringify({ action: 'submit', name, business, rating, comment, token: reviewToken })
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw Object.assign(new Error('error_submitting'), { code: data.error });
@@ -1701,10 +1731,12 @@ se construye.</h2>
         testimonialMsg.textContent = translations[currentLang]['testimonials-success'];
         testimonialMsg.className = 'text-xs text-emerald-400 font-mono';
         testimonialForm.reset();
+        try { window.turnstile.reset(reviewWidgetId); } catch (e) {}
         setTimeout(() => { testimonialModal.close(); testimonialMsg.textContent = ''; submitBtn.disabled = false; }, 3500);
       } catch (err) {
         testimonialMsg.textContent = translations[currentLang][ERR[err.code]] || translations[currentLang]['err-network'];
         testimonialMsg.className = 'text-xs text-red-400 font-mono';
+        try { window.turnstile.reset(reviewWidgetId); } catch (e) {}
         submitBtn.disabled = false;
       }
     });
@@ -1825,6 +1857,7 @@ se construye.</h2>
         const id = toggle.dataset.webToggle;
         planWebState[id] = !planWebState[id];
         renderPlans(false);
+        plansContainer.querySelector(`[data-web-toggle="${id}"]`)?.focus();
         return;
       }
       const planBtn = e.target.closest('[data-plan-key]');
@@ -1864,6 +1897,7 @@ se construye.</h2>
       const t = translations[currentLang];
       langIndicator.textContent = currentLang;
       document.documentElement.lang = currentLang;
+      document.title = { es: 'rebrandyourbrand — Rebranding y diseño visual', en: 'rebrandyourbrand — Rebranding & visual design', ca: 'rebrandyourbrand — Rebranding i disseny visual' }[currentLang];
       langToggle.setAttribute('aria-label', t['lang-aria']);
       document.querySelectorAll('[data-i18n]').forEach((el) => {
         if (el.classList.contains('toggle-text')) return;
@@ -1887,6 +1921,7 @@ se construye.</h2>
 
     function switchLanguage(lang) {
       currentLang = lang;
+      try { localStorage.setItem('rybb-lang', lang); } catch (e) {}
       updateLangDropdownUI();
       const fading = document.querySelectorAll('.lang-trans, #plans-container');
       fading.forEach((el) => el.classList.add('is-changing'));
@@ -1978,6 +2013,7 @@ se construye.</h2>
     }
 
     function openAssistantPanel(opener) {
+      if (assistantIsOpen) return;
       assistantOpener = opener; assistantIsOpen = true;
       assistantPanel.style.visibility = 'visible';
       assistantPanel.removeAttribute('inert');
@@ -2017,7 +2053,7 @@ se construye.</h2>
     // ───────── Chat ─────────
     const chatHistory = [];
     let busy = false;
-    let lastBrand = '';
+    let lastBrand = '', lastConfirmSig = '';
 
     const isLeadClosed = () => chatHistory.some((e) => e.leadClosed);
 
@@ -2039,7 +2075,7 @@ se construye.</h2>
       if (samePlan && chatHistory.length) {
         chatHistory[0] = greeting;
       } else {
-        chatHistory.length = 0; chatHistory.push(greeting); lastBrand = '';
+        chatHistory.length = 0; chatHistory.push(greeting); lastBrand = ''; lastConfirmSig = '';
       }
       openAssistantPanel(opener);
       renderHistory();
@@ -2102,6 +2138,7 @@ se construye.</h2>
         frag.appendChild(row);
       });
       assistantOutput.replaceChildren(frag);
+      assistantPrompt.disabled = closed;
       assistantOutput.scrollTop = assistantOutput.scrollHeight;
     }
 
@@ -2155,7 +2192,7 @@ se construye.</h2>
       const messages = [
         ...chatHistory.filter((e) => !e.greeting).map((e) => ({ role: e.role, text: e.text || '', sig: e.sig })),
         { role: 'user', text }
-      ];
+      ].slice(-24);
 
       busy = true;
       assistantSubmit.disabled = true;
@@ -2169,13 +2206,14 @@ se construye.</h2>
         const res = await fetch(WORKER_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ messages, plan, token, lang: currentLang, confirm, brand: lastBrand }),
+          body: JSON.stringify({ messages, plan, token, lang: currentLang, confirm, brand: lastBrand, confirmSig: confirm ? lastConfirmSig : '' }),
           signal: AbortSignal.timeout(30000)
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw Object.assign(new Error(data.error || 'http_' + res.status), { code: data.error });
 
         if (data.brand) lastBrand = data.brand;
+        lastConfirmSig = data.confirmSig || '';
         chatHistory.push({ role: 'assistant', text: data.reply, sig: data.sig, leadClosed: data.leadClosed, canConfirm: data.canConfirm });
         hideThinkingBubble();
         renderHistory(true);
