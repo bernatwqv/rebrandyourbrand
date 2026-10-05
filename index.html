@@ -907,6 +907,7 @@ se construye.</h2>
       <div class="space-y-2">
         <span class="font-display text-xl md:text-2xl text-paper tracking-tight">rebrandyourbrand</span>
         <p class="lang-trans text-xs md:text-sm text-muted lowercase" data-i18n="footer-copy">rebrandyourbrand — rebranding y diseño visual</p>
+        <p class="text-xs md:text-sm font-mono"><a href="mailto:hola@rebrandyourbrand.es" class="text-brand hover:underline">hola@rebrandyourbrand.es</a></p>
       </div>
       <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 text-xs md:text-sm text-muted">
         <span>&copy; <span id="year"></span> <span class="lang-trans" data-i18n="footer-rights">Todos los derechos reservados</span></span>
@@ -1059,25 +1060,15 @@ se construye.</h2>
         <button data-modal-close type="button" aria-label="Cerrar" class="text-muted hover:text-paper p-1 shrink-0">✕</button>
       </div>
 
-      <p class="lang-trans text-muted text-sm leading-relaxed mb-6" data-i18n="modal-intro">elige cómo prefieres que empecemos a perfilar los detalles de tu proyecto:</p>
+      <p class="lang-trans text-muted text-sm leading-relaxed mb-6" data-i18n="modal-intro">inicia el briefing conversacional con Brandi para perfilar los detalles de tu proyecto:</p>
 
       <div class="space-y-3">
-        <button id="modal-choose-ai" type="button" class="w-full text-left p-4 bg-ink/40 border border-line hover:border-ai/60 transition-colors group">
+        <button id="modal-choose-ai" type="button" class="w-full text-left p-4 bg-ink/40 border border-line hover:border-ai/60 transition-colors group cursor-pointer">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 shrink-0 rounded-full bg-ai text-[#0A0A0C] flex items-center justify-center font-bold" aria-hidden="true">B</div>
             <div>
               <div class="lang-trans text-paper text-sm font-medium group-hover:underline" data-i18n="modal-ai-title">charlar con brandi (ia)</div>
               <div class="lang-trans text-xs text-muted mt-0.5" data-i18n="modal-ai-desc">briefing guiado, rápido y sin fricción</div>
-            </div>
-          </div>
-        </button>
-
-        <button id="modal-choose-email" type="button" class="w-full text-left p-4 bg-ink/20 border border-line hover:border-brand/60 transition-colors group">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 shrink-0 rounded-full bg-panel border border-line text-muted flex items-center justify-center" aria-hidden="true">@</div>
-            <div>
-              <div class="lang-trans text-paper/90 text-sm font-medium group-hover:text-paper" data-i18n="modal-email-title">forma tradicional (correo)</div>
-              <div class="lang-trans text-xs text-muted mt-0.5" data-i18n="modal-email-desc">enviar un email directo al estudio</div>
             </div>
           </div>
         </button>
@@ -1154,7 +1145,8 @@ se construye.</h2>
         "confirm-no": "No",
         "role-user": "tú",
         "lang-aria": "Cambiar idioma",
-        "dot-label": "Ir al {plan}"
+        "dot-label": "Ir al {plan}",
+        "modal-intro": "inicia el briefing conversacional con Brandi para perfilar los detalles de tu proyecto:"
       },
       en: {
         "nav-planes": "plans", "nav-about": "about us", "nav-testimonials": "testimonials", "nav-terms": "terms",
@@ -1228,11 +1220,8 @@ se construye.</h2>
         "greet-noweb": " (identity only)",
         "modal-eyebrow": "onboarding",
         "modal-title": "plan selected",
-        "modal-intro": "choose how you'd like us to start scoping out your project:",
         "modal-ai-title": "chat with brandi (ai)",
         "modal-ai-desc": "guided briefing, fast and frictionless",
-        "modal-email-title": "traditional way (email)",
-        "modal-email-desc": "send a direct email to the studio",
         "terms-eyebrow": "legal & operational framework",
         "terms-heading": "terms of service",
         "terms-sub": "Clear rules, phased methodology, and mutual protection to ensure success and transparency for every project at rebrandyourbrand.",
@@ -1297,7 +1286,8 @@ se construye.</h2>
         "confirm-no": "No",
         "role-user": "you",
         "lang-aria": "Change language",
-        "dot-label": "Go to the {plan}"
+        "dot-label": "Go to the {plan}",
+        "modal-intro": "start the conversational briefing with Brandi to scope out the details of your project:"
       },
       ca: {
         "nav-planes": "plans", "nav-about": "sobre nosaltres", "nav-testimonials": "testimonis", "nav-terms": "termes",
@@ -1371,11 +1361,8 @@ se construye.</h2>
         "greet-noweb": " (només identitat)",
         "modal-eyebrow": "onboarding",
         "modal-title": "pla seleccionat",
-        "modal-intro": "tria com prefereixes que comencem a perfilar els detalls del teu projecte:",
         "modal-ai-title": "xerrar amb brandi (ia)",
         "modal-ai-desc": "briefing guiat, ràpid i sense fricció",
-        "modal-email-title": "forma tradicional (correu)",
-        "modal-email-desc": "enviar un email directe a l'estudi",
         "terms-eyebrow": "marc legal i operatiu",
         "terms-heading": "condicions de servei",
         "terms-sub": "Regles clares, metodologia per fases i protecció mútua per garantir l'èxit i la transparència de cada projecte a rebrandyourbrand.",
@@ -1440,7 +1427,8 @@ se construye.</h2>
         "confirm-no": "No",
         "role-user": "tu",
         "lang-aria": "Canvia l'idioma",
-        "dot-label": "Anar al {plan}"
+        "dot-label": "Anar al {plan}",
+        "modal-intro": "inicia el briefing conversacional amb Brandi per perfilar els detalls del teu projecte:"
       }
     };
     document.querySelectorAll('[data-i18n]').forEach((el) => { translations.es[el.dataset.i18n] = el.textContent.trim(); });
@@ -1785,46 +1773,6 @@ se construye.</h2>
       const { key, id, opener } = pendingPlan;
       planModal.close();
       selectPlan(key, opener, id);
-    });
-
-    // ── Forma tradicional por correo conectada directamente al Worker ──
-    $('modal-choose-email').addEventListener('click', async () => {
-      const t = translations[currentLang];
-      const plan = plansArray.find((p) => p.id === pendingPlan.id);
-      const hasWeb = !!planWebState[pendingPlan.id];
-      const planName = t[pendingPlan.key];
-
-      const clientEmail = prompt(currentLang === 'es' ? 'Introduce tu correo de empresa:' : (currentLang === 'ca' ? 'Introdueix el teu correu d\'empresa:' : 'Enter your company email:'));
-      if (!clientEmail || !clientEmail.includes('@')) return;
-
-      const brandName = prompt(currentLang === 'es' ? 'Introduce el nombre de tu marca o negocio:' : (currentLang === 'ca' ? 'Introdueix el nom de la teva marca o negoci:' : 'Enter your brand or business name:'));
-      if (!brandName) return;
-
-      const description = prompt(currentLang === 'es' ? 'Introduce una breve descripción de tu proyecto:' : (currentLang === 'ca' ? 'Introdueix una breu descripció del teu projecte:' : 'Enter a brief description of your project:')) || 'Sin descripción';
-
-      planModal.close();
-
-      try {
-        const res = await fetch(`${WORKER_URL}/webhook/email`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: clientEmail,
-            brand: brandName,
-            planId: pendingPlan.id,
-            hasWeb,
-            description
-          })
-        });
-
-        if (res.ok) {
-          alert(currentLang === 'es' ? '¡Solicitud enviada! Revisa tu bandeja de entrada para verificar tu correo.' : (currentLang === 'ca' ? 'Sol·licitud enviada! Revisa la teva bústia per verificar el teu correu.' : 'Request sent! Check your inbox to verify your email.'));
-        } else {
-          alert(currentLang === 'es' ? 'Hubo un error al procesar la solicitud. Inténtalo de nuevo.' : 'Error processing request. Please try again.');
-        }
-      } catch (err) {
-        alert(currentLang === 'es' ? 'Error de conexión con el servidor.' : 'Server connection error.');
-      }
     });
 
     function setToggleLabel() {
