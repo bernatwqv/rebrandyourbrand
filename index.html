@@ -2,13 +2,12 @@
 <html lang="es" class="scroll-smooth no-js">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://challenges.cloudflare.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://rebrandyourbrand-proxy.bernatxd705.workers.dev https://challenges.cloudflare.com; frame-src 'self' https://challenges.cloudflare.com; img-src 'self' data: https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://challenges.cloudflare.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.rebrandyourbrand.es https://challenges.cloudflare.com; frame-src 'self' https://challenges.cloudflare.com; img-src 'self' data: https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self';">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#0A0A0C">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 
-<!-- Red: preconexión + fuentes no bloqueantes (solo los pesos/ejes que se usan) -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400..600&family=Inter:wght@400..600&display=swap">
@@ -55,7 +54,6 @@
   })();
 </script>
 
-<!-- Utilidades estáticas -->
 <style id="tailwind-static">
 *, ::after, ::before, ::backdrop, ::file-selector-button {
   box-sizing: border-box; margin: 0; padding: 0; border: 0 solid;
@@ -319,7 +317,6 @@ textarea { resize: vertical; }
 }
 </style>
 
-<!-- Diseño, variables, modo oscuro / claro -->
 <style>
   :root {
     --color-bg: 10 10 12;
@@ -392,7 +389,6 @@ textarea { resize: vertical; }
   .reveal.in-view { opacity: 1; transform: translateY(0); }
   .no-js .hero-fade, .no-js .reveal { opacity: 1 !important; transform: none !important; }
 
-  /* Condiciones: despliegue con grid (sin max-height mágico) */
   .terms-content {
     display: grid; grid-template-rows: 0fr; opacity: 0; visibility: hidden;
     transition: grid-template-rows 400ms cubic-bezier(0.16, 1, 0.3, 1), opacity 400ms ease, visibility 0s linear 400ms;
@@ -403,7 +399,6 @@ textarea { resize: vertical; }
   }
   .terms-inner { min-height: 0; overflow: hidden; }
 
-  /* Modales cerrados: sin visibilidad → no se pintan ni mantienen backdrop-filter */
   .modal-root { visibility: visible; transition: opacity 300ms ease, visibility 0s; }
   .modal-root[inert] { visibility: hidden; transition: opacity 300ms ease, visibility 0s linear 300ms; }
   .modal-root > div { transition: transform 250ms cubic-bezier(0.16, 1, 0.3, 1); }
@@ -425,7 +420,6 @@ textarea { resize: vertical; }
   @keyframes bubble-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
   .bubble-in { animation: bubble-in 300ms cubic-bezier(0.16, 1, 0.3, 1); }
 
-  /* Pulso del botón flotante: solo transform/opacity (compositor), no box-shadow */
   @keyframes ai-ring { 0% { transform: scale(1); opacity: 0.35; } 70%, 100% { transform: scale(1.7); opacity: 0; } }
   #assistant-trigger::after {
     content: ""; position: absolute; inset: 0; border-radius: inherit; z-index: -1; pointer-events: none;
@@ -493,7 +487,6 @@ textarea { resize: vertical; }
   .disabled\:opacity-40:disabled{opacity:.4}.disabled\:cursor-not-allowed:disabled{cursor:not-allowed}
   :focus-visible{outline:2px solid rgb(var(--color-ai));outline-offset:2px}
 
-  /* Acabado editorial */
   :root {
     --ease-editorial: cubic-bezier(.16, 1, .3, 1);
     --shadow-panel: 0 20px 60px rgb(0 0 0 / .18);
@@ -506,24 +499,12 @@ textarea { resize: vertical; }
     --shadow-brand: 0 18px 44px rgb(95 122 158 / .16);
     --ring-brand: 0 0 0 1px rgb(var(--color-brand) / .3), 0 18px 44px rgb(95 122 158 / .13);
   }
-  body {
-    letter-spacing: -.01em;
-  }
-  /* Degradados de fondo solo aplicados en modo claro (html.light) para mantener el modo oscuro completamente limpio y plano */
-  html.light body {
-    background-image: radial-gradient(circle at 88% 8%, rgb(var(--color-brand) / .07), transparent 28rem);
-  }
-  html.light #top {
-    background: radial-gradient(circle at 72% 42%, rgb(var(--color-brand) / .1), transparent 25rem);
-  }
+  body { letter-spacing: -.01em; }
+  html.light body { background-image: radial-gradient(circle at 88% 8%, rgb(var(--color-brand) / .07), transparent 28rem); }
+  html.light #top { background: radial-gradient(circle at 72% 42%, rgb(var(--color-brand) / .1), transparent 25rem); }
 
   body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 0;
-    opacity: .3;
+    content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: .3;
     background-image: linear-gradient(rgb(var(--color-line) / .18) 1px, transparent 1px);
     background-size: 100% 5rem;
     -webkit-mask-image: linear-gradient(to bottom, black, transparent 80%);
@@ -533,108 +514,66 @@ textarea { resize: vertical; }
   header a, header button, nav a { transition: color 220ms var(--ease-editorial), border-color 220ms var(--ease-editorial), background-color 220ms var(--ease-editorial), transform 220ms var(--ease-editorial), box-shadow 220ms var(--ease-editorial); }
   header nav a { position: relative; letter-spacing: .015em; }
   header nav a::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 100%;
-    bottom: -.55rem;
-    height: 1px;
-    background: rgb(var(--color-brand));
-    transition: right 260ms var(--ease-editorial);
+    content: ""; position: absolute; left: 0; right: 100%; bottom: -.55rem; height: 1px;
+    background: rgb(var(--color-brand)); transition: right 260ms var(--ease-editorial);
   }
   header nav a:hover::after { right: 0; }
   #lang-toggle:hover, #theme-toggle:hover, #mobile-menu-toggle:hover {
-    background: rgb(var(--color-brand) / .08);
-    box-shadow: 0 0 0 4px rgb(var(--color-brand) / .06);
+    background: rgb(var(--color-brand) / .08); box-shadow: 0 0 0 4px rgb(var(--color-brand) / .06);
   }
-  #lang-dropdown {
-    box-shadow: var(--shadow-panel);
-    border-color: rgb(var(--color-brand) / .25);
-    backdrop-filter: blur(18px);
-  }
+  #lang-dropdown { box-shadow: var(--shadow-panel); border-color: rgb(var(--color-brand) / .25); backdrop-filter: blur(18px); }
   section { scroll-margin-top: 5rem; }
   #top h1 { letter-spacing: -.045em; }
   #top p, #manifiesto p { letter-spacing: -.005em; }
   section > div > .reveal > h2, section > div > .reveal h2 { letter-spacing: -.035em; }
-  .plans-carousel-grid {
-    display: grid;
-    grid-template-columns: 2.5rem minmax(0, 1fr) 2.5rem;
-    gap: 1rem;
-  }
+  .plans-carousel-grid { display: grid; grid-template-columns: 2.5rem minmax(0, 1fr) 2.5rem; gap: 1rem; }
   #plans-container > div {
-    border-color: rgb(var(--color-brand) / .72);
-    border-radius: 1.25rem;
+    border-color: rgb(var(--color-brand) / .72); border-radius: 1.25rem;
     background: linear-gradient(145deg, rgb(var(--color-panel) / .98), rgb(var(--color-panel) / .82));
     box-shadow: var(--shadow-brand), inset 0 1px 0 rgb(255 255 255 / .04);
     transition: box-shadow 300ms var(--ease-editorial), border-color 300ms var(--ease-editorial), transform 300ms var(--ease-editorial);
   }
   #plans-container > div:hover {
-    border-color: rgb(var(--color-brand));
-    box-shadow: var(--ring-brand), inset 0 1px 0 rgb(255 255 255 / .06);
-    transform: translateY(-4px);
+    border-color: rgb(var(--color-brand)); box-shadow: var(--ring-brand), inset 0 1px 0 rgb(255 255 255 / .06); transform: translateY(-4px);
   }
   #plans-container > div > button[data-open-launch-modal],
   #plans-container > div > button[data-open-recommended-modal] {
-    top: -0.75rem;
-    color: rgb(var(--color-ai-soft));
-    border-radius: 999px;
-    padding: .35rem .7rem;
-    letter-spacing: .08em;
-    background: rgb(var(--color-panel));
-    border: 1px solid rgb(var(--color-ai) / .45);
+    top: -0.75rem; color: rgb(var(--color-ai-soft)); border-radius: 999px; padding: .35rem .7rem; letter-spacing: .08em;
+    background: rgb(var(--color-panel)); border: 1px solid rgb(var(--color-ai) / .45);
     transition: border-color 220ms var(--ease-editorial), transform 220ms var(--ease-editorial);
   }
   #plans-container > div > button[data-open-launch-modal]:hover,
   #plans-container > div > button[data-open-recommended-modal]:hover {
-    border-color: rgb(var(--color-ai));
-    transform: translateY(-1px);
+    border-color: rgb(var(--color-ai)); transform: translateY(-1px);
   }
   #plans-container [data-web-toggle] { transition: background-color 240ms var(--ease-editorial), border-color 240ms var(--ease-editorial), box-shadow 240ms var(--ease-editorial), transform 240ms var(--ease-editorial); }
   #plans-container [data-web-toggle]:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgb(0 0 0 / .12); }
-  #plans-container [data-plan-key],
-  [data-open-testimonial-modal],
-  [data-modal-ok] {
-    border-radius: .7rem;
-    box-shadow: 0 10px 24px rgb(var(--color-brand) / .14);
+  #plans-container [data-plan-key], [data-open-testimonial-modal], [data-modal-ok] {
+    border-radius: .7rem; box-shadow: 0 10px 24px rgb(var(--color-brand) / .14);
     transition: background-color 220ms var(--ease-editorial), box-shadow 220ms var(--ease-editorial), transform 220ms var(--ease-editorial);
   }
-  #plans-container [data-plan-key]:hover,
-  [data-open-testimonial-modal]:hover,
-  [data-modal-ok]:hover { box-shadow: 0 14px 30px rgb(var(--color-brand) / .24); transform: translateY(-2px); }
-  #sobre-nosotros .grid > div,
-  #approved-testimonials-container > div,
-  #terminos .terms-inner > div {
-    border-radius: 1rem;
-    background: linear-gradient(145deg, rgb(var(--color-panel) / .98), rgb(var(--color-panel) / .72));
+  #plans-container [data-plan-key]:hover, [data-open-testimonial-modal]:hover, [data-modal-ok]:hover {
+    box-shadow: 0 14px 30px rgb(var(--color-brand) / .24); transform: translateY(-2px);
+  }
+  #sobre-nosotros .grid > div, #approved-testimonials-container > div, #terminos .terms-inner > div {
+    border-radius: 1rem; background: linear-gradient(145deg, rgb(var(--color-panel) / .98), rgb(var(--color-panel) / .72));
     box-shadow: inset 0 1px 0 rgb(255 255 255 / .035);
     transition: border-color 280ms var(--ease-editorial), box-shadow 280ms var(--ease-editorial), transform 280ms var(--ease-editorial), background-color 280ms var(--ease-editorial);
   }
-  #sobre-nosotros .grid > div:hover,
-  #approved-testimonials-container > div:hover,
-  #terminos .terms-inner > div:hover {
-    border-color: rgb(var(--color-brand) / .6);
-    box-shadow: var(--ring-brand);
-    transform: translateY(-3px);
+  #sobre-nosotros .grid > div:hover, #approved-testimonials-container > div:hover, #terminos .terms-inner > div:hover {
+    border-color: rgb(var(--color-brand) / .6); box-shadow: var(--ring-brand); transform: translateY(-3px);
   }
   #approved-testimonials-container > div { border-color: rgb(var(--color-line) / .9); }
-  #assistant-trigger {
-    box-shadow: var(--ring-ai);
-    transition: transform 260ms var(--ease-editorial), box-shadow 260ms var(--ease-editorial), background-color 260ms var(--ease-editorial);
-  }
+  #assistant-trigger { box-shadow: var(--ring-ai); transition: transform 260ms var(--ease-editorial), box-shadow 260ms var(--ease-editorial), background-color 260ms var(--ease-editorial); }
   #assistant-trigger:hover { box-shadow: 0 0 0 1px rgb(var(--color-ai) / .65), 0 18px 42px rgb(var(--color-ai) / .28); }
-  #assistant-panel {
-    border-color: rgb(var(--color-brand) / .32);
-    background: linear-gradient(160deg, rgb(var(--color-panel) / .98), rgb(var(--color-panel) / .93));
-    box-shadow: -22px 0 70px rgb(0 0 0 / .24);
-  }
+  #assistant-panel { border-color: rgb(var(--color-brand) / .32); background: linear-gradient(160deg, rgb(var(--color-panel) / .98), rgb(var(--color-panel) / .93)); box-shadow: -22px 0 70px rgb(0 0 0 / .24); }
   #assistant-panel > div:first-child { border-color: rgb(var(--color-line) / .8); }
   #assistant-output { scrollbar-color: rgb(var(--color-brand) / .45) transparent; }
   #brand-assistant-form { background: rgb(var(--color-bg) / .42); }
   #brand-prompt:focus { box-shadow: 0 0 0 3px rgb(var(--color-ai) / .1); }
   .modal-root { background-color: rgb(6 7 9 / .68); }
   .modal-root > div {
-    border-radius: 1.15rem;
-    border-color: rgb(var(--color-brand) / .5);
+    border-radius: 1.15rem; border-color: rgb(var(--color-brand) / .5);
     background: linear-gradient(145deg, rgb(var(--color-panel) / .99), rgb(var(--color-panel) / .92));
     box-shadow: 0 28px 90px rgb(0 0 0 / .34), inset 0 1px 0 rgb(255 255 255 / .05);
   }
@@ -642,8 +581,7 @@ textarea { resize: vertical; }
     transition: border-color 220ms var(--ease-editorial), box-shadow 220ms var(--ease-editorial), background-color 220ms var(--ease-editorial);
   }
   .modal-root input:focus, .modal-root select:focus, .modal-root textarea:focus {
-    background-color: rgb(var(--color-bg) / .68);
-    box-shadow: 0 0 0 3px rgb(var(--color-brand) / .1);
+    background-color: rgb(var(--color-bg) / .68); box-shadow: 0 0 0 3px rgb(var(--color-brand) / .1);
   }
   #terminos .terms-inner { letter-spacing: -.005em; }
   footer { background: linear-gradient(180deg, rgb(var(--color-panel) / .85), rgb(var(--color-panel))); }
@@ -653,12 +591,10 @@ textarea { resize: vertical; }
     #plans-container > div { border-radius: 1rem; }
   }
 
-  /* Auditoría: contraste en modo claro */
   html.light { --color-brand-text: 61 90 133; --color-ai-text: 130 80 8; }
   html.light .text-brand, html.light .hover\:text-brand:hover { color: rgb(var(--color-brand-text)); }
   html.light .text-ai { color: rgb(var(--color-ai-text)); }
   html.light .text-ai\/80 { color: rgb(var(--color-ai-text) / .8); }
-  /* Auditoría: teclado en el carrusel */
   [data-plan-prev]:focus-visible span, [data-plan-next]:focus-visible span { opacity: 1; }
   #plans-dots button { position: relative; }
   #plans-dots button::after { content: ""; position: absolute; inset: -9px; }
@@ -873,7 +809,6 @@ se construye.</h2>
 
         <div id="terms-content" class="terms-content">
           <div class="terms-inner space-y-8 text-sm md:text-base text-paper/90 leading-relaxed font-sans pt-2">
-
             <div class="bg-panel border border-line p-6 md:p-8 space-y-4">
               <h3 class="lang-trans lowercase font-display text-lg md:text-xl text-paper font-semibold" data-i18n="t1-title">1. naturaleza de los servicios y alcance de los planes</h3>
               <div class="space-y-3 pl-3 border-l-2 border-brand/40 text-muted">
@@ -961,7 +896,6 @@ se construye.</h2>
               <h3 class="lang-trans lowercase font-display text-lg md:text-xl text-paper font-semibold" data-i18n="t6-title">6. ley aplicable y jurisdicción (ámbito b2b)</h3>
               <p class="lang-trans" data-i18n="t6-p">Al tratarse de una relación contractual estrictamente profesional y entre empresas (B2B), para cualquier controversia o disputa legal derivada de la interpretación o cumplimiento de estas condiciones, ambas partes se someten expressamente la jurisdicción de los Juzgados y Tribunales de Barcelona, renunciando a cualquier otro fuero que pudiera corresponderles.</p>
             </div>
-
           </div>
         </div>
       </div>
@@ -1036,7 +970,6 @@ se construye.</h2>
     </form>
   </aside>
 
-  <!-- Modal: testimonio -->
   <div id="testimonial-modal" class="modal-root fixed inset-0 z-[70] flex items-center justify-center bg-black/60 backdrop-blur-sm opacity-0 pointer-events-none px-6"
        role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="testimonial-modal-title" inert>
     <div class="bg-panel border-2 border-brand p-8 md:p-10 max-w-lg w-full shadow-2xl scale-95 relative">
@@ -1080,7 +1013,6 @@ se construye.</h2>
     </div>
   </div>
 
-  <!-- Modal: programa de clientes fundadores -->
   <div id="launch-modal" class="modal-root fixed inset-0 z-[70] flex items-center justify-center bg-black/60 backdrop-blur-sm opacity-0 pointer-events-none px-6"
        role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="launch-modal-title" inert>
     <div class="bg-panel border-2 border-brand p-8 md:p-10 max-w-xl w-full shadow-2xl scale-95 relative">
@@ -1099,7 +1031,6 @@ se construye.</h2>
     </div>
   </div>
 
-  <!-- Modal: plan recomendado -->
   <div id="recommended-modal" class="modal-root fixed inset-0 z-[70] flex items-center justify-center bg-black/60 backdrop-blur-sm opacity-0 pointer-events-none px-6"
        role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="recommended-modal-title" inert>
     <div class="bg-panel border-2 border-brand p-8 md:p-10 max-w-xl w-full shadow-2xl scale-95 relative">
@@ -1117,7 +1048,6 @@ se construye.</h2>
     </div>
   </div>
 
-  <!-- Modal: ¿cómo quieres empezar? -->
   <div id="plan-modal" class="modal-root fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm opacity-0 pointer-events-none px-6"
        role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="plan-modal-title" inert>
     <div class="bg-panel border border-line p-8 max-w-md w-full shadow-2xl scale-95">
@@ -1159,23 +1089,21 @@ se construye.</h2>
   (() => {
     'use strict';
 
-    // ───────── Utilidades ─────────
     const $ = (id) => document.getElementById(id);
     const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const store = {
       get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
       set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
     };
-    const WORKER_URL = 'https://rebrandyourbrand-proxy.bernatxd705.workers.dev';
+    const WORKER_URL = 'https://api.rebrandyourbrand.es';
     const TURNSTILE_SITEKEY = '0x4AAAAAAFAc6AhM84k_7AQk';
-    const WEB_PRICE = 400; // debe coincidir con WEB_PRICE del Worker
+    const WEB_PRICE = 400;
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     const smooth = () => (reduceMotion.matches ? 'auto' : 'smooth');
 
     document.documentElement.classList.remove('no-js');
     $('year').textContent = new Date().getFullYear();
 
-    // ───────── Traducciones ─────────
     const translations = {
       es: {
         "testimonials-empty": "Aún no hay testimonios públicos publicados. ¡Sé el primer negocio en dejar tu valoración de 5 estrellas!",
@@ -1205,9 +1133,6 @@ se construye.</h2>
         "web-feature": "landing page de alto rendimiento (GitHub + Cloudflare)",
         "web-toggle-label": "añadir desarrollo web",
         "web-toggle-sub": "landing page lista para producción (precio fijo)",
-        "email-subject": "Interés en la contratación del {plan}",
-        "email-web": " incluyendo desarrollo web",
-        "email-body": "Hola,\n\nEstoy interesado/ada en el {plan}{web} ({total} total con tarifa de clientes fundadores) para mi proyecto.\n\nCorreo de empresa:\nNombre de la marca / negocio:\nBreve descripción:\n\n¡Un saludo!",
         "greet": "¡Perfecto! Te decantas por el {plan}{web} ({total} total con programa de clientes fundadores). ¿Cómo se llama tu marca o proyecto actual para continuar?",
         "greet-web": " con desarrollo web incluido",
         "greet-noweb": " (solo identidad)",
@@ -1298,9 +1223,6 @@ se construye.</h2>
         "web-feature": "high-performance landing page (GitHub + Cloudflare)",
         "web-toggle-label": "add custom web development",
         "web-toggle-sub": "production-ready landing page (fixed price)",
-        "email-subject": "Interest in hiring the {plan}",
-        "email-web": " including custom web development",
-        "email-body": "Hello,\n\nI am interested in the {plan}{web} ({total} total with founders program rate) for my project.\n\nCompany email:\nBrand / business name:\nShort description:\n\nBest regards!",
         "greet": "Perfect! You're leaning towards the {plan}{web} ({total} total with founders program rate). What is your current brand or project name to continue?",
         "greet-web": " with web design included",
         "greet-noweb": " (identity only)",
@@ -1444,9 +1366,6 @@ se construye.</h2>
         "web-feature": "landing page d'alt rendiment (GitHub + Cloudflare)",
         "web-toggle-label": "afegir desenvolupament web",
         "web-toggle-sub": "landing page llesta per a producció (preu fix)",
-        "email-subject": "Interès en la contractació del {plan}",
-        "email-web": " amb desenvolupament web inclòs",
-        "email-body": "Hola,\n\nEstic interessat/ada en el {plan}{web} ({total} total amb tarifa de clients fundadors) per al meu projecte.\n\nCorreu de empresa:\nNom de la marca / negoci:\nBreu descripció:\n\nUna abraçada!",
         "greet": "Perfecte! T'atures pel {plan}{web} ({total} total amb programa de clients fundadors). Com es diu la teva marca o projecte actual per continuar?",
         "greet-web": " amb desenvolupament web inclòs",
         "greet-noweb": " (només identitat)",
@@ -1508,7 +1427,7 @@ se construye.</h2>
         "status-consulting": "consultant amb brandi...",
         "status-completed": "completat",
         "status-failed": "fallit",
-        "output-placeholder": "inicia la conversa amb brandi o selecciona un pla.",
+        "output-placeholder": "inicia la conversa com brandi o selecciona un pla.",
         "err-empty": "si us plau, escriu un missatge abans d'enviar.",
         "err-turnstile": "si us plau, completa la verificació humana.",
         "err-network": "error en connectar amb el servidor segur",
@@ -1527,7 +1446,6 @@ se construye.</h2>
     document.querySelectorAll('[data-i18n]').forEach((el) => { translations.es[el.dataset.i18n] = el.textContent.trim(); });
     document.querySelectorAll('[data-i18n-placeholder]').forEach((el) => { translations.es[el.dataset.i18nPlaceholder] = el.placeholder; });
 
-    // ───────── Idioma y URL ─────────
     const slugMap = {
       es: { top: '', planes: 'planes', 'sobre-nosotros': 'sobre-nosotros', testimonios: 'testimonios', terminos: 'terminos' },
       en: { top: '', planes: 'plans', 'sobre-nosotros': 'about', testimonios: 'testimonials', terminos: 'terms' },
@@ -1551,7 +1469,6 @@ se construye.</h2>
       if (push) history.pushState(null, '', h); else history.replaceState(null, '', h);
     }
 
-    // ───────── Referencias DOM ─────────
     const langToggle = $('lang-toggle');
     const langDropdown = $('lang-dropdown');
     const langIndicator = $('lang-indicator');
@@ -1568,7 +1485,6 @@ se construye.</h2>
     const assistantOutput = $('assistant-output');
     const assistantForm = $('brand-assistant-form');
 
-    // ───────── Menús ─────────
     function toggleLangDropdown(force) {
       const open = force ?? langDropdown.classList.contains('hidden');
       langDropdown.classList.toggle('hidden', !open);
@@ -1620,7 +1536,6 @@ se construye.</h2>
       setHash(id, true);
     });
 
-    // ───────── Modales ─────────
     let scrollLocks = 0;
     const lockScroll = () => { scrollLocks++; document.body.classList.add('overflow-hidden'); };
     const unlockScroll = () => { scrollLocks = Math.max(0, scrollLocks - 1); if (!scrollLocks) document.body.classList.remove('overflow-hidden'); };
@@ -1662,7 +1577,6 @@ se construye.</h2>
     const planModal = makeModal($('plan-modal'), { focus: 'modal-choose-ai' });
     const modals = [launchModal, recommendedModal, testimonialModal, planModal];
 
-    // ───────── Testimonios ─────────
     let testimonialsCache = null;
     async function renderApprovedTestimonials() {
       const container = $('approved-testimonials-container');
@@ -1741,7 +1655,6 @@ se construye.</h2>
       }
     });
 
-    // ───────── Planes ─────────
     const plansArray = [
       { id: 'esencial', titleKey: 'p1-title', basePrice: 200, originalPrice: 400, descKey: 'p1-desc', features: ['p1-f1', 'p1-f2', 'p1-f3'] },
       { id: 'evolucion', titleKey: 'p2-title', basePrice: 400, originalPrice: 800, descKey: 'p2-desc', features: ['p2-f1', 'p2-f2', 'p2-f3'], isRecommended: true },
@@ -1873,21 +1786,47 @@ se construye.</h2>
       planModal.close();
       selectPlan(key, opener, id);
     });
-    $('modal-choose-email').addEventListener('click', () => {
+
+    // ── Forma tradicional por correo conectada directamente al Worker ──
+    $('modal-choose-email').addEventListener('click', async () => {
       const t = translations[currentLang];
       const plan = plansArray.find((p) => p.id === pendingPlan.id);
       const hasWeb = !!planWebState[pendingPlan.id];
-      const total = (plan?.basePrice || 0) + (hasWeb ? WEB_PRICE : 0);
       const planName = t[pendingPlan.key];
-      const subject = encodeURIComponent(t['email-subject'].replace('{plan}', planName));
-      const body = encodeURIComponent(
-        t['email-body'].replace('{plan}', planName).replace('{web}', hasWeb ? t['email-web'] : '').replace('{total}', fmt(total).replace(/\u00a0/g, ' '))
-      );
+
+      const clientEmail = prompt(currentLang === 'es' ? 'Introduce tu correo de empresa:' : (currentLang === 'ca' ? 'Introdueix el teu correu d\'empresa:' : 'Enter your company email:'));
+      if (!clientEmail || !clientEmail.includes('@')) return;
+
+      const brandName = prompt(currentLang === 'es' ? 'Introduce el nombre de tu marca o negocio:' : (currentLang === 'ca' ? 'Introdueix el nom de la teva marca o negoci:' : 'Enter your brand or business name:'));
+      if (!brandName) return;
+
+      const description = prompt(currentLang === 'es' ? 'Introduce una breve descripción de tu proyecto:' : (currentLang === 'ca' ? 'Introdueix una breu descripció del teu projecte:' : 'Enter a brief description of your project:')) || 'Sin descripción';
+
       planModal.close();
-      location.href = `mailto:hola@rebrandyourbrand.es?subject=${subject}&body=${body}`;
+
+      try {
+        const res = await fetch(`${WORKER_URL}/webhook/email`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: clientEmail,
+            brand: brandName,
+            planId: pendingPlan.id,
+            hasWeb,
+            description
+          })
+        });
+
+        if (res.ok) {
+          alert(currentLang === 'es' ? '¡Solicitud enviada! Revisa tu bandeja de entrada para verificar tu correo.' : (currentLang === 'ca' ? 'Sol·licitud enviada! Revisa la teva bústia per verificar el teu correu.' : 'Request sent! Check your inbox to verify your email.'));
+        } else {
+          alert(currentLang === 'es' ? 'Hubo un error al procesar la solicitud. Inténtalo de nuevo.' : 'Error processing request. Please try again.');
+        }
+      } catch (err) {
+        alert(currentLang === 'es' ? 'Error de conexión con el servidor.' : 'Server connection error.');
+      }
     });
 
-    // ───────── Idioma ─────────
     function setToggleLabel() {
       const open = $('terms-content').classList.contains('is-open');
       document.querySelector('#terms-toggle .toggle-text').textContent = translations[currentLang][open ? 'terms-btn-hide' : 'terms-btn-show'];
@@ -1932,7 +1871,6 @@ se construye.</h2>
       }, 250);
     }
 
-    // ───────── Tema ─────────
     const themeToggle = $('theme-toggle');
     const iconSun = themeToggle.querySelector('.icon-sun');
     const iconMoon = themeToggle.querySelector('.icon-moon');
@@ -1952,7 +1890,6 @@ se construye.</h2>
       updateTheme();
     });
 
-    // ───────── Panel de Brandi + Turnstile ─────────
     let assistantOpener = null, assistantIsOpen = false;
     let turnstileWidgetId = null, turnstileWidgetLang = null, turnstileLoadPromise = null;
 
@@ -2050,7 +1987,6 @@ se construye.</h2>
     $('assistant-close').addEventListener('click', closeAssistantPanel);
     assistantBackdrop.addEventListener('click', closeAssistantPanel);
 
-    // ───────── Chat ─────────
     const chatHistory = [];
     let busy = false;
     let lastBrand = '', lastConfirmSig = '';
@@ -2255,7 +2191,6 @@ se construye.</h2>
       if (!ok) { assistantPrompt.value = prev; autoGrow(); }
     });
 
-    // ───────── Teclado ─────────
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         if (!mobileNav.classList.contains('hidden')) { toggleMobileMenu(false); mobileMenuToggle.focus(); return; }
@@ -2275,7 +2210,6 @@ se construye.</h2>
       else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
     });
 
-    // ───────── Condiciones, scroll y reveal ─────────
     $('terms-toggle').addEventListener('click', () => {
       const content = $('terms-content');
       const open = !content.classList.contains('is-open');
@@ -2303,7 +2237,6 @@ se construye.</h2>
     }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
     document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
 
-    // ───────── Init ─────────
     updateTheme();
     applyTranslations();
     window.addEventListener('DOMContentLoaded', () => {
