@@ -264,6 +264,12 @@ textarea { resize: vertical; }
 .lowercase { text-transform: lowercase; }
 .uppercase { text-transform: uppercase; }
 
+.line-through { text-decoration: line-through; }
+.items-baseline { align-items: baseline; }
+.flex-wrap { flex-wrap: wrap; }
+.gap-x-3 { column-gap: 0.75rem; }
+.gap-y-1 { row-gap: 0.25rem; }
+
 .plans-carousel-grid { display: grid; grid-template-columns: 1fr; }
 @media (min-width: 48rem) {
   .plans-carousel-grid { grid-template-columns: 1fr minmax(0, 32rem) 1fr; }
@@ -273,6 +279,7 @@ textarea { resize: vertical; }
   .sm\:items-end { align-items: flex-end; }
   .sm\:items-center { align-items: center; }
   .sm\:text-right { text-align: right; }
+  .sm\:justify-end { justify-content: flex-end; }
   .sm\:inline-block { display: inline-block; }
   .sm\:w-auto { width: auto; }
   .sm\:text-6xl { font-size: 3.75rem; line-height: 1; }
@@ -702,7 +709,7 @@ se construye.</h2>
       <div class="max-w-6xl mx-auto relative z-10">
         <div class="reveal max-w-xl mb-12">
           <h2 class="lang-trans lowercase font-display text-3xl md:text-4xl mb-4" data-i18n="plans-heading">planes de rebranding y web</h2>
-          <p class="lang-trans text-muted leading-relaxed" data-i18n="plans-sub">Contrata solo identidad o añade desarrollo web a medida. Sin cuotas mensuales ni ataduras.</p>
+          <p class="lang-trans text-muted leading-relaxed" data-i18n="plans-sub">Contrata solo identidad o añade desarrollo web a medida. Pago único del 100% al aceptar el proyecto, sin cuotas mensuales ni ataduras.</p>
         </div>
 
         <div class="reveal mb-16 p-4 bg-panel border border-line flex items-center gap-3 w-full">
@@ -731,9 +738,9 @@ se construye.</h2>
         </div>
 
         <div class="flex items-center justify-center gap-2 mt-8" id="plans-dots">
-          <button type="button" data-dot-index="0" aria-label="Ir al plan esencial" aria-current="true" class="w-2.5 h-2.5 rounded-full bg-brand transition-all"></button>
-          <button type="button" data-dot-index="1" aria-label="Ir al plan evolución" class="w-2 h-2 rounded-full bg-line transition-all"></button>
-          <button type="button" data-dot-index="2" aria-label="Ir al plan partner" class="w-2 h-2 rounded-full bg-line transition-all"></button>
+          <button type="button" data-dot-index="0" aria-label="Ir al plan básico" aria-current="true" class="w-2.5 h-2.5 rounded-full bg-brand transition-all"></button>
+          <button type="button" data-dot-index="1" aria-label="Ir al plan pro" class="w-2 h-2 rounded-full bg-line transition-all"></button>
+          <button type="button" data-dot-index="2" aria-label="Ir al plan plus" class="w-2 h-2 rounded-full bg-line transition-all"></button>
         </div>
       </div>
     </section>
@@ -813,11 +820,11 @@ se construye.</h2>
               <h3 class="lang-trans lowercase font-display text-lg md:text-xl text-paper font-semibold" data-i18n="t1-title">1. naturaleza de los servicios y alcance de los planes</h3>
               <div class="space-y-3 pl-3 border-l-2 border-brand/40 text-muted">
                 <div>
-                  <strong class="lang-trans text-paper font-medium" data-i18n="t1-l1">1.1. Modelo de pago fraccionado y entregables:</strong>
-                  <p class="lang-trans mt-1" data-i18n="t1-p1">rebrandyourbrand ofrece servicios cerrados de rebranding y desarrollo web bajo un modelo de pago fraccionado: un 50% en concepto de anticipo al aceptar el presupuesto para iniciar formalmente la Fase 1, y el 50% restante obligatorio antes de acometer el despliegue técnico de la Fase 3. Cada plan detalla estrictamente sus entregables sin cuotas mensuales ocultas.</p>
+                  <strong class="lang-trans text-paper font-medium" data-i18n="t1-l1">1.1. Modelo de pago único y entregables:</strong>
+                  <p class="lang-trans mt-1" data-i18n="t1-p1">rebrandyourbrand ofrece servicios cerrados de rebranding y desarrollo web bajo un modelo de pago único: el 100% del importe total se abona de una sola vez al aceptar el proyecto, mediante un enlace de pago seguro (Stripe) tras verificar el correo. La Fase 1 se inicia una vez confirmado el pago. Cada plan detalla strictly sus entregables sin cuotas mensuales ocultas.</p>
                 </div>
                 <div>
-                  <strong class="lang-trans text-paper font-medium" data-i18n="t1-l2">1.2. Exclusions y trabajos extraordinarios:</strong>
+                  <strong class="lang-trans text-paper font-medium" data-i18n="t1-l2">1.2. Exclusiones y trabajos extraordinarios:</strong>
                   <p class="lang-trans mt-1" data-i18n="t1-p2">Cualquier característica, sección adicional, pasarela de comercio electrónico (e-commerce), base de datos compleja o desarrollo a medida no especificado en el plan contratado quedará excluido del precio base y requerirá la contratación de un plan superior (Upsell) o un presupuesto extraordinario tarificado a 50 €/hora.</p>
                 </div>
               </div>
@@ -837,7 +844,7 @@ se construye.</h2>
                 </div>
                 <div>
                   <strong class="text-paper font-semibold lang-trans" data-i18n="t2-f3-title">2.3. Fase 3 (Despliegue y Entrega Llave en Mano):</strong>
-                  <p class="text-muted text-sm md:text-base lang-trans mt-1" data-i18n="t2-f3-desc">Una vez abonado el 50% restante del importe total, Bernat efectúa el despliegue técnico definitivo en GitHub y Cloudflare, realizando la entrega formal llave en mano y transfiriendo la propiedad técnica acordada al cliente.</p>
+                  <p class="text-muted text-sm md:text-base lang-trans mt-1" data-i18n="t2-f3-desc">Una vez validada la Fase 2, Bernat efectúa el despliegue técnico definitivo en GitHub y Cloudflare, realizando la entrega formal llave en mano y transfiriendo la propiedad técnica acordada al cliente.</p>
                 </div>
               </div>
             </div>
@@ -851,7 +858,7 @@ se construye.</h2>
                 </div>
                 <div>
                   <strong class="lang-trans text-paper font-medium" data-i18n="t3-l2">3.2. Plazos de entrega, retrasos y rescisión por abandono:</strong>
-                  <p class="lang-trans mt-1" data-i18n="t3-p2">El cliente se compromete a suministrar textos, imágenes, logotipos previos y accesos DNS en un plazo máximo de 15 días naturales. Retrasos superiores a 30 días naturales sin previo aviso o respuesta por parte del cliente darán derecho a rebrandyourbrand a rescindir unilateralmente el contrato por abandono, quedando retenido el importe del anticipo inicial en concepto de compensación por el bloqueo de la agenda del estudio.</p>
+                  <p class="lang-trans mt-1" data-i18n="t3-p2">El cliente se compromete a suministrar textos, imágenes, logotipos previos y accesos DNS en un plazo máximo de 15 días naturales. Retrasos superiores a 30 días naturales sin previo aviso o respuesta por parte del cliente darán derecho a rebrandyourbrand a rescindir unilateralmente el contrato por abandono, quedando retenido el importe abonado en concepto de compensación por el trabajo realizado y el bloqueo de la agenda del estudio.</p>
                 </div>
                 <div>
                   <strong class="lang-trans text-paper font-medium" data-i18n="t3-l3">3.3. Aprobación tácita por silencio temporal:</strong>
@@ -869,11 +876,11 @@ se construye.</h2>
               <div class="space-y-3 pl-3 border-l-2 border-brand/40 text-muted">
                 <div>
                   <strong class="lang-trans text-paper font-medium" data-i18n="t4-l1">4.1. Propiedad intelectual:</strong>
-                  <p class="lang-trans mt-1" data-i18n="t4-p1">La titularidad comercial e intelectual de los diseños y desarrollos se transfiere íntegramente al cliente únicamente una vez abonado el 100% de la tarifa del plan.</p>
+                  <p class="lang-trans mt-1" data-i18n="t4-p1">La titularidad comercial e intelectual de los diseños y desarrollos se transfiere íntegramente al cliente únicamente una vez confirmado el pago íntegro de la tarifa del plan.</p>
                 </div>
                 <div>
                   <strong class="lang-trans text-paper font-medium" data-i18n="t4-l2">4.2. Política de reembolsos:</strong>
-                  <p class="lang-trans mt-1" data-i18n="t4-p2">Al tratarse de servicios personalizados de creación técnica e intelectual, no se admiten devoluciones ni reembolsos económicos del anticipo una vez iniciada formalmente la Fase 1.</p>
+                  <p class="lang-trans mt-1" data-i18n="t4-p2">Al tratarse de servicios personalizados de creación técnica e intelectual, no se admiten devoluciones ni reembolsos económicos del importe abonado una vez iniciada formalmente la Fase 1.</p>
                 </div>
               </div>
             </div>
@@ -894,7 +901,7 @@ se construye.</h2>
 
             <div class="bg-panel border border-line p-6 md:p-8 space-y-3">
               <h3 class="lang-trans lowercase font-display text-lg md:text-xl text-paper font-semibold" data-i18n="t6-title">6. ley aplicable y jurisdicción (ámbito b2b)</h3>
-              <p class="lang-trans" data-i18n="t6-p">Al tratarse de una relación contractual estrictamente profesional y entre empresas (B2B), para cualquier controversia o disputa legal derivada de la interpretación o cumplimiento de estas condiciones, ambas partes se someten expressamente la jurisdicción de los Juzgados y Tribunales de Barcelona, renunciando a cualquier otro fuero que pudiera corresponderles.</p>
+              <p class="lang-trans" data-i18n="t6-p">Al tratarse de una relación contractual strictly profesional y entre empresas (B2B), para cualquier controversia o disputa legal derivada de la interpretación o cumplimiento de estas condiciones, ambas partes se someten expresamente a la jurisdicción de los Juzgados y Tribunales de Barcelona, renunciando a cualquier otro fuero que pudiera corresponderles.</p>
             </div>
           </div>
         </div>
@@ -1014,24 +1021,6 @@ se construye.</h2>
     </div>
   </div>
 
-  <div id="launch-modal" class="modal-root fixed inset-0 z-[70] flex items-center justify-center bg-black/60 backdrop-blur-sm opacity-0 pointer-events-none px-6"
-       role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="launch-modal-title" inert>
-    <div class="bg-panel border-2 border-brand p-8 md:p-10 max-w-xl w-full shadow-2xl scale-95 relative">
-      <div class="flex justify-between items-start mb-6">
-        <div>
-          <span class="lang-trans lowercase block text-xs tracking-widest text-ai font-mono mb-1" data-i18n="launch-modal-eyebrow">filosofía del estudio</span>
-          <h3 id="launch-modal-title" class="lang-trans lowercase font-display text-2xl text-paper" data-i18n="launch-modal-title">¿en qué consiste el programa de clientes fundadores?</h3>
-        </div>
-        <button data-modal-close type="button" aria-label="Cerrar" class="text-muted hover:text-paper p-1 shrink-0 text-xl font-mono cursor-pointer">✕</button>
-      </div>
-      <div class="space-y-4 text-sm md:text-base text-paper/90 leading-relaxed font-sans mb-8">
-        <p class="lang-trans" data-i18n="launch-modal-p1">Como estudio emergente fundado por jóvenes apasionados, sabemos que empezamos nuestro camino sin un portfolio histórico gigante ni la veteranía de las grandes agencias tradicionales.</p>
-        <p class="lang-trans" data-i18n="launch-modal-p2">Por eso, para nuestros primeros 10 proyectos en la comarca, ofrecemos un 50% de descuento exclusivo en nuestros planes de identidad. Además, puedes añadir el desarrollo web profesional a un precio fijo de 400 €. No es una rebaja permanente, sino un cupo limitado para fundar nuestros primeros casos de éxito reales a cambio de vuestra confianza y testimonio. Una vez cubiertas las 10 plazas, los precios pasarán a su valor estándar.</p>
-      </div>
-      <button data-modal-close data-modal-ok type="button" data-i18n="modal-ok-btn" class="lang-trans lowercase w-full block text-center bg-brand text-[#0A0A0C] hover:bg-brand-soft shadow-lg py-3.5 text-xs font-semibold cursor-pointer tracking-wider">entendido, ¡vamos a crear!</button>
-    </div>
-  </div>
-
   <div id="recommended-modal" class="modal-root fixed inset-0 z-[70] flex items-center justify-center bg-black/60 backdrop-blur-sm opacity-0 pointer-events-none px-6"
        role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="recommended-modal-title" inert>
     <div class="bg-panel border-2 border-brand p-8 md:p-10 max-w-xl w-full shadow-2xl scale-95 relative">
@@ -1097,34 +1086,36 @@ se construye.</h2>
 
     const translations = {
       es: {
+        "err-plan": "elige un plan en la sección de planes (botón «empezar plan») antes de continuar.",
         "testimonials-empty": "Aún no hay testimonios públicos publicados. ¡Sé el primer negocio en dejar tu valoración de 5 estrellas!",
         "testimonials-success": "¡Reseña enviada correctamente! Queda pendiente de moderación para verificar que procede de un negocio real.",
         "plans-badge": "recomendado",
-        "plans-discount-badge": "programa fundadores (10 plazas)",
         "plans-cta": "empezar plan",
-        "p1-title": "plan esencial",
-        "p1-desc": "Identidad visual esencial para autónomos y negocios locales, entregada llave en mano.",
-        "p1-f1": "logotipo principal + paleta cromática y directrices tipográficas",
-        "p1-f2": "proceso guiado por fases (aprobación visual paso a paso)",
-        "p1-f3": "entrega llave en mano con propiedad total (cero cuotas)",
-        "p2-title": "plan evolución",
-        "p2-desc": "Rebranding integral y sistema visual completo para marcas que exigen impacto.",
-        "p2-f1": "rebranding integral (sistema visual completo y guía de estilo)",
-        "p2-f2": "proceso guiado por fases y validación paso a paso",
-        "p2-f3": "entrega llave en mano con propiedad total (cero cuotas)",
-        "p3-title": "plan partner",
-        "p3-desc": "Ecosistema de marca profundo con dirección de arte exclusiva y avanzada.",
-        "p3-f1": "rebranding profundo y dirección de arte a medida",
-        "p3-f2": "sistema visual avanzado y directrices exclusivas",
-        "p3-f3": "entrega llave en mano con propiedad total (cero cuotas)",
-        "recount-base": "Precio base identidad:",
-        "recount-web": "Desarrollo web a medida (fijo):",
-        "recount-discount": "Descuento fundadores identidad (-50%):",
-        "recount-total": "Total:",
-        "web-feature": "landing page de alto rendimiento (GitHub + Cloudflare)",
-        "web-toggle-label": "añadir desarrollo web",
-        "web-toggle-sub": "landing page lista para producción (precio fijo)",
-        "greet": "¡Perfecto! Te decantas por el {plan}{web} ({total} total con programa de clientes fundadores). ¿Cómo se llama tu marca o proyecto actual para continuar?",
+        "p1-title": "plan básico",
+        "p1-desc": "Identidad visual esencial para marcas y proyectos que nacen y necesitan un núcleo gráfico sólido.",
+        "p1-f1": "logotipo principal, versión secundaria e isotipo",
+        "p1-f2": "paleta cromática corporativa y combinación tipográfica",
+        "p1-f3": "guía ejecutiva de uso de marca (1 página PDF)",
+
+        "p2-title": "plan pro",
+        "p2-desc": "Sistema visual expandido para marcas que comunican a diario y exigen coherencia integral.",
+        "p2-f1": "todo lo incluido en plan básico",
+        "p2-f2": "manual de marca completo en PDF (20-25 págs.) y 3 aplicaciones reales",
+        "p2-f3": "configuración de tokens de diseño CSS para despliegue web",
+
+        "p3-title": "plan plus",
+        "p3-desc": "Acompañamiento integral, dirección de arte avanzada y kit de autonomía operativa.",
+        "p3-f1": "todo lo incluido en plan pro",
+        "p3-f2": "kit de plantillas editables avanzadas (Figma / Canva) y guía fotográfica",
+        "p3-f3": "6 aplicaciones reales y sesión directa de entrega de 45 min",
+
+        "recount-base": "Inversión base identidad:",
+        "recount-web": "Módulo web edge (fijo):",
+        "recount-total": "Inversión total:",
+        "web-feature": "plataforma web edge de alto rendimiento (GitHub + Cloudflare Workers)",
+        "web-toggle-label": "añadir módulo web edge",
+        "web-toggle-sub": "landing page lista para producción en código natiu",
+        "greet": "¡Perfecto! Te decantas por {plan}{web} ({total} de inversión total). ¿Cómo se llama tu marca o proyecto actual para continuar con tu propuesta?",
         "greet-web": " con desarrollo web incluido",
         "greet-noweb": " (solo identidad)",
         "terms-btn-hide": "- ocultar condiciones",
@@ -1149,6 +1140,7 @@ se construye.</h2>
         "modal-intro": "inicia el briefing conversacional con Brandi para perfilar los detalles de tu proyecto:"
       },
       en: {
+        "err-plan": "please choose a plan in the plans section (\"get started\" button) before continuing.",
         "nav-planes": "plans", "nav-about": "about us", "nav-testimonials": "testimonials", "nav-terms": "terms",
         "hero-tag": "rebranding & visual design studio",
         "hero-title": "brands that refuse to fade into the background.",
@@ -1180,42 +1172,39 @@ se construye.</h2>
         "testimonials-submit": "submit review for moderation",
         "testimonials-success": "Review successfully submitted! Pending moderation to verify it comes from a real business.",
         "plans-heading": "rebranding & web plans",
-        "plans-sub": "Hire identity only or add custom web development. No monthly retainers or lock-ins.",
+        "plans-sub": "Hire identity only or add custom web development. One-time payment of 100% when the project is accepted, no monthly retainers or lock-ins.",
         "plans-quote": "we skip the .99 marketing gimmicks to deliver uncompromising quality.",
-        "launch-modal-eyebrow": "studio philosophy",
-        "launch-modal-title": "what is the founding clients program?",
-        "launch-modal-p1": "As an emerging studio founded by passionate youngsters, we know we are starting our path without a massive historical portfolio or the decades-old seniority of traditional agencies.",
-        "launch-modal-p2": "That's why, for our first 10 projects, we offer an exclusive 50% discount on our identity plans. You can also add professional web development at a fixed price of €400. This is not a perpetual markdown, but a capped quota to build our initial real case studies in exchange for your trust and testimony. Once all 10 spots are filled, prices return to their standard value.",
         "modal-ok-btn": "got it, let's build!",
         "recommended-modal-eyebrow": "studio philosophy",
         "recommended-modal-title": "why is this our recommended choice?",
         "recommended-modal-p1": "It is the recommended option for those looking for the perfect balance and best value for money to elevate their brand to the highest level, ensuring a complete and professional visual system.",
         "plans-badge": "recommended",
-        "plans-discount-badge": "founders program (10 spots)",
         "plans-cta": "get started",
-        "p1-title": "essential plan",
-        "p1-desc": "Essential visual identity for freelancers and local businesses, delivered turnkey.",
-        "p1-f1": "main logo + color palette and typographic guidelines",
-        "p1-f2": "phased guided workflow (step-by-step visual approval)",
-        "p1-f3": "turnkey delivery with full ownership (zero retainers)",
-        "p2-title": "evolution plan",
-        "p2-desc": "Full rebranding and complete visual system for high-impact brands.",
-        "p2-f1": "full rebranding (complete visual system & style guide)",
-        "p2-f2": "phased workflow and step-by-step validation",
-        "p2-f3": "turnkey delivery with full ownership (zero retainers)",
-        "p3-title": "partner plan",
-        "p3-desc": "Deep brand ecosystem with exclusive and advanced art direction.",
-        "p3-f1": "deep rebranding & custom art direction",
-        "p3-f2": "advanced visual system and exclusive guidelines",
-        "p3-f3": "turnkey delivery with full ownership (zero retainers)",
-        "recount-base": "Base identity price:",
-        "recount-web": "Custom web development (fixed):",
-        "recount-discount": "Founders identity discount (-50%):",
-        "recount-total": "Total:",
-        "web-feature": "high-performance landing page (GitHub + Cloudflare)",
-        "web-toggle-label": "add custom web development",
-        "web-toggle-sub": "production-ready landing page (fixed price)",
-        "greet": "Perfect! You're leaning towards the {plan}{web} ({total} total with founders program rate). What is your current brand or project name to continue?",
+        "p1-title": "basic plan",
+        "p1-desc": "Essential visual identity for brands that need a solid graphic core.",
+        "p1-f1": "primary logo, secondary version, and mark",
+        "p1-f2": "corporate color palette and typographic pairing",
+        "p1-f3": "brand executive style guide (1-page PDF)",
+
+        "p2-title": "pro plan",
+        "p2-desc": "Expanded visual system for brands requiring daily consistency and high impact.",
+        "p2-f1": "everything in basic plan",
+        "p2-f2": "full brand manual in PDF (20-25 pages) + 3 real-world applications",
+        "p2-f3": "CSS design tokens configuration for web deployment",
+
+        "p3-title": "plus plan",
+        "p3-desc": "Comprehensive strategy, advanced art direction, and brand autonomy kit.",
+        "p3-f1": "everything in pro plan",
+        "p3-f2": "editable templates kit (Figma / Canva) & photo direction guide",
+        "p3-f3": "6 real-world applications + 45-min direct delivery session",
+
+        "recount-base": "Base identity investment:",
+        "recount-web": "Edge web module (fixed):",
+        "recount-total": "Total investment:",
+        "web-feature": "high-performance edge web platform (GitHub + Cloudflare Workers)",
+        "web-toggle-label": "add edge web module",
+        "web-toggle-sub": "production-ready native code landing page",
+        "greet": "Perfect! You're leaning towards {plan}{web} ({total} total investment). What is your current brand or project name to continue?",
         "greet-web": " with web design included",
         "greet-noweb": " (identity only)",
         "modal-eyebrow": "onboarding",
@@ -1228,8 +1217,8 @@ se construye.</h2>
         "terms-btn-show": "+ view terms",
         "terms-btn-hide": "- hide terms",
         "t1-title": "1. nature of services and scope of plans",
-        "t1-l1": "1.1. Fractional payment model and deliverables:",
-        "t1-p1": "rebrandyourbrand provides closed rebranding and web development services under a fractional payment model: a 50% advance deposit upon budget acceptance to officially start Phase 1, and the remaining 50% mandatory before undertaking Phase 3 technical deployment. Each plan strictly outlines its deliverables with zero hidden retainers.",
+        "t1-l1": "1.1. One-time payment model and deliverables:",
+        "t1-p1": "rebrandyourbrand provides closed rebranding and web development services under a one-time payment model: 100% of the total amount is paid at once when the project is accepted, through a secure payment link (Stripe) after email verification. Phase 1 starts once payment is confirmed. Each plan strictly outlines its deliverables with zero hidden retainers.",
         "t1-l2": "1.2. Exclusions and extraordinary work:",
         "t1-p2": "Any feature, additional section, e-commerce functionality, complex database, or custom development not explicitly specified in the contracted plan is excluded from the base price and will require upgrading to a higher plan (Upsell) or an extraordinary engineering hourly rate of €50/hour.",
         "t2-title": "2. phased workflow methodology and revision limits",
@@ -1239,21 +1228,21 @@ se construye.</h2>
         "t2-f2-title": "2.2. Phase 2 (Web Structure & Development):",
         "t2-f2-desc": "The web structure is implemented (landing page or multi-page) using provided materials. The client reviews the provisional version and validates the base design (up to 2 rounds of minor adjustments). With the OK, the structure becomes firm; deep structural changes later will incur extra costs.",
         "t2-f3-title": "2.3. Phase 3 (Deployment & Turnkey Delivery):",
-        "t2-f3-desc": "Upon payment of the remaining 50% balance, Bernat executes the final technical deployment on GitHub and Cloudflare, performing formal turnkey delivery and transferring agreed technical ownership to the client.",
+        "t2-f3-desc": "Once Phase 2 is approved, Bernat executes the final technical deployment on GitHub and Cloudflare, performing formal turnkey delivery and transferring agreed technical ownership to the client.",
         "t3-title": "3. provision of materials, deadlines, tacit approval, and abandonment",
         "t3-l1": "3.1. Domain ownership:",
         "t3-p1": "The client is the sole owner and responsible for the purchase, renewal, and ownership of their web domain.",
         "t3-l2": "3.2. Delivery deadlines, delays and termination for abandonment:",
-        "t3-p2": "The client agrees to supply texts, corporate images, previous logos, and DNS access within a maximum of 15 calendar days. Delays exceeding 30 calendar days without notice or response will give rebrandyourbrand the right to unilaterally terminate the contract for abandonment, retaining the initial deposit as compensation for studio agenda blockage.",
+        "t3-p2": "The client agrees to supply texts, corporate images, previous logos, and DNS access within a maximum of 15 calendar days. Delays exceeding 30 calendar days without notice or response will give rebrandyourbrand the right to unilaterally terminate the contract for abandonment, retaining the amount paid as compensation for work performed and studio agenda blockage.",
         "t3-l3": "3.3. Tacit approval by silence:",
         "t3-p3": "The absence of comments, feedback, or explicit response by the client for a period exceeding 15 calendar days after delivery or formal notification of any phase or deliverable shall be considered tacit approval (sign-off), automatically empowering the studio to advance in the schedule and proceed to the next stage.",
         "t3-l4": "3.4. Typos in content:",
         "t3-p4": "rebrandyourbrand is not responsible for typos or errors in texts directly provided by the client.",
         "t4-title": "4. intellectual property and refund policy",
         "t4-l1": "4.1. Intellectual property:",
-        "t4-p1": "Commercial and intellectual ownership of created designs and developments is fully transferred to the client only upon 100% payment of the plan fee.",
+        "t4-p1": "Commercial and intellectual ownership of created designs and developments is fully transferred to the client only once full payment of the plan fee has been confirmed.",
         "t4-l2": "4.2. Refund policy:",
-        "t4-p2": "Being customized intellectual and technical services, no returns or monetary refunds of the deposit are accepted once Phase 1 has officially started.",
+        "t4-p2": "Being customized intellectual and technical services, no returns or monetary refunds of the amount paid are accepted once Phase 1 has officially started.",
         "t5-title": "5. technical liability limitations and warranty",
         "t5-l1": "5.1. Post-delivery technical warranty:",
         "t5-p1": "A technical warranty period of 14 calendar days is established after final delivery to resolve visual or technical glitches directly attributable to the initial development.",
@@ -1290,9 +1279,10 @@ se construye.</h2>
         "modal-intro": "start the conversational briefing with Brandi to scope out the details of your project:"
       },
       ca: {
+        "err-plan": "si us plau, tria un pla a la secció de plans (botó «començar pla») abans de continuar.",
         "nav-planes": "plans", "nav-about": "sobre nosaltres", "nav-testimonials": "testimonis", "nav-terms": "termes",
         "hero-tag": "estudi de rebranding i disseny visual",
-        "hero-title": "marques que deixen de passar desapercibudes.",
+        "hero-title": "marques que deixen de passar desapercebudes.",
         "hero-desc": "Redissenyem identitats visuals combinant direcció d'art i precisió tècnica, per a marques que necessiten veure's tan bé com el que fan.",
         "manifesto-title": "una marca no es decora.\nes construeix.",
         "manifesto-desc": "Cada projecte comença assenyalant l'essencial i descartant el superflu. No perseguim tendències: busquem un sistema que segueixi sent cert d'aquí a cinc anys.",
@@ -1321,42 +1311,39 @@ se construye.</h2>
         "testimonials-submit": "enviar ressenya per a moderació",
         "testimonials-success": "Ressenya enviada correctament! Queda pendent de moderació per verificar que procedeix d'un negoci real.",
         "plans-heading": "plans de rebranding i web",
-        "plans-sub": "Contracta només identitat o afegeix desenvolupament web a mida. Sense quotes mensuals ni lligams.",
+        "plans-sub": "Contracta només identitat o afegeix desenvolupament web a mida. Pagament únic del 100% en acceptar el projecte, sense quotes mensuals ni lligams.",
         "plans-quote": "ens estalviem el .99 en trucs de màrqueting per oferir-te una qualitat innegociable.",
-        "launch-modal-eyebrow": "filosofia de l'estudi",
-        "launch-modal-title": "en què consisteix el programa de clients fundadors?",
-        "launch-modal-p1": "Com a estudi emergent fundat per joves apassionats, sabem que comencem el nostre camí sense un portfolio històric gegant ni la veterania de les grans agències tradicionals.",
-        "launch-modal-p2": "Per això, per als nostres 10 primers projectes a la comarca, oferim un 50% de descompte exclusiu en els plans d'identitat. A més, pots afegir el desenvolupament web a un preu fix de 400 €. No és una rebaixa permanent, sinó una quota limitada per fundar els nostres primers casos d'èxit reals a canvi de la vostra confiança i testimoni. Un cop cobertes les 10 places, els preus passaran al seu valor estàndard.",
         "modal-ok-btn": "entès, anem a crear!",
         "recommended-modal-eyebrow": "filosofia de l'estudi",
         "recommended-modal-title": "per què és la nostra opció recomanada?",
         "recommended-modal-p1": "És l'opció recomanada per a aquells que busquen l'equilibri perfecte i la millor relació qualitat-preu per potenciar la seva marca al màxim nivell, assegurant un sistema visual complet i professional.",
         "plans-badge": "recomanat",
-        "plans-discount-badge": "programa fundadors (10 places)",
         "plans-cta": "començar pla",
-        "p1-title": "pla essencial",
-        "p1-desc": "Identitat visual essencial per a autònoms i negocis locals, lliurada clau en mà.",
-        "p1-f1": "logotip principal + paleta cromàtica i directrius tipogràfiques",
-        "p1-f2": "procés guiat per fases (aprovació visual pas a pas)",
-        "p1-f3": "lliurament clau en mà amb propietat total (sense quotes)",
-        "p2-title": "pla evolució",
-        "p2-desc": "Rebranding integral i sistema visual complet per a marques que exigeixen impacte.",
-        "p2-f1": "rebranding integral (sistema visual complet i guia d'estil)",
-        "p2-f2": "procés guiat per fases i validació pas a pas",
-        "p2-f3": "lliurament clau en mà amb propietat total (sense quotes)",
-        "p3-title": "pla partner",
-        "p3-desc": "Ecosistema de marca profund amb direcció d'art exclusiva i avançada.",
-        "p3-f1": "rebranding profund i direcció d'art a mida",
-        "p3-f2": "sistema visual avançat i directrius exclusives",
-        "p3-f3": "lliurament clau en mà amb propietat total (sense quotes)",
-        "recount-base": "Preu base identitat:",
-        "recount-web": "Desenvolupament web a mida (fix):",
-        "recount-discount": "Descompte fundadors identitat (-50%):",
-        "recount-total": "Total:",
-        "web-feature": "landing page d'alt rendiment (GitHub + Cloudflare)",
-        "web-toggle-label": "afegir desenvolupament web",
-        "web-toggle-sub": "landing page llesta per a producció (preu fix)",
-        "greet": "Perfecte! T'atures pel {plan}{web} ({total} total amb programa de clients fundadors). Com es diu la teva marca o projecte actual per continuar?",
+        "p1-title": "pla bàsic",
+        "p1-desc": "Identitat visual essencial per a projectes que necessiten un nucli gràfic sòlid.",
+        "p1-f1": "logotip principal, versió secundària i isotip",
+        "p1-f2": "paleta cromàtica corporativa i combinació tipogràfica",
+        "p1-f3": "guia executiva d'ús de marca (1 pàgina PDF)",
+
+        "p2-title": "pla pro",
+        "p2-desc": "Sistema visual expandit per a marques que comuniquen diàriament i exigeixen coherència.",
+        "p2-f1": "tot el que inclou pla bàsic",
+        "p2-f2": "manual de marca complet en PDF (20-25 pàgs.) i 3 aplicacions reals",
+        "p2-f3": "configuració de tokens de disseny CSS per a desenvolupament web",
+
+        "p3-title": "pla plus",
+        "p3-desc": "Acompanyament integral, direcció d'art avançada i kit d'autonomia operativa.",
+        "p3-f1": "tot el que inclou pla pro",
+        "p3-f2": "kit de plantilles editables avançades (Figma / Canva) i guia fotogràfica",
+        "p3-f3": "6 aplicacions reals i sessió directa de lliurament de 45 min",
+
+        "recount-base": "Inversió base identitat:",
+        "recount-web": "Mòdul web edge (fix):",
+        "recount-total": "Inversió total:",
+        "web-feature": "plataforma web edge d'alt rendiment (GitHub + Cloudflare Workers)",
+        "web-toggle-label": "afegir mòdul web edge",
+        "web-toggle-sub": "landing page llesta per a producció en codi natiu",
+        "greet": "Perfecte! Et decantes per {plan}{web} ({total} d'inversió total). Com es diu la teva marca o projecte actual per continuar amb la teva proposta?",
         "greet-web": " amb desenvolupament web inclòs",
         "greet-noweb": " (només identitat)",
         "modal-eyebrow": "onboarding",
@@ -1369,8 +1356,8 @@ se construye.</h2>
         "terms-btn-show": "+ veure condicions",
         "terms-btn-hide": "- amagar condicions",
         "t1-title": "1. naturalesa dels serveis i abast dels plans",
-        "t1-l1": "1.1. Model de pagament fraccionat i lliurables:",
-        "t1-p1": "rebrandyourbrand ofereix serveis tancats de rebranding i desenvolupament web sota un model de pagament fraccionat: un 50% en concepte d'anticip en acceptar el pressupost per iniciar formalment la Fase 1, i el 50% restant obligatori abans d'escometre el desplegament tècnic de la Fase 3. Cada pla detalla estrictament els seus lliurables sense quotes mensuals ocultes.",
+        "t1-l1": "1.1. Model de pagament únic i lliurables:",
+        "t1-p1": "rebrandyourbrand ofereix serveis tancats de rebranding i desenvolupament web sota un model de pagament únic: el 100% de l'import total s'abona d'un sol cop en acceptar el projecte, mitjançant un enllaç de pagament segur (Stripe) després de verificar el correu. La Fase 1 s'inicia un cop confirmat el pagament. Cada pla detalla strictly els seus lliurables sense quotes mensuals ocultes.",
         "t1-l2": "1.2. Exclusions i treballs extraordinaris:",
         "t1-p2": "Qualsevol característica, secció addicional, funcionalitat de comerç electrònic (e-commerce), base de dades complexa o desenvolupament a mida no especificat quedarà exclòs del preu base i requerirà un pla superior (Upsell) o un pressupost extraordinari de 50 €/hora.",
         "t2-title": "2. metodologia de treball per fases i límit de revisions",
@@ -1380,21 +1367,21 @@ se construye.</h2>
         "t2-f2-title": "2.2. Fase 2 (Estructura i Desenvolupament Web):",
         "t2-f2-desc": "S'implementa l'estructura web (landing page o web multicapa) amb els materials aportats. El client revisa la versió provisional i valida el disseny base (fins a 2 rondes d'ajustos menors). Amb l'aprovació, l'estructura queda ferma; canvis estructurals profunds posteriors implicaran costos addicionals.",
         "t2-f3-title": "2.3. Fase 3 (Desplegament i Lliurament Clau en Mà):",
-        "t2-f3-desc": "Un cop abonat el 50% restant de l'import total, Bernat efectua el desplegament tècnic definitiu a GitHub i Cloudflare, realitzant el lliurament formal clau en mà i transferint la propietat tècnica acordada al client.",
+        "t2-f3-desc": "Un cop validada la Fase 2, Bernat efectua el desplegament tècnic definitiu a GitHub i Cloudflare, realitzant el lliurament formal clau en mà i transferint la propietat tècnica acordada al client.",
         "t3-title": "3. aportació de materials, terminis, aprovació tàcita i abandonament",
         "t3-l1": "3.1. Titularitat del domini:",
         "t3-p1": "El client és l'únic propietari i responsable de la compra, renovació i titularitat del seu domini web.",
         "t3-l2": "3.2. Terminis de lliurament, retards i rescissió per abandonament:",
-        "t3-p2": "El client es compromet a subministrar textos, imatges, logotips previs i accessos DNS en un termini màxim de 15 dies naturals. Retards superiors a 30 dies naturals sense previ avís o resposta per part del client donaran dret a rebrandyourbrand a rescindir unilateralment el contracte per abandonament, quedant retingut l'import de l'anticip inicial en concepte de compensació pel bloqueig de l'agenda de l'estudi.",
+        "t3-p2": "El client es compromet a subministrar textos, imatges, logotips previs i accessos DNS en un termini màxim de 15 dies naturals. Retards superiors a 30 dies naturals sense previ avís o resposta per part del client donaran dret a rebrandyourbrand a rescindir unilateralment el contracte per abandonament, quedant retingut l'import abonat en concepte de compensació pel treball realitzat i el bloqueig de l'agenda de l'estudi.",
         "t3-l3": "3.3. Aprovació tàcita per silenci temporal:",
         "t3-p3": "L'absència de comentaris, feedback o resposta explícita per part del client durant un termini superior a 15 dies naturals després del lliurament o notificació formal de qualsevol fase o lliurable es considerarà com a aprovació tàcita (vist-i-plau), facultant automàticament l'estudi per avançar en el cronograma i donar pas a la següent etapa del projecte.",
         "t3-l4": "3.4. Errades en continguts:",
         "t3-p4": "rebrandyourbrand no es fa responsable d'errades tipogràfiques o errors en textos facilitats directament pel client.",
         "t4-title": "4. propietat intel·lectual i política de reemborsaments",
         "t4-l1": "4.1. Propietat intel·lectual:",
-        "t4-p1": "La titularitat comercial i intel·lectual dels dissenys i desenvolupaments es transfereix íntegrament al client un cop abonat el 100% de la tarifa del pla.",
+        "t4-p1": "La titularitat comercial i intel·lectual dels dissenys i desenvolupaments es transfereix íntegrament al client un cop confirmat el pagament íntegre de la tarifa del pla.",
         "t4-l2": "4.2. Política de reemborsaments:",
-        "t4-p2": "En tractar-se de serveis personalitzats de creació tècnica i intel·lectual, no s'admeten devolucions ni reemborsaments econòmics de l'anticip un cop iniciada formalment la Fase 1.",
+        "t4-p2": "En tractar-se de serveis personalitzats de creació tècnica i intel·lectual, no s'admeten devolucions ni reemborsaments econòmics de l'import abonat un cop iniciada formalment la Fase 1.",
         "t5-title": "5. limitacions de responsabilitat tècnica i garantia",
         "t5-l1": "5.1. Garantia tècnica post-lliurament:",
         "t5-p1": "S'estableix un període de garantia tècnica de 14 dies naturals després del lliurament final per solucionar fallades visuals o tècniques imputables directament al desenvolupament inicial.",
@@ -1414,7 +1401,7 @@ se construye.</h2>
         "status-consulting": "consultant amb brandi...",
         "status-completed": "completat",
         "status-failed": "fallit",
-        "output-placeholder": "inicia la conversa com brandi o selecciona un pla.",
+        "output-placeholder": "inicia la conversa amb brandi o selecciona un pla.",
         "err-empty": "si us plau, escriu un missatge abans d'enviar.",
         "err-turnstile": "si us plau, completa la verificació humana.",
         "err-network": "error en connectar amb el servidor segur",
@@ -1559,11 +1546,10 @@ se construye.</h2>
       return { el: modal, open, close, isOpen: () => isOpen };
     }
 
-    const launchModal = makeModal($('launch-modal'), { focus: true });
     const recommendedModal = makeModal($('recommended-modal'), { focus: true });
     const testimonialModal = makeModal($('testimonial-modal'), { focus: 'reviewer-name' });
     const planModal = makeModal($('plan-modal'), { focus: 'modal-choose-ai' });
-    const modals = [launchModal, recommendedModal, testimonialModal, planModal];
+    const modals = [recommendedModal, testimonialModal, planModal];
 
     let testimonialsCache = null;
     async function renderApprovedTestimonials() {
@@ -1599,7 +1585,7 @@ se construye.</h2>
     document.querySelectorAll('[data-open-testimonial-modal]').forEach((btn) => btn.addEventListener('click', () => { testimonialModal.open(btn); renderReviewTurnstile(); }));
     const testimonialForm = $('testimonial-form');
     const testimonialMsg = $('testimonial-msg');
-    const ERR = { rate_limited: 'err-rate', email_cooldown: 'err-cooldown', captcha_failed: 'err-turnstile', captcha_unavailable: 'err-turnstile', upstream_busy: 'err-busy', upstream_error: 'err-busy', email_error: 'err-busy', payload_too_large: 'err-busy', invalid_confirmation: 'err-busy', invalid_messages: 'err-busy' };
+    const ERR = { rate_limited: 'err-rate', email_cooldown: 'err-cooldown', captcha_failed: 'err-turnstile', captcha_unavailable: 'err-turnstile', upstream_busy: 'err-busy', upstream_error: 'err-busy', email_error: 'err-busy', payload_too_large: 'err-busy', invalid_confirmation: 'err-busy', invalid_messages: 'err-busy', plan_required: 'err-plan' };
 
     testimonialForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -1644,20 +1630,19 @@ se construye.</h2>
     });
 
     const plansArray = [
-      { id: 'esencial', titleKey: 'p1-title', basePrice: 200, originalPrice: 400, descKey: 'p1-desc', features: ['p1-f1', 'p1-f2', 'p1-f3'] },
-      { id: 'evolucion', titleKey: 'p2-title', basePrice: 400, originalPrice: 800, descKey: 'p2-desc', features: ['p2-f1', 'p2-f2', 'p2-f3'], isRecommended: true },
-      { id: 'partner', titleKey: 'p3-title', basePrice: 700, originalPrice: 1400, descKey: 'p3-desc', features: ['p3-f1', 'p3-f2', 'p3-f3'] }
+      { id: 'esencial', titleKey: 'p1-title', basePrice: 400, descKey: 'p1-desc', features: ['p1-f1', 'p1-f2', 'p1-f3'] },
+      { id: 'evolucion', titleKey: 'p2-title', basePrice: 600, descKey: 'p2-desc', features: ['p2-f1', 'p2-f2', 'p2-f3'], isRecommended: true },
+      { id: 'partner', titleKey: 'p3-title', basePrice: 900, descKey: 'p3-desc', features: ['p3-f1', 'p3-f2', 'p3-f3'] }
     ];
     const planWebState = { esencial: false, evolucion: false, partner: false };
     let currentPlanIndex = 0;
     let isPlansAnimating = false;
-    let activePlanKey = null, activePlanWebState = false;
+    let activePlanKey = null, activePlanWebState = false, activePlanId = null;
     let pendingPlan = { key: null, id: null, opener: null };
 
     function buildPlanCardHTML(d) {
       const t = translations[currentLang];
       const web = planWebState[d.id];
-      const regular = d.originalPrice + (web ? WEB_PRICE : 0);
       const total = d.basePrice + (web ? WEB_PRICE : 0);
       const badge = 'absolute -top-3 bg-brand text-[#0A0A0C] text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full hover:bg-brand-soft shadow-sm cursor-pointer';
 
@@ -1665,12 +1650,13 @@ se construye.</h2>
         + (web ? `<li class="flex items-center gap-2.5 bubble-in"><span class="text-brand font-bold">✓</span> <span class="text-paper font-medium">${esc(t['web-feature'])}</span></li>` : '');
 
       return `
-        <button type="button" data-open-launch-modal class="${badge} left-6">${esc(t['plans-discount-badge'])}</button>
         ${d.isRecommended ? `<button type="button" data-open-recommended-modal class="${badge} right-6">${esc(t['plans-badge'])}</button>` : ''}
         <div>
           <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 pt-2 gap-2">
             <h3 class="lowercase font-display text-2xl md:text-3xl text-paper font-semibold whitespace-normal">${esc(t[d.titleKey])}</h3>
-            <div class="text-left sm:text-right"><span class="font-mono text-paper font-bold text-2xl md:text-3xl whitespace-nowrap">${fmt(regular)}</span></div>
+            <div class="flex items-baseline flex-wrap gap-x-3 gap-y-1 text-left sm:justify-end">
+              <span class="font-mono text-paper font-bold text-3xl md:text-4xl whitespace-nowrap">${fmt(total)}</span>
+            </div>
           </div>
           <p class="text-muted text-sm leading-relaxed mb-6">${esc(t[d.descKey])}</p>
           <ul class="space-y-3 text-xs md:text-sm text-paper/90 mb-4">${features}</ul>
@@ -1690,9 +1676,8 @@ se construye.</h2>
             </button>
           </div>
           <div class="mb-8 p-4 bg-ink/50 border border-line rounded-xl space-y-2 text-xs font-mono">
-            <div class="flex justify-between text-muted"><span>${esc(t['recount-base'])}</span><span>${fmt(d.originalPrice)}</span></div>
+            <div class="flex justify-between text-muted"><span>${esc(t['recount-base'])}</span><span>${fmt(d.basePrice)}</span></div>
             ${web ? `<div class="flex justify-between text-muted bubble-in"><span>${esc(t['recount-web'])}</span><span>+${fmt(WEB_PRICE)}</span></div>` : ''}
-            <div class="flex justify-between text-brand"><span>${esc(t['recount-discount'])}</span><span>-${fmt(d.originalPrice - d.basePrice)}</span></div>
             <div class="pt-2 border-t border-line/60 flex justify-between text-paper font-bold text-sm"><span>${esc(t['recount-total'])}</span><span class="text-base">${fmt(total)}</span></div>
           </div>
         </div>
@@ -1751,7 +1736,6 @@ se construye.</h2>
     }, { passive: true });
 
     plansContainer.addEventListener('click', (e) => {
-      if (e.target.closest('[data-open-launch-modal]')) { launchModal.open(e.target.closest('button')); return; }
       if (e.target.closest('[data-open-recommended-modal]')) { recommendedModal.open(e.target.closest('button')); return; }
       const toggle = e.target.closest('[data-web-toggle]');
       if (toggle) {
@@ -1952,12 +1936,12 @@ se construye.</h2>
       const hasWeb = !!planWebState[planId];
       const samePlan = activePlanKey === titleKey;
 
-      if (samePlan && activePlanWebState === hasWeb && chatHistory.length) { openAssistantPanel(opener); return; }
-
-      activePlanKey = titleKey; activePlanWebState = hasWeb;
+      activePlanKey = titleKey; activePlanWebState = hasWeb; activePlanId = planId;
       const greeting = { role: 'assistant', greeting: true, info: { titleKey, hasWeb, total: (plan?.basePrice || 0) + (hasWeb ? WEB_PRICE : 0) } };
       if (samePlan && chatHistory.length) {
         chatHistory[0] = greeting;
+        chatHistory.forEach((e) => { e.canConfirm = false; });
+        lastConfirmSig = '';
       } else {
         chatHistory.length = 0; chatHistory.push(greeting); lastBrand = ''; lastConfirmSig = '';
       }
@@ -2071,8 +2055,7 @@ se construye.</h2>
         return false;
       }
 
-      const planDef = plansArray.find((p) => p.titleKey === activePlanKey);
-      const plan = planDef ? { id: planDef.id, web: !!activePlanWebState } : null;
+      const plan = activePlanId ? { id: activePlanId, web: !!activePlanWebState } : null;
       const messages = [
         ...chatHistory.filter((e) => !e.greeting).map((e) => ({ role: e.role, text: e.text || '', sig: e.sig })),
         { role: 'user', text }
