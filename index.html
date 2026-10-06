@@ -824,7 +824,7 @@ se construye.</h2>
                   <p class="lang-trans mt-1" data-i18n="t1-p1">rebrandyourbrand ofrece servicios cerrados de rebranding y desarrollo web bajo un modelo de pago único: el 100% del importe total se abona de una sola vez al aceptar el proyecto, mediante un enlace de pago seguro (Stripe) tras verificar el correo. La Fase 1 se inicia una vez confirmado el pago. Cada plan detalla strictly sus entregables sin cuotas mensuales ocultas.</p>
                 </div>
                 <div>
-                  <strong class="lang-trans text-paper font-medium" data-i18n="t1-l2">1.2. Exclusiones y trabajos extraordinarios:</strong>
+                  <strong class="lang-trans text-paper font-medium" data-i18n="t1-l2">1.2. Exclusions y trabajos extraordinarios:</strong>
                   <p class="lang-trans mt-1" data-i18n="t1-p2">Cualquier característica, sección adicional, pasarela de comercio electrónico (e-commerce), base de datos compleja o desarrollo a medida no especificado en el plan contratado quedará excluido del precio base y requerirá la contratación de un plan superior (Upsell) o un presupuesto extraordinario tarificado a 50 €/hora.</p>
                 </div>
               </div>
@@ -1630,11 +1630,11 @@ se construye.</h2>
     });
 
     const plansArray = [
-      { id: 'esencial', titleKey: 'p1-title', basePrice: 400, descKey: 'p1-desc', features: ['p1-f1', 'p1-f2', 'p1-f3'] },
-      { id: 'evolucion', titleKey: 'p2-title', basePrice: 600, descKey: 'p2-desc', features: ['p2-f1', 'p2-f2', 'p2-f3'], isRecommended: true },
-      { id: 'partner', titleKey: 'p3-title', basePrice: 900, descKey: 'p3-desc', features: ['p3-f1', 'p3-f2', 'p3-f3'] }
+      { id: 'basico', titleKey: 'p1-title', basePrice: 400, descKey: 'p1-desc', features: ['p1-f1', 'p1-f2', 'p1-f3'] },
+      { id: 'pro', titleKey: 'p2-title', basePrice: 600, descKey: 'p2-desc', features: ['p2-f1', 'p2-f2', 'p2-f3'], isRecommended: true },
+      { id: 'plus', titleKey: 'p3-title', basePrice: 900, descKey: 'p3-desc', features: ['p3-f1', 'p3-f2', 'p3-f3'] }
     ];
-    const planWebState = { esencial: false, evolucion: false, partner: false };
+    const planWebState = { basico: false, pro: false, plus: false };
     let currentPlanIndex = 0;
     let isPlansAnimating = false;
     let activePlanKey = null, activePlanWebState = false, activePlanId = null;
