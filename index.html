@@ -1092,6 +1092,7 @@ se construye.</h2>
     const translations = {
       es: {
         "err-plan": "elige un plan en la sección de planes (botón «empezar plan») antes de continuar.",
+        "intro": "Hola, soy Brandi, directora de arte de rebrandyourbrand. Cuéntame: ¿cómo se llama tu marca o proyecto y qué necesitas?",
         "testimonials-empty": "Aún no hay testimonios públicos publicados. ¡Sé el primer negocio en dejar tu valoración de 5 estrellas!",
         "testimonials-success": "¡Reseña enviada correctamente! Queda pendiente de moderación para verificar que procede de un negocio real.",
         "plans-badge": "recomendado",
@@ -1146,6 +1147,7 @@ se construye.</h2>
       },
       en: {
         "err-plan": "please choose a plan in the plans section (\"get started\" button) before continuing.",
+        "intro": "Hi, I'm Brandi, art director at rebrandyourbrand. Tell me: what's your brand or project called and what do you need?",
         "nav-planes": "plans", "nav-about": "about us", "nav-testimonials": "testimonials", "nav-terms": "terms",
         "hero-tag": "rebranding & visual design studio",
         "hero-title": "brands that refuse to fade into the background.",
@@ -1285,6 +1287,7 @@ se construye.</h2>
       },
       ca: {
         "err-plan": "si us plau, tria un pla a la secció de plans (botó «començar pla») abans de continuar.",
+        "intro": "Hola, sóc la Brandi, directora d'art de rebrandyourbrand. Explica'm: com es diu la teva marca o projecte i què necessites?",
         "nav-planes": "plans", "nav-about": "sobre nosaltres", "nav-testimonials": "testimonis", "nav-terms": "termes",
         "hero-tag": "estudi de rebranding i disseny visual",
         "hero-title": "marques que deixen de passar desapercebudes.",
@@ -1642,6 +1645,7 @@ se construye.</h2>
     const planWebState = { basico: false, pro: false, plus: false };
     let currentPlanIndex = 0;
     let isPlansAnimating = false;
+    // activePlanWebState: true | false | null (null = el cliente aún no ha decidido sobre la web; solo ocurre si el plan lo dedujo Brandi)
     let activePlanKey = null, activePlanWebState = false, activePlanId = null;
     let pendingPlan = { key: null, id: null, opener: null };
 
@@ -1920,7 +1924,6 @@ se construye.</h2>
       removeTurnstileWidget();
     }
 
-    document.querySelectorAll('[data-open-assistant]').forEach((btn) => btn.addEventListener('click', () => openAssistantPanel(btn)));
     $('assistant-close').addEventListener('click', closeAssistantPanel);
     assistantBackdrop.addEventListener('click', closeAssistantPanel);
 
@@ -1928,9 +1931,19 @@ se construye.</h2>
     let busy = false;
     let lastBrand = '', lastConfirmSig = '';
 
+    // Apertura desde el botón flotante (sin plan elegido): Brandi saluda primero.
+    assistantTrigger.addEventListener('click', () => {
+      if (!chatHistory.length) {
+        chatHistory.push({ role: 'assistant', greeting: true, intro: true });
+        renderHistory();
+      }
+      openAssistantPanel(assistantTrigger);
+    });
+
     const isLeadClosed = () => chatHistory.some((e) => e.leadClosed);
 
     function entryText(entry) {
+      if (entry.intro) return translations[currentLang]['intro'];
       if (!entry.greeting) return entry.text || '';
       const t = translations[currentLang], i = entry.info;
       return t['greet'].replace('{plan}', t[i.titleKey]).replace('{web}', i.hasWeb ? t['greet-web'] : t['greet-noweb']).replace('{total}', fmt(i.total));
@@ -1939,11 +1952,12 @@ se construye.</h2>
     function selectPlan(titleKey, opener, planId) {
       const plan = plansArray.find((p) => p.id === planId);
       const hasWeb = !!planWebState[planId];
-      const samePlan = activePlanKey === titleKey;
+      const first = chatHistory[0];
+      const samePlan = activePlanKey === titleKey && !!first && first.greeting && !first.intro;
 
       activePlanKey = titleKey; activePlanWebState = hasWeb; activePlanId = planId;
       const greeting = { role: 'assistant', greeting: true, info: { titleKey, hasWeb, total: (plan?.basePrice || 0) + (hasWeb ? WEB_PRICE : 0) } };
-      if (samePlan && chatHistory.length) {
+      if (samePlan) {
         chatHistory[0] = greeting;
         chatHistory.forEach((e) => { e.canConfirm = false; });
         lastConfirmSig = '';
@@ -2060,7 +2074,8 @@ se construye.</h2>
         return false;
       }
 
-      const plan = activePlanId ? { id: activePlanId, web: !!activePlanWebState } : null;
+      // El plan puede venir de la tarjeta (web: true/false) o deducido por Brandi (web: null hasta que el cliente decida).
+      const plan = activePlanId ? { id: activePlanId, web: activePlanWebState } : null;
       const messages = [
         ...chatHistory.filter((e) => !e.greeting).map((e) => ({ role: e.role, text: e.text || '', sig: e.sig })),
         { role: 'user', text }
@@ -2078,13 +2093,14 @@ se construye.</h2>
         const res = await fetch(WORKER_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ messages, plan, token, lang: currentLang, confirm, brand: lastBrand, confirmSig: confirm ? lastConfirmSig : '' }),
+          body: JSON.stringify({ messages, plan, token, lang: currentLang, confirm, brand: lastBrand, confirmSig: lastConfirmSig }),
           signal: AbortSignal.timeout(30000)
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw Object.assign(new Error(data.error || 'http_' + res.status), { code: data.error });
 
         if (data.brand) lastBrand = data.brand;
+        if (data.plan && data.plan.id) { activePlanId = data.plan.id; activePlanWebState = data.plan.web; }
         lastConfirmSig = data.confirmSig || '';
         chatHistory.push({ role: 'assistant', text: data.reply, sig: data.sig, leadClosed: data.leadClosed, canConfirm: data.canConfirm });
         hideThinkingBubble();
