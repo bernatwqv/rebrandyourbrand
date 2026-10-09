@@ -8,6 +8,27 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 
+<script>
+  // Primera visita a "/": si el navegador está en catalán o inglés, se abre su versión (/ca/ o /en/).
+  // No actúa si la URL ya trae idioma, si el usuario ya eligió uno a mano, ni con buscadores.
+  (function () {
+    try {
+      if (!/^https?:$/.test(location.protocol)) return;
+      if (/^\/(ca|en)(\/|$)/.test(location.pathname) || location.hash) return;
+      if (/bot|crawl|spider|slurp|lighthouse|pagespeed|headless|preview/i.test(navigator.userAgent)) return;
+      var saved = null;
+      try { saved = localStorage.getItem('rybb-lang'); } catch (e) {}
+      if (saved === 'es' || saved === 'ca' || saved === 'en') return;
+      var langs = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language];
+      for (var i = 0; i < langs.length; i++) {
+        var l = String(langs[i] || '').toLowerCase().split('-')[0];
+        if (l === 'es') return;
+        if (l === 'ca' || l === 'en') { location.replace('/' + l + '/' + location.search); return; }
+      }
+    } catch (e) {}
+  })();
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400..600&family=Inter:wght@400..600&display=swap">
@@ -16,22 +37,26 @@
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400..600&family=Inter:wght@400..600&display=swap" rel="stylesheet">
 </noscript>
 
-<title>rebrandyourbrand — Rebranding y diseño visual</title>
-<meta name="description" content="Rebranding de marcas y diseño visual: identidad, packaging y dirección de arte con enfoque técnico y artístico.">
+<title>rebrandyourbrand — Rebranding y web para negocios</title>
+<meta name="description" content="Rebranding y web para negocios: identidad visual a precio cerrado, pago único y sin cuotas. Tu negocio es mejor de lo que parece.">
 <meta name="google-site-verification" content="YGC3173v8crkOSc3_K39sejUfe4hYPDlsOqbpdTAYXw" />
 <link rel="canonical" href="https://rebrandyourbrand.es/">
+<link rel="alternate" hreflang="es" href="https://rebrandyourbrand.es/">
+<link rel="alternate" hreflang="ca" href="https://rebrandyourbrand.es/ca/">
+<link rel="alternate" hreflang="en" href="https://rebrandyourbrand.es/en/">
+<link rel="alternate" hreflang="x-default" href="https://rebrandyourbrand.es/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="rebrandyourbrand.es">
-<meta property="og:title" content="rebrandyourbrand.es — Rebranding y diseño visual">
-<meta property="og:description" content="Identidad visual, packaging y dirección de arte para marcas que necesitan dejar de pasar desapercibidas.">
+<meta property="og:title" content="rebrandyourbrand.es — Rebranding y web para negocios">
+<meta property="og:description" content="Rebranding y web para negocios: identidad visual a precio cerrado, pago único y sin cuotas mensuales.">
 <meta property="og:url" content="https://rebrandyourbrand.es/">
 <meta property="og:locale" content="es_ES">
 <meta property="og:image" content="https://rebrandyourbrand.es/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="rebrandyourbrand.es — Rebranding y diseño visual">
-<meta name="twitter:description" content="Identidad visual, packaging y dirección de arte para marcas que necesitan dejar de pasar desapercibidas.">
+<meta name="twitter:title" content="rebrandyourbrand.es — Rebranding y web para negocios">
+<meta name="twitter:description" content="Rebranding y web para negocios: identidad visual a precio cerrado, pago único y sin cuotas mensuales.">
 <meta name="twitter:image" content="https://rebrandyourbrand.es/og-image.png">
 
 <script type="application/ld+json">
@@ -40,9 +65,9 @@
   "@type": "ProfessionalService",
   "name": "rebrandyourbrand.es",
   "url": "https://rebrandyourbrand.es/",
-  "description": "Estudio de rebranding y diseño visual especializado en identidad visual, packaging y dirección de arte.",
+  "description": "Estudio de rebranding y desarrollo web para negocios: identidad visual a precio cerrado y pago único.",
   "areaServed": "ES",
-  "serviceType": ["Rebranding", "Identidad visual", "Packaging", "Dirección de arte"]
+  "serviceType": ["Rebranding", "Identidad visual", "Diseño web", "Dirección de arte"]
 }
 </script>
 
@@ -613,6 +638,58 @@ textarea { resize: vertical; }
   .skip-link { position: absolute; left: -999px; top: 0; z-index: 100; }
   .skip-link:focus { left: 1rem; top: 1rem; padding: .5rem 1rem; background: rgb(var(--color-bg)); color: rgb(var(--color-text)); border: 1px solid rgb(var(--color-brand)); border-radius: .5rem; }
 </style>
+<style>
+  .cta-row{display:flex;flex-wrap:wrap;gap:.75rem;margin-top:2rem}
+  .btn{display:inline-flex;align-items:center;justify-content:center;padding:.9rem 1.5rem;border-radius:.7rem;font-size:.8rem;font-weight:600;letter-spacing:.03em;text-transform:lowercase;cursor:pointer;border:1px solid rgb(var(--color-brand))}
+  .btn-primary{background:rgb(var(--color-brand));color:#0A0A0C}
+  .btn-primary:hover{background:rgb(var(--color-brand-soft));transform:translateY(-2px)}
+  .btn-ghost{background:transparent;color:rgb(var(--color-text))}
+  .btn-ghost:hover{background:rgb(var(--color-brand)/.1);transform:translateY(-2px)}
+  @media(max-width:39.99rem){.cta-row .btn{width:100%}}
+  #top p[data-i18n="hero-desc"]{max-width:36rem}
+  .trust-list{display:flex;flex-wrap:wrap;gap:.5rem 1.5rem;margin-top:1.75rem;font:.7rem ui-monospace,monospace;color:rgb(var(--color-muted))}
+  .trust-list li::before{content:"✓ ";color:rgb(var(--color-brand))}
+  .problem-grid,.steps-grid{display:grid;gap:1rem;grid-template-columns:1fr}
+  @media(min-width:48rem){.problem-grid{grid-template-columns:repeat(2,1fr)}.steps-grid{grid-template-columns:repeat(3,1fr)}}
+  .problem-card,.step-card{border:1px solid rgb(var(--color-line));border-radius:1rem;padding:1.5rem;background:rgb(var(--color-panel)/.7);display:flex;gap:1rem;align-items:flex-start;line-height:1.6}
+  .step-card{flex-direction:column;gap:.5rem}
+  .step-card h3{font-size:1.25rem}.step-card p{color:rgb(var(--color-muted));font-size:.9rem}
+  .problem-x{color:rgb(var(--color-ai));font-weight:700}
+  .step-num{font:700 .75rem ui-monospace,monospace;color:rgb(var(--color-ai))}
+  .terms-summary{color:rgb(var(--color-muted));font-size:.9rem;line-height:1.6;margin-bottom:1.5rem;max-width:40rem}
+  #problema{background:radial-gradient(circle at 12% 0%,rgb(var(--color-ai)/.07),transparent 26rem),radial-gradient(circle at 92% 100%,rgb(var(--color-brand)/.08),transparent 24rem)}
+  .problem-grid{gap:1.25rem}
+  .problem-card{position:relative;overflow:hidden;align-items:center;gap:1.25rem;padding:1.75rem;border-radius:1.25rem;font-size:1rem;color:rgb(var(--color-text)/.92);
+    background:linear-gradient(145deg,rgb(var(--color-panel)/.98),rgb(var(--color-panel)/.7));box-shadow:inset 0 1px 0 rgb(255 255 255/.035);
+    transition:opacity 600ms var(--ease-editorial),transform 600ms var(--ease-editorial),border-color 300ms var(--ease-editorial),box-shadow 300ms var(--ease-editorial)}
+  .problem-card::before{content:"";position:absolute;left:0;top:1.25rem;bottom:1.25rem;width:2px;border-radius:2px;background:rgb(var(--color-ai));opacity:0;transition:opacity 300ms var(--ease-editorial)}
+  .problem-card.reveal.in-view:hover{transform:translateY(-4px);border-color:rgb(var(--color-ai)/.45);box-shadow:0 18px 44px rgb(var(--color-ai)/.1),inset 0 1px 0 rgb(255 255 255/.05)}
+  .problem-card:hover::before{opacity:1}
+  .problem-card p{line-height:1.55}
+  .problem-x{flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;width:2.4rem;height:2.4rem;border-radius:999px;font-size:.8rem;
+    background:rgb(var(--color-ai)/.12);border:1px solid rgb(var(--color-ai)/.35);transition:background-color 300ms var(--ease-editorial),transform 300ms var(--ease-editorial)}
+  .problem-card:hover .problem-x{background:rgb(var(--color-ai)/.22);transform:rotate(90deg)}
+  .problem-close{display:flex;align-items:center;gap:1.25rem;margin-top:2.5rem;padding:1.5rem 1.75rem;border-radius:1.25rem;border:1px solid rgb(var(--color-brand)/.4);
+    background:linear-gradient(135deg,rgb(var(--color-brand)/.12),rgb(var(--color-brand)/.03));box-shadow:var(--shadow-brand)}
+  .problem-close p{font-size:clamp(1.2rem,2.4vw,1.75rem);line-height:1.25;letter-spacing:-.02em}
+  .problem-check{flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;width:2.6rem;height:2.6rem;border-radius:999px;font-weight:700;background:rgb(var(--color-brand));color:#0A0A0C}
+  @media(max-width:39.99rem){.problem-card{padding:1.4rem 1.25rem;gap:1rem}.problem-close{padding:1.25rem;gap:1rem}}
+
+  #proceso{background:radial-gradient(circle at 90% 0%,rgb(var(--color-brand)/.09),transparent 26rem),radial-gradient(circle at 8% 100%,rgb(var(--color-ai)/.06),transparent 24rem)}
+  .steps-grid{gap:1.25rem}
+  .step-card{position:relative;overflow:hidden;gap:1rem;padding:1.75rem;border-radius:1.25rem;
+    background:linear-gradient(145deg,rgb(var(--color-panel)/.98),rgb(var(--color-panel)/.7));box-shadow:inset 0 1px 0 rgb(255 255 255/.035);
+    transition:opacity 600ms var(--ease-editorial),transform 600ms var(--ease-editorial),border-color 300ms var(--ease-editorial),box-shadow 300ms var(--ease-editorial)}
+  .step-card::before{content:"";position:absolute;left:0;top:1.25rem;bottom:1.25rem;width:2px;border-radius:2px;background:rgb(var(--color-ai));opacity:0;transition:opacity 300ms var(--ease-editorial)}
+  .step-card.reveal.in-view:hover{transform:translateY(-4px);border-color:rgb(var(--color-ai)/.45);box-shadow:0 18px 44px rgb(var(--color-ai)/.1),inset 0 1px 0 rgb(255 255 255/.05)}
+  .step-card:hover::before{opacity:1}
+  .step-num{display:inline-flex;align-items:center;justify-content:center;width:2.4rem;height:2.4rem;border-radius:999px;font-size:.8rem;letter-spacing:.04em;
+    background:rgb(var(--color-ai)/.12);border:1px solid rgb(var(--color-ai)/.35);transition:background-color 300ms var(--ease-editorial),transform 300ms var(--ease-editorial)}
+  .step-card:hover .step-num{background:rgb(var(--color-ai)/.22);transform:scale(1.08)}
+  .step-card h3{font-size:1.4rem;line-height:1.2;letter-spacing:-.02em;color:rgb(var(--color-text))}
+  .step-card p{line-height:1.6;font-size:.95rem}
+  @media(max-width:39.99rem){.step-card{padding:1.4rem 1.25rem}}
+</style>
 </head>
 
 <body class="bg-ink text-paper antialiased relative overflow-x-hidden">
@@ -649,11 +726,11 @@ textarea { resize: vertical; }
             <button type="button" data-lang-choice="es" class="lang-option w-full text-left px-4 py-2 text-xs font-mono flex items-center justify-between hover:bg-ink/40 transition-colors cursor-pointer">
               <span>español</span><span class="lang-dot w-1.5 h-1.5 rounded-full"></span>
             </button>
-            <button type="button" data-lang-choice="en" class="lang-option w-full text-left px-4 py-2 text-xs font-mono flex items-center justify-between hover:bg-ink/40 transition-colors cursor-pointer">
-              <span>english</span><span class="lang-dot w-1.5 h-1.5 rounded-full"></span>
-            </button>
             <button type="button" data-lang-choice="ca" class="lang-option w-full text-left px-4 py-2 text-xs font-mono flex items-center justify-between hover:bg-ink/40 transition-colors cursor-pointer">
               <span>català</span><span class="lang-dot w-1.5 h-1.5 rounded-full"></span>
+            </button>
+            <button type="button" data-lang-choice="en" class="lang-option w-full text-left px-4 py-2 text-xs font-mono flex items-center justify-between hover:bg-ink/40 transition-colors cursor-pointer">
+              <span>english</span><span class="lang-dot w-1.5 h-1.5 rounded-full"></span>
             </button>
           </div>
         </div>
@@ -694,18 +771,50 @@ textarea { resize: vertical; }
   <main id="main-content">
     <section id="top" class="relative pt-40 pb-28 md:pt-52 md:pb-36 px-6 md:px-10 border-b border-line overflow-hidden z-10">
       <div class="max-w-6xl mx-auto relative z-10">
-        <p class="hero-fade lang-trans delay-0 lowercase text-xs tracking-wide text-muted mb-6" data-i18n="hero-tag">estudio de rebranding y diseño visual</p>
-        <h1 class="hero-fade lang-trans delay-150 lowercase font-display text-[2.6rem] leading-[1.08] sm:text-6xl md:text-7xl max-w-3xl" data-i18n="hero-title">marcas que dejan de pasar desapercibidas.</h1>
-        <p class="hero-fade lang-trans delay-300 mt-8 max-w-md text-muted text-base md:text-lg leading-relaxed" data-i18n="hero-desc">Rediseñamos identidades visuales combinando dirección de arte y precisión técnica, para marcas que necesitan verse tan bien como lo que hacen.</p>
+        <p class="hero-fade lang-trans delay-0 lowercase text-xs tracking-wide text-muted mb-6" data-i18n="hero-tag">rebranding y web para negocios que merecen más</p>
+        <h1 class="hero-fade lang-trans delay-150 lowercase font-display text-[2.6rem] leading-[1.08] sm:text-6xl md:text-7xl max-w-3xl" data-i18n="hero-title">tu negocio es mejor de lo que parece.</h1>
+        <p class="hero-fade lang-trans delay-300 mt-8 max-w-md text-muted text-base md:text-lg leading-relaxed" data-i18n="hero-desc">Si tu imagen no está a la altura de lo que haces, los clientes eligen a otro antes de conocerte. Te la rediseñamos a precio cerrado y sin cuotas mensuales.</p>
+        <div class="cta-row hero-fade delay-300">
+          <a href="#planes" data-section-target="planes" class="btn btn-primary lang-trans" data-i18n="cta-plans">ver planes y precios</a>
+          <button type="button" data-open-brandi class="btn btn-ghost lang-trans" data-i18n="cta-brandi">hablar con brandi</button>
+        </div>
+        <ul class="trust-list hero-fade delay-300">
+          <li class="lang-trans" data-i18n="trust-1">pago único</li>
+          <li class="lang-trans" data-i18n="trust-2">2 rondas de revisión por fase</li>
+          <li class="lang-trans" data-i18n="trust-3">web a tu nombre</li>
+        </ul>
       </div>
     </section>
 
-    <section id="manifiesto" class="relative px-6 md:px-10 py-32 md:py-40 border-b border-line overflow-hidden z-10">
+    <section id="problema" class="relative px-6 md:px-10 py-24 md:py-32 border-b border-line overflow-hidden z-10">
       <div class="max-w-6xl mx-auto relative z-10">
-        <div class="reveal grid md:grid-cols-2 gap-10 md:gap-16 items-start">
-          <h2 class="lang-trans lowercase font-display text-4xl md:text-6xl leading-[1.05] whitespace-pre-line" data-i18n="manifesto-title">una marca no se decora.
-se construye.</h2>
-          <p class="lang-trans text-muted text-base md:text-lg leading-relaxed md:pt-4" data-i18n="manifesto-desc">Cada proyecto empieza señalando lo esencial y descartando lo superfluo. No perseguimos tendencias: buscamos un sistema que siga siendo cierto dentro de cinco años.</p>
+        <div class="reveal mb-12">
+          <span class="lang-trans lowercase block text-xs tracking-widest text-brand font-mono mb-2" data-i18n="problem-eyebrow">el problema</span>
+          <h2 class="lang-trans lowercase font-display text-3xl md:text-4xl" data-i18n="problem-title">¿te suena alguna de estas?</h2>
+        </div>
+        <div class="problem-grid">
+          <div class="problem-card reveal"><span class="problem-x" aria-hidden="true">✕</span><p class="lang-trans" data-i18n="problem-1">Tu logo se ve mal en cuanto lo reduces: en Instagram, en un cartel, en una factura.</p></div>
+          <div class="problem-card reveal"><span class="problem-x" aria-hidden="true">✕</span><p class="lang-trans" data-i18n="problem-2">Cada cosa que publicas parece de una marca distinta.</p></div>
+          <div class="problem-card reveal"><span class="problem-x" aria-hidden="true">✕</span><p class="lang-trans" data-i18n="problem-3">Tu competencia parece más seria, aunque tú trabajes mejor.</p></div>
+          <div class="problem-card reveal"><span class="problem-x" aria-hidden="true">✕</span><p class="lang-trans" data-i18n="problem-4">Has pedido presupuestos y nadie te ha explicado con claridad qué recibes.</p></div>
+        </div>
+        <div class="problem-close reveal">
+          <span class="problem-check" aria-hidden="true">✓</span>
+          <p class="lang-trans font-display" data-i18n="problem-close">tiene arreglo, y es más sencillo de lo que imaginas.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="proceso" class="relative px-6 md:px-10 py-24 md:py-32 border-b border-line overflow-hidden z-10">
+      <div class="max-w-6xl mx-auto relative z-10">
+        <div class="reveal mb-12">
+          <span class="lang-trans lowercase block text-xs tracking-widest text-brand font-mono mb-2" data-i18n="how-eyebrow">la solución</span>
+          <h2 class="lang-trans lowercase font-display text-3xl md:text-4xl" data-i18n="how-title">así de simple</h2>
+        </div>
+        <div class="steps-grid">
+          <div class="step-card reveal"><span class="step-num">01</span><h3 class="lang-trans lowercase font-display" data-i18n="how-1-title">nos cuentas tu marca</h3><p class="lang-trans" data-i18n="how-1-desc">Hablas con Brandi, nuestro asistente, o nos escribes. Solo necesitamos entender qué haces y a quién te diriges.</p></div>
+          <div class="step-card reveal"><span class="step-num">02</span><h3 class="lang-trans lowercase font-display" data-i18n="how-2-title">diseñamos tu identidad</h3><p class="lang-trans" data-i18n="how-2-desc">Te presentamos logotipo, colores y tipografía. Dos rondas de revisión incluidas.</p></div>
+          <div class="step-card reveal"><span class="step-num">03</span><h3 class="lang-trans lowercase font-display" data-i18n="how-3-title">te lo entregamos listo</h3><p class="lang-trans" data-i18n="how-3-desc">Si añades web, la publicamos y te la entregamos llave en mano, a tu nombre.</p></div>
         </div>
       </div>
     </section>
@@ -713,8 +822,9 @@ se construye.</h2>
     <section id="planes" class="relative px-6 md:px-10 py-24 md:py-32 border-b border-line overflow-hidden z-10">
       <div class="max-w-6xl mx-auto relative z-10">
         <div class="reveal max-w-xl mb-12">
-          <h2 class="lang-trans lowercase font-display text-3xl md:text-4xl mb-4" data-i18n="plans-heading">planes de rebranding y web</h2>
-          <p class="lang-trans text-muted leading-relaxed" data-i18n="plans-sub">Contrata solo identidad o añade desarrollo web a medida. Pago único del 100% al aceptar el proyecto, sin cuotas mensuales ni ataduras.</p>
+          <span class="lang-trans lowercase block text-xs tracking-widest text-brand font-mono mb-2" data-i18n="plans-eyebrow">planes y precios</span>
+          <h2 class="lang-trans lowercase font-display text-3xl md:text-4xl mb-4" data-i18n="plans-heading">elige cómo quieres que te vean</h2>
+          <p class="lang-trans text-muted leading-relaxed" data-i18n="plans-sub">Pagas una vez al aceptar el proyecto. Sin cuotas mensuales y con entregables claros desde el primer día.</p>
         </div>
 
         <div class="reveal mb-16 p-4 bg-panel border border-line flex items-center gap-3 w-full">
@@ -743,8 +853,8 @@ se construye.</h2>
         </div>
 
         <div class="flex items-center justify-center gap-2 mt-8" id="plans-dots">
-          <button type="button" data-dot-index="0" aria-label="Ir al plan básico" aria-current="true" class="w-2.5 h-2.5 rounded-full bg-brand transition-all"></button>
-          <button type="button" data-dot-index="1" aria-label="Ir al plan pro" class="w-2 h-2 rounded-full bg-line transition-all"></button>
+          <button type="button" data-dot-index="0" aria-label="Ir al plan básico" class="w-2 h-2 rounded-full bg-line transition-all"></button>
+          <button type="button" data-dot-index="1" aria-label="Ir al plan pro" aria-current="true" class="w-2.5 h-2.5 rounded-full bg-brand transition-all"></button>
           <button type="button" data-dot-index="2" aria-label="Ir al plan plus" class="w-2 h-2 rounded-full bg-line transition-all"></button>
         </div>
       </div>
@@ -753,8 +863,9 @@ se construye.</h2>
     <section id="sobre-nosotros" class="relative px-6 md:px-10 py-24 md:py-32 border-b border-line overflow-hidden z-10">
       <div class="max-w-6xl mx-auto relative z-10">
         <div class="reveal mb-12">
+          <span class="lang-trans lowercase block text-xs tracking-widest text-brand font-mono mb-2" data-i18n="studio-eyebrow">el equipo</span>
           <h2 class="lang-trans lowercase font-display text-3xl md:text-4xl mb-3" data-i18n="studio-heading">sobre nosotros</h2>
-          <p class="lang-trans text-muted leading-relaxed max-w-lg" data-i18n="studio-sub">Dirección de arte, desarrollo web en el edge e ingeniería aplicada.</p>
+          <p class="lang-trans text-muted leading-relaxed max-w-lg" data-i18n="studio-sub">Un ilustrador y un ingeniero: uno hace que tu marca se vea bien, el otro que tu web funcione.</p>
         </div>
 
         <div class="reveal grid md:grid-cols-2 gap-8 items-start">
@@ -767,7 +878,7 @@ se construye.</h2>
                 </a>
               </div>
               <h3 class="lang-trans lowercase font-display text-2xl text-paper mb-4" data-i18n="studio-card-1-title">gael domènech sevillano</h3>
-              <p class="lang-trans text-muted text-sm leading-relaxed mb-6" data-i18n="studio-card-1-desc">Nacido en 2004. Graduado en ilustración en la EASD Josep Serra i Abella.</p>
+              <p class="lang-trans text-muted text-sm leading-relaxed mb-6" data-i18n="studio-card-1-desc">Graduado en ilustración en la EASD Josep Serra i Abella. Se encarga de que tu marca se vea bien.</p>
             </div>
             <div class="pt-6 border-t border-line/60 text-xs text-ai font-mono">
               <span class="lang-trans" data-i18n="studio-card-1-role">dirección de arte & diseño visual</span>
@@ -780,7 +891,7 @@ se construye.</h2>
                 <span class="lang-trans lowercase block text-xs tracking-wider text-ai font-mono" data-i18n="studio-card-2-tag">trayectoria & formación</span>
               </div>
               <h3 class="lang-trans lowercase font-display text-2xl text-paper mb-4" data-i18n="studio-card-2-title">bernat domènech sevillano</h3>
-              <p class="lang-trans text-muted text-sm leading-relaxed mb-6" data-i18n="studio-card-2-desc">Nacido en 2008. Estudiante de Ingeniería Electrónica Industrial y Automática.</p>
+              <p class="lang-trans text-muted text-sm leading-relaxed mb-6" data-i18n="studio-card-2-desc">Estudiante de Ingeniería Electrónica Industrial y Automática. Se encarga de que tu web funcione.</p>
             </div>
             <div class="pt-6 border-t border-line/60 text-xs text-ai font-mono">
               <span class="lang-trans" data-i18n="studio-card-2-role">creador de webs</span>
@@ -796,7 +907,7 @@ se construye.</h2>
           <div>
             <span class="lang-trans lowercase block text-xs tracking-widest text-brand font-mono mb-2" data-i18n="testimonials-eyebrow">opiniones verificadas</span>
             <h2 class="lang-trans lowercase font-display text-3xl md:text-4xl mb-3" data-i18n="testimonials-heading">testimonios de negocios</h2>
-            <p class="lang-trans text-muted text-sm md:text-base leading-relaxed max-w-xl" data-i18n="testimonials-sub">Valoraciones reales de marcas que han confiado en nuestro estudio. Solo publicamos reseñas de negocios verificados con puntuaciones excelentes.</p>
+            <p class="lang-trans text-muted text-sm md:text-base leading-relaxed max-w-xl" data-i18n="testimonials-sub">Valoraciones de negocios que han trabajado con nosotros. Revisamos cada reseña antes de publicarla para comprobar que procede de un cliente real.</p>
           </div>
           <button type="button" data-open-testimonial-modal class="lang-trans lowercase inline-flex items-center justify-center bg-brand text-[#0A0A0C] hover:bg-brand-soft shadow-lg px-6 py-3.5 text-xs font-semibold cursor-pointer tracking-wider shrink-0">
             <span data-i18n="testimonials-btn-open">escribir una valoración</span>
@@ -818,6 +929,8 @@ se construye.</h2>
             <span class="toggle-text" data-i18n="terms-btn-show">+ ver condiciones</span>
           </button>
         </div>
+
+        <p class="terms-summary lang-trans" data-i18n="terms-summary">En resumen: pago único, 2 rondas de revisión por fase y el diseño es tuyo al pagar. Los extras se presupuestan aparte (50 €/h) y no hay reembolsos tras iniciar la fase 1.</p>
 
         <div id="terms-content" class="terms-content">
           <div class="terms-inner space-y-8 text-sm md:text-base text-paper/90 leading-relaxed font-sans pt-2">
@@ -918,7 +1031,7 @@ se construye.</h2>
     <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
       <div class="space-y-2">
         <span class="font-display text-xl md:text-2xl text-paper tracking-tight">rebrandyourbrand</span>
-        <p class="lang-trans text-xs md:text-sm text-muted lowercase" data-i18n="footer-copy">rebrandyourbrand — rebranding y diseño visual</p>
+        <p class="lang-trans text-xs md:text-sm text-muted lowercase" data-i18n="footer-copy">rebrandyourbrand — rebranding y web para negocios</p>
         <p class="text-xs md:text-sm font-mono"><a href="mailto:hola@rebrandyourbrand.es" class="text-brand hover:underline">hola@rebrandyourbrand.es</a></p>
       </div>
       <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 text-xs md:text-sm text-muted">
@@ -1426,6 +1539,117 @@ se construye.</h2>
         "modal-intro": "inicia el briefing conversacional amb Brandi per perfilar els detalls del teu projecte:"
       }
     };
+    Object.assign(translations.es, {
+      "p1-desc": "Estás empezando y necesitas una imagen sólida desde el primer día.",
+      "p1-f1": "un logotipo que funciona grande y pequeño (principal, secundario e isotipo)",
+      "p1-f2": "colores y tipografías elegidos para tu marca",
+      "p1-f3": "guía de 1 página para usar tu marca sin dudas",
+      "p2-desc": "Ya vendes, pero tu imagen cambia según dónde te vean. Aquí la unificamos.",
+      "p2-f1": "todo lo del plan básico",
+      "p2-f2": "manual de marca completo (20-25 págs.) y 3 aplicaciones reales de tu marca",
+      "p2-f3": "base de estilos lista para que tu web mantenga la misma imagen",
+      "p3-desc": "Quieres crear tus propios materiales sin perder coherencia.",
+      "p3-f1": "todo lo del plan pro",
+      "p3-f2": "plantillas editables (Figma / Canva) y guía de fotografía para tus publicaciones",
+      "p3-f3": "6 aplicaciones reales y una sesión de 45 min para entregarte todo y resolver dudas",
+      "recount-base": "Identidad visual:",
+      "recount-web": "Tu web:",
+      "recount-total": "Total:",
+      "web-toggle-label": "añadir tu web",
+      "web-toggle-sub": "tu página lista para publicar, rápida y a tu nombre",
+      "web-feature": "página web rápida y a tu nombre, publicada y entregada llave en mano",
+      "testimonials-empty": "Aún no hay valoraciones publicadas. ¡Sé el primero en contarnos tu experiencia!"
+    });
+    Object.assign(translations.en, {
+      "hero-tag": "rebranding & web for businesses that deserve more",
+      "hero-title": "your business is better than it looks.",
+      "hero-desc": "If your image doesn't match the quality of your work, customers pick someone else before they meet you. We redesign it at a fixed price with no monthly fees.",
+      "cta-plans": "see plans & prices", "cta-brandi": "talk to brandi",
+      "trust-1": "one-time payment", "trust-2": "2 revision rounds per phase", "trust-3": "website in your name",
+      "problem-eyebrow": "the problem", "how-eyebrow": "the solution", "plans-eyebrow": "plans & pricing", "studio-eyebrow": "the team",
+      "problem-title": "does any of this sound familiar?",
+      "problem-1": "Your logo falls apart when you shrink it: on Instagram, on a sign, on an invoice.",
+      "problem-2": "Everything you post looks like it comes from a different brand.",
+      "problem-3": "Your competitors look more serious, even though you do better work.",
+      "problem-4": "You've asked for quotes and nobody told you clearly what you'd get.",
+      "problem-close": "this is fixable, and it's simpler than you think.",
+      "how-title": "it's this simple",
+      "how-1-title": "you tell us about your brand", "how-1-desc": "Chat with Brandi, our assistant, or write to us. We just need to understand what you do and who you serve.",
+      "how-2-title": "we design your identity", "how-2-desc": "We present logo, colors and typography. Two revision rounds included.",
+      "how-3-title": "we deliver it ready", "how-3-desc": "If you add a website, we publish it and hand it over turnkey, in your name.",
+      "plans-heading": "choose how you want to be seen",
+      "plans-sub": "You pay once when you accept the project. No monthly fees and clear deliverables from day one.",
+      "p1-desc": "You're just starting out and need a solid image from day one.",
+      "p1-f1": "a logo that works big and small (primary, secondary and mark)",
+      "p1-f2": "colors and typefaces chosen for your brand",
+      "p1-f3": "1-page guide to use your brand with confidence",
+      "p2-desc": "You already sell, but your image changes depending on where people see you. We unify it.",
+      "p2-f1": "everything in the basic plan",
+      "p2-f2": "full brand manual (20-25 pages) and 3 real-world applications",
+      "p2-f3": "style foundation so your website keeps the same look",
+      "p3-desc": "You want to create your own materials without losing consistency.",
+      "p3-f1": "everything in the pro plan",
+      "p3-f2": "editable templates (Figma / Canva) and a photo guide for your posts",
+      "p3-f3": "6 real-world applications and a 45-min handover session to answer your questions",
+      "recount-base": "Visual identity:",
+      "recount-web": "Your website:",
+      "recount-total": "Total:",
+      "web-toggle-label": "add your website",
+      "web-toggle-sub": "your page ready to publish, fast and in your name",
+      "web-feature": "fast website in your name, published and delivered turnkey",
+      "studio-sub": "An illustrator and an engineer: one makes your brand look right, the other makes your website work.",
+      "studio-card-1-desc": "Illustration graduate at EASD Josep Serra i Abella. He makes sure your brand looks right.",
+      "studio-card-2-desc": "Industrial Electronic and Automatic Engineering student. He makes sure your website works.",
+      "testimonials-sub": "Reviews from businesses that have worked with us. We check each review before publishing it to make sure it comes from a real client.",
+      "testimonials-empty": "No public reviews yet. Be the first to share your experience!",
+      "terms-summary": "In short: one-time payment, 2 revision rounds per phase, and the design is yours once you pay. Extras are quoted separately (€50/h) and there are no refunds once phase 1 has started.",
+      "footer-copy": "rebrandyourbrand — rebranding & web for businesses"
+    });
+    Object.assign(translations.ca, {
+      "hero-tag": "rebranding i web per a negocis que mereixen més",
+      "hero-title": "el teu negoci és millor del que sembla.",
+      "hero-desc": "Si la teva imatge no està a l'altura del que fas, els clients trien un altre abans de conèixer-te. Te la redissenyem a preu tancat i sense quotes mensuals.",
+      "cta-plans": "veure plans i preus", "cta-brandi": "parlar amb la brandi",
+      "trust-1": "pagament únic", "trust-2": "2 rondes de revisió per fase", "trust-3": "web a nom teu",
+      "problem-eyebrow": "el problema", "how-eyebrow": "la solució", "plans-eyebrow": "plans i preus", "studio-eyebrow": "l'equip",
+      "problem-title": "et sona alguna d'aquestes?",
+      "problem-1": "El teu logo es veu malament quan el redueixes: a Instagram, en un cartell, en una factura.",
+      "problem-2": "Cada cosa que publiques sembla d'una marca diferent.",
+      "problem-3": "La competència sembla més seriosa, encara que tu treballis millor.",
+      "problem-4": "Has demanat pressupostos i ningú t'ha explicat amb claredat què reps.",
+      "problem-close": "té solució, i és més senzill del que imagines.",
+      "how-title": "així de simple",
+      "how-1-title": "ens expliques la teva marca", "how-1-desc": "Parles amb la Brandi, el nostre assistent, o ens escrius. Només necessitem entendre què fas i a qui t'adreces.",
+      "how-2-title": "dissenyem la teva identitat", "how-2-desc": "Et presentem logotip, colors i tipografia. Dues rondes de revisió incloses.",
+      "how-3-title": "t'ho lliurem llest", "how-3-desc": "Si afegeixes web, la publiquem i te la lliurem clau en mà, a nom teu.",
+      "plans-heading": "tria com vols que et vegin",
+      "plans-sub": "Pagues un cop en acceptar el projecte. Sense quotes mensuals i amb lliurables clars des del primer dia.",
+      "p1-desc": "Estàs començant i necessites una imatge sòlida des del primer dia.",
+      "p1-f1": "un logotip que funciona gran i petit (principal, secundari i isotip)",
+      "p1-f2": "colors i tipografies triats per a la teva marca",
+      "p1-f3": "guia d'1 pàgina per fer servir la teva marca sense dubtes",
+      "p2-desc": "Ja vens, però la teva imatge canvia segons on et vegin. Aquí la unifiquem.",
+      "p2-f1": "tot el del pla bàsic",
+      "p2-f2": "manual de marca complet (20-25 pàgs.) i 3 aplicacions reals de la teva marca",
+      "p2-f3": "base d'estils llesta perquè la teva web mantingui la mateixa imatge",
+      "p3-desc": "Vols crear els teus propis materials sense perdre coherència.",
+      "p3-f1": "tot el del pla pro",
+      "p3-f2": "plantilles editables (Figma / Canva) i guia de fotografia per a les teves publicacions",
+      "p3-f3": "6 aplicacions reals i una sessió de 45 min per lliurar-te-ho tot i resoldre dubtes",
+      "recount-base": "Identitat visual:",
+      "recount-web": "La teva web:",
+      "recount-total": "Total:",
+      "web-toggle-label": "afegir la teva web",
+      "web-toggle-sub": "la teva pàgina llesta per publicar, ràpida i a nom teu",
+      "web-feature": "pàgina web ràpida i a nom teu, publicada i lliurada clau en mà",
+      "studio-sub": "Un il·lustrador i un enginyer: un fa que la teva marca es vegi bé, l'altre que la teva web funcioni.",
+      "studio-card-1-desc": "Graduat en il·lustració a l'EASD Josep Serra i Abella. S'encarrega que la teva marca es vegi bé.",
+      "studio-card-2-desc": "Estudiant d'Enginyeria Electrònica Industrial i Automàtica. S'encarrega que la teva web funcioni.",
+      "testimonials-sub": "Valoracions de negocis que han treballat amb nosaltres. Revisem cada ressenya abans de publicar-la per comprovar que procedeix d'un client real.",
+      "testimonials-empty": "Encara no hi ha valoracions publicades. Sigues el primer a explicar-nos la teva experiència!",
+      "terms-summary": "En resum: pagament únic, 2 rondes de revisió per fase i el disseny és teu en pagar. Els extres es pressupostan a part (50 €/h) i no hi ha reemborsaments un cop iniciada la fase 1.",
+      "footer-copy": "rebrandyourbrand — rebranding i web per a negocis"
+    });
     document.querySelectorAll('[data-i18n]').forEach((el) => { translations.es[el.dataset.i18n] = el.textContent.trim(); });
     document.querySelectorAll('[data-i18n-placeholder]').forEach((el) => { translations.es[el.dataset.i18nPlaceholder] = el.placeholder; });
 
@@ -1439,8 +1663,13 @@ se construye.</h2>
       for (const [id, slug] of Object.entries(map)) if (slug) reverseSlugMap[slug] = { lang, id };
     }
 
+    // Idioma por URL: / (es), /ca/ (català), /en/ (english). La URL manda sobre el hash y sobre localStorage.
+    const LANG_PATH = { es: '/', ca: '/ca/', en: '/en/' };
+    const PATH_ROUTING = /^https?:$/.test(location.protocol);
+    const pathLang = PATH_ROUTING ? ((location.pathname.match(/^\/(ca|en)(?:\/|$)/) || [])[1] || null) : null;
+
     const initialHash = location.hash.slice(1);
-    let currentLang = reverseSlugMap[initialHash]?.lang || (() => { try { const l = localStorage.getItem('rybb-lang'); return translations[l] ? l : 'es'; } catch (e) { return 'es'; } })();
+    let currentLang = pathLang || reverseSlugMap[initialHash]?.lang || (() => { try { const l = localStorage.getItem('rybb-lang'); return translations[l] ? l : 'es'; } catch (e) { return 'es'; } })();
     const initialSectionId = reverseSlugMap[initialHash]?.id || null;
     let currentSectionId = 'top';
 
@@ -1448,8 +1677,9 @@ se construye.</h2>
 
     function setHash(id, push) {
       const slug = slugMap[currentLang][id];
-      const h = slug ? '#' + slug : location.pathname + location.search;
-      if (push) history.pushState(null, '', h); else history.replaceState(null, '', h);
+      const base = PATH_ROUTING ? LANG_PATH[currentLang] : location.pathname;
+      const h = base + location.search + (slug ? '#' + slug : '');
+      try { if (push) history.pushState(null, '', h); else history.replaceState(null, '', h); } catch (e) {}
     }
 
     const langToggle = $('lang-toggle');
@@ -1643,7 +1873,7 @@ se construye.</h2>
       { id: 'plus', titleKey: 'p3-title', basePrice: 900, descKey: 'p3-desc', features: ['p3-f1', 'p3-f2', 'p3-f3'] }
     ];
     const planWebState = { basico: false, pro: false, plus: false };
-    let currentPlanIndex = 0;
+    let currentPlanIndex = 1;
     let isPlansAnimating = false;
     // activePlanWebState: true | false | null (null = el cliente aún no ha decidido sobre la web; solo ocurre si el plan lo dedujo Brandi)
     let activePlanKey = null, activePlanWebState = false, activePlanId = null;
@@ -1777,7 +2007,7 @@ se construye.</h2>
       const t = translations[currentLang];
       langIndicator.textContent = currentLang;
       document.documentElement.lang = currentLang;
-      document.title = { es: 'rebrandyourbrand — Rebranding y diseño visual', en: 'rebrandyourbrand — Rebranding & visual design', ca: 'rebrandyourbrand — Rebranding i disseny visual' }[currentLang];
+      document.title = { es: 'rebrandyourbrand — Rebranding y web para negocios', en: 'rebrandyourbrand — Rebranding & web for businesses', ca: 'rebrandyourbrand — Rebranding i web per a negocis' }[currentLang];
       langToggle.setAttribute('aria-label', t['lang-aria']);
       document.querySelectorAll('[data-i18n]').forEach((el) => {
         if (el.classList.contains('toggle-text')) return;
@@ -2191,6 +2421,7 @@ se construye.</h2>
 
     updateTheme();
     applyTranslations();
+    document.querySelectorAll('[data-open-brandi]').forEach((b) => b.addEventListener('click', () => assistantTrigger.click()));
     window.addEventListener('DOMContentLoaded', () => {
       document.documentElement.classList.add('is-loaded');
       if (initialSectionId && $(initialSectionId)) {
