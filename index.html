@@ -9,24 +9,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 
 <script>
-  // Primera visita a "/": si el navegador está en catalán o inglés, se abre su versión (/ca/ o /en/).
-  // No actúa si la URL ya trae idioma, si el usuario ya eligió uno a mano, ni con buscadores.
-  (function () {
-    try {
-      if (!/^https?:$/.test(location.protocol)) return;
-      if (/^\/(ca|en)(\/|$)/.test(location.pathname) || location.hash) return;
-      if (/bot|crawl|spider|slurp|lighthouse|pagespeed|headless|preview/i.test(navigator.userAgent)) return;
-      var saved = null;
-      try { saved = localStorage.getItem('rybb-lang'); } catch (e) {}
-      if (saved === 'es' || saved === 'ca' || saved === 'en') return;
-      var langs = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language];
-      for (var i = 0; i < langs.length; i++) {
-        var l = String(langs[i] || '').toLowerCase().split('-')[0];
-        if (l === 'es') return;
-        if (l === 'ca' || l === 'en') { location.replace('/' + l + '/' + location.search); return; }
-      }
-    } catch (e) {}
-  })();
+  // Sin redirección automática por idioma.
 </script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1663,10 +1646,10 @@ textarea { resize: vertical; }
       for (const [id, slug] of Object.entries(map)) if (slug) reverseSlugMap[slug] = { lang, id };
     }
 
-    // Idioma por URL: / (es), /ca/ (català), /en/ (english). La URL manda sobre el hash y sobre localStorage.
-    const LANG_PATH = { es: '/', ca: '/ca/', en: '/en/' };
+    // Sin prefijos de idioma en la ruta: siempre mantener "/".
+    const LANG_PATH = { es: '/', ca: '/', en: '/' };
     const PATH_ROUTING = /^https?:$/.test(location.protocol);
-    const pathLang = PATH_ROUTING ? ((location.pathname.match(/^\/(ca|en)(?:\/|$)/) || [])[1] || null) : null;
+    const pathLang = null;
 
     const initialHash = location.hash.slice(1);
     let currentLang = pathLang || reverseSlugMap[initialHash]?.lang || (() => { try { const l = localStorage.getItem('rybb-lang'); return translations[l] ? l : 'es'; } catch (e) { return 'es'; } })();
