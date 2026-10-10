@@ -9,12 +9,10 @@
 <meta name="mobile-web-app-capable" content="yes">
 
 <script>
-  // Primera visita a "/": si el navegador está en catalán o inglés, se abre su versión (/ca/ o /en/).
-  // No actúa si la URL ya trae idioma, si el usuario ya eligió uno a mano, ni con buscadores.
+  // Detecta el idioma del navegador en la primera visita sin alterar la URL
   (function () {
     try {
       if (!/^https?:$/.test(location.protocol)) return;
-      if (/^\/(ca|en)(\/|$)/.test(location.pathname) || location.hash) return;
       if (/bot|crawl|spider|slurp|lighthouse|pagespeed|headless|preview/i.test(navigator.userAgent)) return;
       var saved = null;
       try { saved = localStorage.getItem('rybb-lang'); } catch (e) {}
@@ -23,12 +21,15 @@
       for (var i = 0; i < langs.length; i++) {
         var l = String(langs[i] || '').toLowerCase().split('-')[0];
         if (l === 'es') return;
-        if (l === 'ca' || l === 'en') { location.replace('/' + l + '/' + location.search); return; }
+        if (l === 'ca' || l === 'en') {
+          try { localStorage.setItem('rybb-lang', l); } catch (e) {}
+          return;
+        }
       }
     } catch (e) {}
   })();
 </script>
-
+                                                                                                                                                                         
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400..600&family=Inter:wght@400..600&display=swap">
