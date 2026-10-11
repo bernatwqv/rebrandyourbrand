@@ -1664,13 +1664,9 @@ textarea { resize: vertical; }
       for (const [id, slug] of Object.entries(map)) if (slug) reverseSlugMap[slug] = { lang, id };
     }
 
-    // Idioma por URL: / (es), /ca/ (català), /en/ (english). La URL manda sobre el hash y sobre localStorage.
-    const LANG_PATH = { es: '/', ca: '/ca/', en: '/en/' };
-    const PATH_ROUTING = /^https?:$/.test(location.protocol);
-    const pathLang = PATH_ROUTING ? ((location.pathname.match(/^\/(ca|en)(?:\/|$)/) || [])[1] || null) : null;
-
     const initialHash = location.hash.slice(1);
-    let currentLang = pathLang || reverseSlugMap[initialHash]?.lang || (() => { try { const l = localStorage.getItem('rybb-lang'); return translations[l] ? l : 'es'; } catch (e) { return 'es'; } })();
+    let hasExplicitHashNav = Boolean(initialHash);
+    let currentLang = reverseSlugMap[initialHash]?.lang || (() => { try { const l = localStorage.getItem('rybb-lang'); return translations[l] ? l : 'es'; } catch (e) { return 'es'; } })();
     const initialSectionId = reverseSlugMap[initialHash]?.id || null;
     let currentSectionId = 'top';
 
@@ -1678,7 +1674,7 @@ textarea { resize: vertical; }
 
     function setHash(id, push) {
       const slug = slugMap[currentLang][id];
-      const base = PATH_ROUTING ? LANG_PATH[currentLang] : location.pathname;
+      const base = location.pathname;
       const h = base + location.search + (slug ? '#' + slug : '');
       try { if (push) history.pushState(null, '', h); else history.replaceState(null, '', h); } catch (e) {}
     }
@@ -1747,6 +1743,7 @@ textarea { resize: vertical; }
       if (!target) return;
       e.preventDefault();
       target.scrollIntoView({ behavior: smooth() });
+      hasExplicitHashNav = true;
       setHash(id, true);
     });
 
@@ -2039,7 +2036,7 @@ textarea { resize: vertical; }
       setTimeout(() => {
         applyTranslations();
         fading.forEach((el) => el.classList.remove('is-changing'));
-        setHash(currentSectionId);
+        if (hasExplicitHashNav) setHash(currentSectionId);
       }, 250);
     }
 
@@ -2406,7 +2403,7 @@ textarea { resize: vertical; }
       for (const entry of entries) {
         if (!entry.isIntersecting) continue;
         currentSectionId = entry.target.id;
-        setHash(currentSectionId);
+        if (hasExplicitHashNav) setHash(currentSectionId);
       }
     }, { rootMargin: '-20% 0px -60% 0px', threshold: 0 });
     sectionIds.forEach((id) => { const el = $(id); if (el) sectionObserver.observe(el); });
