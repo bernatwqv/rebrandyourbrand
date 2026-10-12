@@ -647,8 +647,6 @@ textarea { resize: vertical; }
   .btn-ghost:hover{background:rgb(var(--color-brand)/.1);transform:translateY(-2px)}
   @media(max-width:39.99rem){.cta-row .btn{width:100%}}
   #top p[data-i18n="hero-desc"]{max-width:36rem}
-  .trust-list{display:flex;flex-wrap:wrap;gap:.5rem 1.5rem;margin-top:1.75rem;font:.7rem ui-monospace,monospace;color:rgb(var(--color-muted))}
-  .trust-list li::before{content:"✓ ";color:rgb(var(--color-brand))}
   .problem-grid,.steps-grid{display:grid;gap:1rem;grid-template-columns:1fr}
   @media(min-width:48rem){.problem-grid{grid-template-columns:repeat(2,1fr)}.steps-grid{grid-template-columns:repeat(3,1fr)}}
   .problem-card,.step-card{border:1px solid rgb(var(--color-line));border-radius:1rem;padding:1.5rem;background:rgb(var(--color-panel)/.7);display:flex;gap:1rem;align-items:flex-start;line-height:1.6}
@@ -689,6 +687,21 @@ textarea { resize: vertical; }
   .step-card h3{font-size:1.4rem;line-height:1.2;letter-spacing:-.02em;color:rgb(var(--color-text))}
   .step-card p{line-height:1.6;font-size:.95rem}
   @media(max-width:39.99rem){.step-card{padding:1.4rem 1.25rem}}
+  .quote-card{position:relative;margin-top:2.25rem;max-width:36rem;padding:1.5rem 1.75rem 1.25rem 2rem;border:1px solid rgb(var(--color-line));border-radius:1.25rem;overflow:hidden;
+    background:linear-gradient(145deg,rgb(var(--color-panel)/.98),rgb(var(--color-panel)/.7));box-shadow:inset 0 1px 0 rgb(255 255 255/.035)}
+  .quote-card::before{content:"";position:absolute;left:0;top:1.25rem;bottom:1.25rem;width:2px;border-radius:2px;background:rgb(var(--color-ai))}
+  .quote-track{display:grid}
+  .quote-slide{grid-area:1/1;opacity:0;transform:translateX(32px);pointer-events:none;
+    transition:opacity 700ms var(--ease-editorial),transform 700ms var(--ease-editorial)}
+  .quote-slide.is-active{opacity:1;transform:translateX(0);pointer-events:auto}
+  .quote-slide.is-leaving{opacity:0;transform:translateX(-32px)}
+  .quote-text{font-family:'Fraunces',serif;font-size:clamp(1.1rem,2.2vw,1.35rem);line-height:1.35;letter-spacing:-.015em;color:rgb(var(--color-text))}
+  .quote-author{margin-top:.85rem;font:.7rem ui-monospace,monospace;letter-spacing:.08em;text-transform:lowercase;color:rgb(var(--color-ai-text,var(--color-ai)))}
+  .quote-author::before{content:"— "}
+  .quote-dots{display:flex;gap:.4rem;margin-top:1.1rem}
+  .quote-dot{width:.4rem;height:.4rem;border-radius:999px;background:rgb(var(--color-muted)/.35);transition:width 300ms var(--ease-editorial),background-color 300ms var(--ease-editorial)}
+  .quote-dot.is-active{width:1.25rem;background:rgb(var(--color-ai))}
+  @media(max-width:39.99rem){.quote-card{padding:1.25rem 1.25rem 1.1rem 1.5rem}}
 </style>
 </head>
 
@@ -778,11 +791,16 @@ textarea { resize: vertical; }
           <a href="#planes" data-section-target="planes" class="btn btn-primary lang-trans" data-i18n="cta-plans">ver planes y precios</a>
           <button type="button" data-open-brandi class="btn btn-ghost lang-trans" data-i18n="cta-brandi">hablar con brandi</button>
         </div>
-        <ul class="trust-list hero-fade delay-300">
-          <li class="lang-trans" data-i18n="trust-1">pago único</li>
-          <li class="lang-trans" data-i18n="trust-2">2 rondas de revisión por fase</li>
-          <li class="lang-trans" data-i18n="trust-3">web a tu nombre</li>
-        </ul>
+        <figure class="quote-card hero-fade delay-300" data-quote-rotator>
+          <div class="quote-track">
+            <blockquote class="quote-slide is-active"><p class="quote-text lang-trans" data-i18n="quote-1">El diseño es el embajador silencioso de tu marca.</p><footer class="quote-author">Paul Rand</footer></blockquote>
+            <blockquote class="quote-slide"><p class="quote-text lang-trans" data-i18n="quote-2">El buen diseño es tan poco diseño como sea posible.</p><footer class="quote-author">Dieter Rams</footer></blockquote>
+            <blockquote class="quote-slide"><p class="quote-text lang-trans" data-i18n="quote-3">Si sabes diseñar una cosa, sabes diseñarlo todo.</p><footer class="quote-author">Massimo Vignelli</footer></blockquote>
+            <blockquote class="quote-slide"><p class="quote-text lang-trans" data-i18n="quote-4">Los detalles no son detalles. Hacen el diseño.</p><footer class="quote-author">Charles Eames</footer></blockquote>
+            <blockquote class="quote-slide"><p class="quote-text lang-trans" data-i18n="quote-5">Hay tres respuestas ante una pieza de diseño: sí, no y ¡guau! El «guau» es al que hay que aspirar.</p><footer class="quote-author">Milton Glaser</footer></blockquote>
+          </div>
+          <div class="quote-dots" aria-hidden="true"><span class="quote-dot is-active"></span><span class="quote-dot"></span><span class="quote-dot"></span><span class="quote-dot"></span><span class="quote-dot"></span></div>
+        </figure>
       </div>
     </section>
 
@@ -800,7 +818,7 @@ textarea { resize: vertical; }
         </div>
         <div class="problem-close reveal">
           <span class="problem-check" aria-hidden="true">✓</span>
-          <p class="lang-trans font-display" data-i18n="problem-close">tiene arreglo, y es más sencillo de lo que imaginas.</p>
+          <p class="lang-trans font-display" data-i18n="problem-close">Tiene arreglo, y es más sencillo de lo que imaginas.</p>
         </div>
       </div>
     </section>
@@ -808,7 +826,7 @@ textarea { resize: vertical; }
     <section id="proceso" class="relative px-6 md:px-10 py-24 md:py-32 border-b border-line overflow-hidden z-10">
       <div class="max-w-6xl mx-auto relative z-10">
         <div class="reveal mb-12">
-          <span class="lang-trans lowercase block text-xs tracking-widest text-brand font-mono mb-2" data-i18n="how-eyebrow">la solución</span>
+          <span class="lang-trans lowercase block text-xs tracking-widest text-brand font-mono mb-2" data-i18n="how-eyebrow">cómo funciona</span>
           <h2 class="lang-trans lowercase font-display text-3xl md:text-4xl" data-i18n="how-title">así de simple</h2>
         </div>
         <div class="steps-grid">
@@ -1565,14 +1583,18 @@ textarea { resize: vertical; }
       "hero-title": "your business is better than it looks.",
       "hero-desc": "If your image doesn't match the quality of your work, customers pick someone else before they meet you. We redesign it at a fixed price with no monthly fees.",
       "cta-plans": "see plans & prices", "cta-brandi": "talk to brandi",
-      "trust-1": "one-time payment", "trust-2": "2 revision rounds per phase", "trust-3": "website in your name",
-      "problem-eyebrow": "the problem", "how-eyebrow": "the solution", "plans-eyebrow": "plans & pricing", "studio-eyebrow": "the team",
+      "quote-1": "Design is the silent ambassador of your brand.",
+      "quote-2": "Good design is as little design as possible.",
+      "quote-3": "If you can design one thing, you can design everything.",
+      "quote-4": "The details are not the details. They make the design.",
+      "quote-5": "There are three responses to a piece of design: yes, no, and WOW. Wow is the one to aim for.",
+      "problem-eyebrow": "the problem", "how-eyebrow": "how it works", "plans-eyebrow": "plans & pricing", "studio-eyebrow": "the team",
       "problem-title": "does any of this sound familiar?",
       "problem-1": "Your logo falls apart when you shrink it: on Instagram, on a sign, on an invoice.",
       "problem-2": "Everything you post looks like it comes from a different brand.",
       "problem-3": "Your competitors look more serious, even though you do better work.",
       "problem-4": "You've asked for quotes and nobody told you clearly what you'd get.",
-      "problem-close": "this is fixable, and it's simpler than you think.",
+      "problem-close": "This is fixable, and it's simpler than you think.",
       "how-title": "it's this simple",
       "how-1-title": "you tell us about your brand", "how-1-desc": "Chat with Brandi, our assistant, or write to us. We just need to understand what you do and who you serve.",
       "how-2-title": "we design your identity", "how-2-desc": "We present logo, colors and typography. Two revision rounds included.",
@@ -1610,14 +1632,18 @@ textarea { resize: vertical; }
       "hero-title": "el teu negoci és millor del que sembla.",
       "hero-desc": "Si la teva imatge no està a l'altura del que fas, els clients trien un altre abans de conèixer-te. Te la redissenyem a preu tancat i sense quotes mensuals.",
       "cta-plans": "veure plans i preus", "cta-brandi": "parlar amb la brandi",
-      "trust-1": "pagament únic", "trust-2": "2 rondes de revisió per fase", "trust-3": "web a nom teu",
-      "problem-eyebrow": "el problema", "how-eyebrow": "la solució", "plans-eyebrow": "plans i preus", "studio-eyebrow": "l'equip",
+      "quote-1": "El disseny és l'ambaixador silenciós de la teva marca.",
+      "quote-2": "El bon disseny és tan poc disseny com sigui possible.",
+      "quote-3": "Si saps dissenyar una cosa, saps dissenyar-ho tot.",
+      "quote-4": "Els detalls no són detalls. Fan el disseny.",
+      "quote-5": "Hi ha tres respostes davant d'una peça de disseny: sí, no i uau! L'«uau» és el que cal buscar.",
+      "problem-eyebrow": "el problema", "how-eyebrow": "com funciona", "plans-eyebrow": "plans i preus", "studio-eyebrow": "l'equip",
       "problem-title": "et sona alguna d'aquestes?",
       "problem-1": "El teu logo es veu malament quan el redueixes: a Instagram, en un cartell, en una factura.",
       "problem-2": "Cada cosa que publiques sembla d'una marca diferent.",
       "problem-3": "La competència sembla més seriosa, encara que tu treballis millor.",
       "problem-4": "Has demanat pressupostos i ningú t'ha explicat amb claredat què reps.",
-      "problem-close": "té solució, i és més senzill del que imagines.",
+      "problem-close": "Té solució, i és més senzill del que imagines.",
       "how-title": "així de simple",
       "how-1-title": "ens expliques la teva marca", "how-1-desc": "Parles amb la Brandi, el nostre assistent, o ens escrius. Només necessitem entendre què fas i a qui t'adreces.",
       "how-2-title": "dissenyem la teva identitat", "how-2-desc": "Et presentem logotip, colors i tipografia. Dues rondes de revisió incloses.",
@@ -2418,6 +2444,32 @@ textarea { resize: vertical; }
       }
     }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
     document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+
+    // Rotador de citas del hero: entra por la derecha, sale por la izquierda. Se pausa con el ratón y no rota con "reducir movimiento".
+    (() => {
+      const box = document.querySelector('[data-quote-rotator]');
+      if (!box || reduceMotion.matches) return;
+      const slides = [...box.querySelectorAll('.quote-slide')];
+      const dots = [...box.querySelectorAll('.quote-dot')];
+      if (slides.length < 2) return;
+      let i = 0, timer = null;
+      const show = (n) => {
+        const prev = slides[i];
+        prev.classList.remove('is-active'); prev.classList.add('is-leaving'); prev.setAttribute('aria-hidden', 'true');
+        setTimeout(() => prev.classList.remove('is-leaving'), 900);
+        i = n;
+        slides[i].classList.remove('is-leaving'); slides[i].classList.add('is-active'); slides[i].removeAttribute('aria-hidden');
+        dots.forEach((d, k) => d.classList.toggle('is-active', k === i));
+      };
+      const stop = () => { clearInterval(timer); timer = null; };
+      const start = () => { stop(); timer = setInterval(() => { if (!document.hidden) show((i + 1) % slides.length); }, 7000); };
+      box.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') stop(); });
+      box.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') start(); });
+      box.addEventListener('focusin', stop);
+      box.addEventListener('focusout', start);
+      slides.forEach((el, k) => { if (k) el.setAttribute('aria-hidden', 'true'); });
+      start();
+    })();
 
     updateTheme();
     applyTranslations();
