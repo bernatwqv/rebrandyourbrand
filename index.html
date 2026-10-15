@@ -1034,15 +1034,10 @@ textarea { resize: vertical; }
     <div id="assistant-output" class="assistant-output flex-1 overflow-y-auto p-6 flex flex-col gap-4" role="log" aria-relevant="additions" data-placeholder="inicia la conversación con brandi o elige tus servicios."></div>
 
     <form id="brand-assistant-form" class="p-4 md:p-6 border-t border-line/60 bg-ink/30 shrink-0 space-y-3">
-      <div class="flex flex-col sm:flex-row items-center justify-between gap-2 px-3 py-2 bg-ink/20 border border-line/60">
-        <span class="lang-trans text-[0.6rem] text-muted uppercase font-mono shrink-0" data-i18n="turnstile-label">verificación humana</span>
-        <div id="turnstile-container" class="w-full sm:w-auto min-h-[65px] flex items-center justify-center"></div>
-      </div>
-
       <div class="relative flex items-center bg-ink/60 border border-line rounded-xl p-1.5 focus-within:border-ai">
         <textarea id="brand-prompt" rows="1" maxlength="500" aria-label="mensaje para brandi" placeholder="escribe un mensaje a brandi..."
               class="lang-trans w-full bg-transparent resize-none border-none px-3 py-2 text-xs md:text-sm text-paper placeholder:text-muted/60 focus:outline-none max-h-24" data-i18n-placeholder="panel-placeholder"></textarea>
-        <button id="brand-assistant-submit" type="submit" disabled
+        <button id="brand-assistant-submit" type="submit"
               class="inline-flex items-center justify-center bg-ai text-[#0A0A0C] p-2.5 rounded-lg hover:bg-ai-soft hover:scale-105 disabled:cursor-not-allowed disabled:opacity-40 shrink-0" aria-label="Enviar mensaje">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;" aria-hidden="true">
             <line x1="22" y1="2" x2="11" y2="13"></line>
@@ -1057,6 +1052,22 @@ textarea { resize: vertical; }
       </div>
     </form>
   </aside>
+
+  <div id="verify-modal" class="modal-root fixed inset-0 z-[70] flex items-center justify-center bg-black/60 backdrop-blur-sm opacity-0 pointer-events-none px-6"
+       role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="verify-modal-title" inert>
+    <div class="bg-panel border-2 border-brand p-6 md:p-10 max-w-md w-full shadow-2xl scale-95 relative text-center">
+      <button data-modal-close type="button" aria-label="Cerrar" class="text-muted hover:text-paper p-1 text-xl font-mono cursor-pointer" style="position:absolute;top:1rem;right:1.25rem;">✕</button>
+      <div class="w-14 h-14 mx-auto mb-6 rounded-full bg-ai/10 border border-ai/30 flex items-center justify-center text-ai" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="currentColor" style="width:24px;height:24px;"><path d="M12 2l1.8 5.6L19.4 9.4 13.8 11.2 12 17l-1.8-5.8L4.6 9.4l5.6-1.8L12 2z"></path></svg>
+      </div>
+      <span class="lang-trans lowercase block text-xs tracking-widest text-brand font-mono mb-2" data-i18n="verify-eyebrow">verificación humana</span>
+      <h3 id="verify-modal-title" class="lang-trans lowercase font-display text-2xl text-paper mb-3" data-i18n="verify-title">un último paso antes de hablar con brandi</h3>
+      <p class="lang-trans text-muted text-sm leading-relaxed mb-6" data-i18n="verify-desc">Confirma que eres una persona real. Solo te lo pediremos una vez en esta conversación.</p>
+      <div id="verify-widget" class="min-h-[65px] flex items-center justify-center"></div>
+      <p id="verify-status" class="text-xs font-mono lowercase mt-3 text-muted" aria-live="polite"></p>
+      <p class="lang-trans text-[10px] font-mono lowercase tracking-wider text-muted mt-8" data-i18n="verify-note">protegido por cloudflare turnstile · sin acertijos ni cuentas</p>
+    </div>
+  </div>
 
   <div id="testimonial-modal" class="modal-root fixed inset-0 z-[70] flex items-center justify-center bg-black/60 backdrop-blur-sm opacity-0 pointer-events-none px-6"
        role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="testimonial-modal-title" inert>
@@ -1150,7 +1161,8 @@ textarea { resize: vertical; }
         "confirm-yes": "Sí",
         "confirm-no": "No",
         "role-user": "tú",
-        "lang-aria": "Cambiar idioma"
+        "lang-aria": "Cambiar idioma",
+        "verify-loading": "cargando verificación...", "verify-ok": "verificado ✓", "verify-error": "no se pudo verificar. inténtalo de nuevo."
       },
       en: {
         "err-plan": "please choose at least one service in the services section before continuing.",
@@ -1254,7 +1266,6 @@ textarea { resize: vertical; }
         "panel-title": "brandi · creative assistant",
         "panel-subtitle": "brand artificial intelligence",
         "panel-placeholder": "type a message to brandi...",
-        "turnstile-label": "human verification",
         "status-waiting": "standing by",
         "status-verifying": "verifying security...",
         "status-consulting": "consulting brandi...",
@@ -1272,7 +1283,11 @@ textarea { resize: vertical; }
         "confirm-yes": "Yes",
         "confirm-no": "No",
         "role-user": "you",
-        "lang-aria": "Change language"
+        "lang-aria": "Change language",
+        "verify-eyebrow": "human verification", "verify-title": "one last step before talking to brandi",
+        "verify-desc": "Please confirm you're a real person. We'll only ask once in this conversation.",
+        "verify-note": "protected by cloudflare turnstile · no puzzles, no accounts",
+        "verify-loading": "loading verification...", "verify-ok": "verified ✓", "verify-error": "couldn't verify. please try again."
       },
       ca: {
         "err-plan": "si us plau, tria almenys un servei a la secció de serveis abans de continuar.",
@@ -1376,7 +1391,6 @@ textarea { resize: vertical; }
         "panel-title": "brandi · assistent creatiu",
         "panel-subtitle": "intel·ligència artificial de marca",
         "panel-placeholder": "escriu un missatge a brandi...",
-        "turnstile-label": "verificació humana",
         "status-waiting": "en espera",
         "status-verifying": "verificant seguretat...",
         "status-consulting": "consultant amb brandi...",
@@ -1394,7 +1408,11 @@ textarea { resize: vertical; }
         "confirm-yes": "Sí",
         "confirm-no": "No",
         "role-user": "tu",
-        "lang-aria": "Canvia l'idioma"
+        "lang-aria": "Canvia l'idioma",
+        "verify-eyebrow": "verificació humana", "verify-title": "un últim pas abans de parlar amb la brandi",
+        "verify-desc": "Confirma que ets una persona real. Només te'l demanarem un cop en aquesta conversa.",
+        "verify-note": "protegit per cloudflare turnstile · sense endevinalles ni comptes",
+        "verify-loading": "carregant verificació...", "verify-ok": "verificat ✓", "verify-error": "no s'ha pogut verificar. torna-ho a provar."
       }
     };
     // El español se toma del propio HTML (así el texto visible y la traducción nunca se desincronizan)
@@ -1527,7 +1545,8 @@ textarea { resize: vertical; }
     }
 
     const testimonialModal = makeModal($('testimonial-modal'), { focus: 'reviewer-name' });
-    const modals = [testimonialModal];
+    const verifyModal = makeModal($('verify-modal'));
+    const modals = [verifyModal, testimonialModal];
 
     let testimonialsCache = null;
     async function renderApprovedTestimonials() {
@@ -1563,7 +1582,7 @@ textarea { resize: vertical; }
     document.querySelectorAll('[data-open-testimonial-modal]').forEach((btn) => btn.addEventListener('click', () => { testimonialModal.open(btn); renderReviewTurnstile(); }));
     const testimonialForm = $('testimonial-form');
     const testimonialMsg = $('testimonial-msg');
-    const ERR = { rate_limited: 'err-rate', email_cooldown: 'err-cooldown', captcha_failed: 'err-turnstile', captcha_unavailable: 'err-turnstile', upstream_busy: 'err-busy', upstream_error: 'err-busy', email_error: 'err-busy', payload_too_large: 'err-busy', invalid_confirmation: 'err-busy', invalid_messages: 'err-busy', plan_required: 'err-plan', missing_fields: 'err-busy', misconfigured: 'err-busy', internal_error: 'err-busy' };
+    const ERR = { rate_limited: 'err-rate', email_cooldown: 'err-cooldown', captcha_failed: 'err-turnstile', captcha_unavailable: 'err-turnstile', upstream_busy: 'err-busy', upstream_error: 'err-busy', email_error: 'err-busy', payload_too_large: 'err-busy', invalid_confirmation: 'err-busy', invalid_messages: 'err-busy', plan_required: 'err-plan', session_invalid: 'err-turnstile', missing_fields: 'err-busy', misconfigured: 'err-busy', internal_error: 'err-busy' };
 
     testimonialForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -1683,7 +1702,7 @@ textarea { resize: vertical; }
       renderServices();
       renderApprovedTestimonials();
       renderHistory();
-      if (assistantIsOpen && window.turnstile) renderOrResetTurnstile();
+      if (verifyModal.isOpen()) renderVerifyWidget();
     }
 
     function switchLanguage(lang) {
@@ -1718,7 +1737,20 @@ textarea { resize: vertical; }
     });
 
     let assistantOpener = null, assistantIsOpen = false;
-    let turnstileWidgetId = null, turnstileWidgetLang = null, turnstileLoadPromise = null;
+    let verifyWidgetId = null, turnstileLoadPromise = null, afterVerify = null, exchanging = false;
+
+    // ── Sesión de chat: Turnstile una sola vez, en un pop up, al empezar la conversación ──
+    let chatSession = null; // { s: 'exp.firma', exp: segundos }
+    try { const saved = JSON.parse(sessionStorage.getItem('rybb-session') || 'null'); if (saved && saved.s && saved.exp) chatSession = saved; } catch (e) {}
+    const hasSession = () => !!chatSession && chatSession.exp * 1000 > Date.now() + 30000;
+    function saveSession(s) {
+      chatSession = { s, exp: Number(String(s).split('.')[0]) };
+      try { sessionStorage.setItem('rybb-session', JSON.stringify(chatSession)); } catch (e) {}
+    }
+    function clearSession() {
+      chatSession = null;
+      try { sessionStorage.removeItem('rybb-session'); } catch (e) {}
+    }
 
     function setAssistantStatus(key, state) {
       assistantStatus.textContent = translations[currentLang][key];
@@ -1738,43 +1770,65 @@ textarea { resize: vertical; }
       }));
     }
 
-    function renderOrResetTurnstile() {
-      const container = $('turnstile-container');
-      if (!container || !window.turnstile) return;
-      assistantSubmit.disabled = true;
-      setAssistantStatus('status-verifying', 'idle');
+    const verifyStatus = $('verify-status');
+    function setVerifyStatus(key, state) {
+      verifyStatus.textContent = key ? translations[currentLang][key] : '';
+      verifyStatus.className = 'text-xs font-mono lowercase mt-3 ' + (state === 'error' ? 'text-red-400' : state === 'ok' ? 'text-emerald-400' : 'text-muted');
+    }
 
-      if (turnstileWidgetId !== null && turnstileWidgetLang !== currentLang) {
-        try { window.turnstile.remove(turnstileWidgetId); } catch (e) {}
-        turnstileWidgetId = null;
+    function renderVerifyWidget() {
+      if (!window.turnstile) return;
+      const box = $('verify-widget');
+      if (verifyWidgetId !== null) { try { window.turnstile.remove(verifyWidgetId); } catch (e) {} verifyWidgetId = null; }
+      box.replaceChildren();
+      try {
+        verifyWidgetId = window.turnstile.render(box, {
+          sitekey: TURNSTILE_SITEKEY, action: 'brandi-chat', theme: isLight() ? 'light' : 'dark', language: currentLang,
+          size: window.innerWidth < 400 ? 'compact' : 'flexible',
+          callback: exchangeToken,
+          'expired-callback': () => setVerifyStatus('verify-error', 'error'),
+          'error-callback': () => setVerifyStatus('verify-error', 'error')
+        });
+        setVerifyStatus('', 'idle');
+      } catch (e) { setVerifyStatus('verify-error', 'error'); }
+    }
+
+    // El token de Turnstile se canjea una sola vez por una sesión firmada que dura toda la conversación
+    async function exchangeToken(token) {
+      if (exchanging) return;
+      exchanging = true;
+      setVerifyStatus('status-verifying', 'idle');
+      try {
+        const res = await fetch(WORKER_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'session', token }),
+          signal: AbortSignal.timeout(15000)
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.session) throw Object.assign(new Error('session_failed'), { code: data.error });
+        saveSession(data.session);
+        setVerifyStatus('verify-ok', 'ok');
+        const next = afterVerify; afterVerify = null;
+        setTimeout(() => { if (verifyModal.isOpen()) { verifyModal.close(); if (next) next(); } }, 450);
+      } catch (err) {
+        setVerifyStatus(ERR[err.code] || 'verify-error', 'error');
+        try { window.turnstile.reset(verifyWidgetId); } catch (e) {}
+      } finally {
+        exchanging = false;
       }
-      if (turnstileWidgetId === null) {
-        try {
-          turnstileWidgetId = window.turnstile.render(container, {
-            sitekey: TURNSTILE_SITEKEY, action: 'brandi-chat', theme: isLight() ? 'light' : 'dark', size: 'flexible', language: currentLang,
-            callback: () => { assistantSubmit.disabled = false; setAssistantStatus('status-waiting', 'ready'); },
-            'expired-callback': () => { assistantSubmit.disabled = true; setAssistantStatus('status-verifying', 'error'); },
-            'error-callback': () => { assistantSubmit.disabled = true; setAssistantStatus('status-failed', 'error'); }
-          });
-          turnstileWidgetLang = currentLang;
-        } catch (e) { console.error('Error al renderizar Turnstile:', e); }
-      } else {
-        try { window.turnstile.reset(turnstileWidgetId); } catch (e) {}
-      }
     }
-    function removeTurnstileWidget() {
-      if (turnstileWidgetId !== null && window.turnstile) { try { window.turnstile.remove(turnstileWidgetId); } catch (e) {} }
-      turnstileWidgetId = null; turnstileWidgetLang = null;
-      assistantSubmit.disabled = true;
+
+    // Ejecuta `next` ya mismo si hay sesión válida; si no, abre el pop up de verificación y lo ejecuta al superarla
+    function requireHuman(next, opener) {
+      if (hasSession()) { next(); return; }
+      afterVerify = next;
+      verifyModal.open(opener);
+      setVerifyStatus('verify-loading', 'idle');
+      loadTurnstile().then(() => { if (verifyModal.isOpen()) renderVerifyWidget(); })
+        .catch(() => setVerifyStatus('verify-error', 'error'));
     }
-    function getTurnstileToken() {
-      if (turnstileWidgetId === null || !window.turnstile) return '';
-      try { return window.turnstile.getResponse(turnstileWidgetId) || ''; } catch (e) { return ''; }
-    }
-    function resetTurnstileToken() {
-      assistantSubmit.disabled = true;
-      if (turnstileWidgetId !== null && window.turnstile) { try { window.turnstile.reset(turnstileWidgetId); } catch (e) {} }
-    }
+    const openAssistant = (opener) => requireHuman(() => openAssistantPanel(opener), opener);
 
     function openAssistantPanel(opener) {
       if (assistantIsOpen) return;
@@ -1787,10 +1841,7 @@ textarea { resize: vertical; }
       lockScroll();
       assistantTrigger.setAttribute('aria-expanded', 'true');
       assistantPanel.setAttribute('aria-hidden', 'false');
-
-      setAssistantStatus('status-verifying', 'idle');
-      loadTurnstile().then(() => { if (assistantIsOpen) renderOrResetTurnstile(); })
-        .catch(() => { assistantSubmit.disabled = true; setAssistantStatus('status-failed', 'error'); });
+      setAssistantStatus('status-waiting', 'ready');
       setTimeout(() => assistantPrompt.focus(), 300);
     }
 
@@ -1807,7 +1858,6 @@ textarea { resize: vertical; }
       assistantPanel.setAttribute('inert', '');
       if (assistantOpener && assistantOpener.isConnected && !assistantOpener.disabled) assistantOpener.focus();
       assistantOpener = null;
-      removeTurnstileWidget();
     }
 
     $('assistant-close').addEventListener('click', closeAssistantPanel);
@@ -1823,7 +1873,7 @@ textarea { resize: vertical; }
         chatHistory.push({ role: 'assistant', greeting: true, intro: true });
         renderHistory();
       }
-      openAssistantPanel(assistantTrigger);
+      openAssistant(assistantTrigger);
     });
 
     const isLeadClosed = () => chatHistory.some((e) => e.leadClosed);
@@ -1849,7 +1899,7 @@ textarea { resize: vertical; }
       } else {
         chatHistory.length = 0; chatHistory.push(greeting); lastBrand = ''; lastConfirmSig = '';
       }
-      openAssistantPanel(opener);
+      openAssistant(opener);
       renderHistory();
     }
 
@@ -1911,6 +1961,7 @@ textarea { resize: vertical; }
       });
       assistantOutput.replaceChildren(frag);
       assistantPrompt.disabled = closed;
+      assistantSubmit.disabled = closed || busy;
       assistantOutput.scrollTop = assistantOutput.scrollHeight;
     }
 
@@ -1952,12 +2003,7 @@ textarea { resize: vertical; }
     async function askBrandi(text, { confirm = false } = {}) {
       if (busy) return false;
       assistantError.textContent = '';
-      const token = getTurnstileToken();
-      if (!token) {
-        assistantError.textContent = translations[currentLang]['err-turnstile'];
-        setAssistantStatus('status-failed', 'error');
-        return false;
-      }
+      if (!hasSession()) { clearSession(); requireHuman(() => {}, assistantSubmit); return false; }
 
       // Servicios: los de las tarjetas, o los que Brandi haya deducido de la conversación (null si aún no hay ninguno)
       const services = activeServices.length ? activeServices : null;
@@ -1978,7 +2024,7 @@ textarea { resize: vertical; }
         const res = await fetch(WORKER_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ messages, services, token, lang: currentLang, confirm, brand: lastBrand, confirmSig: lastConfirmSig }),
+          body: JSON.stringify({ messages, services, session: chatSession.s, lang: currentLang, confirm, brand: lastBrand, confirmSig: lastConfirmSig }),
           signal: AbortSignal.timeout(30000)
         });
         const data = await res.json().catch(() => ({}));
@@ -1999,10 +2045,11 @@ textarea { resize: vertical; }
         renderHistory();
         assistantError.textContent = translations[currentLang][ERR[err.code]] || translations[currentLang]['err-network'];
         setAssistantStatus('status-failed', 'error');
+        if (err.code === 'session_invalid') { clearSession(); requireHuman(() => {}, assistantSubmit); }
         return false;
       } finally {
         busy = false;
-        resetTurnstileToken();
+        assistantSubmit.disabled = isLeadClosed();
       }
     }
 
