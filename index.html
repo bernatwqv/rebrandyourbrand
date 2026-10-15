@@ -432,6 +432,7 @@ textarea { resize: vertical; }
   .modal-root { visibility: visible; transition: opacity 300ms ease, visibility 0s; }
   .modal-root[inert] { visibility: hidden; transition: opacity 300ms ease, visibility 0s linear 300ms; }
   .modal-root > div { transition: transform 250ms cubic-bezier(0.16, 1, 0.3, 1); }
+  #verify-modal[inert] { visibility: visible; }
   #assistant-backdrop { visibility: visible; transition: opacity 300ms ease, visibility 0s; }
   #assistant-backdrop.pointer-events-none { visibility: hidden; transition: opacity 300ms ease, visibility 0s linear 300ms; }
   #assistant-panel { transition: transform 400ms cubic-bezier(0.16, 1, 0.3, 1); }
@@ -679,20 +680,7 @@ textarea { resize: vertical; }
   <header class="fixed top-0 inset-x-0 z-40 border-b border-line bg-ink/85 backdrop-blur-md">
     <div class="max-w-6xl mx-auto px-6 md:px-10 h-16 flex items-center justify-between">
       <a href="#top" data-section-target="top" class="flex items-center gap-3">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 70" class="h-7 w-auto text-paper" aria-label="rebrandyourbrand">
-          <style>
-            text {
-              font-family: 'Inter', system-ui, -apple-system, sans-serif;
-              font-weight: 500;
-              fill: currentColor;
-              text-transform: lowercase;
-              letter-spacing: -0.03em;
-            }
-          </style>
-          <text x="0" y="27" font-size="28">re</text>
-          <text x="0" y="58" font-size="26">your</text>
-          <text x="60" y="58" font-size="52">brand</text>
-        </svg>
+        <span class="font-display text-lg tracking-tight">rebrandyourbrand</span>
         <span class="inline-block w-px h-5 bg-line" aria-hidden="true"></span>
       </a>
 
@@ -1071,8 +1059,8 @@ textarea { resize: vertical; }
         <svg viewBox="0 0 24 24" fill="currentColor" style="width:24px;height:24px;"><path d="M12 2l1.8 5.6L19.4 9.4 13.8 11.2 12 17l-1.8-5.8L4.6 9.4l5.6-1.8L12 2z"></path></svg>
       </div>
       <span class="lang-trans lowercase block text-xs tracking-widest text-brand font-mono mb-2" data-i18n="verify-eyebrow">verificación humana</span>
-      <h3 id="verify-modal-title" class="lang-trans lowercase font-display text-2xl text-paper mb-3" data-i18n="verify-title">un último paso antes de hablar con brandi</h3>
-      <p class="lang-trans text-muted text-sm leading-relaxed mb-6" data-i18n="verify-desc">Confirma que eres una persona real. Solo te lo pediremos una vez en esta conversación.</p>
+      <h3 id="verify-modal-title" class="lang-trans lowercase font-display text-2xl text-paper mb-3" data-i18n="verify-title">un momento, verificación rápida</h3>
+      <p class="lang-trans text-muted text-sm leading-relaxed mb-6" data-i18n="verify-desc">Confirma que eres una persona real para enviar tu mensaje. Solo te lo pediremos una vez en esta conversación.</p>
       <div id="verify-widget" class="min-h-[65px] flex items-center justify-center"></div>
       <p id="verify-status" class="text-xs font-mono lowercase mt-3 text-muted" aria-live="polite"></p>
       <p class="lang-trans text-[10px] font-mono lowercase tracking-wider text-muted mt-8" data-i18n="verify-note">protegido por cloudflare turnstile · sin acertijos ni cuentas</p>
@@ -1239,8 +1227,8 @@ textarea { resize: vertical; }
         "confirm-no": "No",
         "role-user": "you",
         "lang-aria": "Change language",
-        "verify-eyebrow": "human verification", "verify-title": "one last step before talking to brandi",
-        "verify-desc": "Please confirm you're a real person. We'll only ask once in this conversation.",
+        "verify-eyebrow": "human verification", "verify-title": "one moment, quick check",
+        "verify-desc": "Please confirm you're a real person to send your message. We'll only ask once in this conversation.",
         "verify-note": "protected by cloudflare turnstile · no puzzles, no accounts",
         "verify-loading": "loading verification...", "verify-ok": "verified ✓", "verify-error": "couldn't verify. please try again."
       },
@@ -1354,8 +1342,8 @@ textarea { resize: vertical; }
         "confirm-no": "No",
         "role-user": "tu",
         "lang-aria": "Canvia l'idioma",
-        "verify-eyebrow": "verificació humana", "verify-title": "un últim pas abans de parlar amb la brandi",
-        "verify-desc": "Confirma que ets una persona real. Només te'l demanarem un cop en aquesta conversa.",
+        "verify-eyebrow": "verificació humana", "verify-title": "un moment, verificació ràpida",
+        "verify-desc": "Confirma que ets una persona real per enviar el teu missatge. Només te'l demanarem un cop en aquesta conversa.",
         "verify-note": "protegit per cloudflare turnstile · sense endevinalles ni comptes",
         "verify-loading": "carregant verificació...", "verify-ok": "verificat ✓", "verify-error": "no s'ha pogut verificar. torna-ho a provar."
       }
@@ -1458,7 +1446,7 @@ textarea { resize: vertical; }
     const lockScroll = () => { scrollLocks++; document.body.classList.add('overflow-hidden'); };
     const unlockScroll = () => { scrollLocks = Math.max(0, scrollLocks - 1); if (!scrollLocks) document.body.classList.remove('overflow-hidden'); };
 
-    function makeModal(modal, { focus } = {}) {
+    function makeModal(modal, { focus, onClose } = {}) {
       const content = modal.firstElementChild;
       let isOpen = false, opener = null;
       function open(from) {
@@ -1483,13 +1471,14 @@ textarea { resize: vertical; }
         unlockScroll();
         if (opener && opener.isConnected && !opener.disabled) opener.focus();
         opener = null;
+        if (onClose) onClose();
       }
       modal.addEventListener('click', (e) => { if (e.target === modal) close(); });
       modal.querySelectorAll('[data-modal-close]').forEach((b) => b.addEventListener('click', close));
       return { el: modal, open, close, isOpen: () => isOpen };
     }
 
-    const verifyModal = makeModal($('verify-modal'));
+    const verifyModal = makeModal($('verify-modal'), { onClose: () => { if (verify.promise) settleVerify(false); } });
     const modals = [verifyModal];
 
     let testimonialsCache = null;
@@ -1600,7 +1589,6 @@ textarea { resize: vertical; }
       renderServices();
       renderApprovedTestimonials();
       renderHistory();
-      if (verifyModal.isOpen()) renderVerifyWidget();
     }
 
     function switchLanguage(lang) {
@@ -1635,9 +1623,11 @@ textarea { resize: vertical; }
     });
 
     let assistantOpener = null, assistantIsOpen = false;
-    let verifyWidgetId = null, turnstileLoadPromise = null, afterVerify = null, exchanging = false;
+    let turnstileLoadPromise = null;
 
-    // ── Sesión de chat: Turnstile una sola vez, en un pop up, al empezar la conversación ──
+    // ── Sesión de chat: Turnstile una sola vez por conversación, sin fricción ──
+    // Al abrir el panel se "precalienta" Turnstile en modo interaction-only: casi siempre se resuelve en silencio
+    // y el cliente no ve nada. Solo si Cloudflare exige interacción, y al enviar el primer mensaje, aparece el pop up.
     let chatSession = null; // { s: 'exp.firma', exp: segundos }
     try { const saved = JSON.parse(sessionStorage.getItem('rybb-session') || 'null'); if (saved && saved.s && saved.exp) chatSession = saved; } catch (e) {}
     const hasSession = () => !!chatSession && chatSession.exp * 1000 > Date.now() + 30000;
@@ -1674,28 +1664,45 @@ textarea { resize: vertical; }
       verifyStatus.className = 'text-xs font-mono lowercase mt-3 ' + (state === 'error' ? 'text-red-400' : state === 'ok' ? 'text-emerald-400' : 'text-muted');
     }
 
+    // Estado de la verificación en curso
+    const verify = { id: null, promise: null, resolve: null, interaction: false, waiting: false, error: null, timer: null };
+
+    function settleVerify(ok) {
+      const resolve = verify.resolve;
+      clearTimeout(verify.timer);
+      verify.promise = null; verify.resolve = null; verify.waiting = false; verify.interaction = false; verify.timer = null;
+      if (verify.id !== null && window.turnstile) { try { window.turnstile.remove(verify.id); } catch (e) {} }
+      verify.id = null;
+      if (verifyModal.isOpen()) verifyModal.close();
+      setVerifyStatus('', 'idle');
+      if (resolve) resolve(ok);
+    }
+
+    function showVerifyModal() {
+      if (verifyModal.isOpen()) return;
+      setVerifyStatus('', 'idle');
+      verifyModal.open(assistantSubmit);
+    }
+
     function renderVerifyWidget() {
-      if (!window.turnstile) return;
+      if (!verify.promise || !window.turnstile) return;
       const box = $('verify-widget');
-      if (verifyWidgetId !== null) { try { window.turnstile.remove(verifyWidgetId); } catch (e) {} verifyWidgetId = null; }
       box.replaceChildren();
       try {
-        verifyWidgetId = window.turnstile.render(box, {
+        verify.id = window.turnstile.render(box, {
           sitekey: TURNSTILE_SITEKEY, action: 'brandi-chat', theme: isLight() ? 'light' : 'dark', language: currentLang,
+          appearance: 'interaction-only',
           size: window.innerWidth < 400 ? 'compact' : 'flexible',
           callback: exchangeToken,
-          'expired-callback': () => setVerifyStatus('verify-error', 'error'),
-          'error-callback': () => setVerifyStatus('verify-error', 'error')
+          'before-interactive-callback': () => { verify.interaction = true; if (verify.waiting) showVerifyModal(); },
+          'error-callback': () => { verify.error = 'network'; settleVerify(false); },
+          'timeout-callback': () => { verify.error = 'network'; settleVerify(false); }
         });
-        setVerifyStatus('', 'idle');
-      } catch (e) { setVerifyStatus('verify-error', 'error'); }
+      } catch (e) { verify.error = 'network'; settleVerify(false); }
     }
 
     // El token de Turnstile se canjea una sola vez por una sesión firmada que dura toda la conversación
     async function exchangeToken(token) {
-      if (exchanging) return;
-      exchanging = true;
-      setVerifyStatus('status-verifying', 'idle');
       try {
         const res = await fetch(WORKER_URL, {
           method: 'POST',
@@ -1704,29 +1711,25 @@ textarea { resize: vertical; }
           signal: AbortSignal.timeout(15000)
         });
         const data = await res.json().catch(() => ({}));
-        if (!res.ok || !data.session) throw Object.assign(new Error('session_failed'), { code: data.error });
+        if (!res.ok || !data.session) { verify.error = data.error || 'captcha_failed'; settleVerify(false); return; }
         saveSession(data.session);
-        setVerifyStatus('verify-ok', 'ok');
-        const next = afterVerify; afterVerify = null;
-        setTimeout(() => { if (verifyModal.isOpen()) { verifyModal.close(); if (next) next(); } }, 450);
-      } catch (err) {
-        setVerifyStatus(ERR[err.code] || 'verify-error', 'error');
-        try { window.turnstile.reset(verifyWidgetId); } catch (e) {}
-      } finally {
-        exchanging = false;
-      }
+        if (verifyModal.isOpen()) { setVerifyStatus('verify-ok', 'ok'); setTimeout(() => settleVerify(true), 450); }
+        else settleVerify(true);
+      } catch (e) { verify.error = 'network'; settleVerify(false); }
     }
 
-    // Ejecuta `next` ya mismo si hay sesión válida; si no, abre el pop up de verificación y lo ejecuta al superarla
-    function requireHuman(next, opener) {
-      if (hasSession()) { next(); return; }
-      afterVerify = next;
-      verifyModal.open(opener);
-      setVerifyStatus('verify-loading', 'idle');
-      loadTurnstile().then(() => { if (verifyModal.isOpen()) renderVerifyWidget(); })
-        .catch(() => setVerifyStatus('verify-error', 'error'));
+    // Devuelve una promesa que resuelve true cuando hay sesión válida. Se llama al abrir el panel (precalentado)
+    // y de nuevo al enviar el primer mensaje, que simplemente espera a la misma verificación.
+    function ensureSession() {
+      if (hasSession()) return Promise.resolve(true);
+      if (verify.promise) return verify.promise;
+      verify.error = null;
+      verify.promise = new Promise((resolve) => { verify.resolve = resolve; });
+      // Si no se resuelve sola en unos segundos (y no está esperando una interacción), se descarta y se reintenta al enviar
+      verify.timer = setTimeout(() => { if (verify.promise && !verify.interaction) { verify.error = 'network'; settleVerify(false); } }, 25000);
+      loadTurnstile().then(renderVerifyWidget).catch(() => { verify.error = 'network'; settleVerify(false); });
+      return verify.promise;
     }
-    const openAssistant = (opener) => requireHuman(() => openAssistantPanel(opener), opener);
 
     function openAssistantPanel(opener) {
       if (assistantIsOpen) return;
@@ -1741,6 +1744,7 @@ textarea { resize: vertical; }
       assistantPanel.setAttribute('aria-hidden', 'false');
       setAssistantStatus('status-waiting', 'ready');
       setTimeout(() => assistantPrompt.focus(), 300);
+      ensureSession(); // precalentado silencioso: no bloquea nada
     }
 
     function closeAssistantPanel() {
@@ -1771,7 +1775,7 @@ textarea { resize: vertical; }
         chatHistory.push({ role: 'assistant', greeting: true, intro: true });
         renderHistory();
       }
-      openAssistant(assistantTrigger);
+      openAssistantPanel(assistantTrigger);
     });
 
     const isLeadClosed = () => chatHistory.some((e) => e.leadClosed);
@@ -1797,7 +1801,7 @@ textarea { resize: vertical; }
       } else {
         chatHistory.length = 0; chatHistory.push(greeting); lastBrand = ''; lastConfirmSig = '';
       }
-      openAssistant(opener);
+      openAssistantPanel(opener);
       renderHistory();
     }
 
@@ -1898,10 +1902,9 @@ textarea { resize: vertical; }
       $('thinking-row')?.remove();
     }
 
-    async function askBrandi(text, { confirm = false } = {}) {
+    async function askBrandi(text, { confirm = false, retried = false } = {}) {
       if (busy) return false;
       assistantError.textContent = '';
-      if (!hasSession()) { clearSession(); requireHuman(() => {}, assistantSubmit); return false; }
 
       // Servicios: los de las tarjetas, o los que Brandi haya deducido de la conversación (null si aún no hay ninguno)
       const services = activeServices.length ? activeServices : null;
@@ -1919,6 +1922,14 @@ textarea { resize: vertical; }
       showThinkingBubble();
 
       try {
+        if (!hasSession()) {
+          // Primer mensaje de la conversación: aquí se cierra la verificación (casi siempre ya está lista, sin que el cliente vea nada)
+          setAssistantStatus('status-verifying', 'idle');
+          verify.waiting = true;
+          if (verify.interaction) showVerifyModal();
+          if (!(await ensureSession())) throw Object.assign(new Error('verify_failed'), { code: verify.error || 'captcha_failed' });
+          setAssistantStatus('status-consulting', 'idle');
+        }
         const res = await fetch(WORKER_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1941,9 +1952,10 @@ textarea { resize: vertical; }
         if (i !== -1) chatHistory.splice(i, 1);
         hideThinkingBubble();
         renderHistory();
+        // Sesión caducada o IP distinta: se renueva y se reenvía el mensaje una vez, sin que el cliente tenga que repetirlo
+        if (err.code === 'session_invalid' && !retried) { clearSession(); busy = false; return askBrandi(text, { confirm, retried: true }); }
         assistantError.textContent = translations[currentLang][ERR[err.code]] || translations[currentLang]['err-network'];
         setAssistantStatus('status-failed', 'error');
-        if (err.code === 'session_invalid') { clearSession(); requireHuman(() => {}, assistantSubmit); }
         return false;
       } finally {
         busy = false;
