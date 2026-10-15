@@ -560,11 +560,11 @@ textarea { resize: vertical; }
   }
   #services-builder [data-service]:hover { transform: translateY(-4px); box-shadow: var(--ring-brand); }
   #services-builder [data-service][aria-pressed="true"] { box-shadow: var(--shadow-brand), inset 0 1px 0 rgb(255 255 255 / .05); }
-  [data-start-project], [data-open-testimonial-modal] {
+  [data-start-project] {
     border-radius: .7rem; box-shadow: 0 10px 24px rgb(var(--color-brand) / .14);
     transition: background-color 220ms var(--ease-editorial), box-shadow 220ms var(--ease-editorial), transform 220ms var(--ease-editorial);
   }
-  [data-start-project]:hover:not(:disabled), [data-open-testimonial-modal]:hover {
+  [data-start-project]:hover:not(:disabled) {
     box-shadow: 0 14px 30px rgb(var(--color-brand) / .24); transform: translateY(-2px);
   }
   [data-start-project]:disabled { box-shadow: none; transform: none; }
@@ -686,7 +686,7 @@ textarea { resize: vertical; }
       <nav class="hidden md:flex items-center gap-5 lg:gap-8 ml-auto text-sm text-muted">
         <a href="#planes" data-section-target="planes" class="lang-trans lowercase hover:text-paper" data-i18n="nav-planes">servicios</a>
         <a href="#sobre-nosotros" data-section-target="sobre-nosotros" class="lang-trans lowercase hover:text-paper" data-i18n="nav-about">sobre nosotros</a>
-        <a href="#testimonios" data-section-target="testimonios" class="lang-trans lowercase hover:text-paper" data-i18n="nav-testimonials">testimonios</a>
+        <a hidden href="#testimonios" data-section-target="testimonios" class="lang-trans lowercase hover:text-paper" data-i18n="nav-testimonials">testimonios</a>
         <a href="#terminos" data-section-target="terminos" class="lang-trans lowercase hover:text-paper" data-i18n="nav-terms">términos</a>
       </nav>
 
@@ -744,7 +744,7 @@ textarea { resize: vertical; }
     <div id="mobile-nav" class="md:hidden hidden border-t border-line bg-panel/95 backdrop-blur-md px-6 py-4 flex flex-col gap-3 text-sm">
       <a href="#planes" data-section-target="planes" class="lang-trans lowercase text-muted hover:text-paper py-1" data-i18n="nav-planes">servicios</a>
       <a href="#sobre-nosotros" data-section-target="sobre-nosotros" class="lang-trans lowercase text-muted hover:text-paper py-1" data-i18n="nav-about">sobre nosotros</a>
-      <a href="#testimonios" data-section-target="testimonios" class="lang-trans lowercase text-muted hover:text-paper py-1" data-i18n="nav-testimonials">testimonios</a>
+      <a hidden href="#testimonios" data-section-target="testimonios" class="lang-trans lowercase text-muted hover:text-paper py-1" data-i18n="nav-testimonials">testimonios</a>
       <a href="#terminos" data-section-target="terminos" class="lang-trans lowercase text-muted hover:text-paper py-1" data-i18n="nav-terms">términos</a>
     </div>
   </header>
@@ -863,17 +863,14 @@ textarea { resize: vertical; }
       </div>
     </section>
 
-    <section id="testimonios" class="relative px-6 md:px-10 py-24 md:py-32 border-b border-line overflow-hidden z-10">
+    <section id="testimonios" hidden class="relative px-6 md:px-10 py-24 md:py-32 border-b border-line overflow-hidden z-10">
       <div class="max-w-6xl mx-auto relative z-10">
         <div class="reveal flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
           <div>
             <span class="lang-trans lowercase block text-xs tracking-widest text-brand font-mono mb-2" data-i18n="testimonials-eyebrow">opiniones verificadas</span>
             <h2 class="lang-trans lowercase font-display text-3xl md:text-4xl mb-3" data-i18n="testimonials-heading">testimonios de negocios</h2>
-            <p class="lang-trans text-muted text-sm md:text-base leading-relaxed max-w-xl" data-i18n="testimonials-sub">Valoraciones de negocios que han trabajado con nosotros. Revisamos cada reseña antes de publicarla para comprobar que procede de un cliente real.</p>
+            <p class="lang-trans text-muted text-sm md:text-base leading-relaxed max-w-xl" data-i18n="testimonials-sub">Opiniones de negocios que han completado un proyecto con nosotros. Solo pueden valorar los clientes verificados, mediante un enlace personal que enviamos al terminar el proyecto.</p>
           </div>
-          <button type="button" data-open-testimonial-modal class="lang-trans lowercase inline-flex items-center justify-center bg-brand text-[#0A0A0C] hover:bg-brand-soft shadow-lg px-6 py-3.5 text-xs font-semibold cursor-pointer tracking-wider shrink-0">
-            <span data-i18n="testimonials-btn-open">escribir una valoración</span>
-          </button>
         </div>
         <div id="approved-testimonials-container" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
       </div>
@@ -1069,49 +1066,6 @@ textarea { resize: vertical; }
     </div>
   </div>
 
-  <div id="testimonial-modal" class="modal-root fixed inset-0 z-[70] flex items-center justify-center bg-black/60 backdrop-blur-sm opacity-0 pointer-events-none px-6"
-       role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="testimonial-modal-title" inert>
-    <div class="bg-panel border-2 border-brand p-8 md:p-10 max-w-lg w-full shadow-2xl scale-95 relative">
-      <div class="flex justify-between items-start mb-6">
-        <div>
-          <span class="lang-trans lowercase block text-xs tracking-widest text-brand font-mono mb-1" data-i18n="testimonial-modal-eyebrow">comparte tu experiencia</span>
-          <h3 id="testimonial-modal-title" class="lang-trans lowercase font-display text-2xl text-paper" data-i18n="testimonial-modal-title">valorar nuestro servicio</h3>
-        </div>
-        <button data-modal-close type="button" aria-label="Cerrar" class="text-muted hover:text-paper p-1 shrink-0 text-xl font-mono cursor-pointer">✕</button>
-      </div>
-
-      <form id="testimonial-form" class="space-y-4">
-        <div>
-          <label for="reviewer-name" class="lang-trans block text-xs font-mono lowercase text-muted mb-1.5" data-i18n="testimonials-name">tu nombre y apellidos</label>
-          <input type="text" id="reviewer-name" autocomplete="name" required maxlength="80" class="w-full bg-ink/50 border border-line rounded-xl px-4 py-2.5 text-sm text-paper focus:outline-none focus:border-brand" placeholder="ej. Anna Puig">
-        </div>
-        <div>
-          <label for="reviewer-business" class="lang-trans block text-xs font-mono lowercase text-muted mb-1.5" data-i18n="testimonials-business">nombre de tu negocio o marca real</label>
-          <input type="text" id="reviewer-business" autocomplete="organization" required maxlength="80" class="w-full bg-ink/50 border border-line rounded-xl px-4 py-2.5 text-sm text-paper focus:outline-none focus:border-brand" placeholder="ej. Cafetera Lleidatana">
-        </div>
-        <div>
-          <label for="reviewer-rating" class="lang-trans block text-xs font-mono lowercase text-muted mb-1.5" data-i18n="testimonials-rating">valoración (1 a 5 estrellas)</label>
-          <select id="reviewer-rating" class="w-full bg-ink/50 border border-line rounded-xl px-4 py-2.5 text-sm text-paper focus:outline-none focus:border-brand">
-            <option value="5">★★★★★ (5/5)</option>
-            <option value="4">★★★★☆ (4/5)</option>
-            <option value="3">★★★☆☆ (3/5)</option>
-            <option value="2">★★☆☆☆ (2/5)</option>
-            <option value="1">★☆☆☆☆ (1/5)</option>
-          </select>
-        </div>
-        <div>
-          <label for="reviewer-comment" class="lang-trans block text-xs font-mono lowercase text-muted mb-1.5" data-i18n="testimonials-comment">tu opinión sobre el servicio</label>
-          <textarea id="reviewer-comment" required rows="3" maxlength="300" class="w-full bg-ink/50 border border-line rounded-xl px-4 py-2.5 text-sm text-paper focus:outline-none focus:border-brand resize-none"></textarea>
-        </div>
-        <div id="testimonial-turnstile" class="min-h-[65px] flex items-center justify-center"></div>
-        <p id="testimonial-msg" class="text-xs text-muted" aria-live="polite"></p>
-        <button type="submit" class="lang-trans lowercase w-full block text-center bg-brand text-[#0A0A0C] hover:bg-brand-soft shadow-lg py-3.5 text-xs font-semibold cursor-pointer tracking-wider">
-          <span data-i18n="testimonials-submit">enviar reseña para moderación</span>
-        </button>
-      </form>
-    </div>
-  </div>
-
   <script>
   (() => {
     'use strict';
@@ -1138,8 +1092,6 @@ textarea { resize: vertical; }
         "err-plan": "elige al menos un servicio en la sección de servicios antes de continuar.",
         "intro": "Hola, soy Brandi, directora de arte de rebrandyourbrand. Cuéntame: ¿cómo se llama tu marca o proyecto y qué necesitas?",
         "greet": "¡Perfecto! Has elegido {services} ({total} en total). ¿Cómo se llama tu marca o proyecto para continuar con tu propuesta?",
-        "testimonials-empty": "Aún no hay valoraciones publicadas. ¡Sé el primero en contarnos tu experiencia!",
-        "testimonials-success": "¡Reseña enviada correctamente! Queda pendiente de moderación para verificar que procede de un negocio real.",
         "svc-logo": "logotipo", "svc-logo-desc": "Un logotipo que se ve bien grande y pequeño: versión principal y secundaria, listas para redes, cartel y factura.",
         "svc-paleta": "paleta de empresa", "svc-paleta-desc": "Los colores y tipografías de tu marca, para que todo lo que publiques parezca de la misma empresa.",
         "svc-web": "web", "svc-web-desc": "Tu página web rápida y a tu nombre, publicada y entregada llave en mano.",
@@ -1209,17 +1161,7 @@ textarea { resize: vertical; }
         "studio-card-2-role": "web creator",
         "testimonials-eyebrow": "verified reviews",
         "testimonials-heading": "business testimonials",
-        "testimonials-sub": "Reviews from businesses that have worked with us. We check each review before publishing it to make sure it comes from a real client.",
-        "testimonials-empty": "No public reviews yet. Be the first to share your experience!",
-        "testimonials-btn-open": "write a review",
-        "testimonial-modal-eyebrow": "share your experience",
-        "testimonial-modal-title": "rate our service",
-        "testimonials-name": "your full name",
-        "testimonials-business": "your real business or brand name",
-        "testimonials-rating": "rating (1 to 5 stars)",
-        "testimonials-comment": "your opinion about the service",
-        "testimonials-submit": "submit review for moderation",
-        "testimonials-success": "Review successfully submitted! Pending moderation to verify it comes from a real business.",
+        "testimonials-sub": "Opinions from businesses that have completed a project with us. Only verified clients can leave one, through a personal link we send when the project is finished.",
         "terms-eyebrow": "legal & operational framework",
         "terms-heading": "terms of service",
         "terms-sub": "Clear rules, phased methodology, and mutual protection to ensure success and transparency for every project at rebrandyourbrand.",
@@ -1334,17 +1276,7 @@ textarea { resize: vertical; }
         "studio-card-2-role": "creador de webs",
         "testimonials-eyebrow": "opinions verificades",
         "testimonials-heading": "testimonis de negocis",
-        "testimonials-sub": "Valoracions de negocis que han treballat amb nosaltres. Revisem cada ressenya abans de publicar-la per comprovar que procedeix d'un client real.",
-        "testimonials-empty": "Encara no hi ha valoracions publicades. Sigues el primer a explicar-nos la teva experiència!",
-        "testimonials-btn-open": "escriure una valoració",
-        "testimonial-modal-eyebrow": "comparteix la teva experiència",
-        "testimonial-modal-title": "valorar el nostre servei",
-        "testimonials-name": "el teu nom i cognoms",
-        "testimonials-business": "nom del teu negoci o marca real",
-        "testimonials-rating": "valoració (1 a 5 estrelles)",
-        "testimonials-comment": "la teva opinió sobre el servei",
-        "testimonials-submit": "enviar ressenya per a moderació",
-        "testimonials-success": "Ressenya enviada correctament! Queda pendent de moderació per verificar que procedeix d'un negoci real.",
+        "testimonials-sub": "Opinions de negocis que han completat un projecte amb nosaltres. Només poden valorar els clients verificats, mitjançant un enllaç personal que enviem en acabar el projecte.",
         "terms-eyebrow": "marc legal i operatiu",
         "terms-heading": "condicions de servei",
         "terms-sub": "Regles clares, metodologia per fases i protecció mútua per garantir l'èxit i la transparència de cada projecte a rebrandyourbrand.",
@@ -1544,18 +1476,22 @@ textarea { resize: vertical; }
       return { el: modal, open, close, isOpen: () => isOpen };
     }
 
-    const testimonialModal = makeModal($('testimonial-modal'), { focus: 'reviewer-name' });
     const verifyModal = makeModal($('verify-modal'));
-    const modals = [verifyModal, testimonialModal];
+    const modals = [verifyModal];
 
     let testimonialsCache = null;
+    // La sección de testimonios solo existe cuando hay reseñas aprobadas (todas son de clientes verificados)
+    const testimonialsSection = $('testimonios');
+    function showTestimonials(show) {
+      testimonialsSection.hidden = !show;
+      document.querySelectorAll('[data-section-target="testimonios"]').forEach((a) => { a.hidden = !show; });
+    }
     async function renderApprovedTestimonials() {
       const container = $('approved-testimonials-container');
-      const empty = () => { container.innerHTML = `<div class="col-span-full bg-panel border border-line p-8 text-center text-muted text-sm">${esc(translations[currentLang]['testimonials-empty'])}</div>`; };
       try {
         if (testimonialsCache === null) { const res = await fetch(WORKER_URL); testimonialsCache = res.ok ? await res.json() : []; }
         const list = testimonialsCache;
-        if (!Array.isArray(list) || !list.length) { empty(); return; }
+        if (!Array.isArray(list) || !list.length) { showTestimonials(false); return; }
         container.innerHTML = list.map((item) => {
           const r = Math.min(5, Math.max(1, Number(item.rating) || 5));
           return `<div class="reveal in-view bg-panel border border-line p-6 flex flex-col justify-between h-full shadow-lg">
@@ -1569,62 +1505,11 @@ textarea { resize: vertical; }
             <div class="pt-4 border-t border-line/60 text-xs font-mono text-brand">— ${esc(item.name)}</div>
           </div>`;
         }).join('');
-      } catch (e) { empty(); }
+        showTestimonials(true);
+      } catch (e) { showTestimonials(false); }
     }
 
-    let reviewWidgetId = null;
-    function renderReviewTurnstile() {
-      loadTurnstile().then(() => {
-        if (reviewWidgetId !== null) { try { window.turnstile.reset(reviewWidgetId); } catch (e) {} return; }
-        reviewWidgetId = window.turnstile.render($('testimonial-turnstile'), { sitekey: TURNSTILE_SITEKEY, action: 'testimonial', theme: isLight() ? 'light' : 'dark', language: currentLang });
-      }).catch(() => {});
-    }
-    document.querySelectorAll('[data-open-testimonial-modal]').forEach((btn) => btn.addEventListener('click', () => { testimonialModal.open(btn); renderReviewTurnstile(); }));
-    const testimonialForm = $('testimonial-form');
-    const testimonialMsg = $('testimonial-msg');
     const ERR = { rate_limited: 'err-rate', email_cooldown: 'err-cooldown', captcha_failed: 'err-turnstile', captcha_unavailable: 'err-turnstile', upstream_busy: 'err-busy', upstream_error: 'err-busy', email_error: 'err-busy', payload_too_large: 'err-busy', invalid_confirmation: 'err-busy', invalid_messages: 'err-busy', plan_required: 'err-plan', session_invalid: 'err-turnstile', missing_fields: 'err-busy', misconfigured: 'err-busy', internal_error: 'err-busy' };
-
-    testimonialForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const name = $('reviewer-name').value.trim();
-      const business = $('reviewer-business').value.trim();
-      const rating = parseInt($('reviewer-rating').value, 10);
-      const comment = $('reviewer-comment').value.trim();
-      if (!name || !business || !comment) return;
-      let reviewToken = '';
-      try { reviewToken = reviewWidgetId !== null ? window.turnstile.getResponse(reviewWidgetId) : ''; } catch (e) {}
-      if (!reviewToken) {
-        testimonialMsg.textContent = translations[currentLang]['err-turnstile'];
-        testimonialMsg.className = 'text-xs text-red-400 font-mono';
-        return;
-      }
-
-      const submitBtn = testimonialForm.querySelector('button[type="submit"]');
-      submitBtn.disabled = true;
-      testimonialMsg.textContent = translations[currentLang]['status-verifying'];
-      testimonialMsg.className = 'text-xs text-muted font-mono';
-
-      try {
-        const res = await fetch(WORKER_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'submit', name, business, rating, comment, token: reviewToken })
-        });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw Object.assign(new Error('error_submitting'), { code: data.error });
-
-        testimonialMsg.textContent = translations[currentLang]['testimonials-success'];
-        testimonialMsg.className = 'text-xs text-emerald-400 font-mono';
-        testimonialForm.reset();
-        try { window.turnstile.reset(reviewWidgetId); } catch (e) {}
-        setTimeout(() => { testimonialModal.close(); testimonialMsg.textContent = ''; submitBtn.disabled = false; }, 3500);
-      } catch (err) {
-        testimonialMsg.textContent = translations[currentLang][ERR[err.code]] || translations[currentLang]['err-network'];
-        testimonialMsg.className = 'text-xs text-red-400 font-mono';
-        try { window.turnstile.reset(reviewWidgetId); } catch (e) {}
-        submitBtn.disabled = false;
-      }
-    });
 
     // ── SELECTOR DE SERVICIOS ──
     const selected = new Set();
