@@ -1,12 +1,21 @@
-# Secrets and local configuration
+# Secrets & local configuration
 .env
 .env.*
+.dev.vars
 *.local
 
 # Cloudflare & Node
 .wrangler/
 node_modules/
+dist/
 
-# Python and editor artifacts
-__pycache__/
+# AI Agents & IDEs
+.antigravity/
 .vscode/
+.idea/
+
+# Python & OS artifacts
+__pycache__/
+*.log
+.DS_Store
+Thumbs.db
