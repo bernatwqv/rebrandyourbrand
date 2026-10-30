@@ -43,8 +43,10 @@ const TACIT_APPROVAL_DAYS = 20;
 
 const RENEWAL_NOTICE_DAYS = 30;
 
-// Importe base anual de renovación de infraestructura web (dominio, DNS/SSL y correo corporativo) si env.WEB_RENEWAL_EUR no está definida en Cloudflare
-const WEB_RENEWAL_EUR = 85;
+const MAX_PHASE_REVISIONS = 2;
+
+// Importe anual obligatorio de infraestructura técnica web (dominio, correo corporativo, DNS/SSL y despliegue edge) si env.WEB_RENEWAL_EUR no está definida en Cloudflare
+const WEB_RENEWAL_EUR = 100;
 
 const DAY_MS = 86400 * 1000;
 
@@ -116,10 +118,10 @@ const SERVICES = {
       en: "website",
     },
     includes: {
-      es: "página web rápida y a tu nombre, publicada y entregada llave en mano",
-      ca: "pàgina web ràpida i a nom teu, publicada i lliurada clau en mà",
-      eu: "zure izenean egindako webgune azkarra, argitaratua eta giltza eskuan entregatua",
-      en: "fast website in your name, published and delivered turnkey",
+      es: "página web rápida y a tu nombre entregada llave en mano (más 100 €/año de infraestructura técnica: dominio, correo corporativo, DNS y despliegue edge)",
+      ca: "pàgina web ràpida i a nom teu lliurada clau en mà (més 100 €/any d'infraestructura tècnica: domini, correu corporatiu, DNS i desplegament edge)",
+      eu: "zure izenean egindako webgune azkarra giltza eskuan entregatua (gehi 100 €/urtean azpiegitura teknikoa: domeinua, posta korporatiboa, DNS eta edge hedapena)",
+      en: "fast website in your name delivered turnkey (plus €100/year technical infrastructure: domain, corporate email, DNS and edge deployment)",
     },
   },
 };
@@ -376,7 +378,7 @@ const SUMMARY = {
     email: "Correo",
     services: "Servicios",
     total: "Inversión total",
-    pay: "pago único del 100 %, sin cuotas",
+    pay: "pago único de creación del 100 %, sin cuotas mensuales",
     legal: "Al confirmar, declaras actuar como empresa o autónomo y aceptas las condiciones de servicio y la política de privacidad.",
     ask: "¿Confirmas que quieres recibir el correo de verificación para continuar con el pago seguro?",
   },
@@ -386,7 +388,7 @@ const SUMMARY = {
     email: "Correu",
     services: "Serveis",
     total: "Inversió total",
-    pay: "pagament únic del 100 %, sense quotes",
+    pay: "pagament únic de creació del 100 %, sense quotes mensuals",
     legal: "En confirmar, declares actuar com a empresa o autònom i acceptes les condicions de servei i la política de privacitat.",
     ask: "Confirmes que vols rebre el correu de verificació per continuar amb el pagament segur?",
   },
@@ -396,7 +398,7 @@ const SUMMARY = {
     email: "Posta elektronikoa",
     services: "Zerbitzuak",
     total: "Guztizko inbertsioa",
-    pay: "% 100eko ordainketa bakarra, hileroko kuotarik gabe",
+    pay: "sorkuntzaren % 100eko ordainketa bakarra, hileroko kuotarik gabe",
     legal: "Berrestean, enpresa edo autonomo gisa jokatzen duzula adierazten duzu eta zerbitzu-baldintzak zein pribatutasun-politika onartzen dituzu.",
     ask: "Berresten al duzu egiaztatze-mezua jaso nahi duzula ordainketa seguruarekin jarraitzeko?",
   },
@@ -406,7 +408,7 @@ const SUMMARY = {
     email: "Email",
     services: "Services",
     total: "Total investment",
-    pay: "one-time 100% payment, no monthly fees",
+    pay: "one-time 100% creation payment, no monthly fees",
     legal: "By confirming, you state that you act as a business or sole trader and accept the terms of service and the privacy policy.",
     ask: "Do you confirm you want to receive the verification email to continue to the secure payment?",
   },
@@ -469,8 +471,8 @@ const EM = {
       hello: "hola,",
       intro: (br, ph) => `tenemos lista la propuesta de la fase ${ph} de tu proyecto ${br}.`,
       openDeliverable: "enlace al entregable o vista previa",
-      cta: "revisar y aprobar fase",
-      revisions: "si quieres pedir algún ajuste dentro de tus 2 rondas de revisión incluidas, responde directamente a este correo contándonos los cambios. cuando todo esté como quieres, pulsa el botón superior para dejar aprobada la fase por escrito y pasar a la siguiente.",
+      cta: "revisar propuesta, aprobar o pedir ajustes",
+      revisions: "desde el botón superior puedes aprobar la fase por escrito para pasar a la siguiente etapa o escribir directamente los cambios puntuales que necesites dentro de tus 2 rondas de revisión gratuitas.",
     },
     phase: {
       subject: (br) => `novedades en tu proyecto ${br} — fase completada`,
@@ -487,8 +489,8 @@ const EM = {
       subject: (br, ph) => `recordatorio de revisión pendiente — ${ph} — ${br}`,
       hello: "hola,",
       intro: (br, ph) => `te escribimos para recordarte que tienes pendiente de validar la propuesta de ${ph} en tu proyecto ${br}.`,
-      body: "si ya nos has respondido por correo pidiendo ajustes, puedes ignorar este aviso. si todo está correcto, apruébala desde el botón inferior para avanzar a la siguiente etapa.",
-      cta: "aprobar fase y continuar",
+      body: "desde el botón inferior puedes aprobar la propuesta para avanzar a la siguiente etapa o solicitar ajustes si aún tienes rondas de revisión disponibles.",
+      cta: "revisar propuesta, aprobar o pedir ajustes",
       note: "según las condiciones del servicio, transcurridos 20 días naturales desde el envío sin comentarios se aplicará la aprobación tácita de la fase.",
     },
     review: {
@@ -503,8 +505,8 @@ const EM = {
     renewal: {
       subject: (br) => `aviso de renovación anual de dominio y correo — ${br}`,
       hello: "hola,",
-      intro: (br, date) => `el periodo anual de infraestructura web (dominio, dns/ssl y correo corporativo) de ${br} vence el ${date}.`,
-      body: (amount) => `el importe de renovación anual es de ${amount}. puedes abonarlo desde el botón principal o dar de baja la renovación en un clic si no deseas mantener activos el dominio y la web al terminar el periodo actual.`,
+      intro: (br, date) => `el periodo anual de infraestructura técnica web (dominio, correo corporativo, dns/ssl y despliegue edge) de ${br} vence el ${date}.`,
+      body: (amount) => `el importe de renovación anual de infraestructura es de ${amount} (cubre disponibilidad técnica, certificados y renovaciones; no incluye cambios de contenido ni de diseño). puedes abonarlo desde el botón principal o dar de baja la renovación en un clic si no deseas mantener activos el dominio, el correo y la web al terminar el periodo actual.`,
       ctaPay: "abonar renovación anual",
       cancelLine: "dar de baja la renovación anual en un clic",
       note: "si decides no renovar, no se realizará ningún cargo adicional y el dominio y la web dejarán de estar activos al finalizar el periodo vigente.",
@@ -545,8 +547,8 @@ const EM = {
       hello: "hola,",
       intro: (br, ph) => `tenim a punt la proposta de la fase ${ph} del teu projecte ${br}.`,
       openDeliverable: "enllaç al lliurable o vista prèvia",
-      cta: "revisar i aprovar fase",
-      revisions: "si vols demanar algun ajust dins de les teves 2 rondes de revisió incloses, respon directament a aquest correu explicant-nos els canvis. quan tot estigui al teu gust, prem el botó superior per deixar aprovada la fase per escrit i passar a la següent.",
+      cta: "revisar proposta, aprovar o demanar ajustos",
+      revisions: "des del botó superior pots aprovar la fase per escrit per passar a l'etapa següent o escriure directament els canvis puntuals que necessitis dins de les teves 2 rondes de revisió gratuïtes.",
     },
     phase: {
       subject: (br) => `novetats al teu projecte ${br} — fase completada`,
@@ -563,8 +565,8 @@ const EM = {
       subject: (br, ph) => `recordatori de revisió pendent — ${ph} — ${br}`,
       hello: "hola,",
       intro: (br, ph) => `t'escrivim per recordar-te que tens pendent de validar la proposta de ${ph} al teu projecte ${br}.`,
-      body: "si ja ens has respost per correu demanant ajustos, pots ignorar aquest avís. si tot és correcte, aprova-la des del botó inferior per avançar a l'etapa següent.",
-      cta: "aprovar fase i continuar",
+      body: "des del botó inferior pots aprovar la proposta per avançar a l'etapa següent o demanar ajustos si encara tens rondes de revisió disponibles.",
+      cta: "revisar proposta, aprovar o demanar ajustos",
       note: "segons les condicions del servei, passats 20 dies naturals des de l'enviament sense comentaris s'aplicarà l'aprovació tàcita de la fase.",
     },
     review: {
@@ -579,8 +581,8 @@ const EM = {
     renewal: {
       subject: (br) => `avís de renovació anual de domini i correu — ${br}`,
       hello: "hola,",
-      intro: (br, date) => `el període anual d'infraestructura web (domini, dns/ssl i correu corporatiu) de ${br} venç el ${date}.`,
-      body: (amount) => `l'import de renovació anual és de ${amount}. pots abonar-lo des del botó principal o donar de baixa la renovació en un clic si no vols mantenir actius el domini i la web en acabar el període actual.`,
+      intro: (br, date) => `el període anual d'infraestructura tècnica web (domini, correu corporatiu, dns/ssl i desplegament edge) de ${br} venç el ${date}.`,
+      body: (amount) => `l'import de renovació anual d'infraestructura és de ${amount} (cobreix disponibilitat tècnica, certificats i renovacions; no inclou canvis de contingut ni de disseny). pots abonar-lo des del botó principal o donar de baixa la renovació en un clic si no vols mantenir actius el domini, el correu i la web en acabar el període actual.`,
       ctaPay: "abonar renovació anual",
       cancelLine: "donar de baixa la renovació anual en un clic",
       note: "si decideixes no renovar, no es farà cap càrrec addicional i el domini i la web deixaran d'estar actius en finalitzar el període vigent.",
@@ -621,8 +623,8 @@ const EM = {
       hello: "kaixo,",
       intro: (br, ph) => `prest dugu zure ${br} proiektuko ${ph} fasearen proposamena.`,
       openDeliverable: "entregagarrirako edo aurrebistarako esteka",
-      cta: "berrikusi eta onartu fasea",
-      revisions: "barne dituzun 2 berrikuspen-txanden barruan doikuntzaren bat eskatu nahi baduzu, erantzun zuzenean mezu honi aldaketak adieraziz. dena zure gustura dagoenean, sakatu goiko botoia fasea idatziz onartuta uzteko eta hurrengora igarotzeko.",
+      cta: "proposamena berrikusi, onartu edo doikuntzak eskatu",
+      revisions: "goiko botoitik fasea idatziz onar dezakezu hurrengo etaparantz igarotzeko, edo zuzenean idatzi behar dituzun aldaketa zehatzak barne dituzun doako 2 berrikuspen-txanden barruan.",
     },
     phase: {
       subject: (br) => `berriak zure ${br} proiektuan — fasea osatuta`,
@@ -639,8 +641,8 @@ const EM = {
       subject: (br, ph) => `berrikuspenaren oroigarria — ${ph} — ${br}`,
       hello: "kaixo,",
       intro: (br, ph) => `zure ${br} proiektuan ${ph} proposamena baliozkotzeko duzula gogorarazteko idazten dizugu.`,
-      body: "dagoeneko posta elektronikoz doikuntzak eskatuz erantzun badiguzu, ez egin jaramonik ohar honi. dena ondo badago, onartu beheko botoitik hurrengo fasera igarotzeko.",
-      cta: "onartu fasea eta jarraitu",
+      body: "beheko botoitik proposamena onar dezakezu hurrengo fasera igarotzeko, edo doikuntzak eskatu oraindik berrikuspen-txandak erabilgarri badituzu.",
+      cta: "proposamena berrikusi, onartu edo doikuntzak eskatu",
       note: "zerbitzu-baldintzen arabera, bidalketatik 20 egun natural iruzkinik gabe igarotzean fasearen onespen isila aplikatuko da.",
     },
     review: {
@@ -655,8 +657,8 @@ const EM = {
     renewal: {
       subject: (br) => `domeinuaren eta postaren urteko berritze-abisua — ${br}`,
       hello: "kaixo,",
-      intro: (br, date) => `${br} proiektuaren web-azpiegituraren urteko epea (domeinua, dns/ssl eta posta korporatiboa) ${date} egunean amaituko da.`,
-      body: (amount) => `urteko berritzearen zenbatekoa ${amount} da. botoi nagusitik ordain dezakezu edo klik bakarrean berritzea bertan behera utzi, egungo epea amaitzean domeinua eta webgunea aktibo mantendu nahi ez badituzu.`,
+      intro: (br, date) => `${br} proiektuaren web-azpiegitura teknikoaren urteko epea (domeinua, posta korporatiboa, dns/ssl eta edge hedapena) ${date} egunean amaituko da.`,
+      body: (amount) => `azpiegituraren urteko berritzearen zenbatekoa ${amount} da (erabilgarritasun teknikoa, ziurtagiriak eta berritzeak estaltzen ditu; ez ditu eduki edo diseinu aldaketak barne hartzen). botoi nagusitik ordain dezakezu edo klik bakarrean berritzea bertan behera utzi, egungo epea amaitzean domeinua, posta eta webgunea aktibo mantendu nahi ez badituzu.`,
       ctaPay: "ordaindu urteko berritzea",
       cancelLine: "utzi bertan behera urteko berritzea klik bakarrean",
       note: "ez berritzea erabakitzen baduzu, ez da kargu gehigarririk egingo eta domeinuak zein webguneak aktibo egoteari utziko diote indarrean dagoen epea amaitzean.",
@@ -697,8 +699,8 @@ const EM = {
       hello: "hello,",
       intro: (br, ph) => `the proposal for the ${ph} phase of your project ${br} is ready for your review.`,
       openDeliverable: "link to deliverable or preview",
-      cta: "review and approve phase",
-      revisions: "if you would like adjustments within your 2 included revision rounds, reply directly to this email with your feedback. once everything looks right, click the button above to approve this phase in writing and move to the next stage.",
+      cta: "review proposal, approve or request adjustments",
+      revisions: "from the button above you can approve the phase in writing to move on to the next stage, or submit the specific adjustments you need within your 2 included free revision rounds.",
     },
     phase: {
       subject: (br) => `news on your project ${br} — phase completed`,
@@ -715,8 +717,8 @@ const EM = {
       subject: (br, ph) => `pending review reminder — ${ph} — ${br}`,
       hello: "hello,",
       intro: (br, ph) => `just a friendly reminder that the ${ph} proposal for your project ${br} is awaiting your approval.`,
-      body: "if you have already replied by email requesting adjustments, please disregard this note. if everything looks good, approve it with the button below so we can move forward.",
-      cta: "approve phase and continue",
+      body: "use the button below to approve the proposal and move forward, or request adjustments if you still have revision rounds available.",
+      cta: "review proposal, approve or request adjustments",
       note: "under our terms of service, if 20 calendar days pass from delivery without feedback, tacit approval applies to the phase.",
     },
     review: {
@@ -731,8 +733,8 @@ const EM = {
     renewal: {
       subject: (br) => `annual domain and email renewal notice — ${br}`,
       hello: "hello,",
-      intro: (br, date) => `the annual web infrastructure period (domain, dns/ssl and corporate email) for ${br} expires on ${date}.`,
-      body: (amount) => `the annual renewal amount is ${amount}. you can complete it via the main button or cancel the renewal in one click if you prefer not to keep the domain and website active after the current period ends.`,
+      intro: (br, date) => `the annual technical web infrastructure period (domain, corporate email, dns/ssl and edge deployment) for ${br} expires on ${date}.`,
+      body: (amount) => `the annual infrastructure renewal fee is ${amount} (covers technical availability, certificates and renewals; excludes content or design changes). you can complete it via the main button or cancel the renewal in one click if you prefer not to keep the domain, email and website active after the current period ends.`,
       ctaPay: "pay annual renewal",
       cancelLine: "cancel annual renewal in one click",
       note: "if you choose not to renew, no extra charges will be made and the domain and website will stop being active at the end of the current period.",
@@ -808,13 +810,22 @@ const PG = {
     rvNotReady: ["valoración no disponible", "todavía no disponible", "podrás valorar tu proyecto en cuanto todas sus fases hayan finalizado."],
     rvMissing: ["faltan datos", "faltan datos por completar", "vuelve atrás y rellena tu nombre y tu comentario."],
     ap: {
-      eyebrow: "validación de fase",
-      title: "aprobar fase",
-      heading: "confirmar aprobación de fase",
-      intro: (ph, br) => `vas a dejar aprobada por escrito la fase "${ph}" del proyecto ${br} para avanzar a la siguiente etapa.`,
+      eyebrow: "revisión de fase",
+      title: "revisar propuesta",
+      heading: "revisar propuesta de fase",
+      intro: (ph, br) => `revisa el entregable de la fase "${ph}" del proyecto ${br}. puedes aprobarla para avanzar a la siguiente etapa o solicitar ajustes puntuales.`,
       deliverable: "abrir entregable o vista previa",
-      legal: "al confirmar, das por cerrada esta fase según las condiciones de servicio. si todavía necesitas ajustes dentro de tus 2 rondas de revisión, no pulses el botón y responde al correo que te hemos enviado.",
-      btn: "aprobar fase y avanzar",
+      roundsUsed: (u, m) => `rondas gratuitas usadas en esta fase: ${u} de ${m}`,
+      legal: "al aprobar, das por cerrada esta fase según las condiciones de servicio. si necesitas cambios dentro de tus 2 rondas gratuitas de revisión, despliega el botón secundario de abajo.",
+      btn: "aprobar fase y continuar",
+      revToggle: (r, m) => `pedir ajustes (ronda ${r} de ${m})`,
+      revLabel: (r, m) => `describe con claridad los ajustes que necesitas (ronda ${r} de ${m})`,
+      revPh: "indica en un solo mensaje todos los cambios puntuales para aplicar en esta ronda...",
+      revSubmit: (r, m) => `enviar ajustes de la ronda ${r} de ${m}`,
+      revEmpty: "escribe los ajustes que necesitas antes de enviar la ronda.",
+      revExhausted: "ya has utilizado las 2 rondas de revisión gratuitas incluidas en esta fase. puedes aprobar la propuesta arriba para continuar o escribirnos a hola@rebrandyourbrand.es para presupuestar ajustes adicionales (50 €/hora, cláusula 1.2).",
+      revDone: ["ajustes enviados", "ajustes registrados con éxito", (r, m) => `hemos recibido tus indicaciones de la ronda ${r} de ${m} y te avisaremos por correo en cuanto la versión actualizada esté lista para revisar.`],
+      revWorking: ["ajustes en curso", "estamos aplicando tus ajustes", (r, m) => `ya tenemos registrada tu petición de la ronda ${r} de ${m} y estamos preparando la nueva versión. te avisaremos por correo en cuanto esté lista.`],
       done: ["fase aprobada", "fase aprobada con éxito", "hemos registrado tu validación por escrito y ya hemos activado la siguiente etapa de tu proyecto."],
       already: ["fase ya gestionada", "esta fase ya está cerrada", "esta fase ya consta como aprobada y completada en tu proyecto."],
     },
@@ -844,10 +855,11 @@ const PG = {
       doneClient: "aprobado por ti",
       doneTacit: "aprobación tácita",
       review: "propuesta lista — esperando tu validación",
-      reviewAction: "revisar y aprobar fase",
+      reviewAction: "revisar, aprobar o pedir ajustes",
       deliverable: "ver entregable",
       studioNote: "nota del estudio",
       active: "en curso actualmente",
+      activeRev: (r, m) => `aplicando tus ajustes (ronda ${r} de ${m})`,
       todo: "pendiente",
       obEyebrow: "arranque del proyecto",
       obTitle: "envíanos tus materiales iniciales",
@@ -898,13 +910,22 @@ const PG = {
     rvNotReady: ["valoració no disponible", "encara no disponible", "podràs valorar el teu projecte tan bon punt totes les seves fases hagin finalitzat."],
     rvMissing: ["falten dades", "falten dades per completar", "torna enrere i omple el teu nom i el teu comentari."],
     ap: {
-      eyebrow: "validació de fase",
-      title: "aprovar fase",
-      heading: "confirmar aprovació de fase",
-      intro: (ph, br) => `deixaràs aprovada per escrit la fase "${ph}" del projecte ${br} per avançar a l'etapa següent.`,
+      eyebrow: "revisió de fase",
+      title: "revisar proposta",
+      heading: "revisar proposta de fase",
+      intro: (ph, br) => `revisa el lliurable de la fase "${ph}" del projecte ${br}. pots aprovar-la per avançar a l'etapa següent o demanar ajustos puntuals.`,
       deliverable: "obrir lliurable o vista prèvia",
-      legal: "en confirmar, dónes per tancada aquesta fase segons les condicions de servei. si encara necessites ajustos dins de les teves 2 rondes de revisió, no premis el botó i respon al correu que t'hem enviat.",
-      btn: "aprovar fase i avançar",
+      roundsUsed: (u, m) => `rondes gratuïtes usades en aquesta fase: ${u} de ${m}`,
+      legal: "en aprovar, dónes per tancada aquesta fase segons les condicions de servei. si necessites canvis dins de les teves 2 rondes gratuïtes de revisió, desplega el botó secundari de sota.",
+      btn: "aprovar fase i continuar",
+      revToggle: (r, m) => `demanar ajustos (ronda ${r} de ${m})`,
+      revLabel: (r, m) => `descriu amb claredat els ajustos que necessites (ronda ${r} de ${m})`,
+      revPh: "indica en un sol missatge tots els canvis puntuals per aplicar en aquesta ronda...",
+      revSubmit: (r, m) => `enviar ajustos de la ronda ${r} de ${m}`,
+      revEmpty: "escriu els ajustos que necessites abans d'enviar la ronda.",
+      revExhausted: "ja has utilitzat les 2 rondes de revisió gratuïtes incloses en aquesta fase. pots aprovar la proposta a dalt per continuar o escriure'ns a hola@rebrandyourbrand.es per pressupostar ajustos addicionals (50 €/hora, clàusula 1.2).",
+      revDone: ["ajustos enviats", "ajustos registrats amb èxit", (r, m) => `hem rebut les teves indicacions de la ronda ${r} de ${m} i t'avisarem per correu tan bon punt la versió actualitzada estigui a punt per revisar.`],
+      revWorking: ["ajustos en curs", "estem aplicant els teus ajustos", (r, m) => `ja tenim registrada la teva petició de la ronda ${r} de ${m} i estem preparant la nova versió. t'avisarem per correu tan bon punt estigui a punt.`],
       done: ["fase aprovada", "fase aprovada amb èxit", "hem registrat la teva validació per escrit i ja hem activat l'etapa següent del teu projecte."],
       already: ["fase ja gestionada", "aquesta fase ja està tancada", "aquesta fase ja consta com a aprovada i completada al teu projecte."],
     },
@@ -934,10 +955,11 @@ const PG = {
       doneClient: "aprovat per tu",
       doneTacit: "aprovació tàcita",
       review: "proposta llesta — esperant la teva validació",
-      reviewAction: "revisar i aprovar fase",
+      reviewAction: "revisar, aprovar o demanar ajustos",
       deliverable: "veure lliurable",
       studioNote: "nota de l'estudi",
       active: "en curs actualment",
+      activeRev: (r, m) => `aplicant els teus ajustos (ronda ${r} de ${m})`,
       todo: "pendent",
       obEyebrow: "arrencada del projecte",
       obTitle: "envia'ns els teus materials inicials",
@@ -988,13 +1010,22 @@ const PG = {
     rvNotReady: ["oraindik ez dago erabilgarri", "oraindik ez dago erabilgarri", "proiektuaren fase guztiak amaitzean baloratu ahal izango duzu."],
     rvMissing: ["datuak falta dira", "datuak osatu gabe daude", "itzuli atzera eta bete zure izena eta iruzkina."],
     ap: {
-      eyebrow: "fasearen baliozkotzea",
-      title: "onartu fasea",
-      heading: "berretsi fasearen onarpena",
-      intro: (ph, br) => `${br} proiektuko "${ph}" fasea idatziz onartuta utziko duzu hurrengo etaparantz aurrera egiteko.`,
+      eyebrow: "fasearen berrikuspena",
+      title: "proposamena berrikusi",
+      heading: "berrikusi fasearen proposamena",
+      intro: (ph, br) => `berrikusi ${br} proiektuko "${ph}" faseko entregagarria. onar dezakezu hurrengo etaparantz aurrera egiteko edo doikuntza zehatzak eskatu.`,
       deliverable: "ireki entregagarria edo aurrebista",
-      legal: "berrestean, fase hau itxitzat ematen duzu zerbitzu-baldintzen arabera. zure 2 berrikuspen-txanden barruan doikuntzak behar badituzu oraindik, ez sakatu botoia eta erantzun bidali dizugun mezuari.",
-      btn: "onartu fasea eta aurrera egin",
+      roundsUsed: (u, m) => `fase honetan erabilitako doako txandak: ${m}tik ${u}`,
+      legal: "onartzean, fase hau itxitzat ematen duzu zerbitzu-baldintzen arabera. barne dituzun doako 2 berrikuspen-txanden barruan aldaketak behar badituzu, ireki beheko bigarren botoia.",
+      btn: "onartu fasea eta jarraitu",
+      revToggle: (r, m) => `eskatu doikuntzak (${m}tik ${r}. txanda)`,
+      revLabel: (r, m) => `azaldu argi behar dituzun doikuntzak (${m}tik ${r}. txanda)`,
+      revPh: "adierazi mezu bakarrean txanda honetan aplikatu beharreko aldaketa zehatz guztiak...",
+      revSubmit: (r, m) => `bidali ${m}tik ${r}. txandako doikuntzak`,
+      revEmpty: "idatzi behar dituzun doikuntzak txanda bidali aurretik.",
+      revExhausted: "dagoeneko erabili dituzu fase honetan barne hartutako doako 2 berrikuspen-txandak. goian proposamena onar dezakezu jarraitzeko edo hola@rebrandyourbrand.es helbidera idatzi doikuntza gehigarriak aurrekontatzeko (50 €/orduko, 1.2 klausula).",
+      revDone: ["doikuntzak bidalita", "doikuntzak behar bezala erregistratu dira", (r, m) => `jaso ditugu zure ${m}tik ${r}. txandako argibideak eta posta elektronikoz abisatuko dizugu bertsio eguneratua berrikusteko prest dagoenean.`],
+      revWorking: ["doikuntzak martxan", "zure doikuntzak aplikatzen ari gara", (r, m) => `dagoeneko erregistratuta daukagu zure ${m}tik ${r}. txandako eskaera eta bertsio berria prestatzen ari gara. prest dagoenean posta elektronikoz abisatuko dizugu.`],
       done: ["fasea onartuta", "fasea behar bezala onartu da", "zure idatzizko onarpena erregistratu dugu eta zure proiektuaren hurrengo etapa aktibatu dugu."],
       already: ["fasea kudeatuta", "fase hau itxita dago jada", "fase hau dagoeneko onartuta eta osatuta agertzen da zure proiektuan."],
     },
@@ -1024,10 +1055,11 @@ const PG = {
       doneClient: "zuk onartua",
       doneTacit: "onespen isila",
       review: "proposamena prest — zure onarpenaren zain",
-      reviewAction: "berrikusi eta onartu fasea",
+      reviewAction: "berrikusi, onartu edo doikuntzak eskatu",
       deliverable: "ikusi entregagarria",
       studioNote: "estudioaren oharra",
       active: "martxan une honetan",
+      activeRev: (r, m) => `zure doikuntzak aplikatzen (${m}tik ${r}. txanda)`,
       todo: "egiteke",
       obEyebrow: "proiektuaren abiatzea",
       obTitle: "bidali zure hasierako materialak",
@@ -1078,13 +1110,22 @@ const PG = {
     rvNotReady: ["not available yet", "not available yet", "you will be able to review your project once all phases are finished."],
     rvMissing: ["missing details", "missing required details", "please go back and fill in your name and comment."],
     ap: {
-      eyebrow: "phase approval",
-      title: "approve phase",
-      heading: "confirm phase approval",
-      intro: (ph, br) => `you are about to approve in writing the "${ph}" phase of project ${br} and move on to the next stage.`,
+      eyebrow: "phase review",
+      title: "review proposal",
+      heading: "review phase proposal",
+      intro: (ph, br) => `review the deliverable for the "${ph}" phase of project ${br}. you can approve it to move on to the next stage or request specific adjustments.`,
       deliverable: "open deliverable or preview",
-      legal: "by confirming, this phase is closed under our terms of service. if you still want adjustments within your 2 included revision rounds, do not click the button and reply to our email instead.",
+      roundsUsed: (u, m) => `free revision rounds used in this phase: ${u} of ${m}`,
+      legal: "by approving, this phase is closed under our terms of service. if you need changes within your 2 free revision rounds, expand the secondary button below.",
       btn: "approve phase and continue",
+      revToggle: (r, m) => `request adjustments (round ${r} of ${m})`,
+      revLabel: (r, m) => `describe clearly the adjustments you need (round ${r} of ${m})`,
+      revPh: "list in a single message all the specific changes to apply in this round...",
+      revSubmit: (r, m) => `send adjustments for round ${r} of ${m}`,
+      revEmpty: "please write the adjustments you need before submitting this round.",
+      revExhausted: "you have already used both free revision rounds included in this phase. you can approve the proposal above to continue or email hola@rebrandyourbrand.es to quote additional adjustments (€50/hour, clause 1.2).",
+      revDone: ["adjustments sent", "adjustments recorded successfully", (r, m) => `we have received your round ${r} of ${m} notes and will email you as soon as the updated version is ready for review.`],
+      revWorking: ["adjustments in progress", "we are applying your adjustments", (r, m) => `we already have your round ${r} of ${m} request on file and are preparing the updated version. we will email you as soon as it is ready.`],
       done: ["phase approved", "phase approved successfully", "we have recorded your written approval and activated the next stage of your project."],
       already: ["already approved", "this phase is already closed", "this phase is already marked as approved and completed on your project."],
     },
@@ -1114,10 +1155,11 @@ const PG = {
       doneClient: "approved by you",
       doneTacit: "tacit approval",
       review: "proposal ready — awaiting your approval",
-      reviewAction: "review and approve phase",
+      reviewAction: "review, approve or request adjustments",
       deliverable: "view deliverable",
       studioNote: "studio note",
       active: "in progress",
+      activeRev: (r, m) => `applying your adjustments (round ${r} of ${m})`,
       todo: "pending",
       obEyebrow: "project kickoff",
       obTitle: "send us your initial materials",
@@ -1556,7 +1598,8 @@ ESTILO:
 
 No hay planes cerrados: el cliente elige solo los servicios que necesita y paga únicamente por ellos (pago único del 100% mediante enlace seguro tras verificar el correo, sin cuotas mensuales). Servicios y precios oficiales:
 ${CATALOG}
-El precio total es la suma de los servicios elegidos. No hay descuentos ni paquetes.
+El precio total de creación es la suma de los servicios elegidos. No hay descuentos ni paquetes.
+Si el cliente elige o pregunta por la web (400 € de pago único de desarrollo), aclara si surge la duda que conlleva una cuota obligatoria de 100 €/año exclusivamente por infraestructura técnica gestionada (dominio, correo corporativo, DNS, certificados SSL y despliegue edge): no incluye cambios de contenido, diseño ni nuevas secciones tras la entrega (solo las 2 rondas de revisión gratuitas durante la creación; cualquier cambio posterior se presupuesta aparte o a 50 €/hora).
 
 ESTADO ACTUAL DE LA CONVERSACIÓN:
 - MARCA: ${brand ? `ya conocida (${brand})` : "pendiente"}
@@ -1650,6 +1693,8 @@ const newPhases = (ids) => {
     step: i + 1,
     key,
     status: i === 0 ? "active" : "pending",
+    revisionsUsed: 0,
+    revisions: [],
     ...(i === 0 ? { date: new Date().toISOString() } : {}),
   }));
 };
@@ -1835,10 +1880,10 @@ async function createRenewalCheckout(env, proj, renewalEur) {
   const safeBrand = proj.brand || "proyecto";
   const projectUrl = buildUrl("/proyecto", { token: proj.token });
   const labelByLang = {
-    es: "Renovación anual de dominio y correo",
-    ca: "Renovació anual de domini i correu",
-    eu: "Domeinuaren eta postaren urteko berritzea",
-    en: "Annual domain and email renewal",
+    es: "Renovación anual de infraestructura web (dominio, correo, DNS y edge)",
+    ca: "Renovació anual d'infraestructura web (domini, correu, DNS i edge)",
+    eu: "Web-azpiegituraren urteko berritzea (domeinua, posta, DNS eta edge)",
+    en: "Annual web infrastructure renewal (domain, email, DNS and edge)",
   };
   const params = new URLSearchParams({
     "payment_method_types[0]": "card",
@@ -2261,6 +2306,13 @@ input,select,textarea{
   color:#17171A;
   margin-bottom:1rem;
 }
+textarea{
+  field-sizing:content;
+  height:auto;
+  min-block-size:4.5lh;
+  max-block-size:14lh;
+  resize:vertical;
+}
 input::placeholder,textarea::placeholder{color:rgba(88,87,94,.6)}
 input[readonly]{background:#F6F2E8;color:#58575E}
 input:focus,select:focus,textarea:focus{outline:none;border-color:#8CA3C4;box-shadow:0 0 0 3px rgba(140,163,196,.2)}
@@ -2298,6 +2350,26 @@ button.secondary:hover,.btn.secondary:hover,button.no:hover{
   padding:.52rem .9rem;
   font-size:.76rem;
   border-radius:9px;
+}
+.rev-details{margin-top:.65rem;text-align:left}
+.rev-details summary{list-style:none;margin-top:0;user-select:none}
+.rev-details summary::-webkit-details-marker{display:none}
+.rev-details[open] summary{border-color:#E8A33D;background:#FFFDF9;color:#825008}
+.rev-body{
+  margin-top:.65rem;
+  background:#FFFFFF;
+  border:1px solid #E4DED0;
+  border-radius:12px;
+  padding:1.05rem 1.15rem;
+}
+.rev-err{
+  color:#825008;
+  background:#FFFDF9;
+  border:1px solid #E8A33D;
+  border-radius:8px;
+  padding:.55rem .75rem;
+  font-size:.8rem;
+  margin-bottom:.85rem;
 }
 :focus-visible{outline:2px solid #E8A33D;outline-offset:2px}
 .timeline{display:grid;gap:.85rem;margin-bottom:1.25rem;text-align:left}
@@ -2786,10 +2858,13 @@ async function handlePhaseAdvance(request, env, url) {
   }
 
   const currentTitleEs = phaseTitle(currentPhaseObj, "es");
+  const revsUsed = Math.min(MAX_PHASE_REVISIONS, Math.max(0, Number(currentPhaseObj.revisionsUsed) || 0));
   const stateLabel =
     currentPhaseObj.status === "review"
       ? `en revisión del cliente (enviada el ${fmtDate(currentPhaseObj.reviewSentAt || currentPhaseObj.date, "es")})`
-      : "en curso en el estudio";
+      : revsUsed > 0
+        ? `aplicando ajustes del cliente (ronda ${revsUsed} de ${MAX_PHASE_REVISIONS})`
+        : "en curso en el estudio";
 
   if (request.method === "GET" || request.method === "HEAD") {
     const ob = proj.onboarding;
@@ -2804,6 +2879,21 @@ async function handlePhaseAdvance(request, env, url) {
         </div>`
       : "";
 
+    const revsHtml =
+      Array.isArray(currentPhaseObj.revisions) && currentPhaseObj.revisions.length
+        ? `<div class="box review-box">
+            <span class="eyebrow">historial de ajustes solicitados por el cliente</span>
+            ${currentPhaseObj.revisions
+              .map(
+                (rv) => `<div style="margin-bottom:.75rem;">
+                  <span style="display:block;font-size:.75rem;font-weight:600;color:#825008;margin-bottom:.25rem;">ronda ${Number(rv.round) || 1} de ${MAX_PHASE_REVISIONS}${rv.requestedAt ? ` — ${esc(fmtDate(rv.requestedAt, "es"))}` : ""}</span>
+                  <div class="phase-note" style="margin-top:0;">${esc(rv.text || "")}</div>
+                </div>`
+              )
+              .join("")}
+          </div>`
+        : "";
+
     const html = `
       <div class="box">
         <div class="kv">
@@ -2813,9 +2903,11 @@ async function handlePhaseAdvance(request, env, url) {
           <div class="kv-row"><span>servicios</span><span class="kv-val">${esc(svcLabel(proj.services, "es"))}</span></div>
           <div class="kv-row"><span>fase actual</span><span class="kv-val">paso ${currentPhaseObj.step} — ${esc(currentTitleEs)}</span></div>
           <div class="kv-row"><span>estado</span><span class="kv-val">${esc(stateLabel)}</span></div>
+          <div class="kv-row"><span>rondas gratuitas usadas</span><span class="kv-val">${revsUsed} de ${MAX_PHASE_REVISIONS}</span></div>
         </div>
       </div>
       ${obHtml}
+      ${revsHtml}
       <form method="POST" style="text-align:left;">
         <label for="deliverableUrl">enlace al entregable o preview (opcional, https://)</label>
         <input id="deliverableUrl" name="deliverableUrl" type="url" maxlength="500" placeholder="https://www.figma.com/... o https://drive.google.com/..." value="${esc(currentPhaseObj.deliverableUrl || "")}">
@@ -2930,7 +3022,7 @@ async function handlePhaseAdvance(request, env, url) {
       page(
         "propuesta enviada",
         "propuesta enviada a revisión",
-        `hemos avisado a ${proj.clientEmail} con el botón de aprobación escrita para "${currentTitleEs}". en cuanto pulse aprobar, avanzará automáticamente a la siguiente fase.`,
+        `hemos avisado a ${proj.clientEmail} con el enlace para revisar, aprobar por escrito o pedir ajustes en "${currentTitleEs}".`,
         {
           eyebrow: "panel interno del estudio",
           html: `<a class="btn secondary" href="${esc(currentManageUrl)}">volver al panel de esta fase</a>`,
@@ -2989,7 +3081,7 @@ async function handlePhaseAdvance(request, env, url) {
   );
 }
 
-// ── APROBACIÓN ESCRITA DE FASE POR EL CLIENTE (/approve-phase) ──
+// ── REVISIÓN, SOLICITUD DE AJUSTES Y APROBACIÓN ESCRITA POR EL CLIENTE (/approve-phase) ──
 async function handlePhaseApprove(request, env, url) {
   let L = langFromRequest(request);
   const p = url.searchParams.get("p");
@@ -3037,23 +3129,15 @@ async function handlePhaseApprove(request, env, url) {
     );
   }
 
-  if (request.method === "GET" || request.method === "HEAD") {
-    const detailHtml =
-      ph.note || ph.deliverableUrl
-        ? `<div class="box">
-            ${ph.note ? `<p style="font-size:.84rem;color:#17171A;margin-bottom:${ph.deliverableUrl ? ".75rem" : "0"};white-space:pre-wrap;"><strong>${esc(T.studioNote)}:</strong> ${esc(ph.note)}</p>` : ""}
-            ${ph.deliverableUrl ? `<a class="pill-link" href="${esc(ph.deliverableUrl)}" target="_blank" rel="noopener noreferrer">${esc(A.deliverable)}</a>` : ""}
-          </div>`
-        : "";
+  const used = Math.min(MAX_PHASE_REVISIONS, Math.max(0, Number(ph.revisionsUsed) || 0));
+  const nextRound = used + 1;
 
-    const bodyHtml = `${detailHtml}<p class="lead" style="font-size:.82rem;margin-bottom:1.25rem;">${esc(A.legal)}</p>`;
+  if (ph.status === "active" && used > 0) {
     return htmlResponse(
-      page(A.title, A.heading, A.intro(phaseTitle(ph, L), proj.brand), {
+      page(A.revWorking[0], A.revWorking[1], A.revWorking[2](used, MAX_PHASE_REVISIONS), {
         lang: L,
         eyebrow: A.eyebrow,
-        html: bodyHtml,
-        form: true,
-        formLabel: A.btn,
+        html: `<a class="btn" href="${esc(trackingUrl)}">${esc(PG[L].common.openTracker)}</a>`,
         footerUrl: trackingUrl,
         footerLabel: PG[L].common.openTracker,
       }),
@@ -3061,8 +3145,127 @@ async function handlePhaseApprove(request, env, url) {
     );
   }
 
+  const renderReviewScreen = (revError = "", statusCode = 200) => {
+    const detailHtml =
+      ph.note || ph.deliverableUrl || used > 0
+        ? `<div class="box">
+            ${ph.note ? `<p style="font-size:.84rem;color:#17171A;margin-bottom:${ph.deliverableUrl || used > 0 ? ".75rem" : "0"};white-space:pre-wrap;"><strong>${esc(T.studioNote)}:</strong> ${esc(ph.note)}</p>` : ""}
+            ${ph.deliverableUrl ? `<a class="pill-link" href="${esc(ph.deliverableUrl)}" target="_blank" rel="noopener noreferrer">${esc(A.deliverable)}</a>` : ""}
+            ${used > 0 ? `<p style="font-size:.75rem;color:#58575E;margin-top:${ph.deliverableUrl ? ".65rem" : "0"};">${esc(A.roundsUsed(used, MAX_PHASE_REVISIONS))}</p>` : ""}
+          </div>`
+        : "";
+
+    const canRevise = ph.status === "review" && used < MAX_PHASE_REVISIONS;
+    const reviseHtml = canRevise
+      ? `<details class="rev-details"${revError ? " open" : ""}>
+          <summary class="btn secondary">${esc(A.revToggle(nextRound, MAX_PHASE_REVISIONS))}</summary>
+          <div class="rev-body">
+            ${revError ? `<p class="rev-err">${esc(revError)}</p>` : ""}
+            <form method="POST">
+              <input type="hidden" name="decision" value="revise">
+              <label for="feedback">${esc(A.revLabel(nextRound, MAX_PHASE_REVISIONS))}</label>
+              <textarea id="feedback" name="feedback" rows="4" maxlength="1500" required placeholder="${esc(A.revPh)}"></textarea>
+              <button type="submit">${esc(A.revSubmit(nextRound, MAX_PHASE_REVISIONS))}</button>
+            </form>
+          </div>
+        </details>`
+      : used >= MAX_PHASE_REVISIONS
+        ? `<div class="box" style="margin-top:.85rem;margin-bottom:0;font-size:.8rem;color:#58575E;">${esc(A.revExhausted)}</div>`
+        : "";
+
+    const bodyHtml = `${detailHtml}<p class="lead" style="font-size:.82rem;margin-bottom:1.25rem;">${esc(A.legal)}</p><form method="POST"><input type="hidden" name="decision" value="approve"><button type="submit">${esc(A.btn)}</button></form>${reviseHtml}`;
+
+    return htmlResponse(
+      page(A.title, A.heading, A.intro(phaseTitle(ph, L), proj.brand), {
+        lang: L,
+        eyebrow: A.eyebrow,
+        html: bodyHtml,
+        footerUrl: trackingUrl,
+        footerLabel: PG[L].common.openTracker,
+      }),
+      statusCode
+    );
+  };
+
+  if (request.method === "GET" || request.method === "HEAD") {
+    return renderReviewScreen();
+  }
+
   if (request.method !== "POST") {
     return new Response("method not allowed", { status: 405, headers: { Allow: "GET, HEAD, POST" } });
+  }
+
+  const form = await request.formData().catch(() => null);
+  const decision = String(form?.get("decision") || "approve");
+
+  if (decision === "revise") {
+    if (ph.status !== "review" || used >= MAX_PHASE_REVISIONS) {
+      return renderReviewScreen("", 400);
+    }
+    const feedback = cleanNote(form?.get("feedback") ?? "", 1500);
+    if (!feedback) {
+      return renderReviewScreen(A.revEmpty, 400);
+    }
+
+    const now = new Date().toISOString();
+    const round = nextRound;
+    const phaseTitleEs = phaseTitle(ph, "es");
+    const manageUrl = await advancePhaseUrl(env, p, step);
+
+    try {
+      await resendSend(
+        env,
+        {
+          to: ["hola@rebrandyourbrand.es"],
+          reply_to: proj.clientEmail,
+          subject: `ajustes solicitados (ronda ${round} de ${MAX_PHASE_REVISIONS}) — "${phaseTitleEs}" — ${proj.brand}`,
+          ...renderEmail("es", {
+            paras: [
+              "el cliente ha solicitado ajustes directamente desde la página de revisión de fase.",
+              lines(
+                `— proyecto: ${bold(proj.brand)}`,
+                `— cliente: ${bold(proj.clientEmail)}`,
+                `— fase: ${bold(`paso ${ph.step} — ${phaseTitleEs}`)}`,
+                `— ronda consumida: ${bold(`ronda ${round} de ${MAX_PHASE_REVISIONS}`)}`,
+                `— fecha (iso): ${bold(now)}`
+              ),
+              "cambios solicitados por el cliente:",
+            ],
+            quote: feedback,
+            cta: { label: "abrir panel de la fase para subir nueva versión", url: manageUrl },
+            secondaryLink: { label: "ver seguimiento público del cliente", url: trackingUrl },
+            note:
+              round >= MAX_PHASE_REVISIONS
+                ? "esta ha sido la segunda y última ronda gratuita incluida en esta fase. cualquier ajuste posterior se tarifica aparte o a 50 €/h (cláusula 1.2)."
+                : "cuando tengas lista la propuesta ajustada, vuelve a enviarla a revisión desde el panel de la fase.",
+          }),
+        },
+        `revise-admin-${p}-${step}-r${round}`
+      );
+    } catch (e) {
+      console.error("revision request email failed:", e?.message);
+      return errorPage(L);
+    }
+
+    ph.revisionsUsed = round;
+    if (!Array.isArray(ph.revisions)) ph.revisions = [];
+    ph.revisions.push({ round, text: feedback, requestedAt: now });
+    ph.status = "active";
+    ph.lastRevisionAt = now;
+    delete ph.reminderSentAt;
+    delete ph.tacitAlertSentAt;
+    await env.LEADS_KV.put(`project:${p}`, JSON.stringify(proj));
+
+    return htmlResponse(
+      page(A.revDone[0], A.revDone[1], A.revDone[2](round, MAX_PHASE_REVISIONS), {
+        lang: L,
+        eyebrow: A.eyebrow,
+        html: `<a class="btn" href="${esc(trackingUrl)}">${esc(PG[L].common.openTracker)}</a>`,
+        footerUrl: trackingUrl,
+        footerLabel: PG[L].common.openTracker,
+      }),
+      200
+    );
   }
 
   const res = await completeProjectPhase(env, proj, p, {
@@ -3364,7 +3567,8 @@ async function handleProject(request, env, url) {
       } else if (isReview) {
         meta = T.review;
       } else if (isActive) {
-        meta = T.active;
+        const rUsed = Math.min(MAX_PHASE_REVISIONS, Math.max(0, Number(ph.revisionsUsed) || 0));
+        meta = rUsed > 0 ? T.activeRev(rUsed, MAX_PHASE_REVISIONS) : T.active;
       }
 
       const safeDeliv = cleanHttpsUrl(ph.deliverableUrl || "", 500);

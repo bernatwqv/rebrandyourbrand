@@ -124,6 +124,13 @@ input,select,textarea{
   color:#17171A;
   margin-bottom:1rem;
 }
+textarea{
+  field-sizing:content;
+  height:auto;
+  min-block-size:4.5lh;
+  max-block-size:14lh;
+  resize:vertical;
+}
 input::placeholder,textarea::placeholder{color:rgba(88,87,94,.6)}
 input[readonly]{background:#F6F2E8;color:#58575E}
 input:focus,select:focus,textarea:focus{outline:none;border-color:#8CA3C4;box-shadow:0 0 0 3px rgba(140,163,196,.2)}
@@ -161,6 +168,26 @@ button.secondary:hover,.btn.secondary:hover,button.no:hover{
   padding:.52rem .9rem;
   font-size:.76rem;
   border-radius:9px;
+}
+.rev-details{margin-top:.65rem;text-align:left}
+.rev-details summary{list-style:none;margin-top:0;user-select:none}
+.rev-details summary::-webkit-details-marker{display:none}
+.rev-details[open] summary{border-color:#E8A33D;background:#FFFDF9;color:#825008}
+.rev-body{
+  margin-top:.65rem;
+  background:#FFFFFF;
+  border:1px solid #E4DED0;
+  border-radius:12px;
+  padding:1.05rem 1.15rem;
+}
+.rev-err{
+  color:#825008;
+  background:#FFFDF9;
+  border:1px solid #E8A33D;
+  border-radius:8px;
+  padding:.55rem .75rem;
+  font-size:.8rem;
+  margin-bottom:.85rem;
 }
 :focus-visible{outline:2px solid #E8A33D;outline-offset:2px}
 .timeline{display:grid;gap:.85rem;margin-bottom:1.25rem;text-align:left}

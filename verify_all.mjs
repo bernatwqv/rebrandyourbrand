@@ -19,13 +19,13 @@ ld.forEach((m, i) => {
   console.log(`index.html JSON-LD #${i}: OK`);
 });
 
-for (const key of ["pending-msg", "verified-note", "open-project"]) {
+for (const key of ["pending-msg", "verified-note", "open-project", "svc-web-annual"]) {
   const count = [...html.matchAll(new RegExp(`"${key}"\\s*:`, "g"))].length;
   if (count !== 4) {
     throw new Error(`La clave "${key}" aparece ${count} veces en index.html (esperado: 4 idiomas).`);
   }
 }
-console.log("index.html claves multilingües de Brandi (es / ca / eu / en): OK");
+console.log("index.html claves multilingües de Brandi y servicios (es / ca / eu / en): OK");
 
 // 2. Auditar reglas inquebrantables de estilo y módulo ESM en worker.js
 const workerPath = join(root, "worker.js");

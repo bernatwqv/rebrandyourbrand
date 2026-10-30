@@ -358,10 +358,13 @@ async function handlePhaseAdvance(request, env, url) {
   }
 
   const currentTitleEs = phaseTitle(currentPhaseObj, "es");
+  const revsUsed = Math.min(MAX_PHASE_REVISIONS, Math.max(0, Number(currentPhaseObj.revisionsUsed) || 0));
   const stateLabel =
     currentPhaseObj.status === "review"
       ? `en revisión del cliente (enviada el ${fmtDate(currentPhaseObj.reviewSentAt || currentPhaseObj.date, "es")})`
-      : "en curso en el estudio";
+      : revsUsed > 0
+        ? `aplicando ajustes del cliente (ronda ${revsUsed} de ${MAX_PHASE_REVISIONS})`
+        : "en curso en el estudio";
 
   if (request.method === "GET" || request.method === "HEAD") {
     const ob = proj.onboarding;
@@ -376,6 +379,21 @@ async function handlePhaseAdvance(request, env, url) {
         </div>`
       : "";
 
+    const revsHtml =
+      Array.isArray(currentPhaseObj.revisions) && currentPhaseObj.revisions.length
+        ? `<div class="box review-box">
+            <span class="eyebrow">historial de ajustes solicitados por el cliente</span>
+            ${currentPhaseObj.revisions
+              .map(
+                (rv) => `<div style="margin-bottom:.75rem;">
+                  <span style="display:block;font-size:.75rem;font-weight:600;color:#825008;margin-bottom:.25rem;">ronda ${Number(rv.round) || 1} de ${MAX_PHASE_REVISIONS}${rv.requestedAt ? ` — ${esc(fmtDate(rv.requestedAt, "es"))}` : ""}</span>
+                  <div class="phase-note" style="margin-top:0;">${esc(rv.text || "")}</div>
+                </div>`
+              )
+              .join("")}
+          </div>`
+        : "";
+
     const html = `
       <div class="box">
         <div class="kv">
@@ -385,9 +403,11 @@ async function handlePhaseAdvance(request, env, url) {
           <div class="kv-row"><span>servicios</span><span class="kv-val">${esc(svcLabel(proj.services, "es"))}</span></div>
           <div class="kv-row"><span>fase actual</span><span class="kv-val">paso ${currentPhaseObj.step} — ${esc(currentTitleEs)}</span></div>
           <div class="kv-row"><span>estado</span><span class="kv-val">${esc(stateLabel)}</span></div>
+          <div class="kv-row"><span>rondas gratuitas usadas</span><span class="kv-val">${revsUsed} de ${MAX_PHASE_REVISIONS}</span></div>
         </div>
       </div>
       ${obHtml}
+      ${revsHtml}
       <form method="POST" style="text-align:left;">
         <label for="deliverableUrl">enlace al entregable o preview (opcional, https://)</label>
         <input id="deliverableUrl" name="deliverableUrl" type="url" maxlength="500" placeholder="https://www.figma.com/... o https://drive.google.com/..." value="${esc(currentPhaseObj.deliverableUrl || "")}">
@@ -502,7 +522,7 @@ async function handlePhaseAdvance(request, env, url) {
       page(
         "propuesta enviada",
         "propuesta enviada a revisión",
-        `hemos avisado a ${proj.clientEmail} con el botón de aprobación escrita para "${currentTitleEs}". en cuanto pulse aprobar, avanzará automáticamente a la siguiente fase.`,
+        `hemos avisado a ${proj.clientEmail} con el enlace para revisar, aprobar por escrito o pedir ajustes en "${currentTitleEs}".`,
         {
           eyebrow: "panel interno del estudio",
           html: `<a class="btn secondary" href="${esc(currentManageUrl)}">volver al panel de esta fase</a>`,
@@ -561,7 +581,7 @@ async function handlePhaseAdvance(request, env, url) {
   );
 }
 
-// ── APROBACIÓN ESCRITA DE FASE POR EL CLIENTE (/approve-phase) ──
+// ── REVISIÓN, SOLICITUD DE AJUSTES Y APROBACIÓN ESCRITA POR EL CLIENTE (/approve-phase) ──
 async function handlePhaseApprove(request, env, url) {
   let L = langFromRequest(request);
   const p = url.searchParams.get("p");
@@ -609,23 +629,15 @@ async function handlePhaseApprove(request, env, url) {
     );
   }
 
-  if (request.method === "GET" || request.method === "HEAD") {
-    const detailHtml =
-      ph.note || ph.deliverableUrl
-        ? `<div class="box">
-            ${ph.note ? `<p style="font-size:.84rem;color:#17171A;margin-bottom:${ph.deliverableUrl ? ".75rem" : "0"};white-space:pre-wrap;"><strong>${esc(T.studioNote)}:</strong> ${esc(ph.note)}</p>` : ""}
-            ${ph.deliverableUrl ? `<a class="pill-link" href="${esc(ph.deliverableUrl)}" target="_blank" rel="noopener noreferrer">${esc(A.deliverable)}</a>` : ""}
-          </div>`
-        : "";
+  const used = Math.min(MAX_PHASE_REVISIONS, Math.max(0, Number(ph.revisionsUsed) || 0));
+  const nextRound = used + 1;
 
-    const bodyHtml = `${detailHtml}<p class="lead" style="font-size:.82rem;margin-bottom:1.25rem;">${esc(A.legal)}</p>`;
+  if (ph.status === "active" && used > 0) {
     return htmlResponse(
-      page(A.title, A.heading, A.intro(phaseTitle(ph, L), proj.brand), {
+      page(A.revWorking[0], A.revWorking[1], A.revWorking[2](used, MAX_PHASE_REVISIONS), {
         lang: L,
         eyebrow: A.eyebrow,
-        html: bodyHtml,
-        form: true,
-        formLabel: A.btn,
+        html: `<a class="btn" href="${esc(trackingUrl)}">${esc(PG[L].common.openTracker)}</a>`,
         footerUrl: trackingUrl,
         footerLabel: PG[L].common.openTracker,
       }),
@@ -633,8 +645,127 @@ async function handlePhaseApprove(request, env, url) {
     );
   }
 
+  const renderReviewScreen = (revError = "", statusCode = 200) => {
+    const detailHtml =
+      ph.note || ph.deliverableUrl || used > 0
+        ? `<div class="box">
+            ${ph.note ? `<p style="font-size:.84rem;color:#17171A;margin-bottom:${ph.deliverableUrl || used > 0 ? ".75rem" : "0"};white-space:pre-wrap;"><strong>${esc(T.studioNote)}:</strong> ${esc(ph.note)}</p>` : ""}
+            ${ph.deliverableUrl ? `<a class="pill-link" href="${esc(ph.deliverableUrl)}" target="_blank" rel="noopener noreferrer">${esc(A.deliverable)}</a>` : ""}
+            ${used > 0 ? `<p style="font-size:.75rem;color:#58575E;margin-top:${ph.deliverableUrl ? ".65rem" : "0"};">${esc(A.roundsUsed(used, MAX_PHASE_REVISIONS))}</p>` : ""}
+          </div>`
+        : "";
+
+    const canRevise = ph.status === "review" && used < MAX_PHASE_REVISIONS;
+    const reviseHtml = canRevise
+      ? `<details class="rev-details"${revError ? " open" : ""}>
+          <summary class="btn secondary">${esc(A.revToggle(nextRound, MAX_PHASE_REVISIONS))}</summary>
+          <div class="rev-body">
+            ${revError ? `<p class="rev-err">${esc(revError)}</p>` : ""}
+            <form method="POST">
+              <input type="hidden" name="decision" value="revise">
+              <label for="feedback">${esc(A.revLabel(nextRound, MAX_PHASE_REVISIONS))}</label>
+              <textarea id="feedback" name="feedback" rows="4" maxlength="1500" required placeholder="${esc(A.revPh)}"></textarea>
+              <button type="submit">${esc(A.revSubmit(nextRound, MAX_PHASE_REVISIONS))}</button>
+            </form>
+          </div>
+        </details>`
+      : used >= MAX_PHASE_REVISIONS
+        ? `<div class="box" style="margin-top:.85rem;margin-bottom:0;font-size:.8rem;color:#58575E;">${esc(A.revExhausted)}</div>`
+        : "";
+
+    const bodyHtml = `${detailHtml}<p class="lead" style="font-size:.82rem;margin-bottom:1.25rem;">${esc(A.legal)}</p><form method="POST"><input type="hidden" name="decision" value="approve"><button type="submit">${esc(A.btn)}</button></form>${reviseHtml}`;
+
+    return htmlResponse(
+      page(A.title, A.heading, A.intro(phaseTitle(ph, L), proj.brand), {
+        lang: L,
+        eyebrow: A.eyebrow,
+        html: bodyHtml,
+        footerUrl: trackingUrl,
+        footerLabel: PG[L].common.openTracker,
+      }),
+      statusCode
+    );
+  };
+
+  if (request.method === "GET" || request.method === "HEAD") {
+    return renderReviewScreen();
+  }
+
   if (request.method !== "POST") {
     return new Response("method not allowed", { status: 405, headers: { Allow: "GET, HEAD, POST" } });
+  }
+
+  const form = await request.formData().catch(() => null);
+  const decision = String(form?.get("decision") || "approve");
+
+  if (decision === "revise") {
+    if (ph.status !== "review" || used >= MAX_PHASE_REVISIONS) {
+      return renderReviewScreen("", 400);
+    }
+    const feedback = cleanNote(form?.get("feedback") ?? "", 1500);
+    if (!feedback) {
+      return renderReviewScreen(A.revEmpty, 400);
+    }
+
+    const now = new Date().toISOString();
+    const round = nextRound;
+    const phaseTitleEs = phaseTitle(ph, "es");
+    const manageUrl = await advancePhaseUrl(env, p, step);
+
+    try {
+      await resendSend(
+        env,
+        {
+          to: ["hola@rebrandyourbrand.es"],
+          reply_to: proj.clientEmail,
+          subject: `ajustes solicitados (ronda ${round} de ${MAX_PHASE_REVISIONS}) — "${phaseTitleEs}" — ${proj.brand}`,
+          ...renderEmail("es", {
+            paras: [
+              "el cliente ha solicitado ajustes directamente desde la página de revisión de fase.",
+              lines(
+                `— proyecto: ${bold(proj.brand)}`,
+                `— cliente: ${bold(proj.clientEmail)}`,
+                `— fase: ${bold(`paso ${ph.step} — ${phaseTitleEs}`)}`,
+                `— ronda consumida: ${bold(`ronda ${round} de ${MAX_PHASE_REVISIONS}`)}`,
+                `— fecha (iso): ${bold(now)}`
+              ),
+              "cambios solicitados por el cliente:",
+            ],
+            quote: feedback,
+            cta: { label: "abrir panel de la fase para subir nueva versión", url: manageUrl },
+            secondaryLink: { label: "ver seguimiento público del cliente", url: trackingUrl },
+            note:
+              round >= MAX_PHASE_REVISIONS
+                ? "esta ha sido la segunda y última ronda gratuita incluida en esta fase. cualquier ajuste posterior se tarifica aparte o a 50 €/h (cláusula 1.2)."
+                : "cuando tengas lista la propuesta ajustada, vuelve a enviarla a revisión desde el panel de la fase.",
+          }),
+        },
+        `revise-admin-${p}-${step}-r${round}`
+      );
+    } catch (e) {
+      console.error("revision request email failed:", e?.message);
+      return errorPage(L);
+    }
+
+    ph.revisionsUsed = round;
+    if (!Array.isArray(ph.revisions)) ph.revisions = [];
+    ph.revisions.push({ round, text: feedback, requestedAt: now });
+    ph.status = "active";
+    ph.lastRevisionAt = now;
+    delete ph.reminderSentAt;
+    delete ph.tacitAlertSentAt;
+    await env.LEADS_KV.put(`project:${p}`, JSON.stringify(proj));
+
+    return htmlResponse(
+      page(A.revDone[0], A.revDone[1], A.revDone[2](round, MAX_PHASE_REVISIONS), {
+        lang: L,
+        eyebrow: A.eyebrow,
+        html: `<a class="btn" href="${esc(trackingUrl)}">${esc(PG[L].common.openTracker)}</a>`,
+        footerUrl: trackingUrl,
+        footerLabel: PG[L].common.openTracker,
+      }),
+      200
+    );
   }
 
   const res = await completeProjectPhase(env, proj, p, {
@@ -936,7 +1067,8 @@ async function handleProject(request, env, url) {
       } else if (isReview) {
         meta = T.review;
       } else if (isActive) {
-        meta = T.active;
+        const rUsed = Math.min(MAX_PHASE_REVISIONS, Math.max(0, Number(ph.revisionsUsed) || 0));
+        meta = rUsed > 0 ? T.activeRev(rUsed, MAX_PHASE_REVISIONS) : T.active;
       }
 
       const safeDeliv = cleanHttpsUrl(ph.deliverableUrl || "", 500);

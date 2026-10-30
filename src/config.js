@@ -36,8 +36,10 @@ const TACIT_APPROVAL_DAYS = 20;
 
 const RENEWAL_NOTICE_DAYS = 30;
 
-// Importe base anual de renovación de infraestructura web (dominio, DNS/SSL y correo corporativo) si env.WEB_RENEWAL_EUR no está definida en Cloudflare
-const WEB_RENEWAL_EUR = 85;
+const MAX_PHASE_REVISIONS = 2;
+
+// Importe anual obligatorio de infraestructura técnica web (dominio, correo corporativo, DNS/SSL y despliegue edge) si env.WEB_RENEWAL_EUR no está definida en Cloudflare
+const WEB_RENEWAL_EUR = 100;
 
 const DAY_MS = 86400 * 1000;
 
@@ -109,10 +111,10 @@ const SERVICES = {
       en: "website",
     },
     includes: {
-      es: "página web rápida y a tu nombre, publicada y entregada llave en mano",
-      ca: "pàgina web ràpida i a nom teu, publicada i lliurada clau en mà",
-      eu: "zure izenean egindako webgune azkarra, argitaratua eta giltza eskuan entregatua",
-      en: "fast website in your name, published and delivered turnkey",
+      es: "página web rápida y a tu nombre entregada llave en mano (más 100 €/año de infraestructura técnica: dominio, correo corporativo, DNS y despliegue edge)",
+      ca: "pàgina web ràpida i a nom teu lliurada clau en mà (més 100 €/any d'infraestructura tècnica: domini, correu corporatiu, DNS i desplegament edge)",
+      eu: "zure izenean egindako webgune azkarra giltza eskuan entregatua (gehi 100 €/urtean azpiegitura teknikoa: domeinua, posta korporatiboa, DNS eta edge hedapena)",
+      en: "fast website in your name delivered turnkey (plus €100/year technical infrastructure: domain, corporate email, DNS and edge deployment)",
     },
   },
 };

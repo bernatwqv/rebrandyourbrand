@@ -10,6 +10,8 @@ const newPhases = (ids) => {
     step: i + 1,
     key,
     status: i === 0 ? "active" : "pending",
+    revisionsUsed: 0,
+    revisions: [],
     ...(i === 0 ? { date: new Date().toISOString() } : {}),
   }));
 };
@@ -195,10 +197,10 @@ async function createRenewalCheckout(env, proj, renewalEur) {
   const safeBrand = proj.brand || "proyecto";
   const projectUrl = buildUrl("/proyecto", { token: proj.token });
   const labelByLang = {
-    es: "Renovación anual de dominio y correo",
-    ca: "Renovació anual de domini i correu",
-    eu: "Domeinuaren eta postaren urteko berritzea",
-    en: "Annual domain and email renewal",
+    es: "Renovación anual de infraestructura web (dominio, correo, DNS y edge)",
+    ca: "Renovació anual d'infraestructura web (domini, correu, DNS i edge)",
+    eu: "Web-azpiegituraren urteko berritzea (domeinua, posta, DNS eta edge)",
+    en: "Annual web infrastructure renewal (domain, email, DNS and edge)",
   };
   const params = new URLSearchParams({
     "payment_method_types[0]": "card",
