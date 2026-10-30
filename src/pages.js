@@ -133,6 +133,62 @@ textarea{
 }
 input::placeholder,textarea::placeholder{color:rgba(88,87,94,.6)}
 input[readonly]{background:#F6F2E8;color:#58575E}
+input[type="file"]{
+  padding:.55rem .75rem;
+  font-size:.82rem;
+  background:#FFFFFF;
+  cursor:pointer;
+}
+input[type="file"]::file-selector-button{
+  border:1px solid #E4DED0;
+  background:#EDE6D6;
+  color:#17171A;
+  padding:.4rem .8rem;
+  border-radius:7px;
+  margin-right:.8rem;
+  font:600 .78rem/1.2 inherit;
+  cursor:pointer;
+  transition:background .2s;
+}
+input[type="file"]::file-selector-button:hover{
+  background:#E4DED0;
+}
+.file-note{
+  font-size:.74rem;
+  color:#58575E;
+  margin-top:-.6rem;
+  margin-bottom:1rem;
+  display:block;
+}
+.confirm-box{
+  margin-top:.85rem;
+  margin-bottom:1.15rem;
+  padding:.85rem 1rem;
+  background:#FFFDF9;
+  border:1px solid #E8A33D;
+  border-radius:10px;
+  text-align:left;
+}
+.confirm-label{
+  display:flex;
+  align-items:flex-start;
+  gap:.65rem;
+  font-size:.82rem;
+  line-height:1.45;
+  color:#17171A;
+  cursor:pointer;
+  margin-bottom:0;
+  user-select:none;
+}
+.confirm-label input[type="checkbox"]{
+  width:1.15rem;
+  height:1.15rem;
+  min-width:1.15rem;
+  margin:0;
+  margin-top:.12rem;
+  accent-color:#E8A33D;
+  cursor:pointer;
+}
 input:focus,select:focus,textarea:focus{outline:none;border-color:#8CA3C4;box-shadow:0 0 0 3px rgba(140,163,196,.2)}
 button,.btn{
   display:inline-flex;

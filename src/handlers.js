@@ -103,7 +103,7 @@ async function completeProjectPhase(
   env,
   proj,
   projectToken,
-  { approvedBy = "studio", deliverableUrl = "", note = "", legacyActionToken = "" } = {}
+  { approvedBy = "studio", deliverableUrl = "", deliverableFilename = "", note = "", legacyActionToken = "" } = {}
 ) {
   const idx = proj.phases.findIndex(
     (ph) => ph.step === Number(proj.currentPhase) && (ph.status === "active" || ph.status === "review")
@@ -119,6 +119,7 @@ async function completeProjectPhase(
   advancedPhase.approvedBy = approvedBy;
   if (approvedBy === "client") advancedPhase.approvedAt = now;
   if (deliverableUrl) advancedPhase.deliverableUrl = deliverableUrl;
+  if (deliverableFilename) advancedPhase.deliverableFilename = deliverableFilename;
   if (note) advancedPhase.note = note;
 
   let nextPhase = null;
@@ -408,11 +409,20 @@ async function handlePhaseAdvance(request, env, url) {
       </div>
       ${obHtml}
       ${revsHtml}
-      <form method="POST" style="text-align:left;">
-        <label for="deliverableUrl">enlace al entregable o preview (opcional, https://)</label>
-        <input id="deliverableUrl" name="deliverableUrl" type="url" maxlength="500" placeholder="https://www.figma.com/... o https://drive.google.com/..." value="${esc(currentPhaseObj.deliverableUrl || "")}">
+      <form method="POST" enctype="multipart/form-data" style="text-align:left;">
+        <label for="deliverable_file">1. subir archivo directo del entregable (opcional, cualquier formato)</label>
+        <input id="deliverable_file" name="deliverable_file" type="file">
+        <span class="file-note">acepta cualquier formato (pdf, zip, png, jpg, svg, webp, mp4...) hasta 25 mb.</span>
+        <label for="deliverable_url">2. o pegar enlace externo (opcional si subes archivo, ej. github pages o figma)</label>
+        <input id="deliverable_url" name="deliverable_url" type="url" maxlength="500" placeholder="https://..." value="${esc(currentPhaseObj.deliverableUrl || "")}">
         <label for="note">nota para el cliente (opcional)</label>
         <textarea id="note" name="note" rows="4" maxlength="600" placeholder="contexto breve sobre la entrega, qué revisar o pasos siguientes...">${esc(currentPhaseObj.note || "")}</textarea>
+        <div class="confirm-box">
+          <label class="confirm-label">
+            <input type="checkbox" name="confirm_action" value="yes" required>
+            <span>confirmo que he revisado el contenido y el entregable antes de enviarlo definitivamente</span>
+          </label>
+        </div>
         <button type="submit" name="decision" value="review">enviar propuesta a revisión del cliente</button>
         <button type="submit" name="decision" value="complete" class="secondary">marcar fase como completada y avanzar directamente</button>
       </form>
@@ -440,17 +450,95 @@ async function handlePhaseAdvance(request, env, url) {
   }
 
   const form = await request.formData().catch(() => null);
-  const rawUrl = String(form?.get("deliverableUrl") ?? "").trim();
-  const deliverableUrl = cleanHttpsUrl(rawUrl, 500);
-  if (rawUrl && !deliverableUrl) {
+  const currentManageUrl = await advancePhaseUrl(env, projectToken, step);
+
+  if (String(form?.get("confirm_action") || "") !== "yes") {
+    return htmlResponse(
+      page(
+        "confirmación obligatoria",
+        "marca la casilla de confirmación",
+        "es obligatorio marcar la casilla de confirmación antes de enviar la propuesta o completar la fase.",
+        {
+          eyebrow: "panel interno del estudio",
+          footerUrl: currentManageUrl,
+          footerLabel: "volver a la fase",
+        }
+      ),
+      400
+    );
+  }
+
+  const rawUrl = String(form?.get("deliverable_url") ?? form?.get("deliverableUrl") ?? "").trim();
+  const directUrl = cleanHttpsUrl(rawUrl, 500);
+  if (rawUrl && !directUrl) {
     return htmlResponse(
       page(
         "enlace inválido",
         "revisa el enlace del entregable",
-        "el enlace al entregable debe usar https:// (por ejemplo https://drive.google.com/...). vuelve atrás y corrígelo o déjalo vacío.",
+        "el enlace al entregable debe usar https:// (por ejemplo https://drive.google.com/...). vuelve atrás y corrígelo o déjalo vacío si subes un archivo directo.",
         {
           eyebrow: "panel interno del estudio",
-          footerUrl: await advancePhaseUrl(env, projectToken, step),
+          footerUrl: currentManageUrl,
+          footerLabel: "volver a la fase",
+        }
+      ),
+      400
+    );
+  }
+
+  const delivFile = form?.get("deliverable_file");
+  let uploadedFileUrl = "";
+  let uploadedFilename = "";
+
+  if (
+    delivFile &&
+    typeof delivFile === "object" &&
+    typeof delivFile.arrayBuffer === "function" &&
+    delivFile.size > 0
+  ) {
+    if (delivFile.size > 25 * 1024 * 1024) {
+      return htmlResponse(
+        page(
+          "archivo demasiado grande",
+          "tamaño de archivo superado",
+          "el archivo supera el límite de 25 mb admitido para subida directa. para archivos más pesados, compártelo mediante un enlace externo (drive, wetransfer o dropbox) en el campo inferior.",
+          {
+            eyebrow: "panel interno del estudio",
+            footerUrl: currentManageUrl,
+            footerLabel: "volver a la fase",
+          }
+        ),
+        400
+      );
+    }
+    const fileId = crypto.randomUUID().replace(/-/g, "").slice(0, 16);
+    const arrayBuf = await delivFile.arrayBuffer();
+    uploadedFilename = safeFilename(delivFile.name, `entregable-fase-${step}`);
+    const contentType = cleanInput(delivFile.type, 100) || "application/octet-stream";
+    await env.LEADS_KV.put(`file:${projectToken}:${step}:${fileId}`, arrayBuf, {
+      metadata: {
+        filename: uploadedFilename,
+        contentType,
+        size: delivFile.size,
+        createdAt: new Date().toISOString(),
+      },
+    });
+    uploadedFileUrl = await fileDownloadUrl(env, projectToken, step, fileId);
+  }
+
+  const effectiveDeliverableUrl = uploadedFileUrl || directUrl || currentPhaseObj.deliverableUrl || "";
+  const effectiveDeliverableFilename =
+    uploadedFilename || (uploadedFileUrl ? uploadedFilename : (!directUrl ? currentPhaseObj.deliverableFilename || "" : ""));
+
+  if (!effectiveDeliverableUrl) {
+    return htmlResponse(
+      page(
+        "entregable obligatorio",
+        "falta el entregable de la fase",
+        "es obligatorio adjuntar un archivo o indicar un enlace al entregable antes de enviar la propuesta al cliente.",
+        {
+          eyebrow: "panel interno del estudio",
+          footerUrl: currentManageUrl,
           footerLabel: "volver a la fase",
         }
       ),
@@ -460,13 +548,17 @@ async function handlePhaseAdvance(request, env, url) {
 
   const note = cleanNote(form?.get("note") ?? "", 600);
   const decision = String(form?.get("decision") ?? "complete");
-  const currentManageUrl = await advancePhaseUrl(env, projectToken, step);
 
   if (decision === "review") {
     const now = new Date().toISOString();
     currentPhaseObj.status = "review";
     currentPhaseObj.reviewSentAt = now;
-    currentPhaseObj.deliverableUrl = deliverableUrl;
+    currentPhaseObj.deliverableUrl = effectiveDeliverableUrl;
+    if (effectiveDeliverableFilename) {
+      currentPhaseObj.deliverableFilename = effectiveDeliverableFilename;
+    } else {
+      delete currentPhaseObj.deliverableFilename;
+    }
     currentPhaseObj.note = note;
     delete currentPhaseObj.reminderSentAt;
     delete currentPhaseObj.tacitAlertSentAt;
@@ -487,8 +579,8 @@ async function handlePhaseAdvance(request, env, url) {
             paras: [
               tp.hello,
               tp.intro(bold(proj.brand), bold(phaseNameClient)),
-              deliverableUrl
-                ? `${tp.openDeliverable}: <a href="${esc(deliverableUrl)}" target="_blank" style="color:#3D5A85;font-weight:600;">${esc(deliverableUrl)}</a>`
+              effectiveDeliverableUrl
+                ? `${tp.openDeliverable}: <a href="${esc(effectiveDeliverableUrl)}" target="_blank" style="color:#3D5A85;font-weight:600;">${esc(effectiveDeliverableFilename || effectiveDeliverableUrl)}</a>`
                 : "",
             ].filter(Boolean),
             quote: note,
@@ -536,7 +628,8 @@ async function handlePhaseAdvance(request, env, url) {
 
   const result = await completeProjectPhase(env, proj, projectToken, {
     approvedBy: "studio",
-    deliverableUrl,
+    deliverableUrl: effectiveDeliverableUrl,
+    deliverableFilename: effectiveDeliverableFilename,
     note,
     legacyActionToken,
   });
@@ -650,7 +743,7 @@ async function handlePhaseApprove(request, env, url) {
       ph.note || ph.deliverableUrl || used > 0
         ? `<div class="box">
             ${ph.note ? `<p style="font-size:.84rem;color:#17171A;margin-bottom:${ph.deliverableUrl || used > 0 ? ".75rem" : "0"};white-space:pre-wrap;"><strong>${esc(T.studioNote)}:</strong> ${esc(ph.note)}</p>` : ""}
-            ${ph.deliverableUrl ? `<a class="pill-link" href="${esc(ph.deliverableUrl)}" target="_blank" rel="noopener noreferrer">${esc(A.deliverable)}</a>` : ""}
+            ${ph.deliverableUrl ? `<a class="pill-link" href="${esc(ph.deliverableUrl)}" target="_blank" rel="noopener noreferrer">${esc(ph.deliverableFilename ? `${A.deliverable} (${ph.deliverableFilename})` : A.deliverable)}</a>` : ""}
             ${used > 0 ? `<p style="font-size:.75rem;color:#58575E;margin-top:${ph.deliverableUrl ? ".65rem" : "0"};">${esc(A.roundsUsed(used, MAX_PHASE_REVISIONS))}</p>` : ""}
           </div>`
         : "";
@@ -665,6 +758,12 @@ async function handlePhaseApprove(request, env, url) {
               <input type="hidden" name="decision" value="revise">
               <label for="feedback">${esc(A.revLabel(nextRound, MAX_PHASE_REVISIONS))}</label>
               <textarea id="feedback" name="feedback" rows="4" minlength="5" maxlength="1500" required placeholder="${esc(A.revPh)}"></textarea>
+              <div class="confirm-box">
+                <label class="confirm-label">
+                  <input type="checkbox" name="confirm_action" value="yes" required>
+                  <span>${esc(A.confirmRevise)}</span>
+                </label>
+              </div>
               <button type="submit">${esc(A.revSubmit(nextRound, MAX_PHASE_REVISIONS))}</button>
             </form>
           </div>
@@ -673,7 +772,7 @@ async function handlePhaseApprove(request, env, url) {
         ? `<div class="box" style="margin-top:.85rem;margin-bottom:0;font-size:.8rem;color:#58575E;">${esc(A.revExhausted)}</div>`
         : "";
 
-    const bodyHtml = `${detailHtml}<p class="lead" style="font-size:.82rem;margin-bottom:1.25rem;">${esc(A.legal)}</p><form method="POST"><input type="hidden" name="decision" value="approve"><button type="submit">${esc(A.btn)}</button></form>${reviseHtml}`;
+    const bodyHtml = `${detailHtml}<p class="lead" style="font-size:.82rem;margin-bottom:1.25rem;">${esc(A.legal)}</p><form method="POST"><input type="hidden" name="decision" value="approve"><div class="confirm-box"><label class="confirm-label"><input type="checkbox" name="confirm_action" value="yes" required><span>${esc(A.confirmApprove)}</span></label></div><button type="submit">${esc(A.btn)}</button></form>${reviseHtml}`;
 
     return htmlResponse(
       page(A.title, A.heading, A.intro(phaseTitle(ph, L), proj.brand), {
@@ -697,6 +796,10 @@ async function handlePhaseApprove(request, env, url) {
 
   const form = await request.formData().catch(() => null);
   const decision = String(form?.get("decision") || "approve");
+
+  if (String(form?.get("confirm_action") || "") !== "yes") {
+    return renderReviewScreen(A.confirmRequired, 400);
+  }
 
   if (decision === "revise") {
     if (ph.status !== "review" || used >= MAX_PHASE_REVISIONS) {
@@ -771,6 +874,7 @@ async function handlePhaseApprove(request, env, url) {
   const res = await completeProjectPhase(env, proj, p, {
     approvedBy: "client",
     deliverableUrl: ph.deliverableUrl || "",
+    deliverableFilename: ph.deliverableFilename || "",
     note: ph.note || "",
   });
 
@@ -863,6 +967,79 @@ async function handleCancelRenewal(request, env, url) {
   );
 }
 
+// ── DESCARGA DIRECTA DE ENTREGABLES (/file) ──
+async function handleFileDownload(request, env, url) {
+  if (request.method !== "GET" && request.method !== "HEAD") {
+    return new Response("method not allowed", { status: 405, headers: { Allow: "GET, HEAD" } });
+  }
+
+  const p = url.searchParams.get("p");
+  const step = parseInt(url.searchParams.get("step") || "", 10);
+  const id = url.searchParams.get("id");
+  const t = url.searchParams.get("t");
+
+  if (
+    !p ||
+    !/^[a-f0-9]{64}$/.test(p) ||
+    !Number.isInteger(step) ||
+    step < 1 ||
+    step > 20 ||
+    !id ||
+    !/^[a-zA-Z0-9_-]{1,64}$/.test(id) ||
+    !t ||
+    !/^[a-f0-9]{64}$/.test(t)
+  ) {
+    return new Response("parámetros de archivo incompletos o inválidos", {
+      status: 400,
+      headers: { "Content-Type": "text/plain; charset=utf-8", "X-Content-Type-Options": "nosniff" },
+    });
+  }
+
+  const key = await getKey(env);
+  if (!(await verifyRaw(key, `file|${p}|${step}|${id}`, t))) {
+    return new Response("enlace de archivo no válido o firma incorrecta", {
+      status: 403,
+      headers: { "Content-Type": "text/plain; charset=utf-8", "X-Content-Type-Options": "nosniff" },
+    });
+  }
+
+  if (!env.LEADS_KV) {
+    return new Response("error de configuración en el servidor", {
+      status: 500,
+      headers: { "Content-Type": "text/plain; charset=utf-8", "X-Content-Type-Options": "nosniff" },
+    });
+  }
+
+  const { value, metadata } = await env.LEADS_KV.getWithMetadata(`file:${p}:${step}:${id}`, {
+    type: "arrayBuffer",
+  });
+
+  if (!value) {
+    return new Response("archivo no encontrado o expirado", {
+      status: 404,
+      headers: { "Content-Type": "text/plain; charset=utf-8", "X-Content-Type-Options": "nosniff" },
+    });
+  }
+
+  const filename = metadata?.filename || `entregable-fase-${step}`;
+  const safeName = safeFilename(filename, `entregable-fase-${step}`);
+  const contentType = metadata?.contentType || "application/octet-stream";
+  const size = metadata?.size || value.byteLength;
+  const encodedName = encodeURIComponent(safeName);
+
+  return new Response(value, {
+    status: 200,
+    headers: {
+      "Content-Type": contentType,
+      "Content-Disposition": `inline; filename="${safeName.replace(/["\r\n\\]/g, "_")}"; filename*=UTF-8''${encodedName}`,
+      "Content-Length": String(size),
+      "Cache-Control": "private, max-age=86400",
+      "X-Content-Type-Options": "nosniff",
+      "Referrer-Policy": "no-referrer",
+    },
+  });
+}
+
 // ── SEGUIMIENTO DEL PROYECTO, RESCATE DE PAGO Y ONBOARDING (/proyecto) ──
 async function handleProject(request, env, url) {
   let L = langFromRequest(request);
@@ -899,6 +1076,18 @@ async function handleProject(request, env, url) {
 
     if (op === "onboarding") {
       if (!proj.paid) return redirectTo(projectPageUrl);
+      if (String(form?.get("confirm_action") || "") !== "yes") {
+        return htmlResponse(
+          page(T.confirmRequiredTitle || "confirmación obligatoria", T.confirmRequiredHeading || "marca la casilla de confirmación", T.confirmRequired, {
+            lang: L,
+            eyebrow: T.obEyebrow,
+            html: `<a class="btn" href="${esc(projectPageUrl)}">${esc(PG[L].common.openTracker)}</a>`,
+            footerUrl: projectPageUrl,
+            footerLabel: PG[L].common.openTracker,
+          }),
+          400
+        );
+      }
       const socials = cleanInput(form?.get("socials") ?? "", 250);
       const domain = cleanInput(form?.get("domain") ?? "", 200);
       const materials = cleanInput(form?.get("materials") ?? "", 500);
@@ -1029,6 +1218,12 @@ async function handleProject(request, env, url) {
           <input id="domain" name="domain" type="text" maxlength="200" placeholder="${esc(T.obDomainPh)}">
           <label for="materials">${esc(T.obMaterials)}</label>
           <textarea id="materials" name="materials" rows="3" maxlength="500" placeholder="${esc(T.obMaterialsPh)}"></textarea>
+          <div class="confirm-box">
+            <label class="confirm-label">
+              <input type="checkbox" name="confirm_action" value="yes" required>
+              <span>${esc(T.confirmOnboarding)}</span>
+            </label>
+          </div>
           <button type="submit">${esc(T.obSubmit)}</button>
         </form>
       </div>`;
@@ -1078,8 +1273,11 @@ async function handleProject(request, env, url) {
 
       const actions = [];
       if (safeDeliv) {
+        const delivLabel = ph.deliverableFilename
+          ? `${esc(T.deliverable)} (${esc(ph.deliverableFilename)})`
+          : esc(T.deliverable);
         actions.push(
-          `<a class="pill-link" href="${esc(safeDeliv)}" target="_blank" rel="noopener noreferrer">${esc(T.deliverable)}</a>`
+          `<a class="pill-link" href="${esc(safeDeliv)}" target="_blank" rel="noopener noreferrer">${delivLabel}</a>`
         );
       }
       if (isReview) {

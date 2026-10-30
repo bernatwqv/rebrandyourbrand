@@ -33,6 +33,15 @@ export default {
       }
     }
 
+    if (url.pathname === "/file") {
+      try {
+        return await handleFileDownload(request, env, url);
+      } catch (e) {
+        console.error("file route failed:", e?.message);
+        return new Response("error al procesar el archivo", { status: 500 });
+      }
+    }
+
     if (url.pathname === "/proyecto") {
       try {
         return await handleProject(request, env, url);

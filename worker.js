@@ -256,6 +256,13 @@ const cleanBrand = (v) => {
   return /^(null|none|n\/a|undefined|desconocida?)$/i.test(b) ? "" : b;
 };
 
+function safeFilename(name, fallback = "entregable") {
+  if (typeof name !== "string") return fallback;
+  const base = name.split(/[/\\]/).pop() || fallback;
+  const cleaned = base.replace(/["\r\n\t]/g, "").trim();
+  return cleaned.slice(0, 150) || fallback;
+}
+
 function buildUrl(path, query = {}) {
   const u = new URL(path, WORKER_URL);
   for (const [k, v] of Object.entries(query)) {
@@ -817,6 +824,9 @@ const PG = {
       deliverable: "abrir entregable o vista previa",
       roundsUsed: (u, m) => `rondas gratuitas usadas en esta fase: ${u} de ${m}`,
       legal: "al aprobar, das por cerrada esta fase según las condiciones de servicio. si necesitas cambios dentro de tus 2 rondas gratuitas de revisión, despliega el botón secundario de abajo.",
+      confirmApprove: "confirmo que he revisado la propuesta y quiero aprobar definitivamente esta fase",
+      confirmRevise: "confirmo que he revisado las correcciones y quiero enviar esta ronda de ajustes",
+      confirmRequired: "es obligatorio marcar la casilla de confirmación antes de enviar.",
       btn: "aprobar fase y continuar",
       revToggle: (r, m) => `pedir ajustes (ronda ${r} de ${m})`,
       revLabel: (r, m) => `describe con claridad los ajustes que necesitas (ronda ${r} de ${m})`,
@@ -870,6 +880,10 @@ const PG = {
       obDomainPh: "ej. ya tengo tumarca.es / me gustaría tumarca.com",
       obMaterials: "enlace a carpeta con logo previo, fotos y textos (drive, wetransfer, dropbox...) o notas",
       obMaterialsPh: "https://drive.google.com/... o indicaciones breves",
+      confirmOnboarding: "confirmo que he revisado los datos y enlaces y quiero enviarlos definitivamente al estudio",
+      confirmRequired: "es obligatorio marcar la casilla de confirmación antes de enviar los materiales.",
+      confirmRequiredTitle: "confirmación obligatoria",
+      confirmRequiredHeading: "marca la casilla de confirmación",
       obSubmit: "enviar materiales al estudio",
       obSentBanner: "materiales recibidos correctamente. nuestro equipo ya tiene todo registrado.",
       obSentTitle: "materiales iniciales enviados",
@@ -917,6 +931,9 @@ const PG = {
       deliverable: "obrir lliurable o vista prèvia",
       roundsUsed: (u, m) => `rondes gratuïtes usades en aquesta fase: ${u} de ${m}`,
       legal: "en aprovar, dónes per tancada aquesta fase segons les condicions de servei. si necessites canvis dins de les teves 2 rondes gratuïtes de revisió, desplega el botó secundari de sota.",
+      confirmApprove: "confirmo que he revisat la proposta i vull aprovar definitivament aquesta fase",
+      confirmRevise: "confirmo que he revisat les correccions i vull enviar aquesta ronda d'ajustos",
+      confirmRequired: "és obligatori marcar la casella de confirmació abans d'enviar.",
       btn: "aprovar fase i continuar",
       revToggle: (r, m) => `demanar ajustos (ronda ${r} de ${m})`,
       revLabel: (r, m) => `descriu amb claredat els ajustos que necessites (ronda ${r} de ${m})`,
@@ -970,6 +987,10 @@ const PG = {
       obDomainPh: "ex. ja tinc latevamarca.cat / m'agradaria latevamarca.com",
       obMaterials: "enllaç a carpeta amb logotip previ, fotos i textos (drive, wetransfer, dropbox...) o notes",
       obMaterialsPh: "https://drive.google.com/... o indicacions breus",
+      confirmOnboarding: "confirmo que he revisat les dades i enllaços i vull enviar-los definitivament a l'estudi",
+      confirmRequired: "és obligatori marcar la casella de confirmació abans d'enviar els materials.",
+      confirmRequiredTitle: "confirmació obligatòria",
+      confirmRequiredHeading: "marca la casella de confirmació",
       obSubmit: "enviar materials a l'estudi",
       obSentBanner: "materials rebuts correctament. el nostre equip ja ho té tot registrat.",
       obSentTitle: "materials inicials enviats",
@@ -1017,6 +1038,9 @@ const PG = {
       deliverable: "ireki entregagarria edo aurrebista",
       roundsUsed: (u, m) => `fase honetan erabilitako doako txandak: ${m}tik ${u}`,
       legal: "onartzean, fase hau itxitzat ematen duzu zerbitzu-baldintzen arabera. barne dituzun doako 2 berrikuspen-txanden barruan aldaketak behar badituzu, ireki beheko bigarren botoia.",
+      confirmApprove: "proposamena berrikusi dudala eta fase hau behin betiko onartu nahi dudala berresten dut",
+      confirmRevise: "zuzenketak berrikusi ditudala eta doikuntza-txanda hau bidali nahi dudala berresten dut",
+      confirmRequired: "nahitaezkoa da berrespen-laukia markatzea bidali aurretik.",
       btn: "onartu fasea eta jarraitu",
       revToggle: (r, m) => `eskatu doikuntzak (${m}tik ${r}. txanda)`,
       revLabel: (r, m) => `azaldu argi behar dituzun doikuntzak (${m}tik ${r}. txanda)`,
@@ -1070,6 +1094,10 @@ const PG = {
       obDomainPh: "adib. badut zuremarka.eus / zuremarka.com nahiko nuke",
       obMaterials: "aurreko logotipoa, argazkiak eta testuak dituen karpetarako esteka (drive, wetransfer, dropbox...) edo oharrak",
       obMaterialsPh: "https://drive.google.com/... edo ohar laburrak",
+      confirmOnboarding: "datuak eta estekak berrikusi ditudala eta estudiora behin betiko bidali nahi ditudala berresten dut",
+      confirmRequired: "nahitaezkoa da berrespen-laukia markatzea materialak bidali aurretik.",
+      confirmRequiredTitle: "derrigorrezko berrespena",
+      confirmRequiredHeading: "markatu berrespen-laukia",
       obSubmit: "bidali materialak estudiora",
       obSentBanner: "materialak behar bezala jaso dira. gure taldeak dena erregistratuta dauka jada.",
       obSentTitle: "bidalitako hasierako materialak",
@@ -1117,6 +1145,9 @@ const PG = {
       deliverable: "open deliverable or preview",
       roundsUsed: (u, m) => `free revision rounds used in this phase: ${u} of ${m}`,
       legal: "by approving, this phase is closed under our terms of service. if you need changes within your 2 free revision rounds, expand the secondary button below.",
+      confirmApprove: "i confirm that i have reviewed the proposal and want to approve this phase definitively",
+      confirmRevise: "i confirm that i have reviewed the feedback and want to submit this round of adjustments",
+      confirmRequired: "you must tick the confirmation checkbox before sending.",
       btn: "approve phase and continue",
       revToggle: (r, m) => `request adjustments (round ${r} of ${m})`,
       revLabel: (r, m) => `describe clearly the adjustments you need (round ${r} of ${m})`,
@@ -1170,6 +1201,10 @@ const PG = {
       obDomainPh: "e.g. i own yourbrand.com / i would like yourbrand.es",
       obMaterials: "link to folder with previous logo, photos and copy (drive, wetransfer, dropbox...) or notes",
       obMaterialsPh: "https://drive.google.com/... or brief notes",
+      confirmOnboarding: "i confirm that i have reviewed the details and links and want to send them definitively to the studio",
+      confirmRequired: "you must tick the confirmation checkbox before sending materials.",
+      confirmRequiredTitle: "confirmation required",
+      confirmRequiredHeading: "please tick the confirmation checkbox",
       obSubmit: "send materials to studio",
       obSentBanner: "materials received. our team has everything logged.",
       obSentTitle: "submitted kickoff materials",
@@ -1229,6 +1264,8 @@ const approvePhaseToken = (key, projectToken, step) => signRaw(key, `approve|${p
 
 const cancelRenewalToken = (key, projectToken, dueIso) => signRaw(key, `crenew|${projectToken}|${dueIso}`);
 
+const fileDownloadToken = (key, projectToken, step, fileId) => signRaw(key, `file|${projectToken}|${step}|${fileId}`);
+
 const testimonialDeleteToken = (key, id) => signRaw(key, `tdel|${id}`);
 
 const reviewSig = (key, projectToken) => signRaw(key, `review|${projectToken}`);
@@ -1251,6 +1288,12 @@ async function cancelRenewalUrl(env, projectToken, dueIso) {
   const key = await getKey(env);
   const t = await cancelRenewalToken(key, projectToken, dueIso);
   return buildUrl("/cancel-renewal", { p: projectToken, due: dueIso, t });
+}
+
+async function fileDownloadUrl(env, projectToken, step, fileId) {
+  const key = await getKey(env);
+  const t = await fileDownloadToken(key, projectToken, step, fileId);
+  return buildUrl("/file", { p: projectToken, step, id: fileId, t });
 }
 
 // Sesión de chat: se emite tras resolver Turnstile una vez. Va firmada (HMAC), caduca y está ligada a la IP.
@@ -2315,6 +2358,62 @@ textarea{
 }
 input::placeholder,textarea::placeholder{color:rgba(88,87,94,.6)}
 input[readonly]{background:#F6F2E8;color:#58575E}
+input[type="file"]{
+  padding:.55rem .75rem;
+  font-size:.82rem;
+  background:#FFFFFF;
+  cursor:pointer;
+}
+input[type="file"]::file-selector-button{
+  border:1px solid #E4DED0;
+  background:#EDE6D6;
+  color:#17171A;
+  padding:.4rem .8rem;
+  border-radius:7px;
+  margin-right:.8rem;
+  font:600 .78rem/1.2 inherit;
+  cursor:pointer;
+  transition:background .2s;
+}
+input[type="file"]::file-selector-button:hover{
+  background:#E4DED0;
+}
+.file-note{
+  font-size:.74rem;
+  color:#58575E;
+  margin-top:-.6rem;
+  margin-bottom:1rem;
+  display:block;
+}
+.confirm-box{
+  margin-top:.85rem;
+  margin-bottom:1.15rem;
+  padding:.85rem 1rem;
+  background:#FFFDF9;
+  border:1px solid #E8A33D;
+  border-radius:10px;
+  text-align:left;
+}
+.confirm-label{
+  display:flex;
+  align-items:flex-start;
+  gap:.65rem;
+  font-size:.82rem;
+  line-height:1.45;
+  color:#17171A;
+  cursor:pointer;
+  margin-bottom:0;
+  user-select:none;
+}
+.confirm-label input[type="checkbox"]{
+  width:1.15rem;
+  height:1.15rem;
+  min-width:1.15rem;
+  margin:0;
+  margin-top:.12rem;
+  accent-color:#E8A33D;
+  cursor:pointer;
+}
 input:focus,select:focus,textarea:focus{outline:none;border-color:#8CA3C4;box-shadow:0 0 0 3px rgba(140,163,196,.2)}
 button,.btn{
   display:inline-flex;
@@ -2603,7 +2702,7 @@ async function completeProjectPhase(
   env,
   proj,
   projectToken,
-  { approvedBy = "studio", deliverableUrl = "", note = "", legacyActionToken = "" } = {}
+  { approvedBy = "studio", deliverableUrl = "", deliverableFilename = "", note = "", legacyActionToken = "" } = {}
 ) {
   const idx = proj.phases.findIndex(
     (ph) => ph.step === Number(proj.currentPhase) && (ph.status === "active" || ph.status === "review")
@@ -2619,6 +2718,7 @@ async function completeProjectPhase(
   advancedPhase.approvedBy = approvedBy;
   if (approvedBy === "client") advancedPhase.approvedAt = now;
   if (deliverableUrl) advancedPhase.deliverableUrl = deliverableUrl;
+  if (deliverableFilename) advancedPhase.deliverableFilename = deliverableFilename;
   if (note) advancedPhase.note = note;
 
   let nextPhase = null;
@@ -2908,11 +3008,20 @@ async function handlePhaseAdvance(request, env, url) {
       </div>
       ${obHtml}
       ${revsHtml}
-      <form method="POST" style="text-align:left;">
-        <label for="deliverableUrl">enlace al entregable o preview (opcional, https://)</label>
-        <input id="deliverableUrl" name="deliverableUrl" type="url" maxlength="500" placeholder="https://www.figma.com/... o https://drive.google.com/..." value="${esc(currentPhaseObj.deliverableUrl || "")}">
+      <form method="POST" enctype="multipart/form-data" style="text-align:left;">
+        <label for="deliverable_file">1. subir archivo directo del entregable (opcional, cualquier formato)</label>
+        <input id="deliverable_file" name="deliverable_file" type="file">
+        <span class="file-note">acepta cualquier formato (pdf, zip, png, jpg, svg, webp, mp4...) hasta 25 mb.</span>
+        <label for="deliverable_url">2. o pegar enlace externo (opcional si subes archivo, ej. github pages o figma)</label>
+        <input id="deliverable_url" name="deliverable_url" type="url" maxlength="500" placeholder="https://..." value="${esc(currentPhaseObj.deliverableUrl || "")}">
         <label for="note">nota para el cliente (opcional)</label>
         <textarea id="note" name="note" rows="4" maxlength="600" placeholder="contexto breve sobre la entrega, qué revisar o pasos siguientes...">${esc(currentPhaseObj.note || "")}</textarea>
+        <div class="confirm-box">
+          <label class="confirm-label">
+            <input type="checkbox" name="confirm_action" value="yes" required>
+            <span>confirmo que he revisado el contenido y el entregable antes de enviarlo definitivamente</span>
+          </label>
+        </div>
         <button type="submit" name="decision" value="review">enviar propuesta a revisión del cliente</button>
         <button type="submit" name="decision" value="complete" class="secondary">marcar fase como completada y avanzar directamente</button>
       </form>
@@ -2940,17 +3049,95 @@ async function handlePhaseAdvance(request, env, url) {
   }
 
   const form = await request.formData().catch(() => null);
-  const rawUrl = String(form?.get("deliverableUrl") ?? "").trim();
-  const deliverableUrl = cleanHttpsUrl(rawUrl, 500);
-  if (rawUrl && !deliverableUrl) {
+  const currentManageUrl = await advancePhaseUrl(env, projectToken, step);
+
+  if (String(form?.get("confirm_action") || "") !== "yes") {
+    return htmlResponse(
+      page(
+        "confirmación obligatoria",
+        "marca la casilla de confirmación",
+        "es obligatorio marcar la casilla de confirmación antes de enviar la propuesta o completar la fase.",
+        {
+          eyebrow: "panel interno del estudio",
+          footerUrl: currentManageUrl,
+          footerLabel: "volver a la fase",
+        }
+      ),
+      400
+    );
+  }
+
+  const rawUrl = String(form?.get("deliverable_url") ?? form?.get("deliverableUrl") ?? "").trim();
+  const directUrl = cleanHttpsUrl(rawUrl, 500);
+  if (rawUrl && !directUrl) {
     return htmlResponse(
       page(
         "enlace inválido",
         "revisa el enlace del entregable",
-        "el enlace al entregable debe usar https:// (por ejemplo https://drive.google.com/...). vuelve atrás y corrígelo o déjalo vacío.",
+        "el enlace al entregable debe usar https:// (por ejemplo https://drive.google.com/...). vuelve atrás y corrígelo o déjalo vacío si subes un archivo directo.",
         {
           eyebrow: "panel interno del estudio",
-          footerUrl: await advancePhaseUrl(env, projectToken, step),
+          footerUrl: currentManageUrl,
+          footerLabel: "volver a la fase",
+        }
+      ),
+      400
+    );
+  }
+
+  const delivFile = form?.get("deliverable_file");
+  let uploadedFileUrl = "";
+  let uploadedFilename = "";
+
+  if (
+    delivFile &&
+    typeof delivFile === "object" &&
+    typeof delivFile.arrayBuffer === "function" &&
+    delivFile.size > 0
+  ) {
+    if (delivFile.size > 25 * 1024 * 1024) {
+      return htmlResponse(
+        page(
+          "archivo demasiado grande",
+          "tamaño de archivo superado",
+          "el archivo supera el límite de 25 mb admitido para subida directa. para archivos más pesados, compártelo mediante un enlace externo (drive, wetransfer o dropbox) en el campo inferior.",
+          {
+            eyebrow: "panel interno del estudio",
+            footerUrl: currentManageUrl,
+            footerLabel: "volver a la fase",
+          }
+        ),
+        400
+      );
+    }
+    const fileId = crypto.randomUUID().replace(/-/g, "").slice(0, 16);
+    const arrayBuf = await delivFile.arrayBuffer();
+    uploadedFilename = safeFilename(delivFile.name, `entregable-fase-${step}`);
+    const contentType = cleanInput(delivFile.type, 100) || "application/octet-stream";
+    await env.LEADS_KV.put(`file:${projectToken}:${step}:${fileId}`, arrayBuf, {
+      metadata: {
+        filename: uploadedFilename,
+        contentType,
+        size: delivFile.size,
+        createdAt: new Date().toISOString(),
+      },
+    });
+    uploadedFileUrl = await fileDownloadUrl(env, projectToken, step, fileId);
+  }
+
+  const effectiveDeliverableUrl = uploadedFileUrl || directUrl || currentPhaseObj.deliverableUrl || "";
+  const effectiveDeliverableFilename =
+    uploadedFilename || (uploadedFileUrl ? uploadedFilename : (!directUrl ? currentPhaseObj.deliverableFilename || "" : ""));
+
+  if (!effectiveDeliverableUrl) {
+    return htmlResponse(
+      page(
+        "entregable obligatorio",
+        "falta el entregable de la fase",
+        "es obligatorio adjuntar un archivo o indicar un enlace al entregable antes de enviar la propuesta al cliente.",
+        {
+          eyebrow: "panel interno del estudio",
+          footerUrl: currentManageUrl,
           footerLabel: "volver a la fase",
         }
       ),
@@ -2960,13 +3147,17 @@ async function handlePhaseAdvance(request, env, url) {
 
   const note = cleanNote(form?.get("note") ?? "", 600);
   const decision = String(form?.get("decision") ?? "complete");
-  const currentManageUrl = await advancePhaseUrl(env, projectToken, step);
 
   if (decision === "review") {
     const now = new Date().toISOString();
     currentPhaseObj.status = "review";
     currentPhaseObj.reviewSentAt = now;
-    currentPhaseObj.deliverableUrl = deliverableUrl;
+    currentPhaseObj.deliverableUrl = effectiveDeliverableUrl;
+    if (effectiveDeliverableFilename) {
+      currentPhaseObj.deliverableFilename = effectiveDeliverableFilename;
+    } else {
+      delete currentPhaseObj.deliverableFilename;
+    }
     currentPhaseObj.note = note;
     delete currentPhaseObj.reminderSentAt;
     delete currentPhaseObj.tacitAlertSentAt;
@@ -2987,8 +3178,8 @@ async function handlePhaseAdvance(request, env, url) {
             paras: [
               tp.hello,
               tp.intro(bold(proj.brand), bold(phaseNameClient)),
-              deliverableUrl
-                ? `${tp.openDeliverable}: <a href="${esc(deliverableUrl)}" target="_blank" style="color:#3D5A85;font-weight:600;">${esc(deliverableUrl)}</a>`
+              effectiveDeliverableUrl
+                ? `${tp.openDeliverable}: <a href="${esc(effectiveDeliverableUrl)}" target="_blank" style="color:#3D5A85;font-weight:600;">${esc(effectiveDeliverableFilename || effectiveDeliverableUrl)}</a>`
                 : "",
             ].filter(Boolean),
             quote: note,
@@ -3036,7 +3227,8 @@ async function handlePhaseAdvance(request, env, url) {
 
   const result = await completeProjectPhase(env, proj, projectToken, {
     approvedBy: "studio",
-    deliverableUrl,
+    deliverableUrl: effectiveDeliverableUrl,
+    deliverableFilename: effectiveDeliverableFilename,
     note,
     legacyActionToken,
   });
@@ -3150,7 +3342,7 @@ async function handlePhaseApprove(request, env, url) {
       ph.note || ph.deliverableUrl || used > 0
         ? `<div class="box">
             ${ph.note ? `<p style="font-size:.84rem;color:#17171A;margin-bottom:${ph.deliverableUrl || used > 0 ? ".75rem" : "0"};white-space:pre-wrap;"><strong>${esc(T.studioNote)}:</strong> ${esc(ph.note)}</p>` : ""}
-            ${ph.deliverableUrl ? `<a class="pill-link" href="${esc(ph.deliverableUrl)}" target="_blank" rel="noopener noreferrer">${esc(A.deliverable)}</a>` : ""}
+            ${ph.deliverableUrl ? `<a class="pill-link" href="${esc(ph.deliverableUrl)}" target="_blank" rel="noopener noreferrer">${esc(ph.deliverableFilename ? `${A.deliverable} (${ph.deliverableFilename})` : A.deliverable)}</a>` : ""}
             ${used > 0 ? `<p style="font-size:.75rem;color:#58575E;margin-top:${ph.deliverableUrl ? ".65rem" : "0"};">${esc(A.roundsUsed(used, MAX_PHASE_REVISIONS))}</p>` : ""}
           </div>`
         : "";
@@ -3165,6 +3357,12 @@ async function handlePhaseApprove(request, env, url) {
               <input type="hidden" name="decision" value="revise">
               <label for="feedback">${esc(A.revLabel(nextRound, MAX_PHASE_REVISIONS))}</label>
               <textarea id="feedback" name="feedback" rows="4" minlength="5" maxlength="1500" required placeholder="${esc(A.revPh)}"></textarea>
+              <div class="confirm-box">
+                <label class="confirm-label">
+                  <input type="checkbox" name="confirm_action" value="yes" required>
+                  <span>${esc(A.confirmRevise)}</span>
+                </label>
+              </div>
               <button type="submit">${esc(A.revSubmit(nextRound, MAX_PHASE_REVISIONS))}</button>
             </form>
           </div>
@@ -3173,7 +3371,7 @@ async function handlePhaseApprove(request, env, url) {
         ? `<div class="box" style="margin-top:.85rem;margin-bottom:0;font-size:.8rem;color:#58575E;">${esc(A.revExhausted)}</div>`
         : "";
 
-    const bodyHtml = `${detailHtml}<p class="lead" style="font-size:.82rem;margin-bottom:1.25rem;">${esc(A.legal)}</p><form method="POST"><input type="hidden" name="decision" value="approve"><button type="submit">${esc(A.btn)}</button></form>${reviseHtml}`;
+    const bodyHtml = `${detailHtml}<p class="lead" style="font-size:.82rem;margin-bottom:1.25rem;">${esc(A.legal)}</p><form method="POST"><input type="hidden" name="decision" value="approve"><div class="confirm-box"><label class="confirm-label"><input type="checkbox" name="confirm_action" value="yes" required><span>${esc(A.confirmApprove)}</span></label></div><button type="submit">${esc(A.btn)}</button></form>${reviseHtml}`;
 
     return htmlResponse(
       page(A.title, A.heading, A.intro(phaseTitle(ph, L), proj.brand), {
@@ -3197,6 +3395,10 @@ async function handlePhaseApprove(request, env, url) {
 
   const form = await request.formData().catch(() => null);
   const decision = String(form?.get("decision") || "approve");
+
+  if (String(form?.get("confirm_action") || "") !== "yes") {
+    return renderReviewScreen(A.confirmRequired, 400);
+  }
 
   if (decision === "revise") {
     if (ph.status !== "review" || used >= MAX_PHASE_REVISIONS) {
@@ -3271,6 +3473,7 @@ async function handlePhaseApprove(request, env, url) {
   const res = await completeProjectPhase(env, proj, p, {
     approvedBy: "client",
     deliverableUrl: ph.deliverableUrl || "",
+    deliverableFilename: ph.deliverableFilename || "",
     note: ph.note || "",
   });
 
@@ -3363,6 +3566,79 @@ async function handleCancelRenewal(request, env, url) {
   );
 }
 
+// ── DESCARGA DIRECTA DE ENTREGABLES (/file) ──
+async function handleFileDownload(request, env, url) {
+  if (request.method !== "GET" && request.method !== "HEAD") {
+    return new Response("method not allowed", { status: 405, headers: { Allow: "GET, HEAD" } });
+  }
+
+  const p = url.searchParams.get("p");
+  const step = parseInt(url.searchParams.get("step") || "", 10);
+  const id = url.searchParams.get("id");
+  const t = url.searchParams.get("t");
+
+  if (
+    !p ||
+    !/^[a-f0-9]{64}$/.test(p) ||
+    !Number.isInteger(step) ||
+    step < 1 ||
+    step > 20 ||
+    !id ||
+    !/^[a-zA-Z0-9_-]{1,64}$/.test(id) ||
+    !t ||
+    !/^[a-f0-9]{64}$/.test(t)
+  ) {
+    return new Response("parámetros de archivo incompletos o inválidos", {
+      status: 400,
+      headers: { "Content-Type": "text/plain; charset=utf-8", "X-Content-Type-Options": "nosniff" },
+    });
+  }
+
+  const key = await getKey(env);
+  if (!(await verifyRaw(key, `file|${p}|${step}|${id}`, t))) {
+    return new Response("enlace de archivo no válido o firma incorrecta", {
+      status: 403,
+      headers: { "Content-Type": "text/plain; charset=utf-8", "X-Content-Type-Options": "nosniff" },
+    });
+  }
+
+  if (!env.LEADS_KV) {
+    return new Response("error de configuración en el servidor", {
+      status: 500,
+      headers: { "Content-Type": "text/plain; charset=utf-8", "X-Content-Type-Options": "nosniff" },
+    });
+  }
+
+  const { value, metadata } = await env.LEADS_KV.getWithMetadata(`file:${p}:${step}:${id}`, {
+    type: "arrayBuffer",
+  });
+
+  if (!value) {
+    return new Response("archivo no encontrado o expirado", {
+      status: 404,
+      headers: { "Content-Type": "text/plain; charset=utf-8", "X-Content-Type-Options": "nosniff" },
+    });
+  }
+
+  const filename = metadata?.filename || `entregable-fase-${step}`;
+  const safeName = safeFilename(filename, `entregable-fase-${step}`);
+  const contentType = metadata?.contentType || "application/octet-stream";
+  const size = metadata?.size || value.byteLength;
+  const encodedName = encodeURIComponent(safeName);
+
+  return new Response(value, {
+    status: 200,
+    headers: {
+      "Content-Type": contentType,
+      "Content-Disposition": `inline; filename="${safeName.replace(/["\r\n\\]/g, "_")}"; filename*=UTF-8''${encodedName}`,
+      "Content-Length": String(size),
+      "Cache-Control": "private, max-age=86400",
+      "X-Content-Type-Options": "nosniff",
+      "Referrer-Policy": "no-referrer",
+    },
+  });
+}
+
 // ── SEGUIMIENTO DEL PROYECTO, RESCATE DE PAGO Y ONBOARDING (/proyecto) ──
 async function handleProject(request, env, url) {
   let L = langFromRequest(request);
@@ -3399,6 +3675,18 @@ async function handleProject(request, env, url) {
 
     if (op === "onboarding") {
       if (!proj.paid) return redirectTo(projectPageUrl);
+      if (String(form?.get("confirm_action") || "") !== "yes") {
+        return htmlResponse(
+          page(T.confirmRequiredTitle || "confirmación obligatoria", T.confirmRequiredHeading || "marca la casilla de confirmación", T.confirmRequired, {
+            lang: L,
+            eyebrow: T.obEyebrow,
+            html: `<a class="btn" href="${esc(projectPageUrl)}">${esc(PG[L].common.openTracker)}</a>`,
+            footerUrl: projectPageUrl,
+            footerLabel: PG[L].common.openTracker,
+          }),
+          400
+        );
+      }
       const socials = cleanInput(form?.get("socials") ?? "", 250);
       const domain = cleanInput(form?.get("domain") ?? "", 200);
       const materials = cleanInput(form?.get("materials") ?? "", 500);
@@ -3529,6 +3817,12 @@ async function handleProject(request, env, url) {
           <input id="domain" name="domain" type="text" maxlength="200" placeholder="${esc(T.obDomainPh)}">
           <label for="materials">${esc(T.obMaterials)}</label>
           <textarea id="materials" name="materials" rows="3" maxlength="500" placeholder="${esc(T.obMaterialsPh)}"></textarea>
+          <div class="confirm-box">
+            <label class="confirm-label">
+              <input type="checkbox" name="confirm_action" value="yes" required>
+              <span>${esc(T.confirmOnboarding)}</span>
+            </label>
+          </div>
           <button type="submit">${esc(T.obSubmit)}</button>
         </form>
       </div>`;
@@ -3578,8 +3872,11 @@ async function handleProject(request, env, url) {
 
       const actions = [];
       if (safeDeliv) {
+        const delivLabel = ph.deliverableFilename
+          ? `${esc(T.deliverable)} (${esc(ph.deliverableFilename)})`
+          : esc(T.deliverable);
         actions.push(
-          `<a class="pill-link" href="${esc(safeDeliv)}" target="_blank" rel="noopener noreferrer">${esc(T.deliverable)}</a>`
+          `<a class="pill-link" href="${esc(safeDeliv)}" target="_blank" rel="noopener noreferrer">${delivLabel}</a>`
         );
       }
       if (isReview) {
@@ -4406,6 +4703,15 @@ export default {
       } catch (e) {
         console.error("html route failed:", e?.message);
         return errorPage(HTML_CLIENT_PATHS.has(url.pathname) ? langFromRequest(request) : "es");
+      }
+    }
+
+    if (url.pathname === "/file") {
+      try {
+        return await handleFileDownload(request, env, url);
+      } catch (e) {
+        console.error("file route failed:", e?.message);
+        return new Response("error al procesar el archivo", { status: 500 });
       }
     }
 

@@ -105,6 +105,13 @@ const cleanBrand = (v) => {
   return /^(null|none|n\/a|undefined|desconocida?)$/i.test(b) ? "" : b;
 };
 
+function safeFilename(name, fallback = "entregable") {
+  if (typeof name !== "string") return fallback;
+  const base = name.split(/[/\\]/).pop() || fallback;
+  const cleaned = base.replace(/["\r\n\t]/g, "").trim();
+  return cleaned.slice(0, 150) || fallback;
+}
+
 function buildUrl(path, query = {}) {
   const u = new URL(path, WORKER_URL);
   for (const [k, v] of Object.entries(query)) {
