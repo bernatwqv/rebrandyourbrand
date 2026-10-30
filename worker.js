@@ -43,6 +43,9 @@ const TACIT_APPROVAL_DAYS = 20;
 
 const RENEWAL_NOTICE_DAYS = 30;
 
+// Importe base anual de renovación de infraestructura web (dominio, DNS/SSL y correo corporativo) si env.WEB_RENEWAL_EUR no está definida en Cloudflare
+const WEB_RENEWAL_EUR = 85;
+
 const DAY_MS = 86400 * 1000;
 
 const APPROVED_KEY = "rybb:approved_testimonials";
@@ -131,8 +134,8 @@ const AGREE_RE = /(?<![\p{L}\p{N}])(?:confirmo|confirm|vale|adelante|procedemos|
 
 const DENY_RE = /^\s*(?:no|nope|ez|ezeztatu|cancel\w*)(?![\p{L}\p{N}])/iu;
 
-// Precios que Brandi puede mencionar: 50 (hora extra) y cualquier combinación de servicios
-const ALLOWED_EUR = new Set([50]);
+// Precios que Brandi puede mencionar: 50 (hora extra), renovación anual web y cualquier combinación de servicios
+const ALLOWED_EUR = new Set([50, WEB_RENEWAL_EUR]);
 
 for (let m = 1; m < (1 << SERVICE_IDS.length); m++) {
   ALLOWED_EUR.add(SERVICE_IDS.reduce((sum, id, i) => sum + (m & (1 << i) ? SERVICES[id].price : 0), 0));
@@ -4070,7 +4073,11 @@ async function inspectProjectDeadlines(env, keyName, nowMs) {
       const daysUntil = (dueMs - nowMs) / DAY_MS;
       if (daysUntil <= RENEWAL_NOTICE_DAYS && daysUntil >= -7) {
         const cancelUrl = await cancelRenewalUrl(env, projectToken, proj.nextRenewalAt);
-        const renewalEur = Number(env.WEB_RENEWAL_EUR || 0);
+        const rawRenewal =
+          env.WEB_RENEWAL_EUR !== undefined && String(env.WEB_RENEWAL_EUR).trim() !== ""
+            ? Number(env.WEB_RENEWAL_EUR)
+            : WEB_RENEWAL_EUR;
+        const renewalEur = Number.isFinite(rawRenewal) && rawRenewal >= 0 ? rawRenewal : WEB_RENEWAL_EUR;
 
         if (renewalEur > 0 && env.STRIPE_SECRET_KEY) {
           const payUrl = await createRenewalCheckout(env, proj, renewalEur);

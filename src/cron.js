@@ -103,7 +103,11 @@ async function inspectProjectDeadlines(env, keyName, nowMs) {
       const daysUntil = (dueMs - nowMs) / DAY_MS;
       if (daysUntil <= RENEWAL_NOTICE_DAYS && daysUntil >= -7) {
         const cancelUrl = await cancelRenewalUrl(env, projectToken, proj.nextRenewalAt);
-        const renewalEur = Number(env.WEB_RENEWAL_EUR || 0);
+        const rawRenewal =
+          env.WEB_RENEWAL_EUR !== undefined && String(env.WEB_RENEWAL_EUR).trim() !== ""
+            ? Number(env.WEB_RENEWAL_EUR)
+            : WEB_RENEWAL_EUR;
+        const renewalEur = Number.isFinite(rawRenewal) && rawRenewal >= 0 ? rawRenewal : WEB_RENEWAL_EUR;
 
         if (renewalEur > 0 && env.STRIPE_SECRET_KEY) {
           const payUrl = await createRenewalCheckout(env, proj, renewalEur);
