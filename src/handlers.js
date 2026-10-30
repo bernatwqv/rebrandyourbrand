@@ -368,15 +368,79 @@ async function handlePhaseAdvance(request, env, url) {
         : "en curso en el estudio";
 
   if (request.method === "GET" || request.method === "HEAD") {
-    const ob = proj.onboarding;
-    const obHtml = ob
+    const materialsList = Array.isArray(proj.materialsList) ? [...proj.materialsList] : [];
+    if (proj.onboarding && materialsList.length === 0) {
+      const ob = proj.onboarding;
+      const legacyUrl = cleanHttpsUrl(ob.materials || "", 500);
+      materialsList.push({
+        createdAt: ob.submittedAt || ob.receivedAt || "",
+        domain: ob.domain || "",
+        socials: ob.socials || "",
+        notes: legacyUrl ? "" : (ob.materials || ""),
+        url: legacyUrl || "",
+        fileUrl: "",
+        filename: "",
+      });
+    }
+    const referencesList = Array.isArray(proj.referencesList) ? [...proj.referencesList] : [];
+
+    const matItemsHtml = await Promise.all(
+      materialsList.map(async (m, i) => {
+        const dateStr = m.createdAt ? fmtDate(m.createdAt, "es") : "";
+        const urlLink = cleanHttpsUrl(m.url || "", 500);
+        let fileLink = "";
+        if (m.fileId) fileLink = await fileDownloadUrl(env, projectToken, "mat", m.fileId);
+        else if (m.fileUrl) fileLink = m.fileUrl;
+        return `
+          <div class="history-item">
+            <div class="history-head">
+              <span style="font-size:.78rem;font-weight:600;color:#3D5A85;">material #${i + 1}</span>
+              ${dateStr ? `<span style="font-size:.74rem;color:#58575E;">${esc(dateStr)}</span>` : ""}
+            </div>
+            <div class="kv" style="font-size:.82rem;">
+              ${m.domain ? `<div class="kv-row"><span>dominio</span><span class="kv-val">${esc(m.domain)}</span></div>` : ""}
+              ${m.socials ? `<div class="kv-row"><span>web / redes</span><span class="kv-val">${esc(m.socials)}</span></div>` : ""}
+              ${urlLink ? `<div class="kv-row"><span>enlace externo</span><span class="kv-val" style="word-break:break-all;"><a href="${esc(urlLink)}" target="_blank" rel="noopener noreferrer" style="color:#3D5A85;text-decoration:underline;">${esc(urlLink)}</a></span></div>` : ""}
+              ${fileLink ? `<div class="kv-row"><span>archivo directo</span><span class="kv-val"><a class="pill-link" href="${esc(fileLink)}" target="_blank" rel="noopener noreferrer">${esc(m.filename || "descargar material")}</a></span></div>` : ""}
+            </div>
+            ${m.notes ? `<div class="phase-note" style="margin-top:.55rem;">${esc(m.notes)}</div>` : ""}
+          </div>`;
+      })
+    );
+
+    const refItemsHtml = await Promise.all(
+      referencesList.map(async (r, i) => {
+        const dateStr = r.createdAt ? fmtDate(r.createdAt, "es") : "";
+        const urlLink = cleanHttpsUrl(r.url || "", 500);
+        let fileLink = "";
+        if (r.fileId) fileLink = await fileDownloadUrl(env, projectToken, "ref", r.fileId);
+        else if (r.fileUrl) fileLink = r.fileUrl;
+        return `
+          <div class="history-item">
+            <div class="history-head">
+              <span style="font-size:.78rem;font-weight:600;color:#825008;">referencia #${i + 1}</span>
+              ${dateStr ? `<span style="font-size:.74rem;color:#58575E;">${esc(dateStr)}</span>` : ""}
+            </div>
+            <div class="kv" style="font-size:.82rem;">
+              ${urlLink ? `<div class="kv-row"><span>enlace web</span><span class="kv-val" style="word-break:break-all;"><a href="${esc(urlLink)}" target="_blank" rel="noopener noreferrer" style="color:#3D5A85;text-decoration:underline;">${esc(urlLink)}</a></span></div>` : ""}
+              ${fileLink ? `<div class="kv-row"><span>captura / archivo</span><span class="kv-val"><a class="pill-link" href="${esc(fileLink)}" target="_blank" rel="noopener noreferrer">${esc(r.filename || "descargar referencia")}</a></span></div>` : ""}
+            </div>
+            ${r.notes ? `<div class="phase-note" style="margin-top:.55rem;">${esc(r.notes)}</div>` : ""}
+          </div>`;
+      })
+    );
+
+    const obHtml = matItemsHtml.length
       ? `<div class="box">
-          <span class="eyebrow">materiales del cliente</span>
-          <div class="kv">
-            ${ob.socials ? `<div class="kv-row"><span>web / redes</span><span class="kv-val">${esc(ob.socials)}</span></div>` : ""}
-            ${ob.domain ? `<div class="kv-row"><span>dominio</span><span class="kv-val">${esc(ob.domain)}</span></div>` : ""}
-            ${ob.materials ? `<div class="kv-row"><span>carpeta / notas</span><span class="kv-val">${esc(ob.materials)}</span></div>` : ""}
-          </div>
+          <span class="eyebrow">materiales aportados por el cliente</span>
+          ${matItemsHtml.join("")}
+        </div>`
+      : "";
+
+    const refHtml = refItemsHtml.length
+      ? `<div class="box">
+          <span class="eyebrow">referencias visuales del cliente</span>
+          ${refItemsHtml.join("")}
         </div>`
       : "";
 
@@ -408,6 +472,7 @@ async function handlePhaseAdvance(request, env, url) {
         </div>
       </div>
       ${obHtml}
+      ${refHtml}
       ${revsHtml}
       <form method="POST" enctype="multipart/form-data" style="text-align:left;">
         <label for="deliverable_file">1. subir archivo directo del entregable (opcional, cualquier formato)</label>
@@ -974,16 +1039,15 @@ async function handleFileDownload(request, env, url) {
   }
 
   const p = url.searchParams.get("p");
-  const step = parseInt(url.searchParams.get("step") || "", 10);
+  const step = String(url.searchParams.get("step") || "").trim();
   const id = url.searchParams.get("id");
   const t = url.searchParams.get("t");
 
   if (
     !p ||
     !/^[a-f0-9]{64}$/.test(p) ||
-    !Number.isInteger(step) ||
-    step < 1 ||
-    step > 20 ||
+    !step ||
+    !/^[a-zA-Z0-9_-]{1,32}$/.test(step) ||
     !id ||
     !/^[a-zA-Z0-9_-]{1,64}$/.test(id) ||
     !t ||
@@ -1021,8 +1085,9 @@ async function handleFileDownload(request, env, url) {
     });
   }
 
-  const filename = metadata?.filename || `entregable-fase-${step}`;
-  const safeName = safeFilename(filename, `entregable-fase-${step}`);
+  const fallbackName = step === "mat" ? "material" : (step === "ref" ? "referencia" : `entregable-fase-${step}`);
+  const filename = metadata?.filename || fallbackName;
+  const safeName = safeFilename(filename, fallbackName);
   const contentType = metadata?.contentType || "application/octet-stream";
   const size = metadata?.size || value.byteLength;
   const encodedName = encodeURIComponent(safeName);
@@ -1088,11 +1153,125 @@ async function handleProject(request, env, url) {
           400
         );
       }
-      const socials = cleanInput(form?.get("socials") ?? "", 250);
-      const domain = cleanInput(form?.get("domain") ?? "", 200);
-      const materials = cleanInput(form?.get("materials") ?? "", 500);
 
-      if (!socials && !domain && !materials) {
+      // Bloque 1 — Materiales del negocio:
+      const domain = cleanInput(form?.get("domain") ?? "", 200);
+      const socials = cleanInput(form?.get("socials") ?? "", 250);
+      const rawMaterialsUrl = String(form?.get("materials_url") ?? "").trim();
+      const materialsUrl = cleanHttpsUrl(rawMaterialsUrl, 500);
+      if (rawMaterialsUrl && !materialsUrl) {
+        return htmlResponse(
+          page(T.obInvalidUrlTitle || "enlace inválido", T.obInvalidUrlHeading || "revisa el enlace proporcionado", T.obInvalidUrlMsg || "los enlaces externos deben usar https://. vuelve atrás y corrígelo o déjalo vacío si subes un archivo directo.", {
+            lang: L,
+            eyebrow: T.obEyebrow,
+            html: `<a class="btn" href="${esc(projectPageUrl)}">${esc(PG[L].common.openTracker)}</a>`,
+            footerUrl: projectPageUrl,
+            footerLabel: PG[L].common.openTracker,
+          }),
+          400
+        );
+      }
+      const materialsNotes = cleanNote(form?.get("materials_notes") ?? form?.get("materials") ?? "", 1000);
+
+      let materialsFileDownloadUrl = "";
+      let materialsFilename = "";
+      let materialsFileId = "";
+      let materialsFileSize = 0;
+      const matFile = form?.get("materials_file");
+      if (
+        matFile &&
+        typeof matFile === "object" &&
+        typeof matFile.arrayBuffer === "function" &&
+        matFile.size > 0
+      ) {
+        if (matFile.size > 25 * 1024 * 1024) {
+          return htmlResponse(
+            page(T.fileTooLargeTitle || "archivo demasiado grande", T.fileTooLargeHeading || "tamaño de archivo superado", T.fileTooLarge || "el archivo supera el límite de 25 mb admitido para subida directa.", {
+              lang: L,
+              eyebrow: T.obEyebrow,
+              html: `<a class="btn" href="${esc(projectPageUrl)}">${esc(PG[L].common.openTracker)}</a>`,
+              footerUrl: projectPageUrl,
+              footerLabel: PG[L].common.openTracker,
+            }),
+            400
+          );
+        }
+        materialsFileId = crypto.randomUUID().replace(/-/g, "").slice(0, 16);
+        const arrayBuf = await matFile.arrayBuffer();
+        materialsFilename = safeFilename(matFile.name, "material-arranque");
+        materialsFileSize = matFile.size;
+        const contentType = cleanInput(matFile.type, 100) || "application/octet-stream";
+        await env.LEADS_KV.put(`file:${token}:mat:${materialsFileId}`, arrayBuf, {
+          metadata: {
+            filename: materialsFilename,
+            contentType,
+            size: matFile.size,
+            createdAt: new Date().toISOString(),
+          },
+        });
+        materialsFileDownloadUrl = await fileDownloadUrl(env, token, "mat", materialsFileId);
+      }
+
+      // Bloque 2 — Referencias visuales:
+      const rawRefUrl = String(form?.get("reference_url") ?? "").trim();
+      const referenceUrl = cleanHttpsUrl(rawRefUrl, 500);
+      if (rawRefUrl && !referenceUrl) {
+        return htmlResponse(
+          page(T.obInvalidUrlTitle || "enlace inválido", T.obInvalidUrlHeading || "revisa el enlace proporcionado", T.obInvalidUrlMsg || "los enlaces externos deben usar https://. vuelve atrás y corrígelo o déjalo vacío si subes un archivo directo.", {
+            lang: L,
+            eyebrow: T.obEyebrow,
+            html: `<a class="btn" href="${esc(projectPageUrl)}">${esc(PG[L].common.openTracker)}</a>`,
+            footerUrl: projectPageUrl,
+            footerLabel: PG[L].common.openTracker,
+          }),
+          400
+        );
+      }
+      const referenceNotes = cleanNote(form?.get("reference_notes") ?? "", 1000);
+
+      let referenceFileDownloadUrl = "";
+      let referenceFilename = "";
+      let referenceFileId = "";
+      let referenceFileSize = 0;
+      const refFile = form?.get("reference_file");
+      if (
+        refFile &&
+        typeof refFile === "object" &&
+        typeof refFile.arrayBuffer === "function" &&
+        refFile.size > 0
+      ) {
+        if (refFile.size > 25 * 1024 * 1024) {
+          return htmlResponse(
+            page(T.fileTooLargeTitle || "archivo demasiado grande", T.fileTooLargeHeading || "tamaño de archivo superado", T.fileTooLarge || "el archivo supera el límite de 25 mb admitido para subida directa.", {
+              lang: L,
+              eyebrow: T.obEyebrow,
+              html: `<a class="btn" href="${esc(projectPageUrl)}">${esc(PG[L].common.openTracker)}</a>`,
+              footerUrl: projectPageUrl,
+              footerLabel: PG[L].common.openTracker,
+            }),
+            400
+          );
+        }
+        referenceFileId = crypto.randomUUID().replace(/-/g, "").slice(0, 16);
+        const arrayBuf = await refFile.arrayBuffer();
+        referenceFilename = safeFilename(refFile.name, "referencia-visual");
+        referenceFileSize = refFile.size;
+        const contentType = cleanInput(refFile.type, 100) || "application/octet-stream";
+        await env.LEADS_KV.put(`file:${token}:ref:${referenceFileId}`, arrayBuf, {
+          metadata: {
+            filename: referenceFilename,
+            contentType,
+            size: refFile.size,
+            createdAt: new Date().toISOString(),
+          },
+        });
+        referenceFileDownloadUrl = await fileDownloadUrl(env, token, "ref", referenceFileId);
+      }
+
+      const hasMaterial = Boolean(domain || socials || materialsUrl || materialsNotes || materialsFileDownloadUrl);
+      const hasReference = Boolean(referenceUrl || referenceNotes || referenceFileDownloadUrl);
+
+      if (!hasMaterial && !hasReference) {
         return htmlResponse(
           page(T.obMissing[0], T.obMissing[1], T.obMissing[2], {
             lang: L,
@@ -1105,38 +1284,111 @@ async function handleProject(request, env, url) {
         );
       }
 
-      proj.onboarding = {
-        socials,
-        domain,
-        materials,
-        submittedAt: new Date().toISOString(),
-      };
+      // Migración retrocompatible de onboarding previo a materialsList si no existe:
+      if (!Array.isArray(proj.materialsList)) {
+        proj.materialsList = [];
+        if (proj.onboarding) {
+          const ob = proj.onboarding;
+          const legacyUrl = cleanHttpsUrl(ob.materials || "", 500);
+          proj.materialsList.push({
+            id: "legacy",
+            createdAt: ob.submittedAt || ob.receivedAt || proj.createdAt || new Date().toISOString(),
+            domain: ob.domain || "",
+            socials: ob.socials || "",
+            notes: legacyUrl ? "" : (ob.materials || ""),
+            url: legacyUrl || "",
+            fileUrl: "",
+            filename: "",
+          });
+        }
+      }
+      if (!Array.isArray(proj.referencesList)) {
+        proj.referencesList = [];
+      }
+
+      const nowIso = new Date().toISOString();
+
+      if (hasMaterial) {
+        const matItem = {
+          id: crypto.randomUUID().replace(/-/g, "").slice(0, 12),
+          createdAt: nowIso,
+          domain,
+          socials,
+          url: materialsUrl,
+          notes: materialsNotes,
+          fileUrl: materialsFileDownloadUrl,
+          filename: materialsFilename,
+          fileId: materialsFileId,
+          fileSize: materialsFileSize,
+        };
+        proj.materialsList.push(matItem);
+        if (!proj.onboarding) {
+          proj.onboarding = {
+            domain: domain || "",
+            socials: socials || "",
+            materials: materialsUrl || materialsNotes || materialsFilename || "",
+            submittedAt: nowIso,
+          };
+        }
+      }
+
+      if (hasReference) {
+        const refItem = {
+          id: crypto.randomUUID().replace(/-/g, "").slice(0, 12),
+          createdAt: nowIso,
+          url: referenceUrl,
+          notes: referenceNotes,
+          fileUrl: referenceFileDownloadUrl,
+          filename: referenceFilename,
+          fileId: referenceFileId,
+          fileSize: referenceFileSize,
+        };
+        proj.referencesList.push(refItem);
+      }
+
       await env.LEADS_KV.put(`project:${token}`, JSON.stringify(proj));
 
       if (env.RESEND_API_KEY) {
         const manageUrl = await advancePhaseUrl(env, token, proj.currentPhase || 1);
+        const addedLines = [];
+        if (hasMaterial) {
+          addedLines.push(bold("materiales del negocio aportados:"));
+          if (domain) addedLines.push(`— dominio: ${bold(domain)}`);
+          if (socials) addedLines.push(`— web / redes: ${bold(socials)}`);
+          if (materialsUrl) addedLines.push(`— enlace externo: <a href="${esc(materialsUrl)}" target="_blank" style="color:#3D5A85;font-weight:600;">${esc(materialsUrl)}</a>`);
+          if (materialsFileDownloadUrl) addedLines.push(`— archivo directo: <a href="${esc(materialsFileDownloadUrl)}" target="_blank" style="color:#3D5A85;font-weight:600;">${esc(materialsFilename || "descargar archivo")}</a>`);
+          if (materialsNotes) addedLines.push(`— notas: ${esc(materialsNotes)}`);
+        }
+        if (hasReference) {
+          if (addedLines.length) addedLines.push("");
+          addedLines.push(bold("referencias visuales e inspiración:"));
+          if (referenceUrl) addedLines.push(`— enlace de referencia: <a href="${esc(referenceUrl)}" target="_blank" style="color:#3D5A85;font-weight:600;">${esc(referenceUrl)}</a>`);
+          if (referenceFileDownloadUrl) addedLines.push(`— captura o imagen: <a href="${esc(referenceFileDownloadUrl)}" target="_blank" style="color:#3D5A85;font-weight:600;">${esc(referenceFilename || "descargar referencia")}</a>`);
+          if (referenceNotes) addedLines.push(`— qué le gusta: ${esc(referenceNotes)}`);
+        }
+
+        const subjectType = hasMaterial && hasReference
+          ? "nuevos materiales y referencias recibidos"
+          : (hasReference ? "nuevas referencias visuales recibidas" : "nuevos materiales recibidos");
+
         await resendSend(
           env,
           {
             to: ["hola@rebrandyourbrand.es"],
             reply_to: proj.clientEmail,
-            subject: `materiales iniciales recibidos — ${proj.brand}`,
+            subject: `${subjectType} — ${proj.brand}`,
             ...renderEmail("es", {
               paras: [
-                `el cliente ha enviado los materiales de arranque para ${bold(proj.brand)}.`,
-                lines(
-                  `— cliente: ${bold(proj.clientEmail)}`,
-                  socials && `— web / redes actuales: ${bold(socials)}`,
-                  domain && `— dominio: ${bold(domain)}`,
-                  materials && `— carpeta / notas: ${bold(materials)}`
-                ),
+                `el cliente ha aportado nueva información para ${bold(proj.brand)}.`,
+                `— cliente: ${bold(proj.clientEmail)}`,
+                ...addedLines,
               ],
               cta: { label: "abrir gestión de la fase actual", url: manageUrl },
               secondaryLink: { label: "ver seguimiento del cliente", url: projectPageUrl },
             }),
           },
-          `onboarding-${token}-${Date.now()}`
-        ).catch((e) => console.error("onboarding email failed:", e?.message));
+          `materials-${token}-${Date.now()}`
+        ).catch((e) => console.error("materials email failed:", e?.message));
       }
 
       return redirectTo(buildUrl("/proyecto", { token, ob: "1" }));
@@ -1202,22 +1454,129 @@ async function handleProject(request, env, url) {
     url.searchParams.get("ob") === "1" ? `<div class="banner-ok">${esc(T.obSentBanner)}</div>` : "";
 
   const allDone = Array.isArray(proj.phases) && proj.phases.every((ph) => ph.status === "done");
-  let onboardingHtml = "";
 
-  if (!proj.onboarding && !allDone) {
-    onboardingHtml = `
-      <div class="box accent">
+  // Normalizar lista de materiales y referencias (modo append-only)
+  const materialsList = Array.isArray(proj.materialsList) ? [...proj.materialsList] : [];
+  if (proj.onboarding && materialsList.length === 0) {
+    const ob = proj.onboarding;
+    const legacyUrl = cleanHttpsUrl(ob.materials || "", 500);
+    materialsList.push({
+      id: "legacy",
+      createdAt: ob.submittedAt || ob.receivedAt || proj.createdAt || "",
+      domain: ob.domain || "",
+      socials: ob.socials || "",
+      notes: legacyUrl ? "" : (ob.materials || ""),
+      url: legacyUrl || "",
+      fileUrl: "",
+      filename: "",
+    });
+  }
+  const referencesList = Array.isArray(proj.referencesList) ? [...proj.referencesList] : [];
+
+  const materialsItemsHtml = await Promise.all(
+    materialsList.map(async (m, i) => {
+      const dateStr = m.createdAt ? fmtDate(m.createdAt, L) : "";
+      const urlLink = cleanHttpsUrl(m.url || "", 500);
+      let fileLink = "";
+      if (m.fileId) {
+        fileLink = await fileDownloadUrl(env, token, "mat", m.fileId);
+      } else if (m.fileUrl) {
+        fileLink = m.fileUrl;
+      }
+      return `
+        <div class="history-item">
+          <div class="history-head">
+            <span style="font-size:.78rem;font-weight:600;color:#3D5A85;text-transform:lowercase;">${esc(T.obMaterialsHistory)} #${i + 1}</span>
+            ${dateStr ? `<span style="font-size:.74rem;color:#58575E;">${esc(dateStr)}</span>` : ""}
+          </div>
+          <div class="kv" style="font-size:.82rem;">
+            ${m.domain ? `<div class="kv-row"><span>${esc(T.obLblDomain)}</span><span class="kv-val">${esc(m.domain)}</span></div>` : ""}
+            ${m.socials ? `<div class="kv-row"><span>${esc(T.obLblSocials)}</span><span class="kv-val">${esc(m.socials)}</span></div>` : ""}
+            ${urlLink ? `<div class="kv-row"><span>${esc(T.obMaterialsUrl)}</span><span class="kv-val" style="word-break:break-all;"><a href="${esc(urlLink)}" target="_blank" rel="noopener noreferrer" style="color:#3D5A85;text-decoration:underline;">${esc(urlLink)}</a></span></div>` : ""}
+            ${fileLink ? `<div class="kv-row"><span>${esc(T.obMaterialsFile)}</span><span class="kv-val"><a class="pill-link" href="${esc(fileLink)}" target="_blank" rel="noopener noreferrer">${esc(m.filename || T.obFileDownload)}</a></span></div>` : ""}
+          </div>
+          ${m.notes ? `<div class="phase-note" style="margin-top:.55rem;">${esc(m.notes)}</div>` : ""}
+        </div>`;
+    })
+  );
+
+  const referencesItemsHtml = await Promise.all(
+    referencesList.map(async (r, i) => {
+      const dateStr = r.createdAt ? fmtDate(r.createdAt, L) : "";
+      const urlLink = cleanHttpsUrl(r.url || "", 500);
+      let fileLink = "";
+      if (r.fileId) {
+        fileLink = await fileDownloadUrl(env, token, "ref", r.fileId);
+      } else if (r.fileUrl) {
+        fileLink = r.fileUrl;
+      }
+      return `
+        <div class="history-item">
+          <div class="history-head">
+            <span style="font-size:.78rem;font-weight:600;color:#825008;text-transform:lowercase;">${esc(T.obReferencesHistory)} #${i + 1}</span>
+            ${dateStr ? `<span style="font-size:.74rem;color:#58575E;">${esc(dateStr)}</span>` : ""}
+          </div>
+          <div class="kv" style="font-size:.82rem;">
+            ${urlLink ? `<div class="kv-row"><span>${esc(T.obRefUrl)}</span><span class="kv-val" style="word-break:break-all;"><a href="${esc(urlLink)}" target="_blank" rel="noopener noreferrer" style="color:#3D5A85;text-decoration:underline;">${esc(urlLink)}</a></span></div>` : ""}
+            ${fileLink ? `<div class="kv-row"><span>${esc(T.obRefFile)}</span><span class="kv-val"><a class="pill-link" href="${esc(fileLink)}" target="_blank" rel="noopener noreferrer">${esc(r.filename || T.obFileDownload)}</a></span></div>` : ""}
+          </div>
+          ${r.notes ? `<div class="phase-note" style="margin-top:.55rem;">${esc(r.notes)}</div>` : ""}
+        </div>`;
+    })
+  );
+
+  const materialsBox = materialsItemsHtml.length
+    ? `<div class="box">
+        <span class="eyebrow">${esc(T.obMaterialsHistory)}</span>
+        ${materialsItemsHtml.join("")}
+      </div>`
+    : "";
+
+  const referencesBox = referencesItemsHtml.length
+    ? `<div class="box">
+        <span class="eyebrow">${esc(T.obReferencesHistory)}</span>
+        ${referencesItemsHtml.join("")}
+      </div>`
+    : "";
+
+  const addFormHtml = !allDone
+    ? `<div class="box accent">
         <span class="eyebrow">${esc(T.obEyebrow)}</span>
-        <h2>${esc(T.obTitle)}</h2>
-        <p class="lead" style="margin-bottom:1.1rem;font-size:.85rem;">${esc(T.obIntro)}</p>
-        <form method="POST" style="text-align:left;">
+        <h2>${esc(T.obAddTitle)}</h2>
+        <p class="lead" style="margin-bottom:1.15rem;font-size:.85rem;">${esc(T.obAddIntro)}</p>
+        <form method="POST" enctype="multipart/form-data" style="text-align:left;">
           <input type="hidden" name="op" value="onboarding">
-          <label for="socials">${esc(T.obSocials)}</label>
-          <input id="socials" name="socials" type="text" maxlength="250" placeholder="${esc(T.obSocialsPh)}">
+
+          <div class="section-subheading">${esc(T.blockAMaterials)}</div>
+
           <label for="domain">${esc(T.obDomain)}</label>
           <input id="domain" name="domain" type="text" maxlength="200" placeholder="${esc(T.obDomainPh)}">
-          <label for="materials">${esc(T.obMaterials)}</label>
-          <textarea id="materials" name="materials" rows="3" maxlength="500" placeholder="${esc(T.obMaterialsPh)}"></textarea>
+
+          <label for="socials">${esc(T.obSocials)}</label>
+          <input id="socials" name="socials" type="text" maxlength="250" placeholder="${esc(T.obSocialsPh)}">
+
+          <label for="materials_url">${esc(T.obMaterialsUrl)}</label>
+          <input id="materials_url" name="materials_url" type="url" maxlength="500" placeholder="${esc(T.obMaterialsUrlPh)}">
+
+          <label for="materials_file">${esc(T.obMaterialsFile)}</label>
+          <input id="materials_file" name="materials_file" type="file">
+          <span class="file-note">${esc(T.obMaterialsFileNote)}</span>
+
+          <label for="materials_notes">${esc(T.obMaterialsNotes)}</label>
+          <textarea id="materials_notes" name="materials_notes" rows="3" maxlength="1000" placeholder="${esc(T.obMaterialsNotesPh)}"></textarea>
+
+          <div class="section-subheading">${esc(T.blockBRefs)}</div>
+
+          <label for="reference_url">${esc(T.obRefUrl)}</label>
+          <input id="reference_url" name="reference_url" type="url" maxlength="500" placeholder="${esc(T.obRefUrlPh)}">
+
+          <label for="reference_file">${esc(T.obRefFile)}</label>
+          <input id="reference_file" name="reference_file" type="file">
+          <span class="file-note">${esc(T.obMaterialsFileNote)}</span>
+
+          <label for="reference_notes">${esc(T.obRefNotes)}</label>
+          <textarea id="reference_notes" name="reference_notes" rows="3" maxlength="1000" placeholder="${esc(T.obRefNotesPh)}"></textarea>
+
           <div class="confirm-box">
             <label class="confirm-label">
               <input type="checkbox" name="confirm_action" value="yes" required>
@@ -1226,23 +1585,10 @@ async function handleProject(request, env, url) {
           </div>
           <button type="submit">${esc(T.obSubmit)}</button>
         </form>
-      </div>`;
-  } else if (proj.onboarding) {
-    const ob = proj.onboarding;
-    const matUrl = cleanHttpsUrl(ob.materials, 500);
-    const matVal = matUrl
-      ? `<a href="${esc(matUrl)}" target="_blank" rel="noopener noreferrer" style="color:#3D5A85;text-decoration:underline;">${esc(matUrl)}</a>`
-      : esc(ob.materials);
-    onboardingHtml = `
-      <div class="box">
-        <span class="eyebrow">${esc(T.obSentTitle)}</span>
-        <div class="kv">
-          ${ob.socials ? `<div class="kv-row"><span>${esc(T.obLblSocials)}</span><span class="kv-val">${esc(ob.socials)}</span></div>` : ""}
-          ${ob.domain ? `<div class="kv-row"><span>${esc(T.obLblDomain)}</span><span class="kv-val">${esc(ob.domain)}</span></div>` : ""}
-          ${ob.materials ? `<div class="kv-row"><span>${esc(T.obLblMaterials)}</span><span class="kv-val" style="word-break:break-all;">${matVal}</span></div>` : ""}
-        </div>
-      </div>`;
-  }
+      </div>`
+    : "";
+
+  const onboardingHtml = `${materialsBox}${referencesBox}${addFormHtml}`;
 
   const phaseCards = await Promise.all(
     (proj.phases || []).map(async (ph) => {

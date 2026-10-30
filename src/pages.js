@@ -160,6 +160,32 @@ input[type="file"]::file-selector-button:hover{
   margin-bottom:1rem;
   display:block;
 }
+.section-subheading{
+  font-weight:600;
+  font-size:.84rem;
+  margin-top:1.15rem;
+  margin-bottom:.65rem;
+  color:#17171A;
+  text-transform:lowercase;
+  border-bottom:1px solid #E4DED0;
+  padding-bottom:.35rem;
+}
+.section-subheading:first-child{margin-top:0}
+.history-item{
+  padding:.85rem 0;
+  border-top:1px solid rgba(228,222,208,.65);
+}
+.history-item:first-child{
+  padding-top:.2rem;
+  border-top:none;
+}
+.history-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:.5rem;
+  margin-bottom:.45rem;
+}
 .confirm-box{
   margin-top:.85rem;
   margin-bottom:1.15rem;
