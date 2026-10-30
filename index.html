@@ -1223,8 +1223,8 @@ textarea { resize: vertical; }
         "thinking-phrases": ["pensando...", "analizando territorios visuales...", "sintetizando concepto de marca...", "afinando dirección de arte..."],
         "lead-closed-badge": "correo de verificación enviado. revisa tu bandeja de entrada.",
         "resend": "reenviar correo", "restart": "empezar de nuevo", "resend-limit": "límite de reenvíos alcanzado",
-        "pending-msg": "Te enviamos un correo de verificación a {email}. Ábrelo y pulsa el botón para continuar con el pago. Si no lo ves, mira en spam o reenvíalo.",
-        "verified-note": "¡Correo verificado! Sigue el enlace del correo para completar el pago, o cuéntame si quieres empezar otro proyecto.",
+        "pending-msg": "Te enviamos un correo de verificación a {email}. Ábrelo y pulsa el botón para abrir tu proyecto y continuar con el pago seguro. Si no lo ves, mira en spam o reenvíalo.",
+        "verified-note": "¡Correo verificado! Desde la página de tu proyecto puedes completar el pago seguro y seguir el avance de cada fase, o escribirme aquí si quieres empezar otro proyecto.", "open-project": "abrir mi proyecto y pago",
         "case-slider": "Comparar antes y después",
         "confirm-yes": "Sí",
         "confirm-no": "No",
@@ -1358,8 +1358,8 @@ textarea { resize: vertical; }
         "thinking-phrases": ["thinking it over...", "synthesizing brand architecture...", "shaping visual direction...", "fine-tuning design parameters..."],
         "lead-closed-badge": "verification email sent. please check your inbox.",
         "resend": "resend email", "restart": "start over", "resend-limit": "resend limit reached",
-        "pending-msg": "We sent a verification email to {email}. Open it and click the button to continue to payment. If you can't see it, check spam or resend it.",
-        "verified-note": "Email verified! Follow the link in the email to complete payment, or tell me if you'd like to start another project.",
+        "pending-msg": "We sent a verification email to {email}. Open it and click the button to open your project and continue to secure payment. If you can't see it, check spam or resend it.",
+        "verified-note": "Email verified! Open your project page to complete the secure payment and track every phase, or write to me here if you'd like to start another project.", "open-project": "open my project and payment",
         "confirm-yes": "Yes",
         "confirm-no": "No",
         "role-user": "you",
@@ -1495,8 +1495,8 @@ textarea { resize: vertical; }
         "thinking-phrases": ["pensant...", "analitzant territoris visuals...", "sintetitzant concepte de marca...", "afinant direcció d'art..."],
         "lead-closed-badge": "correu de verificació enviat. revisa la teva bústia.",
         "resend": "reenviar correu", "restart": "començar de nou", "resend-limit": "límit de reenviaments assolit",
-        "pending-msg": "T'hem enviat un correu de verificació a {email}. Obre'l i prem el botó per continuar amb el pagament. Si no el veus, mira el correu brossa o reenvia'l.",
-        "verified-note": "Correu verificat! Segueix l'enllaç del correu per completar el pagament, o digues-me si vols començar un altre projecte.",
+        "pending-msg": "T'hem enviat un correu de verificació a {email}. Obre'l i prem el botó per obrir el teu projecte i continuar amb el pagament segur. Si no el veus, mira el correu brossa o reenvia'l.",
+        "verified-note": "Correu verificat! Des de la pàgina del teu projecte pots completar el pagament segur i seguir l'avanç de cada fase, o escriure'm aquí si vols començar un altre projecte.", "open-project": "obrir el meu projecte i pagament",
         "confirm-yes": "Sí",
         "confirm-no": "No",
         "role-user": "tu",
@@ -1662,8 +1662,8 @@ textarea { resize: vertical; }
         "resend": "berriro bidali mezua",
         "restart": "hasi berriro",
         "resend-limit": "birbidalketa-mugara iritsita",
-        "pending-msg": "Egiaztatze-mezu bat bidali dizugu {email} helbidera. Ireki eta sakatu botoia ordainketarekin jarraitzeko. Ikusten ez baduzu, begiratu spama edo berriro bidali.",
-        "verified-note": "Posta egiaztatuta! Jarraitu mezuko esteka ordainketa burutzeko, edo esaidazu beste proiektu bat hasi nahi duzun.",
+        "pending-msg": "Egiaztatze-mezu bat bidali dizugu {email} helbidera. Ireki eta sakatu botoia zure proiektua irekitzeko eta ordainketa seguruarekin jarraitzeko. Ikusten ez baduzu, begiratu spama edo berriro bidali.",
+        "verified-note": "Posta egiaztatuta! Zure proiektuaren orritik ordainketa segurua osatu eta fase bakoitzaren egoera ikus dezakezu, edo idatzi hemen beste proiektu bat hasi nahi baduzu.", "open-project": "ireki nire proiektua eta ordainketa",
         "confirm-yes": "Bai",
         "confirm-no": "Ez",
         "role-user": "zu",
@@ -1904,7 +1904,7 @@ textarea { resize: vertical; }
       const t = translations[currentLang];
       langIndicator.textContent = currentLang;
       document.documentElement.lang = currentLang;
-      document.title = { es: 'rebrandyourbrand — Rebranding y web para negocios', en: 'rebrandyourbrand — Rebranding & web for businesses', ca: 'rebrandyourbrand — Rebranding i web per a negocis', eu: 'rebrandyourbrand — Negozioentzako rebranding-a eta webgunea' }[currentLang];
+      document.title = { es: 'rebrandyourbrand — Rebranding y web para negocios', ca: 'rebrandyourbrand — Rebranding i web per a negocis', eu: 'rebrandyourbrand — Negozioentzako rebranding-a eta webgunea', en: 'rebrandyourbrand — Rebranding and web for businesses' }[currentLang];
       langToggle.setAttribute('aria-label', t['lang-aria']);
       document.querySelectorAll('[data-i18n]').forEach((el) => {
         if (el.classList.contains('toggle-text')) return;
@@ -2148,10 +2148,11 @@ textarea { resize: vertical; }
       renderHistory();
     }
 
-    function markVerified() {
+    function markVerified(projectUrl) {
       clearResume();
       chatHistory.length = 0;
-      chatHistory.push({ role: 'assistant', local: true, noteKey: 'verified-note' });
+      const safeUrl = typeof projectUrl === 'string' && projectUrl.startsWith(WORKER_URL + '/proyecto?') ? projectUrl : '';
+      chatHistory.push({ role: 'assistant', local: true, noteKey: 'verified-note', projectUrl: safeUrl });
       renderHistory(true);
     }
 
@@ -2168,7 +2169,7 @@ textarea { resize: vertical; }
       busy = true; assistantError.textContent = ''; syncResendBtn();
       try {
         const d = await pendingCall('resend');
-        if (d.state === 'verified') { markVerified(); return; }
+        if (d.state === 'verified') { markVerified(d.projectUrl); return; }
         saveResume({ ...resume, resendAt: Date.now(), left: d.left });
         setAssistantStatus('status-resent', 'ready');
       } catch (err) { pendingFailed(err); }
@@ -2188,7 +2189,7 @@ textarea { resize: vertical; }
     async function checkPending() {
       if (!resume || statusChecked) return;
       statusChecked = true;
-      try { const d = await pendingCall('status'); if (d.state === 'verified') markVerified(); }
+      try { const d = await pendingCall('status'); if (d.state === 'verified') markVerified(d.projectUrl); }
       catch (err) { if (err.code === 'expired' || err.code === 'invalid_resume') { clearResume(); resetChat(); } }
     }
 
@@ -2283,6 +2284,16 @@ textarea { resize: vertical; }
         no.addEventListener('click', () => askBrandi(t['confirm-no']));
         actions.append(yes, no);
         bubble.appendChild(actions);
+      }
+
+      if (!isUser && entry.projectUrl) {
+        const openLink = document.createElement('a');
+        openLink.href = entry.projectUrl;
+        openLink.target = '_blank';
+        openLink.rel = 'noopener noreferrer';
+        openLink.className = 'mt-3 inline-flex items-center justify-center py-2.5 px-4 bg-brand text-[#0A0A0C] font-semibold rounded-xl text-xs hover:bg-brand-soft transition-all lowercase shadow-sm';
+        openLink.textContent = t['open-project'];
+        bubble.appendChild(openLink);
       }
 
       if (!isUser && entry.leadClosed) {
