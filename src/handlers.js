@@ -664,7 +664,7 @@ async function handlePhaseApprove(request, env, url) {
             <form method="POST">
               <input type="hidden" name="decision" value="revise">
               <label for="feedback">${esc(A.revLabel(nextRound, MAX_PHASE_REVISIONS))}</label>
-              <textarea id="feedback" name="feedback" rows="4" maxlength="1500" required placeholder="${esc(A.revPh)}"></textarea>
+              <textarea id="feedback" name="feedback" rows="4" minlength="5" maxlength="1500" required placeholder="${esc(A.revPh)}"></textarea>
               <button type="submit">${esc(A.revSubmit(nextRound, MAX_PHASE_REVISIONS))}</button>
             </form>
           </div>
@@ -703,7 +703,7 @@ async function handlePhaseApprove(request, env, url) {
       return renderReviewScreen("", 400);
     }
     const feedback = cleanNote(form?.get("feedback") ?? "", 1500);
-    if (!feedback) {
+    if (!feedback || feedback.length < 5) {
       return renderReviewScreen(A.revEmpty, 400);
     }
 
