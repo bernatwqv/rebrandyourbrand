@@ -16,12 +16,12 @@
       if (/bot|crawl|spider|slurp|lighthouse|pagespeed|headless|preview/i.test(navigator.userAgent)) return;
       var saved = null;
       try { saved = localStorage.getItem('rybb-lang'); } catch (e) {}
-      if (saved === 'es' || saved === 'ca' || saved === 'en' || saved === 'eu') return;
+      if (saved === 'es' || saved === 'ca' || saved === 'eu' || saved === 'en') return;
       var langs = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language];
       for (var i = 0; i < langs.length; i++) {
         var l = String(langs[i] || '').toLowerCase().split('-')[0];
         if (l === 'es') return;
-        if (l === 'ca' || l === 'en' || l === 'eu') {
+        if (l === 'ca' || l === 'eu' || l === 'en') {
           try { localStorage.setItem('rybb-lang', l); } catch (e) {}
           return;
         }
@@ -44,8 +44,8 @@
 <link rel="canonical" href="https://rebrandyourbrand.es/">
 <link rel="alternate" hreflang="es" href="https://rebrandyourbrand.es/">
 <link rel="alternate" hreflang="ca" href="https://rebrandyourbrand.es/ca/">
-<link rel="alternate" hreflang="en" href="https://rebrandyourbrand.es/en/">
 <link rel="alternate" hreflang="eu" href="https://rebrandyourbrand.es/eu/">
+<link rel="alternate" hreflang="en" href="https://rebrandyourbrand.es/en/">
 <link rel="alternate" hreflang="x-default" href="https://rebrandyourbrand.es/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="rebrandyourbrand.es">
@@ -73,7 +73,7 @@
 }
 </script>
 
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%A8%3C/text%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
 
 <script>
   (function () {
@@ -469,13 +469,6 @@ textarea { resize: vertical; }
   #assistant-trigger { bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px)); }
   #assistant-panel { padding-bottom: env(safe-area-inset-bottom, 0px); }
 
-  .lang-option.is-active {
-    background-color: rgb(var(--color-brand) / 0.15);
-    color: rgb(var(--color-brand-soft));
-    box-shadow: 0 0 12px rgba(140, 163, 196, 0.25);
-    font-weight: 600;
-  }
-
   @keyframes pulse { 50% { opacity: .4; } }
   .bg-ink\/20{background:rgb(var(--color-bg)/.2)}.bg-ink\/30{background:rgb(var(--color-bg)/.3)}
   .bg-ink\/40{background:rgb(var(--color-bg)/.4)}.bg-ink\/50{background:rgb(var(--color-bg)/.5)}
@@ -545,10 +538,9 @@ textarea { resize: vertical; }
     background: rgb(var(--color-brand)); transition: right 260ms var(--ease-editorial);
   }
   header nav a:hover::after { right: 0; }
-  #lang-toggle:hover, #theme-toggle:hover, #mobile-menu-toggle:hover {
+  #theme-toggle:hover, #mobile-menu-toggle:hover {
     background: rgb(var(--color-brand) / .08); box-shadow: 0 0 0 4px rgb(var(--color-brand) / .06);
   }
-  #lang-dropdown { box-shadow: var(--shadow-panel); border-color: rgb(var(--color-brand) / .25); backdrop-filter: blur(18px); }
   section { scroll-margin-top: 5rem; }
   #top h1 { letter-spacing: -.045em; }
   #top p, #manifiesto p { letter-spacing: -.005em; }
@@ -658,28 +650,44 @@ textarea { resize: vertical; }
   .step-card p{line-height:1.6;font-size:.95rem}
   @media(max-width:39.99rem){.step-card{padding:1.4rem 1.25rem}}
 
-  /* Casos de estudio: comparador antes / después */
-  #casos{background:radial-gradient(circle at 88% 0%,rgb(var(--color-brand)/.09),transparent 26rem)}
-  .cases-grid{display:grid;gap:1.25rem;grid-template-columns:1fr}
-  @media(min-width:48rem){.cases-grid{grid-template-columns:repeat(3,1fr)}}
-  .case-card{overflow:hidden;border:1px solid rgb(var(--color-line));border-radius:1.25rem;background:linear-gradient(145deg,rgb(var(--color-panel)/.98),rgb(var(--color-panel)/.7));
-    transition:opacity 600ms var(--ease-editorial),transform 600ms var(--ease-editorial),border-color 300ms var(--ease-editorial),box-shadow 300ms var(--ease-editorial)}
-  .case-card.reveal.in-view:hover{transform:translateY(-4px);border-color:rgb(var(--color-brand)/.6);box-shadow:var(--ring-brand)}
-  .ba{position:relative;aspect-ratio:4/3;overflow:hidden;--pos:50%}
-  .ba:focus-within{outline:2px solid rgb(var(--color-ai));outline-offset:-2px}
-  .ba-tile{position:absolute;inset:0;display:flex;align-items:flex-end;padding:.75rem}
-  .ba-before{background:linear-gradient(135deg,rgb(var(--color-line)),rgb(var(--color-panel)))}
-  .ba-after{background:linear-gradient(135deg,rgb(var(--color-brand)/.45),rgb(var(--color-panel)));justify-content:flex-end;clip-path:inset(0 0 0 var(--pos))}
-  .case-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-  .ba-label{position:relative;z-index:1;font:600 .65rem ui-monospace,monospace;letter-spacing:.06em;text-transform:lowercase;padding:.2rem .5rem;border-radius:999px;background:rgb(var(--color-bg)/.8);color:rgb(var(--color-text))}
-  .ba-handle{position:absolute;top:0;bottom:0;left:var(--pos);width:2px;background:#fff;transform:translateX(-1px);pointer-events:none;box-shadow:0 0 0 1px rgb(0 0 0/.18)}
-  .ba-handle::after{content:"↔";position:absolute;top:50%;left:50%;width:2rem;height:2rem;margin:-1rem 0 0 -1rem;border-radius:999px;background:#fff;color:#0A0A0C;display:flex;align-items:center;justify-content:center;font-size:.8rem;box-shadow:0 4px 12px rgb(0 0 0/.25)}
-  .ba-range{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:ew-resize;touch-action:pan-y}
-  .case-body{padding:1.25rem 1.5rem 1.5rem}
-  .case-tags{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.75rem}
-  .case-tags span{font:.65rem ui-monospace,monospace;letter-spacing:.04em;text-transform:lowercase;padding:.15rem .55rem;border-radius:999px;border:1px solid rgb(var(--color-brand)/.4);color:rgb(var(--color-brand-text,var(--color-brand)))}
-  .case-body h3{font-size:1.25rem;line-height:1.2;letter-spacing:-.02em;margin-bottom:.5rem}
-  .case-body p{color:rgb(var(--color-muted));font-size:.9rem;line-height:1.6}
+  /* Logotipo principal (header y footer) */
+  .brand-logo{display:block;width:auto;fill:currentColor;color:rgb(var(--color-text));transition:color 300ms var(--ease-editorial),opacity 220ms var(--ease-editorial)}
+  .brand-logo-header{height:1.9rem}
+  @media(min-width:48rem){.brand-logo-header{height:2.15rem}}
+  .brand-logo-footer{height:2.5rem}
+  @media(min-width:48rem){.brand-logo-footer{height:2.85rem}}
+  a:hover .brand-logo{opacity:.86}
+
+  /* Selector deslizante de idioma */
+  .lang-trigger{display:inline-flex;align-items:center;gap:.42rem;height:2.5rem;padding:0 .72rem 0 .68rem;border-radius:9999px;border:1px solid rgb(var(--color-line));
+    background:linear-gradient(145deg,rgb(var(--color-panel)/.72),rgb(var(--color-panel)/.36));color:rgb(var(--color-text));box-shadow:inset 0 1px 0 rgb(255 255 255/.05)}
+  .lang-trigger:hover,.lang-trigger[aria-expanded="true"]{border-color:rgb(var(--color-brand)/.6);background:rgb(var(--color-brand)/.1);box-shadow:0 0 0 4px rgb(var(--color-brand)/.07)}
+  .lang-globe{width:15px;height:15px;flex-shrink:0;color:rgb(var(--color-brand-text,var(--color-brand)))}
+  .lang-trigger-code{font:600 .72rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.06em;text-transform:uppercase;color:rgb(var(--color-text))}
+  .lang-chevron{width:12px;height:12px;flex-shrink:0;color:rgb(var(--color-muted));transition:transform 260ms var(--ease-editorial),color 220ms var(--ease-editorial)}
+  .lang-trigger[aria-expanded="true"] .lang-chevron{transform:rotate(180deg);color:rgb(var(--color-text))}
+  .lang-menu{position:absolute;right:0;top:calc(100% + .6rem);width:11.75rem;padding:.375rem;border-radius:1rem;z-index:50;
+    border:1px solid rgb(var(--color-brand)/.28);background:linear-gradient(155deg,rgb(var(--color-panel)/.96),rgb(var(--color-bg)/.94));
+    backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:var(--shadow-panel),inset 0 1px 0 rgb(255 255 255/.05);
+    opacity:0;visibility:hidden;pointer-events:none;transform:translateY(-.4rem) scale(.96);transform-origin:top right;
+    transition:opacity 220ms var(--ease-editorial),transform 260ms var(--ease-editorial),visibility 0s linear 260ms}
+  html.light .lang-menu{background:linear-gradient(155deg,rgb(var(--color-bg)/.97),rgb(var(--color-panel)/.88));border-color:rgb(var(--color-brand)/.35);box-shadow:var(--shadow-panel),inset 0 1px 0 rgb(255 255 255/.85)}
+  .lang-menu.is-open{opacity:1;visibility:visible;pointer-events:auto;transform:translateY(0) scale(1);transition:opacity 220ms var(--ease-editorial),transform 260ms var(--ease-editorial),visibility 0s}
+  .lang-track{position:relative;display:flex;flex-direction:column;gap:.25rem}
+  .lang-glider{position:absolute;left:0;right:0;top:0;height:2.25rem;border-radius:.625rem;pointer-events:none;z-index:0;
+    background:linear-gradient(135deg,rgb(var(--color-brand)/.22),rgb(var(--color-brand)/.09));border:1px solid rgb(var(--color-brand)/.42);
+    box-shadow:0 6px 16px rgb(var(--color-brand)/.14),inset 0 1px 0 rgb(255 255 255/.08);
+    transform:translateY(calc(var(--glider-idx,0) * 2.5rem));transition:transform 320ms var(--ease-editorial)}
+  html.light .lang-glider{background:linear-gradient(135deg,rgb(var(--color-bg)),rgb(var(--color-brand)/.15));border-color:rgb(var(--color-brand)/.52);box-shadow:0 4px 12px rgb(var(--color-brand-text)/.1),inset 0 1px 0 rgb(255 255 255/.9)}
+  .lang-option{position:relative;z-index:1;width:100%;height:2.25rem;padding:0 .75rem;border-radius:.625rem;display:flex;align-items:center;justify-content:space-between;cursor:pointer;color:rgb(var(--color-muted));transition:color 200ms var(--ease-editorial)}
+  .lang-option:hover,.lang-option:focus-visible{color:rgb(var(--color-text))}
+  .lang-option:focus-visible{outline-offset:-2px}
+  .lang-name{font-size:.82rem;font-weight:500;letter-spacing:-.01em;text-transform:lowercase}
+  .lang-code{font:600 .64rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.06em;text-transform:uppercase;padding:.24rem .44rem;border-radius:9999px;border:1px solid rgb(var(--color-line));background:rgb(var(--color-bg)/.45);color:rgb(var(--color-muted));transition:background-color 220ms var(--ease-editorial),border-color 220ms var(--ease-editorial),color 220ms var(--ease-editorial)}
+  .lang-option:hover .lang-code,.lang-option:focus-visible .lang-code{border-color:rgb(var(--color-brand)/.5);color:rgb(var(--color-text))}
+  .lang-option.is-active{color:rgb(var(--color-text))}
+  .lang-option.is-active .lang-name{font-weight:600}
+  .lang-option.is-active .lang-code{background:rgb(var(--color-brand));border-color:rgb(var(--color-brand));color:#0A0A0C}
 
   /* Información legal (LSSI / RGPD) */
   .legal-list{display:grid;gap:1rem}
@@ -697,15 +705,18 @@ textarea { resize: vertical; }
 <body class="bg-ink text-paper antialiased relative overflow-x-hidden">
   <a href="#main-content" class="skip-link">saltar al contenido</a>
 
+  <svg hidden aria-hidden="true">
+    <symbol id="rybb-mark" viewBox="0 0 726 261"><path fill-rule="evenodd" d="M258.2 2.5L262.5 2.1L288 2.5L288.5 70.5L293.9 64.4L298.9 60.4L305.2 57.7L313.5 56.4L322.2 57.4L327.4 59.1L333.5 63L339 69.5L341.5 74L344 80.5L346.7 91.7L347.6 97.7L348.7 126.5L348.8 168.5L347.9 195.5L346.7 206.3L344.5 215L341.5 222L338.1 227.6L334.3 231.9L329.7 235.2L323.4 237.9L316.5 238.9L306.9 238.5L301.4 237.1L295.7 233.8L290.6 228.9L286.5 222.9L283.5 236.8L258.1 236.5ZM696 2.5L696.5 2.1L722.7 2.5L723 236.5L715.5 236.9L699 236.5L698.2 234.4L697.4 226.2L696.5 224.1L692.8 229.3L687.8 234.3L682.7 237.2L677.3 238.7L668.5 239L662.6 237.9L656.7 234.8L652.4 231.2L648.9 226.6L646.3 221.2L642.3 207.3L640.3 180.5L640.1 164.5L640.2 118.5L641.3 99.5L642.3 90.6L644.3 81.7L645.6 77.1L648.7 70.2L653 64.4L658.5 60L664.1 57.6L671.6 56.4L679.2 57.4L684.2 59.3L690 63.5L695.5 69.9L695.9 68.5ZM234.2 88.5L140.5 88.8L138.5 88.9L137.9 89.5L139.3 99.2L141.7 105.8L144.6 110.9L151.2 117.3L160.1 121.4L167.6 122.7L172.5 122.8L180.4 121.9L184.3 120.8L189.7 118.2L193.1 115.6L196.4 111.9L199.5 106.3L233.5 110.5L233.7 112.3L230.7 120.2L227.5 126L222.2 132.7L212.8 141.3L207.8 144.3L201.6 147.1L189.4 150.8L182.5 151.9L170.5 152.7L159.5 151.9L152.7 150.7L140.4 147.1L129.8 141.7L121.5 135L116.6 129.9L113.1 125.4L107.3 115.2L103.5 105L101.2 95.4L100.5 89.1L100.1 73.5L101.4 60.8L103.8 51.4L106.7 44.2L113.2 32.7L121.2 23.7L127.2 18.7L132.1 15.6L139.5 11.9L146.1 9.6L156.6 7.2L169.5 6.3L185.2 8.4L196.5 12L207.5 18L211.4 21L217 26.4L224.3 36.2L227.8 42.7L230.4 49.2L233.5 62L234.8 77.5ZM88.5 8.8L89.2 9.5L88.8 18.5L87.7 34.5L86.5 43L79.4 41.2L73.5 40.8L66.6 41.2L61.1 42.6L57 44.5L51.8 48.3L48.5 52L45.6 57.1L43.2 65.6L42.7 73.5L42.5 149.5L41.5 150.1L21.5 150.1L4.5 150.1L3.5 149.5L3.5 9.4L4.5 8.9L36.5 8.9L39.5 8.9L40.2 9.5L40.2 29.5L40.7 32.5L41.5 33L45.5 24L49.1 18.6L54.2 13.7L60.3 9.9L67.8 7.4L74.5 6.7L82.4 7.2ZM138.5 63.9L193.5 64.2L197.8 63.5L195.5 53L192.8 47.7L189.1 43.4L185.3 40.2L180 37.5L174.5 36L168.5 35.4L161.6 36.2L156.2 37.7L151.7 40.1L147.8 43.3L144.5 47.1L141.5 52L139.1 58.6ZM520.8 236.5L497.5 236.9L494.8 236.5L492.5 224.4L486.7 231.2L483.5 234L479.2 236.7L475.5 238L469.5 239L461.6 238.7L456.2 237.3L450.3 234.2L447.1 231.4L444 227.6L441.3 223.2L438.4 216.1L435.4 201.2L434.4 182.5L435.1 165.5L436.3 157.7L439 148.5L441.7 143.2L444.4 139.9L450.1 134.6L456.6 131.1L490.7 119.5L490.8 103.5L489.6 91.8L486.8 84.7L484.8 82.7L482.3 81.2L477.6 80.4L473.7 81.1L471.1 82.5L468.2 85.7L466.6 89.2L465.1 95.5L464.5 109.5L463.5 110.3L437.5 109.7L437.2 100.5L438.2 89.5L441.4 77.9L444.1 72.6L447.5 68L451.6 64.1L456.5 61L464.5 58L475.8 56.5L480 56.5L491.5 58L499.6 60.9L503.9 63.5L509 68.5L512.4 73.1L516.4 83.1L518.9 98.5L519.3 113.5L519.3 215.5ZM621.5 236.6L594.5 236.9L594.1 236.5L593.8 111.5L593 96.5L591.8 89.7L589.5 85L586.2 82.2L581.5 81.2L578.3 81.8L575.6 83.1L573 85.5L571.4 87.9L569 94.5L567.3 108.6L566.9 236.5L541.5 236.9L539.7 236.5L539.4 91.5L538.6 59.5L539.5 58.9L564.5 59.2L565.7 71.5L566.5 72.4L572.2 64.7L577.8 60.3L584.8 57.3L593.4 56.4L602.3 58.2L608.8 61.7L611.9 64.7L614.4 68.1L617.9 75.6L620.8 86.6L621.8 100.5ZM426.8 57.5L426.5 86.8L425.5 87.2L418.5 86.7L413.5 87L410.4 87.8L406.3 89.9L403.1 92.6L400.6 96.1L397.5 105L396.3 122.5L396 236.5L395.5 236.9L389.5 236.9L368 236.5L367.8 88.5L366.9 59.5L367.5 58.9L392.5 59L393.5 59.5L394.5 74L394.7 75.5L395.5 75.6L400.9 66.4L403.8 63.3L408.4 59.9L411.7 58.2L416.5 57L422.5 56.8ZM301.8 81.4L297.5 83L294 86.4L291.9 90.4L290.1 96.5L289.1 104.5L288.5 125.7L288.4 167.5L289.2 192.5L291 203.5L293 208.5L295.6 211.9L299.4 214.2L303.5 214.8L308.4 213.9L312.4 210.9L315.2 205.6L316.6 198.3L317.9 179.5L317.9 122.5L316.8 101.5L314.6 89.9L312.6 85.9L310.1 83.4L305.9 81.6ZM679.7 81.3L675.6 83.1L672.5 87L670.9 91.5L669.3 101.7L668.5 127.6L668.5 170.5L669.2 192.5L671.4 207.2L673 210.6L675.2 213.3L677.8 214.7L681.5 215.2L686 214.5L689.1 211.8L691.7 207.2L693.7 200.4L694.8 190.5L695.7 172.5L695.8 128.5L694.8 104.5L692.7 91.8L690.7 86.8L688 83.5L684.1 81.5ZM488.7 143.2L475.6 148.1L471.3 150.8L467 155.5L464.5 162.1L463.9 169.5L463.8 184.5L464.1 196.5L464.9 202.5L466.5 208L468.1 211.4L470.7 213.9L473.6 215L479.4 215L484 212.5L487.2 208.7L489.8 201.4L490.8 186.5L490.9 143.5L490.5 142.9ZM89 171.5L95.5 171.2L101.5 171.9L107.4 174.1L111.1 176.4L114.9 179.7L119.4 186.1L122.7 195.8L123.2 202.5L123 209.5L119.7 220.2L116.7 225.2L113.4 228.9L108.7 232.2L102.3 234.8L95.3 235.5L88.5 235.1L84.4 234.1L79 231.5L74.6 227.9L71 223.6L68.5 219L66.3 212.3L65.6 204.5L66 196.5L67.4 190.8L69.7 185.3L73.1 180.6L78.3 175.8L82.8 173.4ZM235.8 172.5L235 186.5L234.5 187.5L228.5 186.6L224.1 187.6L220.4 189.9L217.5 194L216.2 201.5L216.2 233.5L215.7 234.5L200.5 234.5L200 231.5L200 172.5L200.5 172.1L214.5 172L215.3 172.5L215.6 180.5L216.5 181.2L220.1 175.6L224.8 172.3L230.5 171.2L233.9 171.6ZM2.5 172.3L18.5 172L19.4 172.5L31.2 213.3L32.5 216.4L44.9 172.5L45.5 172.1L60.5 172.1L61.5 172.4L41.8 232.3L38.4 241.9L35.2 248.7L30.2 254.6L24.2 257.7L14.5 258.1L10.8 257.7L7.8 256.5L10.5 244.3L16.5 244.9L20 243.6L22.5 240.1L23.6 237.1L23.7 234.6ZM133.5 172.5L134.5 172L148.5 172L149.3 172.5L149.5 206.3L150.1 213.4L151.1 216.3L153.4 219L156 220.4L159.5 221L163.1 220.5L166.9 218.4L169.1 215.6L170.4 211.9L170.8 206.5L170.9 172.5L171.5 172.1L186.5 172.3L186.5 234.1L172.5 234.3L171.5 225.8L165 232.5L161 234.4L156.5 235.1L149.6 234.9L145.8 233.7L142 231.5L138 227.5L135.8 223.7L134.6 219.9L133.5 212.9ZM93.8 184.5L88.7 186.1L86.5 188L84.4 190.9L82.3 197.6L81.9 204.5L83 212.5L85.6 217.9L89.4 221.1L94.5 222.2L97.4 221.8L100.2 220.7L103.7 217.2L106.1 211.5L106.9 202.5L105.9 194.6L103.4 189.1L99.7 185.8Z"></path></symbol>
+  </svg>
+
   <header class="fixed top-0 inset-x-0 z-40 border-b border-line bg-ink/85 backdrop-blur-md">
     <div class="max-w-6xl mx-auto px-6 md:px-10 h-16 flex items-center justify-between">
-      <a href="#top" data-section-target="top" class="flex items-center gap-3">
-        <span class="font-display text-lg tracking-tight">rebrandyourbrand</span>
+      <a href="#top" data-section-target="top" aria-label="rebrandyourbrand" class="flex items-center gap-3 text-paper">
+        <svg class="brand-logo brand-logo-header" viewBox="0 0 726 261" width="96" height="34" aria-hidden="true"><use href="#rybb-mark"></use></svg>
         <span class="inline-block w-px h-5 bg-line" aria-hidden="true"></span>
       </a>
 
       <nav class="hidden md:flex items-center gap-5 lg:gap-8 ml-auto text-sm text-muted">
-        <a href="#casos" data-section-target="casos" class="lang-trans lowercase hover:text-paper" data-i18n="nav-cases">trabajos</a>
         <a href="#planes" data-section-target="planes" class="lang-trans lowercase hover:text-paper" data-i18n="nav-planes">servicios</a>
         <a href="#sobre-nosotros" data-section-target="sobre-nosotros" class="lang-trans lowercase hover:text-paper" data-i18n="nav-about">sobre nosotros</a>
         <a hidden href="#testimonios" data-section-target="testimonios" class="lang-trans lowercase hover:text-paper" data-i18n="nav-testimonials">testimonios</a>
@@ -716,28 +727,34 @@ textarea { resize: vertical; }
 
       <div class="flex items-center gap-3">
         <div class="relative">
-          <button id="lang-toggle" type="button" aria-label="Cambiar idioma" aria-expanded="false" aria-controls="lang-dropdown"
-              class="relative w-10 h-10 rounded-full border border-line flex items-center justify-center text-paper font-mono text-xs hover:border-brand/60 hover:scale-105 cursor-pointer">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;" aria-hidden="true">
+          <button id="lang-toggle" type="button" aria-label="Cambiar idioma" aria-haspopup="menu" aria-expanded="false" aria-controls="lang-dropdown"
+              class="lang-trigger cursor-pointer">
+            <svg class="lang-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <circle cx="12" cy="12" r="10"></circle>
               <path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"></path>
             </svg>
-            <span id="lang-indicator" class="absolute -bottom-1 -right-1 bg-brand text-[#0A0A0C] text-[9px] font-bold px-1 rounded-full uppercase">es</span>
+            <span id="lang-indicator" class="lang-trigger-code">es</span>
+            <svg class="lang-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M6 9l6 6 6-6"></path>
+            </svg>
           </button>
 
-          <div id="lang-dropdown" class="hidden absolute right-0 mt-2 w-36 bg-panel border border-line rounded-xl shadow-xl py-2 z-50 flex flex-col gap-1">
-            <button type="button" data-lang-choice="es" class="lang-option w-full text-left px-4 py-2 text-xs font-mono flex items-center justify-between hover:bg-ink/40 transition-colors cursor-pointer">
-              <span>español</span><span class="lang-dot w-1.5 h-1.5 rounded-full"></span>
-            </button>
-            <button type="button" data-lang-choice="ca" class="lang-option w-full text-left px-4 py-2 text-xs font-mono flex items-center justify-between hover:bg-ink/40 transition-colors cursor-pointer">
-              <span>català</span><span class="lang-dot w-1.5 h-1.5 rounded-full"></span>
-            </button>
-            <button type="button" data-lang-choice="en" class="lang-option w-full text-left px-4 py-2 text-xs font-mono flex items-center justify-between hover:bg-ink/40 transition-colors cursor-pointer">
-              <span>english</span><span class="lang-dot w-1.5 h-1.5 rounded-full"></span>
-            </button>
-            <button type="button" data-lang-choice="eu" class="lang-option w-full text-left px-4 py-2 text-xs font-mono flex items-center justify-between hover:bg-ink/40 transition-colors cursor-pointer">
-              <span>euskara</span><span class="lang-dot w-1.5 h-1.5 rounded-full"></span>
-            </button>
+          <div id="lang-dropdown" role="menu" aria-labelledby="lang-toggle" inert class="lang-menu">
+            <div class="lang-track">
+              <span class="lang-glider" aria-hidden="true"></span>
+              <button type="button" role="menuitemradio" aria-checked="true" data-lang-choice="es" class="lang-option is-active">
+                <span class="lang-name">español</span><span class="lang-code">es</span>
+              </button>
+              <button type="button" role="menuitemradio" aria-checked="false" data-lang-choice="ca" class="lang-option">
+                <span class="lang-name">català</span><span class="lang-code">ca</span>
+              </button>
+              <button type="button" role="menuitemradio" aria-checked="false" data-lang-choice="eu" class="lang-option">
+                <span class="lang-name">euskara</span><span class="lang-code">eu</span>
+              </button>
+              <button type="button" role="menuitemradio" aria-checked="false" data-lang-choice="en" class="lang-option">
+                <span class="lang-name">english</span><span class="lang-code">en</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -767,7 +784,6 @@ textarea { resize: vertical; }
     </div>
 
     <div id="mobile-nav" class="md:hidden hidden border-t border-line bg-panel/95 backdrop-blur-md px-6 py-4 flex flex-col gap-3 text-sm">
-      <a href="#casos" data-section-target="casos" class="lang-trans lowercase text-muted hover:text-paper py-1" data-i18n="nav-cases">trabajos</a>
       <a href="#planes" data-section-target="planes" class="lang-trans lowercase text-muted hover:text-paper py-1" data-i18n="nav-planes">servicios</a>
       <a href="#sobre-nosotros" data-section-target="sobre-nosotros" class="lang-trans lowercase text-muted hover:text-paper py-1" data-i18n="nav-about">sobre nosotros</a>
       <a hidden href="#testimonios" data-section-target="testimonios" class="lang-trans lowercase text-muted hover:text-paper py-1" data-i18n="nav-testimonials">testimonios</a>
@@ -784,61 +800,6 @@ textarea { resize: vertical; }
         <div class="cta-row hero-fade delay-300">
           <a href="#planes" data-section-target="planes" class="btn btn-primary lang-trans" data-i18n="cta-plans">ver servicios y precios</a>
           <button type="button" data-open-brandi class="btn btn-ghost lang-trans" data-i18n="cta-brandi">hablar con brandi</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- EDITA: casos ilustrativos. Sustituye textos y coloca tus imágenes reales en /casos/ (antes y después, formato 4:3, .webp) -->
-    <section id="casos" class="relative px-6 md:px-10 py-24 md:py-32 border-b border-line overflow-hidden z-10">
-      <div class="max-w-6xl mx-auto relative z-10">
-        <div class="reveal max-w-xl mb-12">
-          <span class="lang-trans lowercase block text-xs tracking-widest text-brand font-mono mb-2" data-i18n="cases-eyebrow">trabajos recientes</span>
-          <h2 class="lang-trans lowercase font-display text-3xl md:text-4xl mb-4" data-i18n="cases-title">antes y después</h2>
-          <p class="lang-trans text-muted leading-relaxed" data-i18n="cases-sub">Desliza cada imagen para comparar el rediseño con el punto de partida.</p>
-        </div>
-        <div class="cases-grid">
-          <article class="case-card reveal">
-            <div class="ba" data-ba>
-              <div class="ba-tile ba-before"><img class="case-img" src="/casos/cafeteria-antes.webp" alt="" loading="lazy" width="800" height="600"><span class="ba-label lang-trans" data-i18n="case-before">antes</span></div>
-              <div class="ba-tile ba-after"><img class="case-img" src="/casos/cafeteria-despues.webp" alt="" loading="lazy" width="800" height="600"><span class="ba-label lang-trans" data-i18n="case-after">después</span></div>
-              <span class="ba-handle" aria-hidden="true"></span>
-              <input class="ba-range" type="range" min="0" max="100" value="50" aria-label="Comparar antes y después" data-i18n-aria="case-slider">
-            </div>
-            <div class="case-body">
-              <div class="case-tags"><span data-i18n="svc-logo">logotipo</span><span data-i18n="svc-paleta">paleta de empresa</span></div>
-              <h3 class="lang-trans lowercase font-display" data-i18n="case-1-title">cafetería de barrio</h3>
-              <p class="lang-trans" data-i18n="case-1-desc">Logotipo y paleta que funcionan igual de bien en la fachada que en el vaso para llevar.</p>
-            </div>
-          </article>
-          <article class="case-card reveal">
-            <div class="ba" data-ba>
-              <div class="ba-tile ba-before"><img class="case-img" src="/casos/fisio-antes.webp" alt="" loading="lazy" width="800" height="600"><span class="ba-label lang-trans" data-i18n="case-before">antes</span></div>
-              <div class="ba-tile ba-after"><img class="case-img" src="/casos/fisio-despues.webp" alt="" loading="lazy" width="800" height="600"><span class="ba-label lang-trans" data-i18n="case-after">después</span></div>
-              <span class="ba-handle" aria-hidden="true"></span>
-              <input class="ba-range" type="range" min="0" max="100" value="50" aria-label="Comparar antes y después" data-i18n-aria="case-slider">
-            </div>
-            <div class="case-body">
-              <div class="case-tags"><span data-i18n="svc-paleta">paleta de empresa</span></div>
-              <h3 class="lang-trans lowercase font-display" data-i18n="case-2-title">estudio de fisioterapia</h3>
-              <p class="lang-trans" data-i18n="case-2-desc">Una identidad coherente en la web, las redes y los folletos: de cuatro estilos distintos a uno solo.</p>
-            </div>
-          </article>
-          <article class="case-card reveal">
-            <div class="ba" data-ba>
-              <div class="ba-tile ba-before"><img class="case-img" src="/casos/ceramica-antes.webp" alt="" loading="lazy" width="800" height="600"><span class="ba-label lang-trans" data-i18n="case-before">antes</span></div>
-              <div class="ba-tile ba-after"><img class="case-img" src="/casos/ceramica-despues.webp" alt="" loading="lazy" width="800" height="600"><span class="ba-label lang-trans" data-i18n="case-after">después</span></div>
-              <span class="ba-handle" aria-hidden="true"></span>
-              <input class="ba-range" type="range" min="0" max="100" value="50" aria-label="Comparar antes y después" data-i18n-aria="case-slider">
-            </div>
-            <div class="case-body">
-              <div class="case-tags"><span data-i18n="svc-web">web</span></div>
-              <h3 class="lang-trans lowercase font-display" data-i18n="case-3-title">tienda de cerámica</h3>
-              <p class="lang-trans" data-i18n="case-3-desc">Una web rápida y a su nombre, con la marca renovada de punta a punta.</p>
-            </div>
-          </article>
-        </div>
-        <div class="cta-row reveal">
-          <button type="button" data-open-brandi class="btn btn-primary lang-trans" data-i18n="cases-cta">quiero algo así</button>
         </div>
       </div>
     </section>
@@ -1091,7 +1052,7 @@ textarea { resize: vertical; }
   <footer class="relative px-6 md:px-10 py-20 md:py-28 overflow-hidden z-10 bg-panel border-t border-line">
     <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
       <div class="space-y-2">
-        <span class="font-display text-xl md:text-2xl text-paper tracking-tight">rebrandyourbrand</span>
+        <a href="#top" data-section-target="top" aria-label="rebrandyourbrand" class="inline-block text-paper"><svg class="brand-logo brand-logo-footer" viewBox="0 0 726 261" width="118" height="42" aria-hidden="true"><use href="#rybb-mark"></use></svg></a>
         <p class="lang-trans text-xs md:text-sm text-muted lowercase" data-i18n="footer-copy">rebrandyourbrand — rebranding y web para negocios</p>
         <p class="text-xs md:text-sm font-mono"><a href="mailto:hola@rebrandyourbrand.es" class="text-brand hover:underline">hola@rebrandyourbrand.es</a></p>
       </div>
@@ -1225,7 +1186,6 @@ textarea { resize: vertical; }
         "resend": "reenviar correo", "restart": "empezar de nuevo", "resend-limit": "límite de reenvíos alcanzado",
         "pending-msg": "Te enviamos un correo de verificación a {email}. Ábrelo y pulsa el botón para abrir tu proyecto y continuar con el pago seguro. Si no lo ves, mira en spam o reenvíalo.",
         "verified-note": "¡Correo verificado! Desde la página de tu proyecto puedes completar el pago seguro y seguir el avance de cada fase, o escribirme aquí si quieres empezar otro proyecto.", "open-project": "abrir mi proyecto y pago",
-        "case-slider": "Comparar antes y después",
         "confirm-yes": "Sí",
         "confirm-no": "No",
         "role-user": "tú",
@@ -1236,16 +1196,11 @@ textarea { resize: vertical; }
         "err-plan": "please choose at least one service in the services section before continuing.",
         "intro": "Hi, I'm Brandi, art director at rebrandyourbrand. Tell me: what's your brand or project called and what do you need?",
         "greet": "Perfect! You chose {services} ({total} total). What is your brand or project called, so we can continue with your proposal?",
-        "nav-cases": "work", "nav-planes": "services", "nav-about": "about us", "nav-testimonials": "testimonials", "nav-terms": "terms",
+        "nav-planes": "services", "nav-about": "about us", "nav-testimonials": "testimonials", "nav-terms": "terms",
         "hero-tag": "rebranding & web for businesses that deserve more",
         "hero-title": "your business is better than it looks.",
         "hero-desc": "If your image doesn't match the quality of your work, customers pick someone else before they meet you. We redesign it at a fixed price with no monthly fees.",
         "cta-plans": "see services & prices", "cta-brandi": "talk to brandi",
-        "cases-eyebrow": "recent work", "cases-title": "before & after", "cases-sub": "Drag each image to compare the redesign with the starting point.",
-        "case-before": "before", "case-after": "after", "cases-cta": "i want something like this", "case-slider": "Compare before and after",
-        "case-1-title": "neighbourhood café", "case-1-desc": "A logo and palette that work as well on the shopfront as on the takeaway cup.",
-        "case-2-title": "physiotherapy studio", "case-2-desc": "One coherent identity across website, social media and leaflets: from four different styles to one.",
-        "case-3-title": "ceramics shop", "case-3-desc": "A fast website in their name, with the brand refreshed from end to end.",
         "problem-eyebrow": "the problem", "how-eyebrow": "how it works", "plans-eyebrow": "services & pricing", "studio-eyebrow": "the team",
         "problem-title": "does any of this sound familiar?",
         "problem-1": "Your logo falls apart when you shrink it: on Instagram, on a sign, on an invoice.",
@@ -1373,16 +1328,11 @@ textarea { resize: vertical; }
         "err-plan": "si us plau, tria almenys un servei a la secció de serveis abans de continuar.",
         "intro": "Hola, sóc la Brandi, directora d'art de rebrandyourbrand. Explica'm: com es diu la teva marca o projecte i què necessites?",
         "greet": "Perfecte! Has triat {services} ({total} en total). Com es diu la teva marca o projecte per continuar amb la teva proposta?",
-        "nav-cases": "treballs", "nav-planes": "serveis", "nav-about": "sobre nosaltres", "nav-testimonials": "testimonis", "nav-terms": "termes",
+        "nav-planes": "serveis", "nav-about": "sobre nosaltres", "nav-testimonials": "testimonis", "nav-terms": "termes",
         "hero-tag": "rebranding i web per a negocis que mereixen més",
         "hero-title": "el teu negoci és millor del que sembla.",
         "hero-desc": "Si la teva imatge no està a l'altura del que fas, els clients trien un altre abans de conèixer-te. Te la redissenyem a preu tancat i sense quotes mensuals.",
         "cta-plans": "veure serveis i preus", "cta-brandi": "parlar amb la brandi",
-        "cases-eyebrow": "treballs recents", "cases-title": "abans i després", "cases-sub": "Llisca cada imatge per comparar el redisseny amb el punt de partida.",
-        "case-before": "abans", "case-after": "després", "cases-cta": "vull alguna cosa així", "case-slider": "Comparar abans i després",
-        "case-1-title": "cafeteria de barri", "case-1-desc": "Un logotip i una paleta que funcionen igual de bé a la façana que al got per emportar.",
-        "case-2-title": "estudi de fisioteràpia", "case-2-desc": "Una identitat coherent a la web, les xarxes i els fulletons: de quatre estils diferents a un de sol.",
-        "case-3-title": "botiga de ceràmica", "case-3-desc": "Una web ràpida i a nom seu, amb la marca renovada de cap a cap.",
         "problem-eyebrow": "el problema", "how-eyebrow": "com funciona", "plans-eyebrow": "serveis i preus", "studio-eyebrow": "l'equip",
         "problem-title": "et sona alguna d'aquestes?",
         "problem-1": "El teu logo es veu malament quan el redueixes: a Instagram, en un cartell, en una factura.",
@@ -1510,7 +1460,6 @@ textarea { resize: vertical; }
         "err-plan": "hautatu gutxienez zerbitzu bat zerbitzuen atalean jarraitu aurretik.",
         "intro": "Kaixo, Brandi naiz, rebrandyourbrand-eko arte-zuzendaria. Esaidazu: nola du izena zure marka edo proiektuak eta zer behar duzu?",
         "greet": "Bikain! {services} hautatu dituzu (guztira {total}). Nola du izena zure marka edo proiektuak zure proposamenarekin jarraitzeko?",
-        "nav-cases": "lanak",
         "nav-planes": "zerbitzuak",
         "nav-about": "guri buruz",
         "nav-testimonials": "lekukotzak",
@@ -1520,19 +1469,6 @@ textarea { resize: vertical; }
         "hero-desc": "Zure irudia ez badator bat zure lanaren kalitatearekin, bezeroek beste norbait aukeratuko dute zu ezagutu aurretik. Prezio itxian eta hileroko kuotarik gabe berdiseinatzen dizugu.",
         "cta-plans": "ikusi zerbitzuak eta prezioak",
         "cta-brandi": "hitz egin brandirekin",
-        "cases-eyebrow": "azken lanak",
-        "cases-title": "lehen eta orain",
-        "cases-sub": "Arrastatu irudi bakoitza berdiseinua hasierako puntuarekin alderatzeko.",
-        "case-before": "lehen",
-        "case-after": "orain",
-        "cases-cta": "honelako zerbait nahi dut",
-        "case-slider": "Alderatu lehen eta orain",
-        "case-1-title": "auzoko kafetegia",
-        "case-1-desc": "Erakusleihoan zein eramateko edalontzian berdin funtzionatzen duten logotipoa eta kolore-paleta.",
-        "case-2-title": "fisioterapia estudioa",
-        "case-2-desc": "Nortasun koherente bakarra webgunean, sare sozialetan eta eskuorrietan: lau estilo desberdinetatik bakarrera.",
-        "case-3-title": "zeramika denda",
-        "case-3-desc": "Webgune azkarra eta beren izenean, marka muturretik muturrera berrituta.",
         "problem-eyebrow": "arazoa",
         "how-eyebrow": "nola dabilen",
         "plans-eyebrow": "zerbitzuak eta prezioak",
@@ -1682,10 +1618,10 @@ textarea { resize: vertical; }
     document.querySelectorAll('[data-i18n-placeholder]').forEach((el) => { translations.es[el.dataset.i18nPlaceholder] = el.placeholder; });
 
     const slugMap = {
-      es: { top: '', casos: 'casos', planes: 'planes', 'sobre-nosotros': 'sobre-nosotros', testimonios: 'testimonios', terminos: 'terminos' },
-      en: { top: '', casos: 'work', planes: 'plans', 'sobre-nosotros': 'about', testimonios: 'testimonials', terminos: 'terms' },
-      ca: { top: '', casos: 'treballs', planes: 'plans-cat', 'sobre-nosotros': 'sobre-nosaltres', testimonios: 'testimonis', terminos: 'termes' },
-      eu: { top: '', casos: 'lanak', planes: 'zerbitzuak', 'sobre-nosotros': 'guri-buruz', testimonios: 'lekukotzak', terminos: 'baldintzak' }
+      es: { top: '', planes: 'planes', 'sobre-nosotros': 'sobre-nosotros', testimonios: 'testimonios', terminos: 'terminos' },
+      ca: { top: '', planes: 'plans-cat', 'sobre-nosotros': 'sobre-nosaltres', testimonios: 'testimonis', terminos: 'termes' },
+      eu: { top: '', planes: 'zerbitzuak', 'sobre-nosotros': 'guri-buruz', testimonios: 'lekukotzak', terminos: 'baldintzak' },
+      en: { top: '', planes: 'plans', 'sobre-nosotros': 'about', testimonios: 'testimonials', terminos: 'terms' }
     };
     const reverseSlugMap = {};
     for (const [lang, map] of Object.entries(slugMap)) {
@@ -1721,20 +1657,50 @@ textarea { resize: vertical; }
     const assistantOutput = $('assistant-output');
     const assistantForm = $('brand-assistant-form');
 
-    function toggleLangDropdown(force) {
-      const open = force ?? langDropdown.classList.contains('hidden');
-      langDropdown.classList.toggle('hidden', !open);
+    const LANG_ORDER = ['es', 'ca', 'eu', 'en'];
+    const langButtons = Array.from(langDropdown.querySelectorAll('[data-lang-choice]'));
+    const setLangGlider = (lang) => {
+      const idx = LANG_ORDER.indexOf(lang);
+      langDropdown.style.setProperty('--glider-idx', String(idx >= 0 ? idx : 0));
+    };
+    function toggleLangDropdown(force, focusActive) {
+      const open = force ?? !langDropdown.classList.contains('is-open');
+      langDropdown.classList.toggle('is-open', open);
+      if (open) langDropdown.removeAttribute('inert');
+      else langDropdown.setAttribute('inert', '');
       langToggle.setAttribute('aria-expanded', String(open));
+      setLangGlider(currentLang);
+      if (open && focusActive) {
+        const activeBtn = langButtons.find((b) => b.dataset.langChoice === currentLang) || langButtons[0];
+        activeBtn?.focus();
+      }
     }
-    langToggle.addEventListener('click', (e) => { e.stopPropagation(); toggleLangDropdown(); });
+    langToggle.addEventListener('click', (e) => { e.stopPropagation(); toggleLangDropdown(undefined, e.detail === 0); });
+    langToggle.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); toggleLangDropdown(true, true); }
+    });
     document.addEventListener('click', (e) => {
       if (!langDropdown.contains(e.target) && !langToggle.contains(e.target)) toggleLangDropdown(false);
     });
-    document.querySelectorAll('[data-lang-choice]').forEach((btn) => {
+    langDropdown.addEventListener('mouseleave', () => setLangGlider(currentLang));
+    langDropdown.addEventListener('focusout', (e) => {
+      if (e.relatedTarget && !langDropdown.contains(e.relatedTarget) && !langToggle.contains(e.relatedTarget)) toggleLangDropdown(false);
+    });
+    langButtons.forEach((btn, idx) => {
+      btn.addEventListener('mouseenter', () => setLangGlider(btn.dataset.langChoice));
+      btn.addEventListener('focus', () => setLangGlider(btn.dataset.langChoice));
       btn.addEventListener('click', () => {
-        toggleLangDropdown(false);
         const lang = btn.dataset.langChoice;
         if (lang !== currentLang) switchLanguage(lang);
+        toggleLangDropdown(false);
+      });
+      btn.addEventListener('keydown', (e) => {
+        let next = -1;
+        if (e.key === 'ArrowDown') next = (idx + 1) % langButtons.length;
+        else if (e.key === 'ArrowUp') next = (idx - 1 + langButtons.length) % langButtons.length;
+        else if (e.key === 'Home') next = 0;
+        else if (e.key === 'End') next = langButtons.length - 1;
+        if (next !== -1) { e.preventDefault(); langButtons[next].focus(); }
       });
     });
 
@@ -1747,10 +1713,12 @@ textarea { resize: vertical; }
     mobileNav.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => toggleMobileMenu(false)));
 
     function updateLangDropdownUI() {
-      document.querySelectorAll('[data-lang-choice]').forEach((btn) => {
+      langIndicator.textContent = currentLang;
+      setLangGlider(currentLang);
+      langButtons.forEach((btn) => {
         const active = btn.dataset.langChoice === currentLang;
         btn.classList.toggle('is-active', active);
-        btn.querySelector('.lang-dot').classList.toggle('bg-brand', active);
+        btn.setAttribute('aria-checked', String(active));
       });
     }
     function updateNavHrefs() {
@@ -2445,7 +2413,7 @@ textarea { resize: vertical; }
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         if (!mobileNav.classList.contains('hidden')) { toggleMobileMenu(false); mobileMenuToggle.focus(); return; }
-        if (!langDropdown.classList.contains('hidden')) { toggleLangDropdown(false); langToggle.focus(); return; }
+        if (langDropdown.classList.contains('is-open')) { toggleLangDropdown(false); langToggle.focus(); return; }
         const m = modals.find((x) => x.isOpen());
         if (m) { m.close(); return; }
         closeAssistantPanel();
@@ -2469,7 +2437,7 @@ textarea { resize: vertical; }
       setToggleLabel();
     });
 
-    const sectionIds = ['top', 'casos', 'planes', 'sobre-nosotros', 'testimonios', 'terminos'];
+    const sectionIds = ['top', 'planes', 'sobre-nosotros', 'testimonios', 'terminos'];
     const sectionObserver = new IntersectionObserver((entries) => {
       for (const entry of entries) {
         if (!entry.isIntersecting) continue;
@@ -2486,16 +2454,6 @@ textarea { resize: vertical; }
       }
     }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
     document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
-
-    // Comparador antes/después de los casos. Si falta una imagen, se retira y queda el degradado con su etiqueta.
-    document.querySelectorAll('[data-ba]').forEach((box) => {
-      const range = box.querySelector('.ba-range');
-      range.addEventListener('input', () => box.style.setProperty('--pos', range.value + '%'));
-      box.querySelectorAll('.case-img').forEach((img) => {
-        const drop = () => img.remove();
-        if (img.complete && img.naturalWidth === 0) drop(); else img.addEventListener('error', drop);
-      });
-    });
 
     updateTheme();
     applyTranslations();
