@@ -11,7 +11,7 @@ Reglas para agentes de código (Antigravity, Claude, Gemini…). Léelas antes d
 - **Cliente:** exclusivamente B2B (empresas y autónomos). Sin derecho de desistimiento de consumidor. Ley española; tribunales de Barcelona.
 - **Servicios y precios actuales:** logotipo 200 €, paleta de empresa 100 €, web 400 €. Trabajo extra: 50 €/h.
 - **Equipo:** Gael Domènech (dirección de arte y diseño visual) y Bernat Domènech (web).
-- **Idiomas:** español (principal), catalán e inglés.
+- **Idiomas:** español (principal), catalán, inglés y euskera.
 - **Voz de marca:** cercana y directa, tutea, frases cortas, beneficio claro, cero jerga técnica. Titulares en minúscula (clase `lowercase`). Nunca prometas lo que el servicio no incluye.
 
 ## 2. Reglas de edición (obligatorias)
@@ -73,19 +73,19 @@ Los colores son variables con triplete RGB (`rgb(var(--color-x))`). **No pongas 
 - **Movimiento:** easing `--ease-editorial` (`cubic-bezier(.16,1,.3,1)`), 250–600 ms. Entradas con `.reveal` (IntersectionObserver) y `.hero-fade`. Respeta `prefers-reduced-motion`; `.no-js` debe mostrar todo. Nada de animaciones bruscas.
 - **Safe areas:** `viewport-fit=cover` y `env(safe-area-inset-*)` ya están aplicados. Mantenlos en elementos fijos.
 
-## 5. Idiomas (es / ca / en)
+## 5. Idiomas (es / ca / en / eu)
 
 - Todo texto visible lleva `data-i18n="clave"`. Atributos: `data-i18n-placeholder` y `data-i18n-aria`.
-- **El español se lee del propio HTML.** Los textos en `en` y `ca` viven en el objeto `translations`.
-- Al añadir o cambiar un texto: actualiza el HTML en español **y las claves en `en` y `ca`**. Nunca dejes un idioma sin traducir.
+- **El español se lee del propio HTML.** Los textos en `en`, `ca` y `eu` viven en el objeto `translations`.
+- Al añadir o cambiar un texto: actualiza el HTML en español **y las claves en `en`, `ca` y `eu`**. Nunca dejes un idioma sin traducir.
 - Textos creados por JS: claves en `translations`, nunca literales en el código.
-- Una sección nueva necesita: entrada en `slugMap` (es/en/ca), en `sectionIds`, enlace con `data-section-target` y `<title>`/SEO si procede.
+- Una sección nueva necesita: entrada en `slugMap` (es/en/ca/eu), en `sectionIds`, enlace con `data-section-target` y `<title>`/SEO si procede.
 - Idioma guardado en `rybb-lang`. Los `hreflang` del `<head>` deben reflejar cómo se sirven realmente los idiomas.
 
 ## 6. Servicios y precios (dos sitios a sincronizar)
 
 - La lista `SERVICES` está en `index.html` **y** en `worker.js`. Cambiar un precio exige cambiarlo en ambos, más los textos legales y de términos si lo mencionan.
-- Para añadir un servicio: una entrada en cada `SERVICES`, y los textos `svc-<id>` y `svc-<id>-desc` en los tres idiomas.
+- Para añadir un servicio: una entrada en cada `SERVICES`, y los textos `svc-<id>` y `svc-<id>-desc` en los cuatro idiomas.
 
 ## 7. Backend y seguridad
 
@@ -126,7 +126,7 @@ Los colores son variables con triplete RGB (`rgb(var(--color-x))`). **No pongas 
 
 1. Revisado en el navegador integrado a **390 px** y **1440 px**.
 2. Probado en **tema claro y oscuro**.
-3. Probado en **español, catalán e inglés**.
+3. Probado en **español, catalán, inglés y euskera**.
 4. **Sin errores en consola** ni bloqueos de la CSP.
 5. Navegación con **teclado** correcta (Tab, Escape en paneles y modales).
 6. Animaciones OK con `prefers-reduced-motion`.

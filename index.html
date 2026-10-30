@@ -16,12 +16,12 @@
       if (/bot|crawl|spider|slurp|lighthouse|pagespeed|headless|preview/i.test(navigator.userAgent)) return;
       var saved = null;
       try { saved = localStorage.getItem('rybb-lang'); } catch (e) {}
-      if (saved === 'es' || saved === 'ca' || saved === 'en') return;
+      if (saved === 'es' || saved === 'ca' || saved === 'en' || saved === 'eu') return;
       var langs = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language];
       for (var i = 0; i < langs.length; i++) {
         var l = String(langs[i] || '').toLowerCase().split('-')[0];
         if (l === 'es') return;
-        if (l === 'ca' || l === 'en') {
+        if (l === 'ca' || l === 'en' || l === 'eu') {
           try { localStorage.setItem('rybb-lang', l); } catch (e) {}
           return;
         }
@@ -45,6 +45,7 @@
 <link rel="alternate" hreflang="es" href="https://rebrandyourbrand.es/">
 <link rel="alternate" hreflang="ca" href="https://rebrandyourbrand.es/ca/">
 <link rel="alternate" hreflang="en" href="https://rebrandyourbrand.es/en/">
+<link rel="alternate" hreflang="eu" href="https://rebrandyourbrand.es/eu/">
 <link rel="alternate" hreflang="x-default" href="https://rebrandyourbrand.es/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="rebrandyourbrand.es">
@@ -656,21 +657,40 @@ textarea { resize: vertical; }
   .step-card h3{font-size:1.4rem;line-height:1.2;letter-spacing:-.02em;color:rgb(var(--color-text))}
   .step-card p{line-height:1.6;font-size:.95rem}
   @media(max-width:39.99rem){.step-card{padding:1.4rem 1.25rem}}
-  .quote-card{position:relative;margin-top:2.25rem;max-width:36rem;padding:1.5rem 1.75rem 1.25rem 2rem;border:1px solid rgb(var(--color-line));border-radius:1.25rem;overflow:hidden;
-    background:linear-gradient(145deg,rgb(var(--color-panel)/.98),rgb(var(--color-panel)/.7));box-shadow:inset 0 1px 0 rgb(255 255 255/.035)}
-  .quote-card::before{content:"";position:absolute;left:0;top:1.25rem;bottom:1.25rem;width:2px;border-radius:2px;background:rgb(var(--color-ai))}
-  .quote-track{display:grid}
-  .quote-slide{grid-area:1/1;opacity:0;transform:translateX(32px);pointer-events:none;
-    transition:opacity 700ms var(--ease-editorial),transform 700ms var(--ease-editorial)}
-  .quote-slide.is-active{opacity:1;transform:translateX(0);pointer-events:auto}
-  .quote-slide.is-leaving{opacity:0;transform:translateX(-32px)}
-  .quote-text{font-family:'Fraunces',serif;font-size:clamp(1.1rem,2.2vw,1.35rem);line-height:1.35;letter-spacing:-.015em;color:rgb(var(--color-text))}
-  .quote-author{margin-top:.85rem;font:.7rem ui-monospace,monospace;letter-spacing:.08em;text-transform:lowercase;color:rgb(var(--color-ai-text,var(--color-ai)))}
-  .quote-author::before{content:"— "}
-  .quote-dots{display:flex;gap:.4rem;margin-top:1.1rem}
-  .quote-dot{width:.4rem;height:.4rem;border-radius:999px;background:rgb(var(--color-muted)/.35);transition:width 300ms var(--ease-editorial),background-color 300ms var(--ease-editorial)}
-  .quote-dot.is-active{width:1.25rem;background:rgb(var(--color-ai))}
-  @media(max-width:39.99rem){.quote-card{padding:1.25rem 1.25rem 1.1rem 1.5rem}}
+
+  /* Casos de estudio: comparador antes / después */
+  #casos{background:radial-gradient(circle at 88% 0%,rgb(var(--color-brand)/.09),transparent 26rem)}
+  .cases-grid{display:grid;gap:1.25rem;grid-template-columns:1fr}
+  @media(min-width:48rem){.cases-grid{grid-template-columns:repeat(3,1fr)}}
+  .case-card{overflow:hidden;border:1px solid rgb(var(--color-line));border-radius:1.25rem;background:linear-gradient(145deg,rgb(var(--color-panel)/.98),rgb(var(--color-panel)/.7));
+    transition:opacity 600ms var(--ease-editorial),transform 600ms var(--ease-editorial),border-color 300ms var(--ease-editorial),box-shadow 300ms var(--ease-editorial)}
+  .case-card.reveal.in-view:hover{transform:translateY(-4px);border-color:rgb(var(--color-brand)/.6);box-shadow:var(--ring-brand)}
+  .ba{position:relative;aspect-ratio:4/3;overflow:hidden;--pos:50%}
+  .ba:focus-within{outline:2px solid rgb(var(--color-ai));outline-offset:-2px}
+  .ba-tile{position:absolute;inset:0;display:flex;align-items:flex-end;padding:.75rem}
+  .ba-before{background:linear-gradient(135deg,rgb(var(--color-line)),rgb(var(--color-panel)))}
+  .ba-after{background:linear-gradient(135deg,rgb(var(--color-brand)/.45),rgb(var(--color-panel)));justify-content:flex-end;clip-path:inset(0 0 0 var(--pos))}
+  .case-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .ba-label{position:relative;z-index:1;font:600 .65rem ui-monospace,monospace;letter-spacing:.06em;text-transform:lowercase;padding:.2rem .5rem;border-radius:999px;background:rgb(var(--color-bg)/.8);color:rgb(var(--color-text))}
+  .ba-handle{position:absolute;top:0;bottom:0;left:var(--pos);width:2px;background:#fff;transform:translateX(-1px);pointer-events:none;box-shadow:0 0 0 1px rgb(0 0 0/.18)}
+  .ba-handle::after{content:"↔";position:absolute;top:50%;left:50%;width:2rem;height:2rem;margin:-1rem 0 0 -1rem;border-radius:999px;background:#fff;color:#0A0A0C;display:flex;align-items:center;justify-content:center;font-size:.8rem;box-shadow:0 4px 12px rgb(0 0 0/.25)}
+  .ba-range{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:ew-resize;touch-action:pan-y}
+  .case-body{padding:1.25rem 1.5rem 1.5rem}
+  .case-tags{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.75rem}
+  .case-tags span{font:.65rem ui-monospace,monospace;letter-spacing:.04em;text-transform:lowercase;padding:.15rem .55rem;border-radius:999px;border:1px solid rgb(var(--color-brand)/.4);color:rgb(var(--color-brand-text,var(--color-brand)))}
+  .case-body h3{font-size:1.25rem;line-height:1.2;letter-spacing:-.02em;margin-bottom:.5rem}
+  .case-body p{color:rgb(var(--color-muted));font-size:.9rem;line-height:1.6}
+
+  /* Información legal (LSSI / RGPD) */
+  .legal-list{display:grid;gap:1rem}
+  .legal-card{border:1px solid rgb(var(--color-line));border-radius:1rem;padding:1.25rem 1.5rem;background:linear-gradient(145deg,rgb(var(--color-panel)/.98),rgb(var(--color-panel)/.72))}
+  .legal-card summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:1rem;font-family:'Fraunces',serif;font-size:1.1rem;text-transform:lowercase}
+  .legal-card summary::-webkit-details-marker{display:none}
+  .legal-card summary::after{content:"+";font-family:ui-monospace,monospace;color:rgb(var(--color-brand-text,var(--color-brand)))}
+  .legal-card[open] summary::after{content:"–"}
+  .legal-card p{margin-top:1rem;color:rgb(var(--color-muted));font-size:.9rem;line-height:1.65}
+  .legal-links{display:flex;flex-wrap:wrap;gap:.5rem 1.5rem;margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgb(var(--color-line)/.6);font-size:.75rem;text-transform:lowercase;color:rgb(var(--color-muted))}
+  .legal-links a:hover{color:rgb(var(--color-text))}
 </style>
 </head>
 
@@ -685,6 +705,7 @@ textarea { resize: vertical; }
       </a>
 
       <nav class="hidden md:flex items-center gap-5 lg:gap-8 ml-auto text-sm text-muted">
+        <a href="#casos" data-section-target="casos" class="lang-trans lowercase hover:text-paper" data-i18n="nav-cases">trabajos</a>
         <a href="#planes" data-section-target="planes" class="lang-trans lowercase hover:text-paper" data-i18n="nav-planes">servicios</a>
         <a href="#sobre-nosotros" data-section-target="sobre-nosotros" class="lang-trans lowercase hover:text-paper" data-i18n="nav-about">sobre nosotros</a>
         <a hidden href="#testimonios" data-section-target="testimonios" class="lang-trans lowercase hover:text-paper" data-i18n="nav-testimonials">testimonios</a>
@@ -713,6 +734,9 @@ textarea { resize: vertical; }
             </button>
             <button type="button" data-lang-choice="en" class="lang-option w-full text-left px-4 py-2 text-xs font-mono flex items-center justify-between hover:bg-ink/40 transition-colors cursor-pointer">
               <span>english</span><span class="lang-dot w-1.5 h-1.5 rounded-full"></span>
+            </button>
+            <button type="button" data-lang-choice="eu" class="lang-option w-full text-left px-4 py-2 text-xs font-mono flex items-center justify-between hover:bg-ink/40 transition-colors cursor-pointer">
+              <span>euskara</span><span class="lang-dot w-1.5 h-1.5 rounded-full"></span>
             </button>
           </div>
         </div>
@@ -743,6 +767,7 @@ textarea { resize: vertical; }
     </div>
 
     <div id="mobile-nav" class="md:hidden hidden border-t border-line bg-panel/95 backdrop-blur-md px-6 py-4 flex flex-col gap-3 text-sm">
+      <a href="#casos" data-section-target="casos" class="lang-trans lowercase text-muted hover:text-paper py-1" data-i18n="nav-cases">trabajos</a>
       <a href="#planes" data-section-target="planes" class="lang-trans lowercase text-muted hover:text-paper py-1" data-i18n="nav-planes">servicios</a>
       <a href="#sobre-nosotros" data-section-target="sobre-nosotros" class="lang-trans lowercase text-muted hover:text-paper py-1" data-i18n="nav-about">sobre nosotros</a>
       <a hidden href="#testimonios" data-section-target="testimonios" class="lang-trans lowercase text-muted hover:text-paper py-1" data-i18n="nav-testimonials">testimonios</a>
@@ -760,16 +785,61 @@ textarea { resize: vertical; }
           <a href="#planes" data-section-target="planes" class="btn btn-primary lang-trans" data-i18n="cta-plans">ver servicios y precios</a>
           <button type="button" data-open-brandi class="btn btn-ghost lang-trans" data-i18n="cta-brandi">hablar con brandi</button>
         </div>
-        <figure class="quote-card hero-fade delay-300" data-quote-rotator>
-          <div class="quote-track">
-            <blockquote class="quote-slide is-active"><p class="quote-text lang-trans" data-i18n="quote-1">El diseño es el embajador silencioso de tu marca.</p><footer class="quote-author">Paul Rand</footer></blockquote>
-            <blockquote class="quote-slide"><p class="quote-text lang-trans" data-i18n="quote-2">El buen diseño es tan poco diseño como sea posible.</p><footer class="quote-author">Dieter Rams</footer></blockquote>
-            <blockquote class="quote-slide"><p class="quote-text lang-trans" data-i18n="quote-3">Si sabes diseñar una cosa, sabes diseñarlo todo.</p><footer class="quote-author">Massimo Vignelli</footer></blockquote>
-            <blockquote class="quote-slide"><p class="quote-text lang-trans" data-i18n="quote-4">Los detalles no son detalles. Hacen el diseño.</p><footer class="quote-author">Charles Eames</footer></blockquote>
-            <blockquote class="quote-slide"><p class="quote-text lang-trans" data-i18n="quote-5">Hay tres respuestas ante una pieza de diseño: sí, no y ¡guau! El «guau» es al que hay que aspirar.</p><footer class="quote-author">Milton Glaser</footer></blockquote>
-          </div>
-          <div class="quote-dots" aria-hidden="true"><span class="quote-dot is-active"></span><span class="quote-dot"></span><span class="quote-dot"></span><span class="quote-dot"></span><span class="quote-dot"></span></div>
-        </figure>
+      </div>
+    </section>
+
+    <!-- EDITA: casos ilustrativos. Sustituye textos y coloca tus imágenes reales en /casos/ (antes y después, formato 4:3, .webp) -->
+    <section id="casos" class="relative px-6 md:px-10 py-24 md:py-32 border-b border-line overflow-hidden z-10">
+      <div class="max-w-6xl mx-auto relative z-10">
+        <div class="reveal max-w-xl mb-12">
+          <span class="lang-trans lowercase block text-xs tracking-widest text-brand font-mono mb-2" data-i18n="cases-eyebrow">trabajos recientes</span>
+          <h2 class="lang-trans lowercase font-display text-3xl md:text-4xl mb-4" data-i18n="cases-title">antes y después</h2>
+          <p class="lang-trans text-muted leading-relaxed" data-i18n="cases-sub">Desliza cada imagen para comparar el rediseño con el punto de partida.</p>
+        </div>
+        <div class="cases-grid">
+          <article class="case-card reveal">
+            <div class="ba" data-ba>
+              <div class="ba-tile ba-before"><img class="case-img" src="/casos/cafeteria-antes.webp" alt="" loading="lazy" width="800" height="600"><span class="ba-label lang-trans" data-i18n="case-before">antes</span></div>
+              <div class="ba-tile ba-after"><img class="case-img" src="/casos/cafeteria-despues.webp" alt="" loading="lazy" width="800" height="600"><span class="ba-label lang-trans" data-i18n="case-after">después</span></div>
+              <span class="ba-handle" aria-hidden="true"></span>
+              <input class="ba-range" type="range" min="0" max="100" value="50" aria-label="Comparar antes y después" data-i18n-aria="case-slider">
+            </div>
+            <div class="case-body">
+              <div class="case-tags"><span data-i18n="svc-logo">logotipo</span><span data-i18n="svc-paleta">paleta de empresa</span></div>
+              <h3 class="lang-trans lowercase font-display" data-i18n="case-1-title">cafetería de barrio</h3>
+              <p class="lang-trans" data-i18n="case-1-desc">Logotipo y paleta que funcionan igual de bien en la fachada que en el vaso para llevar.</p>
+            </div>
+          </article>
+          <article class="case-card reveal">
+            <div class="ba" data-ba>
+              <div class="ba-tile ba-before"><img class="case-img" src="/casos/fisio-antes.webp" alt="" loading="lazy" width="800" height="600"><span class="ba-label lang-trans" data-i18n="case-before">antes</span></div>
+              <div class="ba-tile ba-after"><img class="case-img" src="/casos/fisio-despues.webp" alt="" loading="lazy" width="800" height="600"><span class="ba-label lang-trans" data-i18n="case-after">después</span></div>
+              <span class="ba-handle" aria-hidden="true"></span>
+              <input class="ba-range" type="range" min="0" max="100" value="50" aria-label="Comparar antes y después" data-i18n-aria="case-slider">
+            </div>
+            <div class="case-body">
+              <div class="case-tags"><span data-i18n="svc-paleta">paleta de empresa</span></div>
+              <h3 class="lang-trans lowercase font-display" data-i18n="case-2-title">estudio de fisioterapia</h3>
+              <p class="lang-trans" data-i18n="case-2-desc">Una identidad coherente en la web, las redes y los folletos: de cuatro estilos distintos a uno solo.</p>
+            </div>
+          </article>
+          <article class="case-card reveal">
+            <div class="ba" data-ba>
+              <div class="ba-tile ba-before"><img class="case-img" src="/casos/ceramica-antes.webp" alt="" loading="lazy" width="800" height="600"><span class="ba-label lang-trans" data-i18n="case-before">antes</span></div>
+              <div class="ba-tile ba-after"><img class="case-img" src="/casos/ceramica-despues.webp" alt="" loading="lazy" width="800" height="600"><span class="ba-label lang-trans" data-i18n="case-after">después</span></div>
+              <span class="ba-handle" aria-hidden="true"></span>
+              <input class="ba-range" type="range" min="0" max="100" value="50" aria-label="Comparar antes y después" data-i18n-aria="case-slider">
+            </div>
+            <div class="case-body">
+              <div class="case-tags"><span data-i18n="svc-web">web</span></div>
+              <h3 class="lang-trans lowercase font-display" data-i18n="case-3-title">tienda de cerámica</h3>
+              <p class="lang-trans" data-i18n="case-3-desc">Una web rápida y a su nombre, con la marca renovada de punta a punta.</p>
+            </div>
+          </article>
+        </div>
+        <div class="cta-row reveal">
+          <button type="button" data-open-brandi class="btn btn-primary lang-trans" data-i18n="cases-cta">quiero algo así</button>
+        </div>
       </div>
     </section>
 
@@ -835,7 +905,7 @@ textarea { resize: vertical; }
           <div class="bg-panel border border-line p-8 flex flex-col justify-between h-full">
             <div>
               <div class="flex items-center justify-between mb-3">
-                <span class="lang-trans lowercase block text-xs tracking-wider text-ai font-mono" data-i18n="studio-card-1-tag">trayectoria & formación</span>
+                <span class="lang-trans lowercase block text-xs tracking-wider text-ai font-mono" data-i18n="studio-card-1-tag">trayectoria y formación</span>
                 <a href="https://gaeldomenech.framer.website/" target="_blank" rel="noopener noreferrer" class="text-xs font-mono text-ai hover:underline inline-flex items-center gap-1.5 cursor-pointer">
                   <span class="lang-trans" data-i18n="portfolio-btn">+ portfolio</span>
                 </a>
@@ -844,14 +914,14 @@ textarea { resize: vertical; }
               <p class="lang-trans text-muted text-sm leading-relaxed mb-6" data-i18n="studio-card-1-desc">Graduado en ilustración en la EASD Josep Serra i Abella. Se encarga de que tu marca se vea bien.</p>
             </div>
             <div class="pt-6 border-t border-line/60 text-xs text-ai font-mono">
-              <span class="lang-trans" data-i18n="studio-card-1-role">dirección de arte & diseño visual</span>
+              <span class="lang-trans" data-i18n="studio-card-1-role">dirección de arte y diseño visual</span>
             </div>
           </div>
 
           <div class="bg-panel border border-line p-8 flex flex-col justify-between h-full">
             <div>
               <div class="flex items-center justify-between mb-3">
-                <span class="lang-trans lowercase block text-xs tracking-wider text-ai font-mono" data-i18n="studio-card-2-tag">trayectoria & formación</span>
+                <span class="lang-trans lowercase block text-xs tracking-wider text-ai font-mono" data-i18n="studio-card-2-tag">trayectoria y formación</span>
               </div>
               <h3 class="lang-trans lowercase font-display text-2xl text-paper mb-4" data-i18n="studio-card-2-title">bernat domènech sevillano</h3>
               <p class="lang-trans text-muted text-sm leading-relaxed mb-6" data-i18n="studio-card-2-desc">Estudiante de Ingeniería Electrónica Industrial y Automática. Se encarga de que tu web funcione.</p>
@@ -890,7 +960,7 @@ textarea { resize: vertical; }
           </button>
         </div>
 
-        <p class="terms-summary lang-trans" data-i18n="terms-summary">En resumen: pago único, 2 rondas de revisión por fase y el diseño es tuyo al pagar. Los extras se presupuestan aparte (50 €/h) y no hay reembolsos una vez iniciado el proyecto.</p>
+        <p class="terms-summary lang-trans" data-i18n="terms-summary">En resumen: pago único de diseño y desarrollo (sin cuotas mensuales), 2 rondas de revisión por fase y el proyecto es tuyo al pagar. Si contratas la web, gestionamos tu dominio y correo corporativo mediante una renovación anual obligatoria (con aviso previo y cancelación en un clic). Los extras se presupuestan aparte (50 €/h) y no hay reembolsos una vez iniciado el proyecto.</p>
 
         <div id="terms-content" class="terms-content">
           <div class="terms-inner space-y-8 text-sm md:text-base text-paper/90 leading-relaxed font-sans pt-2">
@@ -904,6 +974,10 @@ textarea { resize: vertical; }
                 <div>
                   <strong class="lang-trans text-paper font-medium" data-i18n="t1-l2">1.2. Exclusiones y trabajos extraordinarios:</strong>
                   <p class="lang-trans mt-1" data-i18n="t1-p2">Cualquier característica, sección adicional, pasarela de comercio electrónico (e-commerce), base de datos compleja o desarrollo a medida no incluido en los servicios contratados quedará excluido del precio y requerirá contratar el servicio correspondiente o un presupuesto extraordinario tarificado a 50 €/hora.</p>
+                </div>
+                <div>
+                  <strong class="lang-trans text-paper font-medium" data-i18n="t1-l3">1.3. Ámbito profesional (B2B) y exclusión del derecho de desistimiento:</strong>
+                  <p class="lang-trans mt-1" data-i18n="t1-p3">Los servicios se prestan exclusivamente a empresas y autónomos que actúan en el ejercicio de su actividad profesional. Al contratar, el cliente declara no actuar como consumidor, por lo que no resulta de aplicación la normativa de consumidores ni el derecho de desistimiento de 14 días. Se trata de servicios personalizados, elaborados según las indicaciones del cliente.</p>
                 </div>
               </div>
             </div>
@@ -931,16 +1005,16 @@ textarea { resize: vertical; }
               <h3 class="lang-trans lowercase font-display text-lg md:text-xl text-paper font-semibold" data-i18n="t3-title">3. aportación de materiales, plazos, aprobación tácita y abandono</h3>
               <div class="space-y-3 pl-3 border-l-2 border-brand/40 text-muted">
                 <div>
-                  <strong class="lang-trans text-paper font-medium" data-i18n="t3-l1">3.1. Titularidad del dominio:</strong>
-                  <p class="lang-trans mt-1" data-i18n="t3-p1">El cliente es el único propietario y responsable de la compra, renovación y titularidad de su dominio web.</p>
+                  <strong class="lang-trans text-paper font-medium" data-i18n="t3-l1">3.1. Gestión y renovación anual de dominio y correo:</strong>
+                  <p class="lang-trans mt-1" data-i18n="t3-p1">En los proyectos que incluyan el desarrollo web, rebrandyourbrand gestiona íntegramente el registro del dominio, la configuración DNS/SSL y el correo corporativo. Este servicio de infraestructura tiene un coste de renovación anual obligatorio. Antes de cada vencimiento anual, el cliente recibirá un correo automático con el enlace de pago y un botón directo de cancelación; en caso de cancelar o no abonar la renovación anual, no se realizará ningún cargo adicional y el dominio y la página web dejarán de estar activos al finalizar el periodo vigente.</p>
                 </div>
                 <div>
                   <strong class="lang-trans text-paper font-medium" data-i18n="t3-l2">3.2. Plazos de entrega, retrasos y rescisión por abandono:</strong>
-                  <p class="lang-trans mt-1" data-i18n="t3-p2">El cliente se compromete a suministrar textos, imágenes, logotipos previos y accesos DNS en un plazo máximo de 15 días naturales. Retrasos superiores a 30 días naturales sin previo aviso o respuesta por parte del cliente darán derecho a rebrandyourbrand a rescindir unilateralmente el contrato por abandono, quedando retenido el importe abonado en concepto de compensación por el trabajo realizado y el bloqueo de la agenda del estudio.</p>
+                  <p class="lang-trans mt-1" data-i18n="t3-p2">El cliente se compromete a facilitar textos, imágenes y logotipos previos (así como accesos DNS en caso de disponer ya de un dominio previo a trasladar) en un plazo razonable de 20 días naturales. Si el proyecto queda sin actividad ni respuesta del cliente durante 30 días naturales, rebrandyourbrand le enviará un aviso por correo; si pasados 7 días naturales más sigue sin respuesta, podrá dar el proyecto por abandonado y rescindirlo, conservando el importe abonado como compensación por el trabajo realizado y la reserva de agenda.</p>
                 </div>
                 <div>
                   <strong class="lang-trans text-paper font-medium" data-i18n="t3-l3">3.3. Aprobación tácita por silencio temporal:</strong>
-                  <p class="lang-trans mt-1" data-i18n="t3-p3">La ausencia de comentarios, feedback o respuesta explícita por parte del cliente durante un plazo superior a 15 días naturales tras la entrega o notificación formal de cualquier fase o entregable se considerará como aprobación tácita (visto bueno), facultando automáticamente al estudio para avanzar en el cronograma y dar paso a la siguiente etapa del proyecto.</p>
+                  <p class="lang-trans mt-1" data-i18n="t3-p3">Si pasan más de 20 días naturales sin comentarios del cliente tras la entrega o notificación de una fase, y tras un aviso por correo, se entenderá aprobada (aprobación tácita) y el estudio podrá avanzar a la siguiente etapa.</p>
                 </div>
                 <div>
                   <strong class="lang-trans text-paper font-medium" data-i18n="t3-l4">3.4. Erratas en contenidos:</strong>
@@ -979,9 +1053,36 @@ textarea { resize: vertical; }
 
             <div class="bg-panel border border-line p-6 md:p-8 space-y-3">
               <h3 class="lang-trans lowercase font-display text-lg md:text-xl text-paper font-semibold" data-i18n="t6-title">6. ley aplicable y jurisdicción (ámbito b2b)</h3>
-              <p class="lang-trans" data-i18n="t6-p">Al tratarse de una relación contractual estrictamente profesional y entre empresas (B2B), para cualquier controversia o disputa legal derivada de la interpretación o cumplimiento de estas condiciones, ambas partes se someten expresamente a la jurisdicción de los Juzgados y Tribunales de Barcelona, renunciando a cualquier otro fuero que pudiera corresponderles.</p>
+              <p class="lang-trans" data-i18n="t6-p">Esta relación contractual es estrictamente profesional (B2B) y se rige por la legislación española. Para cualquier controversia derivada de estas condiciones, las partes se someten a los Juzgados y Tribunales de Barcelona, con renuncia a cualquier otro fuero que pudiera corresponderles.</p>
             </div>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="legal" class="relative px-6 md:px-10 py-24 md:py-32 border-b border-line overflow-hidden z-10">
+      <div class="max-w-4xl mx-auto relative z-10">
+        <div class="reveal mb-12">
+          <span class="lang-trans lowercase block text-xs tracking-widest text-brand font-mono mb-2" data-i18n="legal-eyebrow">información legal</span>
+          <h2 class="lang-trans lowercase font-display text-3xl md:text-4xl mb-3" data-i18n="legal-heading">legal y privacidad</h2>
+          <p class="lang-trans text-muted leading-relaxed max-w-xl" data-i18n="legal-sub">Lo mínimo que debes saber sobre quiénes somos, qué datos tratamos y qué servicios de terceros usa esta web.</p>
+        </div>
+        <div class="legal-list">
+          <details class="legal-card" id="legal-aviso">
+            <summary><span class="lang-trans" data-i18n="legal-aviso-t">aviso legal</span></summary>
+            <p class="lang-trans" data-i18n="legal-aviso-p">En cumplimiento de la Ley 34/2002 (LSSI-CE): titular de este sitio, [NOMBRE O RAZÓN SOCIAL], NIF [NIF], con domicilio en [DIRECCIÓN COMPLETA]. Contacto: hola@rebrandyourbrand.es. El acceso y uso de la web implica aceptar este aviso y las condiciones de servicio.</p>
+          </details>
+          <details class="legal-card" id="legal-privacidad">
+            <summary><span class="lang-trans" data-i18n="legal-priv-t">política de privacidad</span></summary>
+            <p class="lang-trans" data-i18n="legal-priv-p1">Responsable: el titular indicado en el aviso legal (hola@rebrandyourbrand.es). Tratamos tu correo, el nombre de tu marca y los mensajes que escribes a Brandi para (a) verificar tu correo, (b) preparar y gestionar tu propuesta y (c) ejecutar y facturar el proyecto si lo contratas. Base jurídica: tu consentimiento, la aplicación de medidas precontractuales a petición tuya y la ejecución del contrato. Si dejas una valoración, la base es tu consentimiento. No incluyas datos sensibles en el chat.</p>
+            <p class="lang-trans" data-i18n="legal-priv-p2">Encargados y destinatarios: Cloudflare (alojamiento, base de datos y verificación Turnstile), Resend (envío de correos), Groq (procesa los mensajes del chat para generar las respuestas de Brandi, una IA) y Stripe (pagos; no vemos los datos de tu tarjeta). Algunos están fuera del Espacio Económico Europeo y se apoyan en cláusulas contractuales tipo o en el Marco de Privacidad de Datos UE-EE. UU. No vendemos tus datos.</p>
+            <p class="lang-trans" data-i18n="legal-priv-p3">Conservación: los datos de una verificación no completada se borran a las 24 horas; los de proyectos contratados se conservan durante la relación y los plazos legales. Derechos: acceso, rectificación, supresión, oposición, limitación y portabilidad escribiendo a hola@rebrandyourbrand.es. Si no te atendemos, puedes reclamar ante la Agencia Española de Protección de Datos (aepd.es).</p>
+          </details>
+          <details class="legal-card" id="legal-cookies">
+            <summary><span class="lang-trans" data-i18n="legal-cook-t">cookies y servicios de terceros</span></summary>
+            <p class="lang-trans" data-i18n="legal-cook-p1">Esta web no usa cookies de analítica ni de publicidad. Solo guarda en tu navegador datos técnicos necesarios (idioma, tema claro u oscuro, sesión del chat y estado de verificación de tu correo), que no requieren consentimiento. Puedes borrarlos desde los ajustes del navegador o con el botón «empezar de nuevo» del chat.</p>
+            <p class="lang-trans" data-i18n="legal-cook-p2">Servicios de terceros: Cloudflare Turnstile (verificación anti-bots al abrir el chat; puede usar almacenamiento técnico por seguridad), Google Fonts (las tipografías se descargan de servidores de Google, que reciben tu dirección IP) y Stripe (la página de pago es de Stripe y se rige por su propia política de privacidad y cookies).</p>
+          </details>
         </div>
       </div>
     </section>
@@ -1000,6 +1101,11 @@ textarea { resize: vertical; }
         <a href="#top" data-section-target="top" class="lowercase hover:text-paper transition-colors">↑ <span class="lang-trans" data-i18n="footer-top">volver arriba</span></a>
       </div>
     </div>
+    <nav class="legal-links max-w-6xl mx-auto" aria-label="legal">
+      <a href="#legal-aviso" data-i18n="footer-aviso">aviso legal</a>
+      <a href="#legal-privacidad" data-i18n="footer-priv">privacidad</a>
+      <a href="#legal-cookies" data-i18n="footer-cook">cookies</a>
+    </nav>
   </footer>
 
   <button id="assistant-trigger" type="button" data-open-assistant
@@ -1021,7 +1127,7 @@ textarea { resize: vertical; }
       <div class="flex items-center gap-3">
         <span class="w-2.5 h-2.5 rounded-full bg-ai animate-pulse" aria-hidden="true"></span>
         <div>
-          <h2 id="assistant-panel-title" class="lang-trans lowercase font-display text-lg tracking-tight leading-none mb-1" data-i18n="panel-title">brandi · asistente creativo</h2>
+          <h2 id="assistant-panel-title" class="lang-trans lowercase font-display text-lg tracking-tight leading-none mb-1" data-i18n="panel-title">brandi — asistente creativo</h2>
           <span class="lang-trans text-[0.65rem] text-muted lowercase tracking-wider" data-i18n="panel-subtitle">inteligencia artificial de marca</span>
         </div>
       </div>
@@ -1048,6 +1154,7 @@ textarea { resize: vertical; }
         <p id="assistant-status" class="assistant-status lang-trans lowercase text-muted" data-i18n="status-waiting">en espera</p>
         <p id="assistant-error" class="text-xs text-red-400" aria-live="assertive"></p>
       </div>
+      <p class="text-[0.6rem] text-muted leading-relaxed"><span class="lang-trans" data-i18n="chat-privacy">Al escribir a Brandi (una IA) aceptas que tratemos tus datos para preparar tu propuesta. No incluyas datos sensibles. Más info en la</span> <a href="#legal-privacidad" class="lang-trans" style="text-decoration:underline" data-i18n="chat-privacy-link">política de privacidad</a>.</p>
     </form>
   </aside>
 
@@ -1063,7 +1170,7 @@ textarea { resize: vertical; }
       <p class="lang-trans text-muted text-sm leading-relaxed mb-6" data-i18n="verify-desc">Confirma que eres una persona real para enviar tu mensaje. Solo te lo pediremos una vez en esta conversación.</p>
       <div id="verify-widget" class="min-h-[65px] flex items-center justify-center"></div>
       <p id="verify-status" class="text-xs font-mono lowercase mt-3 text-muted" aria-live="polite"></p>
-      <p class="lang-trans text-[10px] font-mono lowercase tracking-wider text-muted mt-8" data-i18n="verify-note">protegido por cloudflare turnstile · sin acertijos ni cuentas</p>
+      <p class="lang-trans text-[10px] font-mono lowercase tracking-wider text-muted mt-8" data-i18n="verify-note">protegido por cloudflare turnstile — sin acertijos ni cuentas</p>
     </div>
   </div>
 
@@ -1096,12 +1203,14 @@ textarea { resize: vertical; }
         "svc-logo": "logotipo", "svc-logo-desc": "Un logotipo que se ve bien grande y pequeño: versión principal y secundaria, listas para redes, cartel y factura.",
         "svc-paleta": "paleta de empresa", "svc-paleta-desc": "Los colores y tipografías de tu marca, para que todo lo que publiques parezca de la misma empresa.",
         "svc-web": "web", "svc-web-desc": "Tu página web rápida y a tu nombre, publicada y entregada llave en mano.",
+        "plans-infra-note": "Sin cuotas mensuales. Si incluyes la web, nosotros nos encargamos del dominio y el correo corporativo mediante una única renovación anual de infraestructura.",
         "svc-total": "total", "svc-cta": "empezar mi proyecto", "svc-hint": "marca al menos un servicio para continuar",
         "terms-btn-hide": "- ocultar condiciones",
         "status-verifying": "verificando seguridad...",
         "status-consulting": "consultando con brandi...",
         "status-completed": "completado",
         "status-failed": "fallido",
+        "status-resent": "correo reenviado",
         "output-placeholder": "inicia la conversación con brandi o elige tus servicios.",
         "err-empty": "por favor, escribe un mensaje antes de enviar.",
         "err-turnstile": "por favor, completa la verificación humana.",
@@ -1109,8 +1218,14 @@ textarea { resize: vertical; }
         "err-rate": "demasiadas solicitudes, espera un minuto.",
         "err-busy": "brandi está saturada, inténtalo de nuevo.",
         "err-cooldown": "ya te enviamos un correo hace poco. revisa tu bandeja (y el spam) o espera unos minutos.",
+        "err-expired": "la verificación caducó. empieza de nuevo.",
+        "err-resend-limit": "has alcanzado el máximo de reenvíos. empieza de nuevo con otro correo.",
         "thinking-phrases": ["pensando...", "analizando territorios visuales...", "sintetizando concepto de marca...", "afinando dirección de arte..."],
         "lead-closed-badge": "correo de verificación enviado. revisa tu bandeja de entrada.",
+        "resend": "reenviar correo", "restart": "empezar de nuevo", "resend-limit": "límite de reenvíos alcanzado",
+        "pending-msg": "Te enviamos un correo de verificación a {email}. Ábrelo y pulsa el botón para continuar con el pago. Si no lo ves, mira en spam o reenvíalo.",
+        "verified-note": "¡Correo verificado! Sigue el enlace del correo para completar el pago, o cuéntame si quieres empezar otro proyecto.",
+        "case-slider": "Comparar antes y después",
         "confirm-yes": "Sí",
         "confirm-no": "No",
         "role-user": "tú",
@@ -1121,16 +1236,16 @@ textarea { resize: vertical; }
         "err-plan": "please choose at least one service in the services section before continuing.",
         "intro": "Hi, I'm Brandi, art director at rebrandyourbrand. Tell me: what's your brand or project called and what do you need?",
         "greet": "Perfect! You chose {services} ({total} total). What is your brand or project called, so we can continue with your proposal?",
-        "nav-planes": "services", "nav-about": "about us", "nav-testimonials": "testimonials", "nav-terms": "terms",
+        "nav-cases": "work", "nav-planes": "services", "nav-about": "about us", "nav-testimonials": "testimonials", "nav-terms": "terms",
         "hero-tag": "rebranding & web for businesses that deserve more",
         "hero-title": "your business is better than it looks.",
         "hero-desc": "If your image doesn't match the quality of your work, customers pick someone else before they meet you. We redesign it at a fixed price with no monthly fees.",
         "cta-plans": "see services & prices", "cta-brandi": "talk to brandi",
-        "quote-1": "Design is the silent ambassador of your brand.",
-        "quote-2": "Good design is as little design as possible.",
-        "quote-3": "If you can design one thing, you can design everything.",
-        "quote-4": "The details are not the details. They make the design.",
-        "quote-5": "There are three responses to a piece of design: yes, no, and WOW. Wow is the one to aim for.",
+        "cases-eyebrow": "recent work", "cases-title": "before & after", "cases-sub": "Drag each image to compare the redesign with the starting point.",
+        "case-before": "before", "case-after": "after", "cases-cta": "i want something like this", "case-slider": "Compare before and after",
+        "case-1-title": "neighbourhood café", "case-1-desc": "A logo and palette that work as well on the shopfront as on the takeaway cup.",
+        "case-2-title": "physiotherapy studio", "case-2-desc": "One coherent identity across website, social media and leaflets: from four different styles to one.",
+        "case-3-title": "ceramics shop", "case-3-desc": "A fast website in their name, with the brand refreshed from end to end.",
         "problem-eyebrow": "the problem", "how-eyebrow": "how it works", "plans-eyebrow": "services & pricing", "studio-eyebrow": "the team",
         "problem-title": "does any of this sound familiar?",
         "problem-1": "Your logo falls apart when you shrink it: on Instagram, on a sign, on an invoice.",
@@ -1145,18 +1260,19 @@ textarea { resize: vertical; }
         "plans-heading": "choose only what you need",
         "plans-sub": "Tick the services you need and pay only for those. One payment when you accept the project, no monthly fees.",
         "plans-quote": "we skip the .99 marketing gimmicks to deliver uncompromising quality.",
+        "plans-infra-note": "No monthly fees. If you include the website, we take care of the domain and corporate email through a single annual infrastructure renewal.",
         "svc-logo": "logo", "svc-logo-desc": "A logo that looks good big and small: primary and secondary versions, ready for social media, signs and invoices.",
         "svc-paleta": "company palette", "svc-paleta-desc": "Your brand's colors and typefaces, so everything you post looks like it comes from the same company.",
         "svc-web": "website", "svc-web-desc": "A fast website in your name, published and delivered turnkey.",
         "svc-total": "total", "svc-cta": "start my project", "svc-hint": "tick at least one service to continue",
         "studio-heading": "about us",
         "studio-sub": "An illustrator and an engineer: one makes your brand look right, the other makes your website work.",
-        "studio-card-1-tag": "background & training",
+        "studio-card-1-tag": "background and education",
         "studio-card-1-title": "gael domènech sevillano",
         "studio-card-1-desc": "Illustration graduate at EASD Josep Serra i Abella. He makes sure your brand looks right.",
-        "studio-card-1-role": "art direction & visual design",
+        "studio-card-1-role": "art direction and visual design",
         "portfolio-btn": "+ portfolio",
-        "studio-card-2-tag": "background & training",
+        "studio-card-2-tag": "background and education",
         "studio-card-2-title": "bernat domènech sevillano",
         "studio-card-2-desc": "Industrial Electronic and Automatic Engineering student. He makes sure your website works.",
         "studio-card-2-role": "web creator",
@@ -1168,12 +1284,14 @@ textarea { resize: vertical; }
         "terms-sub": "Clear rules, phased methodology, and mutual protection to ensure success and transparency for every project at rebrandyourbrand.",
         "terms-btn-show": "+ view terms",
         "terms-btn-hide": "- hide terms",
-        "terms-summary": "In short: one-time payment, 2 revision rounds per phase, and the design is yours once you pay. Extras are quoted separately (€50/h) and there are no refunds once the project has started.",
+        "terms-summary": "In short: one-time design and development payment (no monthly fees), 2 revision rounds per phase, and the design is yours once paid. If you hire the website, we manage your domain and corporate email through a mandatory annual renewal (with prior notice and one-click cancellation). Extras are quoted separately (€50/h) and there are no refunds once the project has started.",
         "t1-title": "1. nature of services and scope",
         "t1-l1": "1.1. One-time payment model and deliverables:",
         "t1-p1": "rebrandyourbrand provides closed rebranding and web development services under a one-time payment model: 100% of the total amount (the sum of the chosen services) is paid at once when the project is accepted, through a secure payment link (Stripe) after email verification. The first phase starts once payment is confirmed. Each service strictly outlines its deliverables, with no hidden monthly fees.",
         "t1-l2": "1.2. Exclusions and extraordinary work:",
         "t1-p2": "Any feature, additional section, e-commerce functionality, complex database, or custom development not included in the contracted services is excluded from the price and will require contracting the corresponding service or an extraordinary quote at €50/hour.",
+        "t1-l3": "1.3. Professional scope (B2B) and no right of withdrawal:",
+        "t1-p3": "The services are provided exclusively to businesses and sole traders acting in the course of their professional activity. By hiring, the client declares not to act as a consumer, so consumer-protection rules and the 14-day right of withdrawal do not apply. These are customised services produced to the client's specifications.",
         "t2-title": "2. phased workflow methodology and revision limits",
         "t2-intro": "To ensure maximum agility, projects run in sequential phases adapted to the contracted services, with mandatory written validation:",
         "t2-f1-title": "2.1. Identity phase (logo and/or palette):",
@@ -1183,12 +1301,12 @@ textarea { resize: vertical; }
         "t2-f3-title": "2.3. Final delivery phase:",
         "t2-f3-desc": "Once the previous phases are approved, the final files are delivered and, if you hired the website, Bernat executes the final technical deployment on GitHub and Cloudflare, with turnkey delivery and transfer of the agreed technical ownership to the client.",
         "t3-title": "3. provision of materials, deadlines, tacit approval, and abandonment",
-        "t3-l1": "3.1. Domain ownership:",
-        "t3-p1": "The client is the sole owner and responsible for the purchase, renewal, and ownership of their web domain.",
+        "t3-l1": "3.1. Annual domain and email management and renewal:",
+        "t3-p1": "For projects that include web development, rebrandyourbrand fully manages domain registration, DNS/SSL configuration, and corporate email. This infrastructure service has a mandatory annual renewal fee. Prior to each annual expiry date, the client will receive an automated email with the payment link and a one-click cancellation button; if cancelled or if the annual renewal is not paid, no additional charges will be made and the domain and website will cease to be active at the end of the current period.",
         "t3-l2": "3.2. Delivery deadlines, delays and termination for abandonment:",
-        "t3-p2": "The client agrees to supply texts, corporate images, previous logos, and DNS access within a maximum of 15 calendar days. Delays exceeding 30 calendar days without notice or response will give rebrandyourbrand the right to unilaterally terminate the contract for abandonment, retaining the amount paid as compensation for work performed and studio agenda blockage.",
+        "t3-p2": "The client agrees to supply texts, images, and previous logos (as well as DNS access if they already own a previous domain they wish to transfer) within a reasonable period of 20 calendar days. If the project has no activity or response from the client for 30 calendar days, rebrandyourbrand will send a reminder by email; if there is still no reply after 7 more calendar days, it may treat the project as abandoned and terminate it, keeping the amount paid as compensation for the work done and the studio time reserved.",
         "t3-l3": "3.3. Tacit approval by silence:",
-        "t3-p3": "The absence of comments, feedback, or explicit response by the client for a period exceeding 15 calendar days after delivery or formal notification of any phase or deliverable shall be considered tacit approval (sign-off), automatically empowering the studio to advance in the schedule and proceed to the next stage.",
+        "t3-p3": "If more than 20 calendar days pass without client feedback after the delivery or notification of a phase, and after a reminder email, it will be considered tacitly approved and the studio may move on to the next stage.",
         "t3-l4": "3.4. Typos in content:",
         "t3-p4": "rebrandyourbrand is not responsible for typos or errors in texts directly provided by the client.",
         "t4-title": "4. intellectual property and refund policy",
@@ -1202,18 +1320,32 @@ textarea { resize: vertical; }
         "t5-l2": "5.2. External environments and regulatory compliance:",
         "t5-p2": "The studio assumes no liability for third-party server outages (Cloudflare/GitHub), unauthorized source code modifications after delivery, or compliance regarding cookies, privacy laws, or legal notices independently added by the client.",
         "t6-title": "6. governing law and jurisdiction (b2b scope)",
-        "t6-p": "Being a strictly professional business-to-business (B2B) contractual relationship, for any controversy or legal dispute arising from the interpretation or compliance of these conditions, both parties expressly submit to the jurisdiction of the Courts and Tribunals of Barcelona, waiving any other forum.",
+        "t6-p": "This is a strictly professional (B2B) contractual relationship governed by Spanish law. For any dispute arising from these conditions, both parties submit to the Courts of Barcelona, waiving any other jurisdiction that might apply to them.",
+        "legal-eyebrow": "legal information", "legal-heading": "legal & privacy",
+        "legal-sub": "The essentials about who we are, what data we process and which third-party services this site uses.",
+        "legal-aviso-t": "legal notice",
+        "legal-aviso-p": "In accordance with Spanish Law 34/2002 (LSSI-CE): site owner, [NAME OR COMPANY NAME], tax ID [NIF], address [FULL ADDRESS]. Contact: hola@rebrandyourbrand.es. Using this website means accepting this notice and the terms of service.",
+        "legal-priv-t": "privacy policy",
+        "legal-priv-p1": "Controller: the owner named in the legal notice (hola@rebrandyourbrand.es). We process your email, brand name and the messages you write to Brandi to (a) verify your email, (b) prepare and manage your proposal and (c) deliver and invoice the project if you hire us. Legal basis: your consent, pre-contractual measures at your request, and performance of the contract. If you leave a review, the basis is your consent. Please don't include sensitive data in the chat.",
+        "legal-priv-p2": "Processors and recipients: Cloudflare (hosting, database and Turnstile verification), Resend (email delivery), Groq (processes chat messages to generate the replies of Brandi, an AI) and Stripe (payments; we never see your card details). Some are outside the European Economic Area and rely on standard contractual clauses or the EU-US Data Privacy Framework. We do not sell your data.",
+        "legal-priv-p3": "Retention: data from an unfinished verification is deleted after 24 hours; data from hired projects is kept for the duration of the relationship and legal periods. Rights: access, rectification, erasure, objection, restriction and portability by writing to hola@rebrandyourbrand.es. If we don't help, you may complain to the Spanish Data Protection Agency (aepd.es).",
+        "legal-cook-t": "cookies & third-party services",
+        "legal-cook-p1": "This site uses no analytics or advertising cookies. It only stores strictly necessary technical data in your browser (language, light/dark theme, chat session and your email verification status), which does not require consent. You can delete it in your browser settings or with the chat's “start over” button.",
+        "legal-cook-p2": "Third-party services: Cloudflare Turnstile (anti-bot check when opening the chat; may use technical storage for security), Google Fonts (typefaces are downloaded from Google servers, which receive your IP address) and Stripe (the payment page belongs to Stripe and follows its own privacy and cookie policy).",
         "footer-copy": "rebrandyourbrand — rebranding & web for businesses",
         "footer-rights": "All rights reserved",
         "footer-top": "back to top",
-        "panel-title": "brandi · creative assistant",
+        "footer-aviso": "legal notice", "footer-priv": "privacy", "footer-cook": "cookies",
+        "panel-title": "brandi — creative assistant",
         "panel-subtitle": "brand artificial intelligence",
         "panel-placeholder": "type a message to brandi...",
+        "chat-privacy": "By writing to Brandi (an AI) you agree that we process your data to prepare your proposal. Please don't include sensitive data. More info in the", "chat-privacy-link": "privacy policy",
         "status-waiting": "standing by",
         "status-verifying": "verifying security...",
         "status-consulting": "consulting brandi...",
         "status-completed": "completed",
         "status-failed": "failed",
+        "status-resent": "email resent",
         "output-placeholder": "start a conversation with brandi or pick your services.",
         "err-empty": "please drop a message before sending.",
         "err-turnstile": "please complete the human verification.",
@@ -1221,31 +1353,36 @@ textarea { resize: vertical; }
         "err-rate": "too many requests, please wait a minute.",
         "err-busy": "brandi is busy, please try again.",
         "err-cooldown": "we already sent you an email a moment ago. check your inbox (and spam) or wait a few minutes.",
+        "err-expired": "the verification expired. please start over.",
+        "err-resend-limit": "you've reached the maximum number of resends. start over with another email.",
         "thinking-phrases": ["thinking it over...", "synthesizing brand architecture...", "shaping visual direction...", "fine-tuning design parameters..."],
         "lead-closed-badge": "verification email sent. please check your inbox.",
+        "resend": "resend email", "restart": "start over", "resend-limit": "resend limit reached",
+        "pending-msg": "We sent a verification email to {email}. Open it and click the button to continue to payment. If you can't see it, check spam or resend it.",
+        "verified-note": "Email verified! Follow the link in the email to complete payment, or tell me if you'd like to start another project.",
         "confirm-yes": "Yes",
         "confirm-no": "No",
         "role-user": "you",
         "lang-aria": "Change language",
         "verify-eyebrow": "human verification", "verify-title": "one moment, quick check",
         "verify-desc": "Please confirm you're a real person to send your message. We'll only ask once in this conversation.",
-        "verify-note": "protected by cloudflare turnstile · no puzzles, no accounts",
+        "verify-note": "protected by cloudflare turnstile — no puzzles, no accounts",
         "verify-loading": "loading verification...", "verify-ok": "verified ✓", "verify-error": "couldn't verify. please try again."
       },
       ca: {
         "err-plan": "si us plau, tria almenys un servei a la secció de serveis abans de continuar.",
         "intro": "Hola, sóc la Brandi, directora d'art de rebrandyourbrand. Explica'm: com es diu la teva marca o projecte i què necessites?",
         "greet": "Perfecte! Has triat {services} ({total} en total). Com es diu la teva marca o projecte per continuar amb la teva proposta?",
-        "nav-planes": "serveis", "nav-about": "sobre nosaltres", "nav-testimonials": "testimonis", "nav-terms": "termes",
+        "nav-cases": "treballs", "nav-planes": "serveis", "nav-about": "sobre nosaltres", "nav-testimonials": "testimonis", "nav-terms": "termes",
         "hero-tag": "rebranding i web per a negocis que mereixen més",
         "hero-title": "el teu negoci és millor del que sembla.",
         "hero-desc": "Si la teva imatge no està a l'altura del que fas, els clients trien un altre abans de conèixer-te. Te la redissenyem a preu tancat i sense quotes mensuals.",
         "cta-plans": "veure serveis i preus", "cta-brandi": "parlar amb la brandi",
-        "quote-1": "El disseny és l'ambaixador silenciós de la teva marca.",
-        "quote-2": "El bon disseny és tan poc disseny com sigui possible.",
-        "quote-3": "Si saps dissenyar una cosa, saps dissenyar-ho tot.",
-        "quote-4": "Els detalls no són detalls. Fan el disseny.",
-        "quote-5": "Hi ha tres respostes davant d'una peça de disseny: sí, no i uau! L'«uau» és el que cal buscar.",
+        "cases-eyebrow": "treballs recents", "cases-title": "abans i després", "cases-sub": "Llisca cada imatge per comparar el redisseny amb el punt de partida.",
+        "case-before": "abans", "case-after": "després", "cases-cta": "vull alguna cosa així", "case-slider": "Comparar abans i després",
+        "case-1-title": "cafeteria de barri", "case-1-desc": "Un logotip i una paleta que funcionen igual de bé a la façana que al got per emportar.",
+        "case-2-title": "estudi de fisioteràpia", "case-2-desc": "Una identitat coherent a la web, les xarxes i els fulletons: de quatre estils diferents a un de sol.",
+        "case-3-title": "botiga de ceràmica", "case-3-desc": "Una web ràpida i a nom seu, amb la marca renovada de cap a cap.",
         "problem-eyebrow": "el problema", "how-eyebrow": "com funciona", "plans-eyebrow": "serveis i preus", "studio-eyebrow": "l'equip",
         "problem-title": "et sona alguna d'aquestes?",
         "problem-1": "El teu logo es veu malament quan el redueixes: a Instagram, en un cartell, en una factura.",
@@ -1260,18 +1397,19 @@ textarea { resize: vertical; }
         "plans-heading": "tria només el que necessites",
         "plans-sub": "Marca els serveis que necessites i paga només per ells. Un únic pagament en acceptar el projecte, sense quotes mensuals.",
         "plans-quote": "ens estalviem el .99 en trucs de màrqueting per oferir-te una qualitat innegociable.",
+        "plans-infra-note": "Sense quotes mensuals. Si inclous la web, nosaltres ens encarreguem del domini i el correu corporatiu mitjançant una única renovació anual d'infraestructura.",
         "svc-logo": "logotip", "svc-logo-desc": "Un logotip que es veu bé gran i petit: versió principal i secundària, llestos per a xarxes, cartells i factures.",
         "svc-paleta": "paleta d'empresa", "svc-paleta-desc": "Els colors i tipografies de la teva marca, perquè tot el que publiquis sembli de la mateixa empresa.",
         "svc-web": "web", "svc-web-desc": "La teva pàgina web ràpida i a nom teu, publicada i lliurada clau en mà.",
         "svc-total": "total", "svc-cta": "començar el meu projecte", "svc-hint": "marca almenys un servei per continuar",
         "studio-heading": "sobre nosaltres",
         "studio-sub": "Un il·lustrador i un enginyer: un fa que la teva marca es vegi bé, l'altre que la teva web funcioni.",
-        "studio-card-1-tag": "trajectòria & formació",
+        "studio-card-1-tag": "trajectòria i formació",
         "studio-card-1-title": "gael domènech sevillano",
         "studio-card-1-desc": "Graduat en il·lustració a l'EASD Josep Serra i Abella. S'encarrega que la teva marca es vegi bé.",
-        "studio-card-1-role": "direcció d'art & disseny visual",
+        "studio-card-1-role": "direcció d'art i disseny visual",
         "portfolio-btn": "+ portfolio",
-        "studio-card-2-tag": "trajectòria & formació",
+        "studio-card-2-tag": "trajectòria i formació",
         "studio-card-2-title": "bernat domènech sevillano",
         "studio-card-2-desc": "Estudiant d'Enginyeria Electrònica Industrial i Automàtica. S'encarrega que la teva web funcioni.",
         "studio-card-2-role": "creador de webs",
@@ -1283,12 +1421,14 @@ textarea { resize: vertical; }
         "terms-sub": "Regles clares, metodologia per fases i protecció mútua per garantir l'èxit i la transparència de cada projecte a rebrandyourbrand.",
         "terms-btn-show": "+ veure condicions",
         "terms-btn-hide": "- amagar condicions",
-        "terms-summary": "En resum: pagament únic, 2 rondes de revisió per fase i el disseny és teu en pagar. Els extres es pressupostan a part (50 €/h) i no hi ha reemborsaments un cop iniciat el projecte.",
+        "terms-summary": "En resum: pagament únic de disseny i desenvolupament (sense quotes mensuals), 2 rondes de revisió per fase i el projecte és teu en pagar. Si contractes la web, gestionem el teu domini i correu corporatiu mitjançant una renovació anual obligatòria (amb avís previ i cancel·lació en un clic). Els extres es pressuposten a part (50 €/h) i no hi ha reemborsaments un cop iniciat el projecte.",
         "t1-title": "1. naturalesa dels serveis i abast",
         "t1-l1": "1.1. Model de pagament únic i lliurables:",
         "t1-p1": "rebrandyourbrand ofereix serveis tancats de rebranding i desenvolupament web sota un model de pagament únic: el 100% de l'import total (suma dels serveis triats) s'abona d'un sol cop en acceptar el projecte, mitjançant un enllaç de pagament segur (Stripe) després de verificar el correu. La primera fase s'inicia un cop confirmat el pagament. Cada servei detalla estrictament els seus lliurables, sense quotes mensuals ocultes.",
         "t1-l2": "1.2. Exclusions i treballs extraordinaris:",
         "t1-p2": "Qualsevol característica, secció addicional, funcionalitat de comerç electrònic (e-commerce), base de dades complexa o desenvolupament a mida no inclòs als serveis contractats quedarà exclòs del preu i requerirà contractar el servei corresponent o un pressupost extraordinari de 50 €/hora.",
+        "t1-l3": "1.3. Àmbit professional (B2B) i exclusió del dret de desistiment:",
+        "t1-p3": "Els serveis es presten exclusivament a empreses i autònoms que actuen en l'exercici de la seva activitat professional. En contractar, el client declara no actuar com a consumidor, de manera que no resulta d'aplicació la normativa de consumidors ni el dret de desistiment de 14 dies. Són serveis personalitzats, elaborats segons les indicacions del client.",
         "t2-title": "2. metodologia de treball per fases i límit de revisions",
         "t2-intro": "Per garantir la màxima agilitat, els projectes s'executen per fases seqüencials adaptades als serveis contractats, amb validació obligatòria per escrit:",
         "t2-f1-title": "2.1. Fase d'identitat (logotip i/o paleta):",
@@ -1298,12 +1438,12 @@ textarea { resize: vertical; }
         "t2-f3-title": "2.3. Fase de lliurament final:",
         "t2-f3-desc": "Un cop validades les fases anteriors, es lliuren els arxius finals i, si has contractat la web, Bernat efectua el desplegament tècnic definitiu a GitHub i Cloudflare, amb lliurament clau en mà i transferint la propietat tècnica acordada al client.",
         "t3-title": "3. aportació de materials, terminis, aprovació tàcita i abandonament",
-        "t3-l1": "3.1. Titularitat del domini:",
-        "t3-p1": "El client és l'únic propietari i responsable de la compra, renovació i titularitat del seu domini web.",
+        "t3-l1": "3.1. Gestió i renovació anual de domini i correu:",
+        "t3-p1": "En els projectes que incloguin el desenvolupament web, rebrandyourbrand gestiona íntegrament el registre del domini, la configuració DNS/SSL i el correu corporatiu. Aquest servei d'infraestructura té un cost de renovació anual obligatori. Abans de cada venciment anual, el client rebrà un correu automàtic amb l'enllaç de pagament i un botó directe de cancel·lació; en cas de cancel·lar o no abonar la renovació anual, no es realitzarà cap càrrec addicional i el domini i la pàgina web deixaran d'estar actius en finalitzar el període vigent.",
         "t3-l2": "3.2. Terminis de lliurament, retards i rescissió per abandonament:",
-        "t3-p2": "El client es compromet a subministrar textos, imatges, logotips previs i accessos DNS en un termini màxim de 15 dies naturals. Retards superiors a 30 dies naturals sense previ avís o resposta per part del client donaran dret a rebrandyourbrand a rescindir unilateralment el contracte per abandonament, quedant retingut l'import abonat en concepte de compensació pel treball realitzat i el bloqueig de l'agenda de l'estudi.",
+        "t3-p2": "El client es compromet a facilitar textos, imatges i logotips previs (així com accessos DNS en cas de disposar ja d'un domini previ a traslladar) en un termini raonable de 20 dies naturals. Si el projecte queda sense activitat ni resposta del client durant 30 dies naturals, rebrandyourbrand li enviarà un avís per correu; si passats 7 dies naturals més continua sense resposta, podrà donar el projecte per abandonat i rescindir-lo, conservant l'import abonat com a compensació pel treball realitzat i la reserva d'agenda.",
         "t3-l3": "3.3. Aprovació tàcita per silenci temporal:",
-        "t3-p3": "L'absència de comentaris, feedback o resposta explícita per part del client durant un termini superior a 15 dies naturals després del lliurament o notificació formal de qualsevol fase o lliurable es considerarà com a aprovació tàcita (vist-i-plau), facultant automàticament l'estudi per avançar en el cronograma i donar pas a la següent etapa del projecte.",
+        "t3-p3": "Si passen més de 20 dies naturals sense comentaris del client després del lliurament o notificació d'una fase, i després d'un avís per correu, s'entendrà aprovada (aprovació tàcita) i l'estudi podrà avançar a l'etapa següent.",
         "t3-l4": "3.4. Errades en continguts:",
         "t3-p4": "rebrandyourbrand no es fa responsable d'errades tipogràfiques o errors en textos facilitats directament pel client.",
         "t4-title": "4. propietat intel·lectual i política de reemborsaments",
@@ -1317,18 +1457,32 @@ textarea { resize: vertical; }
         "t5-l2": "5.2. Entorns externs i compliment normatiu:",
         "t5-p2": "L'estudi no assumeix responsabilitat per caigudes de servidors de tercers (Cloudflare/GitHub), modificacions no autoritzades al codi font post-lliurament, ni per l'incompliment de cookies, LSSI o RGPD en textos legals afegits de manera independent pel client.",
         "t6-title": "6. llei aplicable i jurisdicció (àmbit b2b)",
-        "t6-p": "En tractar-se d'una relació contractual estrictament professional i entre empreses (B2B), per a qualsevol controvèrsia o disputa legal derivada de la interpretació o compliment d'aquestes condicions, ambdues parts se sotmeten expressament a la jurisdicció dels Jutjats i Tribunals de Barcelona, renunciant a qualsevol altre fur que pogués correspondre-ls.",
+        "t6-p": "Aquesta relació contractual és estrictament professional (B2B) i es regeix per la legislació espanyola. Per a qualsevol controvèrsia derivada d'aquestes condicions, les parts se sotmeten als Jutjats i Tribunals de Barcelona, amb renúncia a qualsevol altre fur que pogués correspondre'ls.",
+        "legal-eyebrow": "informació legal", "legal-heading": "legal i privacitat",
+        "legal-sub": "El mínim que has de saber sobre qui som, quines dades tractem i quins serveis de tercers fa servir aquesta web.",
+        "legal-aviso-t": "avís legal",
+        "legal-aviso-p": "En compliment de la Llei 34/2002 (LSSI-CE): titular d'aquest lloc, [NOM O RAÓ SOCIAL], NIF [NIF], amb domicili a [ADREÇA COMPLETA]. Contacte: hola@rebrandyourbrand.es. L'accés i ús de la web implica acceptar aquest avís i les condicions de servei.",
+        "legal-priv-t": "política de privacitat",
+        "legal-priv-p1": "Responsable: el titular indicat a l'avís legal (hola@rebrandyourbrand.es). Tractem el teu correu, el nom de la teva marca i els missatges que escrius a la Brandi per (a) verificar el teu correu, (b) preparar i gestionar la teva proposta i (c) executar i facturar el projecte si el contractes. Base jurídica: el teu consentiment, l'aplicació de mesures precontractuals a petició teva i l'execució del contracte. Si deixes una valoració, la base és el teu consentiment. No incloguis dades sensibles al xat.",
+        "legal-priv-p2": "Encarregats i destinataris: Cloudflare (allotjament, base de dades i verificació Turnstile), Resend (enviament de correus), Groq (processa els missatges del xat per generar les respostes de la Brandi, una IA) i Stripe (pagaments; no veiem les dades de la teva targeta). Alguns són fora de l'Espai Econòmic Europeu i es recolzen en clàusules contractuals tipus o en el Marc de Privacitat de Dades UE-EUA. No venem les teves dades.",
+        "legal-priv-p3": "Conservació: les dades d'una verificació no completada s'esborren a les 24 hores; les de projectes contractats es conserven durant la relació i els terminis legals. Drets: accés, rectificació, supressió, oposició, limitació i portabilitat escrivint a hola@rebrandyourbrand.es. Si no t'atenem, pots reclamar davant l'Agència Espanyola de Protecció de Dades (aepd.es).",
+        "legal-cook-t": "galetes i serveis de tercers",
+        "legal-cook-p1": "Aquesta web no fa servir galetes d'analítica ni de publicitat. Només desa al teu navegador dades tècniques necessàries (idioma, tema clar o fosc, sessió del xat i estat de verificació del teu correu), que no requereixen consentiment. Pots esborrar-les des dels ajustos del navegador o amb el botó «començar de nou» del xat.",
+        "legal-cook-p2": "Serveis de tercers: Cloudflare Turnstile (verificació anti-bots en obrir el xat; pot fer servir emmagatzematge tècnic per seguretat), Google Fonts (les tipografies es descarreguen de servidors de Google, que reben la teva adreça IP) i Stripe (la pàgina de pagament és de Stripe i es regeix per la seva pròpia política de privacitat i galetes).",
         "footer-copy": "rebrandyourbrand — rebranding i web per a negocis",
         "footer-rights": "Tots els drets reservats",
         "footer-top": "tornar a dalt",
-        "panel-title": "brandi · assistent creatiu",
+        "footer-aviso": "avís legal", "footer-priv": "privacitat", "footer-cook": "galetes",
+        "panel-title": "brandi — assistent creatiu",
         "panel-subtitle": "intel·ligència artificial de marca",
         "panel-placeholder": "escriu un missatge a brandi...",
+        "chat-privacy": "En escriure a la Brandi (una IA) acceptes que tractem les teves dades per preparar la teva proposta. No incloguis dades sensibles. Més info a la", "chat-privacy-link": "política de privacitat",
         "status-waiting": "en espera",
         "status-verifying": "verificant seguretat...",
         "status-consulting": "consultant amb brandi...",
         "status-completed": "completat",
         "status-failed": "fallit",
+        "status-resent": "correu reenviat",
         "output-placeholder": "inicia la conversa amb brandi o tria els teus serveis.",
         "err-empty": "si us plau, escriu un missatge abans d'enviar.",
         "err-turnstile": "si us plau, completa la verificació humana.",
@@ -1336,16 +1490,191 @@ textarea { resize: vertical; }
         "err-rate": "massa sol·licituds, espera un minut.",
         "err-busy": "brandi està saturada, torna-ho a provar.",
         "err-cooldown": "ja t'hem enviat un correu fa poc. revisa la teva bústia (i el correu brossa) o espera uns minuts.",
+        "err-expired": "la verificació ha caducat. torna a començar.",
+        "err-resend-limit": "has assolit el màxim de reenviaments. torna a començar amb un altre correu.",
         "thinking-phrases": ["pensant...", "analitzant territoris visuals...", "sintetitzant concepte de marca...", "afinant direcció d'art..."],
         "lead-closed-badge": "correu de verificació enviat. revisa la teva bústia.",
+        "resend": "reenviar correu", "restart": "començar de nou", "resend-limit": "límit de reenviaments assolit",
+        "pending-msg": "T'hem enviat un correu de verificació a {email}. Obre'l i prem el botó per continuar amb el pagament. Si no el veus, mira el correu brossa o reenvia'l.",
+        "verified-note": "Correu verificat! Segueix l'enllaç del correu per completar el pagament, o digues-me si vols començar un altre projecte.",
         "confirm-yes": "Sí",
         "confirm-no": "No",
         "role-user": "tu",
         "lang-aria": "Canvia l'idioma",
         "verify-eyebrow": "verificació humana", "verify-title": "un moment, verificació ràpida",
         "verify-desc": "Confirma que ets una persona real per enviar el teu missatge. Només te'l demanarem un cop en aquesta conversa.",
-        "verify-note": "protegit per cloudflare turnstile · sense endevinalles ni comptes",
+        "verify-note": "protegit per cloudflare turnstile — sense endevinalles ni comptes",
         "verify-loading": "carregant verificació...", "verify-ok": "verificat ✓", "verify-error": "no s'ha pogut verificar. torna-ho a provar."
+      },
+      eu: {
+        "err-plan": "hautatu gutxienez zerbitzu bat zerbitzuen atalean jarraitu aurretik.",
+        "intro": "Kaixo, Brandi naiz, rebrandyourbrand-eko arte-zuzendaria. Esaidazu: nola du izena zure marka edo proiektuak eta zer behar duzu?",
+        "greet": "Bikain! {services} hautatu dituzu (guztira {total}). Nola du izena zure marka edo proiektuak zure proposamenarekin jarraitzeko?",
+        "nav-cases": "lanak",
+        "nav-planes": "zerbitzuak",
+        "nav-about": "guri buruz",
+        "nav-testimonials": "lekukotzak",
+        "nav-terms": "baldintzak",
+        "hero-tag": "rebranding eta webguneak gehiago merezi duten enpresentzat",
+        "hero-title": "zure negozioa dirudiena baino hobea da.",
+        "hero-desc": "Zure irudia ez badator bat zure lanaren kalitatearekin, bezeroek beste norbait aukeratuko dute zu ezagutu aurretik. Prezio itxian eta hileroko kuotarik gabe berdiseinatzen dizugu.",
+        "cta-plans": "ikusi zerbitzuak eta prezioak",
+        "cta-brandi": "hitz egin brandirekin",
+        "cases-eyebrow": "azken lanak",
+        "cases-title": "lehen eta orain",
+        "cases-sub": "Arrastatu irudi bakoitza berdiseinua hasierako puntuarekin alderatzeko.",
+        "case-before": "lehen",
+        "case-after": "orain",
+        "cases-cta": "honelako zerbait nahi dut",
+        "case-slider": "Alderatu lehen eta orain",
+        "case-1-title": "auzoko kafetegia",
+        "case-1-desc": "Erakusleihoan zein eramateko edalontzian berdin funtzionatzen duten logotipoa eta kolore-paleta.",
+        "case-2-title": "fisioterapia estudioa",
+        "case-2-desc": "Nortasun koherente bakarra webgunean, sare sozialetan eta eskuorrietan: lau estilo desberdinetatik bakarrera.",
+        "case-3-title": "zeramika denda",
+        "case-3-desc": "Webgune azkarra eta beren izenean, marka muturretik muturrera berrituta.",
+        "problem-eyebrow": "arazoa",
+        "how-eyebrow": "nola dabilen",
+        "plans-eyebrow": "zerbitzuak eta prezioak",
+        "studio-eyebrow": "taldea",
+        "problem-title": "hauetako batek ezaguna egiten al zaizu?",
+        "problem-1": "Zure logotipoa desitxuratu egiten da txikitzean: Instagramen, errotulu batean, faktura batean.",
+        "problem-2": "Argitaratzen duzun gauza bakoitzak marka desberdin batekoa dirudi.",
+        "problem-3": "Lehiakideek itxura serioagoa dute, nahiz eta zuk lan hobea egin.",
+        "problem-4": "Aurrekontuak eskatu dituzu eta inork ez dizu argi azaldu zer jasoko duzun.",
+        "problem-close": "Konponbidea du, eta uste baino sinpleagoa da.",
+        "how-title": "horren sinplea da",
+        "how-1-title": "behar duzuna aukeratzen duzu",
+        "how-1-desc": "Markatu nahi dituzun zerbitzuak edo hitz egin Brandirekin, gure laguntzailearekin. Zer egiten duzun eta norengana zuzentzen zaren ulertzea besterik ez dugu behar.",
+        "how-2-title": "guk diseinatzen dugu",
+        "how-2-desc": "Aukeratutako zerbitzu bakoitza aurkezten dizugu. Bi berrikuspen-txanda barne.",
+        "how-3-title": "prest entregatzen dizugu",
+        "how-3-desc": "Azken fitxategiak jasotzen dituzu. Weba gehitzen baduzu, argitaratu eta giltza eskuan entregatzen dizugu, zure izenean.",
+        "plans-heading": "aukeratu soilik behar duzuna",
+        "plans-sub": "Markatu behar dituzun zerbitzuak eta ordaindu horiengatik bakarrik. Ordainketa bakarra proiektua onartzean, hileroko kuotarik gabe.",
+        "plans-quote": "marketin trikimailuen .99 hori saihesten dugu kalitate ukaezina eskaintzeko.",
+        "plans-infra-note": "Hileroko kuotarik gabe. Weba gehitzen baduzu, domeinuaz eta posta korporatiboaz arduratzen gara urteko azpiegitura berritze bakar baten bidez.",
+        "svc-logo": "logotipoa",
+        "svc-logo-desc": "Handi eta txiki ondo ikusten den logotipoa: bertsio nagusia eta sekundarioa, sareetarako, karteletarako eta fakturetarako prest.",
+        "svc-paleta": "enpresaren paleta",
+        "svc-paleta-desc": "Zure markaren koloreak eta tipografiak, argitaratzen duzun guztiak enpresa berekoa dirudien.",
+        "svc-web": "webgunea",
+        "svc-web-desc": "Zure webgune azkarra eta zure izenean, argitaratua eta giltza eskuan entregatua.",
+        "svc-total": "guztira",
+        "svc-cta": "hasi nire proiektua",
+        "svc-hint": "markatu gutxienez zerbitzu bat jarraitzeko",
+        "studio-heading": "guri buruz",
+        "studio-sub": "Ilustratzaile bat eta ingeniari bat: batek zure marka itxura onekoa izatea lortzen du, besteak zure webguneak funtzionatzea.",
+        "studio-card-1-tag": "ibilbidea eta prestakuntza",
+        "studio-card-1-title": "gael domènech sevillano",
+        "studio-card-1-desc": "Ilustrazioan graduatua EASD Josep Serra i Abella eskolan. Zure marka bikain ikusteaz arduratzen da.",
+        "studio-card-1-role": "arte-zuzendaritza eta ikus-diseinua",
+        "portfolio-btn": "+ portfolioa",
+        "studio-card-2-tag": "ibilbidea eta prestakuntza",
+        "studio-card-2-title": "bernat domènech sevillano",
+        "studio-card-2-desc": "Industria Elektronika eta Automatika Ingeniaritzako ikaslea. Zure webguneak funtzionatzeaz arduratzen da.",
+        "studio-card-2-role": "webguneen sortzailea",
+        "testimonials-eyebrow": "balorazio egiaztatuak",
+        "testimonials-heading": "enpresen lekukotzak",
+        "testimonials-sub": "Gurekin proiektu bat amaitu duten enpresen iritziak. Bezero egiaztatuek soilik baloratu dezakete, proiektua amaitzean bidaltzen dugun esteka pertsonal baten bidez.",
+        "terms-eyebrow": "esparru legala eta operatiboa",
+        "terms-heading": "zerbitzu-baldintzak",
+        "terms-sub": "Arau argiak, fasetako metodologia eta elkarren babesa rebrandyourbrand-eko proiektu bakoitzaren arrakasta eta gardentasuna bermatzeko.",
+        "terms-btn-show": "+ ikusi baldintzak",
+        "terms-btn-hide": "- ezkutatu baldintzak",
+        "terms-summary": "Laburbilduz: diseinu eta garapen ordainketa bakarra (hileroko kuotarik gabe), fase bakoitzeko 2 berrikuspen-txanda eta proiektua zurea da ordaintzean. Weba kontratatzen baduzu, zure domeinua eta posta korporatiboa kudeatzen ditugu derrigorrezko urteko berritze baten bidez (aldez aurreko abisuarekin eta klik bakarreko ezeztapenarekin). Gehigarriak bereizita aurrekontatzen dira (50 €/h) eta ez da itzulketarik egiten behin proiektua hasita.",
+        "t1-title": "1. zerbitzuen izaera eta irismena",
+        "t1-l1": "1.1. Ordainketa bakarreko eredua eta entregagarriak:",
+        "t1-p1": "rebrandyourbrand-ek rebranding eta web garapen zerbitzu itxiak eskaintzen ditu ordainketa bakarreko eredu baten bidez: zenbateko osoaren % 100 (aukeratutako zerbitzuen batura) kolpe batean ordaintzen da proiektua onartzean, ordainketa-esteka seguru baten bidez (Stripe) posta elektronikoa egiaztatu ondoren. Lehen fasea ordainketa baieztatu ondoren hasten da. Zerbitzu bakoitzak zehatz-mehatz zehazten ditu bere entregagarriak, ezkutuko hileroko kuotarik gabe.",
+        "t1-l2": "1.2. Bazterketak eta aparteko lanak:",
+        "t1-p2": "Kontratatutako zerbitzuetan sartzen ez den edozein ezaugarri, atal osagarri, merkataritza elektronikoko (e-commerce) funtzionalitate, datu-base konplexu edo neurrira egindako garapen prezioz kanpo geratuko da eta dagokion zerbitzua kontratatzea edo 50 €/orduko aparteko aurrekontua beharko du.",
+        "t1-l3": "1.3. Eremu profesionala (B2B) eta atzera egiteko eskubidearen salbuespena:",
+        "t1-p3": "Zerbitzuak beren jarduera profesionalaren baitan diharduten enpresa eta autonomoei soilik ematen zaizkie. Kontratatzean, bezeroak kontsumitzaile gisa ez duela jokatzen aitortzen du; beraz, ez dira aplikagarriak kontsumitzaileen araudia ezta 14 eguneko atzera egiteko eskubidea ere. Bezeroaren argibideen arabera egindako zerbitzu pertsonalizatuak dira.",
+        "t2-title": "2. fasetako lan-metodologia eta berrikuspen-mugak",
+        "t2-intro": "Bizkortasun handiena bermatzeko, proiektuak kontratatutako zerbitzuetara egokitutako fase sekuentzialetan gauzatzen dira, idatzizko nahitaezko baliozkotzearekin:",
+        "t2-f1-title": "2.1. Nortasun-fasea (logotipoa eta/edo paleta):",
+        "t2-f1-desc": "Gaeletik kontratatutako nortasun-zerbitzuen proposamenak aurkezten dira (logotipoa eta/edo enpresaren paleta). Gehienez 2 berrikuspen-txanda txiki sartzen dira. Onarpena eman ondoren (\"Onartua\"), diseinua itxi eta aldaezintzat jotzen da. Logotipoan edo kolore nagusietan gerora egindako aldaketek aparteko lana osatuko dute 50 €/orduan.",
+        "t2-f2-title": "2.2. Web-fasea (weba kontratatzen baduzu soilik):",
+        "t2-f2-desc": "Web-egitura (landing page edo geruza anitzeko webgunea) inplementatzen da emandako materialekin. Bezeroak behin-behineko bertsioa berrikusten du eta oinarrizko diseinua balioztatzen du (gehienez 2 doikuntza-txanda txiki). Onarpenarekin, egitura finko geratzen da; geroko egitura-aldaketa sakonek kostu gehigarriak ekarriko dituzte.",
+        "t2-f3-title": "2.3. Azken entrega-fasea:",
+        "t2-f3-desc": "Aurreko faseak baliozkotu ondoren, azken fitxategiak entregatzen dira eta, weba kontratatu baduzu, Bernatek behin betiko hedapen teknikoa egiten du GitHub eta Cloudflare-n, giltza eskuan entregatuz eta adostutako jabetza teknikoa bezeroari transferituz.",
+        "t3-title": "3. materialen ekarpena, epeak, onespen isila eta bertan behera uztea",
+        "t3-l1": "3.1. Domeinuaren eta posta korporatiboaren kudeaketa eta urteko berritzea:",
+        "t3-p1": "Web garapena barne hartzen duten proiektuetan, rebrandyourbrand-ek osoki kudeatzen ditu domeinuaren erregistroa, DNS/SSL konfigurazioa eta posta korporatiboa. Azpiegitura-zerbitzu honek urteko derrigorrezko berritze-kostua du. Urteko mugaegun bakoitzaren aurretik, bezeroak mezu elektroniko automatiko bat jasoko du ordainketa-estekarekin eta zuzeneko ezeztapen-botoi batekin; ezeztatu edo urteko berritzea ordaindu ezean, ez da gastu gehigarririk egingo eta domeinua zein webgunea aktibo egoteari utziko diote indarrean dagoen epea amaitzean.",
+        "t3-l2": "3.2. Entrega-epeak, atzerapenak eta utzikeriagatiko deuseztapena:",
+        "t3-p2": "Bezeroak 20 egun naturaleko arrazoizko epean testuak, irudiak eta aldez aurreko logotipoak emateko konpromisoa hartzen du (baita DNS sarbideak ere, eskualdatu nahi den aurretiazko domeinuren bat edukiz gero). Proiektua bezeroaren aldetik jarduerarik edo erantzunik gabe geratzen bada 30 egun naturalean, rebrandyourbrand-ek abisu bat bidaliko dio posta elektronikoz; beste 7 egun natural igaro ondoren erantzunik gabe jarraitzen badu, proiektua bertan behera utzitakitzat jo eta amaitutzat eman ahal izango du, ordaindutako zenbatekoa gordez egindako lanaren eta agendaren erreserbaren ordain gisa.",
+        "t3-l3": "3.3. Isiltasun bidezko onespen isila:",
+        "t3-p3": "Fase baten entrega edo jakinarazpenaren ondoren, eta mezu elektroniko bidezko abisu baten ondoren, 20 egun natural baino gehiago igarotzen badira bezeroaren oharrik gabe, onartutzat joko da (onespen isila) eta estudioak hurrengo etaparantz jo ahal izango du.",
+        "t3-l4": "3.4. Edukietako huts-egiteak:",
+        "t3-p4": "rebrandyourbrand-ek ez du bere gain hartzen bezeroak zuzenean emandako testuetako akats tipografikoen edo erroreen ardura.",
+        "t4-title": "4. jabetza intelektuala eta itzulketa-politika",
+        "t4-l1": "4.1. Jabetza intelektuala:",
+        "t4-p1": "Sortutako diseinu eta garapenen merkataritza eta jabetza intelektuala osorik bezeroari transferitzen zaio proiektuaren zenbateko osoaren ordainketa baieztatu ondoren soilik.",
+        "t4-l2": "4.2. Itzulketa-politika:",
+        "t4-p2": "Sorkuntza tekniko eta intelektualeko zerbitzu pertsonalizatuak direnez, ez da onartzen ordaindutako zenbatekoaren itzulketarik edo diru-itzulketarik lehen fasea formalki hasi ondoren.",
+        "t5-title": "5. erantzukizun teknikoaren mugak eta bermea",
+        "t5-l1": "5.1. Entrega osteko berme teknikoa:",
+        "t5-p1": "14 egun naturaleko berme teknikoa ezartzen da azken entregaren ondoren, hasierako garapenari zuzenean egotz dakizkiokeen akats bisualak edo teknikoak konpontzeko.",
+        "t5-l2": "5.2. Kanpoko inguruneak eta araudia betetzea:",
+        "t5-p2": "Estudioak ez du bere gain hartzen hirugarrenen zerbitzarien erorketen (Cloudflare/GitHub), entrega osteko iturburu-kodearen baimenik gabeko aldaketen, ezta bezeroak modu independentean gehitutako testu legaletan cookie-ak, LSSI edo DBEO ez betetzeagatiko erantzukizunik.",
+        "t6-title": "6. lege aplikagarria eta jurisdikzioa (b2b eremua)",
+        "t6-p": "Kontratu-harreman hau erabat profesionala da (B2B) eta espainiar legediak arautzen du. Baldintza hauetatik eratorritako edozein eztabaidarako, alderdiek Bartzelonako Epaitegi eta Auzitegien mende jartzen dute beren burua, legokiekeen beste edozein foruri uko eginez.",
+        "legal-eyebrow": "informazio legala",
+        "legal-heading": "legala eta pribatutasuna",
+        "legal-sub": "Nor garen, zer datu tratatzen ditugun eta webgune honek hirugarrenen zer zerbitzu erabiltzen dituen jakiteko gutxienekoa.",
+        "legal-aviso-t": "lege-oharra",
+        "legal-aviso-p": "34/2002 Legea (LSSI-CE) betez: gune honen titularra, [IZENA EDO ENPRESAREN IZENA], IFZ [IFZ], helbidea [HELBIDE OSOA]. Kontaktua: hola@rebrandyourbrand.es. Webgunean sartzeak eta hura erabiltzeak ohar hau eta zerbitzu-baldintzak onartzea dakar.",
+        "legal-priv-t": "pribatutasun-politika",
+        "legal-priv-p1": "Arduraduna: lege-oharrean adierazitako titularra (hola@rebrandyourbrand.es). Zure posta elektronikoa, zure markaren izena eta Brandiri idazten dizkiozun mezuak tratatzen ditugu: (a) zure posta egiaztatzeko, (b) zure proposamena prestatu eta kudeatzeko eta (c) proiektua burutu eta fakturatzeko, kontratatzen baduzu. Oinarri juridikoa: zure baimena, zure eskariz kontratu aurreko neurriak aplikatzea eta kontratua gauzatzea. Balorazio bat uzten baduzu, oinarria zure baimena da. Ez sartu datu sentikorrik txat-ean.",
+        "legal-priv-p2": "Tratamendu-eragileak eta hartzaileak: Cloudflare (ostatatzea, datu-basea eta Turnstile egiaztapena), Resend (mezu elektronikoak bidaltzea), Groq (txat-eko mezuak prozesatzen ditu Brandiren —IA bat— erantzunak sortzeko) eta Stripe (ordainketak; ez dugu inoiz zure txartelaren daturik ikusten). Batzuk Europako Esparru Ekonomikotik kanpo daude eta kontratu-klausula estandarretan edo EB-AEB Datuen Pribatutasun Esparruan oinarritzen dira. Ez ditugu zure datuak saltzen.",
+        "legal-priv-p3": "Kontserbazioa: amaitu gabeko egiaztapen baten datuak 24 ordura ezabatzen dira; kontratatutako proiektuetakoak harremanak dirauen bitartean eta legezko epeetan gordetzen dira. Eskubideak: atzitzea, zuzentzea, ezabatzea, aurka egitea, mugatzea eta eramangarritasuna hola@rebrandyourbrand.es helbidera idatzita. Erantzuten ez badizugu, Datuak Babesteko Espainiako Agentzian (aepd.es) erreklamatu dezakezu.",
+        "legal-cook-t": "cookie-ak eta hirugarrenen zerbitzuak",
+        "legal-cook-p1": "Webgune honek ez du analitika edo publizitate cookie-rik erabiltzen. Beharrezkoak diren datu teknikoak soilik gordetzen ditu zure arakatzailean (hizkuntza, modu argia edo iluna, txat saioa eta posta egiaztatze-egoera), baimenik behar ez dutenak. Arakatzailearen ezarpenetatik edo txat-eko «hasi berriro» botoiarekin ezaba ditzakezu.",
+        "legal-cook-p2": "Hirugarrenen zerbitzuak: Cloudflare Turnstile (bot-en aurkako egiaztapena txata irekitzean; biltegiratze teknikoa erabil dezake segurtasunagatik), Google Fonts (tipografiak Google-ren zerbitzarietatik deskargatzen dira, zure IP helbidea jasotzen dutenak) eta Stripe (ordainketa orria Stripe-rena da eta bere pribatutasun eta cookie-politikaren arabera arautzen da).",
+        "footer-copy": "rebrandyourbrand — negozioentzako rebranding-a eta webgunea",
+        "footer-rights": "Eskubide guztiak erreserbatuta",
+        "footer-top": "itzuli gora",
+        "footer-aviso": "lege-oharra",
+        "footer-priv": "pribatutasuna",
+        "footer-cook": "cookie-ak",
+        "panel-title": "brandi — laguntzaile sortzailea",
+        "panel-subtitle": "markaren adimen artifiziala",
+        "panel-placeholder": "idatzi mezu bat brandiri...",
+        "chat-privacy": "Brandiri (IA bat) idaztean onartzen duzu zure datuak tratatzea zure proposamena prestatzeko. Ez sartu datu sentikorrik. Informazio gehiago hemen:",
+        "chat-privacy-link": "pribatutasun-politika",
+        "status-waiting": "itxaroten",
+        "status-verifying": "segurtasuna egiaztatzen...",
+        "status-consulting": "brandirekin kontsultatzen...",
+        "status-completed": "osatua",
+        "status-failed": "huts egin du",
+        "status-resent": "mezua berriro bidalia",
+        "output-placeholder": "hasi elkarrizketa brandirekin edo aukeratu zure zerbitzuak.",
+        "err-empty": "mesedez, idatzi mezu bat bidali aurretik.",
+        "err-turnstile": "mesedez, osatu giza egiaztapena.",
+        "err-network": "errorea zerbitzari seguruarekin konektatzean",
+        "err-rate": "eskaera gehiegi, itxaron minutu bat.",
+        "err-busy": "brandi lanpetuta dago, saiatu berriro.",
+        "err-cooldown": "duela gutxi mezu bat bidali dizugu. begiratu zure sarrera-ontzia (eta spama) edo itxaron minutu batzuk.",
+        "err-expired": "egiaztapena iraungi da. hasi berriro.",
+        "err-resend-limit": "birbidalketen mugara iritsi zara. hasi berriro beste posta elektroniko batekin.",
+        "thinking-phrases": ["pentsatzen...", "ikus-lurraldeak aztertzen...", "markaren kontzeptua sintetizatzen...", "arte-zuzendaritza doitzen..."],
+        "lead-closed-badge": "egiaztatze-mezua bidalia. begiratu zure sarrera-ontzia.",
+        "resend": "berriro bidali mezua",
+        "restart": "hasi berriro",
+        "resend-limit": "birbidalketa-mugara iritsita",
+        "pending-msg": "Egiaztatze-mezu bat bidali dizugu {email} helbidera. Ireki eta sakatu botoia ordainketarekin jarraitzeko. Ikusten ez baduzu, begiratu spama edo berriro bidali.",
+        "verified-note": "Posta egiaztatuta! Jarraitu mezuko esteka ordainketa burutzeko, edo esaidazu beste proiektu bat hasi nahi duzun.",
+        "confirm-yes": "Bai",
+        "confirm-no": "Ez",
+        "role-user": "zu",
+        "lang-aria": "Aldatu hizkuntza",
+        "verify-eyebrow": "giza egiaztapena",
+        "verify-title": "une bat, egiaztapen azkarra",
+        "verify-desc": "Mesedez, berretsi benetako pertsona zarela zure mezua bidaltzeko. Elkarrizketa honetan behin bakarrik eskatuko dizugu.",
+        "verify-note": "cloudflare turnstile-k babestua — igarkizunik gabe, konturik gabe",
+        "verify-loading": "egiaztapena kargatzen...",
+        "verify-ok": "egiaztatua ✓",
+        "verify-error": "ezin izan da egiaztatu. saiatu berriro."
       }
     };
     // El español se toma del propio HTML (así el texto visible y la traducción nunca se desincronizan)
@@ -1353,9 +1682,10 @@ textarea { resize: vertical; }
     document.querySelectorAll('[data-i18n-placeholder]').forEach((el) => { translations.es[el.dataset.i18nPlaceholder] = el.placeholder; });
 
     const slugMap = {
-      es: { top: '', planes: 'planes', 'sobre-nosotros': 'sobre-nosotros', testimonios: 'testimonios', terminos: 'terminos' },
-      en: { top: '', planes: 'plans', 'sobre-nosotros': 'about', testimonios: 'testimonials', terminos: 'terms' },
-      ca: { top: '', planes: 'plans-cat', 'sobre-nosotros': 'sobre-nosaltres', testimonios: 'testimonis', terminos: 'termes' }
+      es: { top: '', casos: 'casos', planes: 'planes', 'sobre-nosotros': 'sobre-nosotros', testimonios: 'testimonios', terminos: 'terminos' },
+      en: { top: '', casos: 'work', planes: 'plans', 'sobre-nosotros': 'about', testimonios: 'testimonials', terminos: 'terms' },
+      ca: { top: '', casos: 'treballs', planes: 'plans-cat', 'sobre-nosotros': 'sobre-nosaltres', testimonios: 'testimonis', terminos: 'termes' },
+      eu: { top: '', casos: 'lanak', planes: 'zerbitzuak', 'sobre-nosotros': 'guri-buruz', testimonios: 'lekukotzak', terminos: 'baldintzak' }
     };
     const reverseSlugMap = {};
     for (const [lang, map] of Object.entries(slugMap)) {
@@ -1438,7 +1768,9 @@ textarea { resize: vertical; }
       const target = $(id);
       if (!target) return;
       e.preventDefault();
+      if (assistantIsOpen) closeAssistantPanel();
       target.scrollIntoView({ behavior: smooth() });
+      if (target.tagName === 'DETAILS') target.open = true;
       setHash(id, true);
     });
 
@@ -1511,7 +1843,7 @@ textarea { resize: vertical; }
       } catch (e) { showTestimonials(false); }
     }
 
-    const ERR = { rate_limited: 'err-rate', email_cooldown: 'err-cooldown', captcha_failed: 'err-turnstile', captcha_unavailable: 'err-turnstile', upstream_busy: 'err-busy', upstream_error: 'err-busy', email_error: 'err-busy', payload_too_large: 'err-busy', invalid_confirmation: 'err-busy', invalid_messages: 'err-busy', plan_required: 'err-plan', session_invalid: 'err-turnstile', missing_fields: 'err-busy', misconfigured: 'err-busy', internal_error: 'err-busy' };
+    const ERR = { rate_limited: 'err-rate', email_cooldown: 'err-cooldown', captcha_failed: 'err-turnstile', captcha_unavailable: 'err-turnstile', upstream_busy: 'err-busy', upstream_error: 'err-busy', email_error: 'err-busy', payload_too_large: 'err-busy', invalid_confirmation: 'err-busy', invalid_messages: 'err-busy', plan_required: 'err-plan', session_invalid: 'err-turnstile', missing_fields: 'err-busy', misconfigured: 'err-busy', internal_error: 'err-busy', invalid_resume: 'err-busy', expired: 'err-expired', resend_limit: 'err-resend-limit' };
 
     // ── SELECTOR DE SERVICIOS ──
     const selected = new Set();
@@ -1546,7 +1878,8 @@ textarea { resize: vertical; }
             <span class="block text-xs text-muted mt-1 lowercase">${esc(ids.length ? svcNames(ids) : t['svc-hint'])}</span>
           </div>
           <button type="button" data-start-project ${ids.length ? '' : 'disabled'} class="btn btn-primary w-full sm:w-auto disabled:opacity-40 disabled:cursor-not-allowed">${esc(t['svc-cta'])}</button>
-        </div>`;
+        </div>
+        <p class="mt-3 text-xs text-muted leading-relaxed">${esc(t['plans-infra-note'])}</p>`;
     }
 
     $('services-builder').addEventListener('click', (e) => {
@@ -1571,7 +1904,7 @@ textarea { resize: vertical; }
       const t = translations[currentLang];
       langIndicator.textContent = currentLang;
       document.documentElement.lang = currentLang;
-      document.title = { es: 'rebrandyourbrand — Rebranding y web para negocios', en: 'rebrandyourbrand — Rebranding & web for businesses', ca: 'rebrandyourbrand — Rebranding i web per a negocis' }[currentLang];
+      document.title = { es: 'rebrandyourbrand — Rebranding y web para negocios', en: 'rebrandyourbrand — Rebranding & web for businesses', ca: 'rebrandyourbrand — Rebranding i web per a negocis', eu: 'rebrandyourbrand — Negozioentzako rebranding-a eta webgunea' }[currentLang];
       langToggle.setAttribute('aria-label', t['lang-aria']);
       document.querySelectorAll('[data-i18n]').forEach((el) => {
         if (el.classList.contains('toggle-text')) return;
@@ -1581,6 +1914,10 @@ textarea { resize: vertical; }
       document.querySelectorAll('[data-i18n-placeholder]').forEach((el) => {
         const v = t[el.dataset.i18nPlaceholder];
         if (v != null) el.placeholder = v;
+      });
+      document.querySelectorAll('[data-i18n-aria]').forEach((el) => {
+        const v = t[el.dataset.i18nAria];
+        if (v != null) el.setAttribute('aria-label', v);
       });
       assistantOutput.dataset.placeholder = t['output-placeholder'];
       setToggleLabel();
@@ -1744,7 +2081,7 @@ textarea { resize: vertical; }
       assistantPanel.setAttribute('aria-hidden', 'false');
       setAssistantStatus('status-waiting', 'ready');
       setTimeout(() => assistantPrompt.focus(), 300);
-      ensureSession(); // precalentado silencioso: no bloquea nada
+      if (resume) checkPending(); else ensureSession(); // precalentado silencioso: no bloquea nada
     }
 
     function closeAssistantPanel() {
@@ -1769,6 +2106,94 @@ textarea { resize: vertical; }
     let busy = false;
     let lastBrand = '', lastConfirmSig = '';
 
+    // ── Verificación persistente (rrb_verified_session) ──
+    // Solo guarda el token firmado por el Worker y el correo enmascarado, nunca el correo completo.
+    const RESUME_KEY = 'rrb_verified_session', RESUME_MAX_AGE = 24 * 3600 * 1000, RESEND_COOLDOWN = 60, MAX_RESENDS = 3;
+    let resume = null, statusChecked = false;
+    try {
+      const r = JSON.parse(localStorage.getItem(RESUME_KEY) || 'null');
+      if (r && /^[a-f0-9]{64}\.[a-f0-9]{64}$/.test(r.token || '') && Date.now() - r.at < RESUME_MAX_AGE) resume = r;
+      else localStorage.removeItem(RESUME_KEY);
+    } catch (e) {}
+    const saveResume = (r) => { resume = r; try { localStorage.setItem(RESUME_KEY, JSON.stringify(r)); } catch (e) {} };
+    const clearResume = () => { resume = null; try { localStorage.removeItem(RESUME_KEY); } catch (e) {} };
+    const resendWait = () => (resume ? Math.max(0, Math.ceil((resume.resendAt + RESEND_COOLDOWN * 1000 - Date.now()) / 1000)) : 0);
+
+    async function pendingCall(op) {
+      const res = await fetch(WORKER_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'pending', op, resume: resume.token }),
+        signal: AbortSignal.timeout(15000)
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw Object.assign(new Error(data.error || 'http_' + res.status), { code: data.error });
+      return data;
+    }
+
+    function syncResendBtn() {
+      const btn = $('resend-btn');
+      if (!btn || !resume) return;
+      const t = translations[currentLang], wait = resendWait(), spent = resume.left === 0;
+      btn.disabled = busy || spent || wait > 0;
+      btn.textContent = spent ? t['resend-limit'] : wait > 0 ? `${t['resend']} (${wait}s)` : t['resend'];
+    }
+    setInterval(syncResendBtn, 1000);
+
+    function resetChat() {
+      chatHistory.length = 0; lastBrand = ''; lastConfirmSig = '';
+      chatHistory.push(activeServices.length
+        ? { role: 'assistant', greeting: true, info: { services: [...activeServices] } }
+        : { role: 'assistant', greeting: true, intro: true });
+      renderHistory();
+    }
+
+    function markVerified() {
+      clearResume();
+      chatHistory.length = 0;
+      chatHistory.push({ role: 'assistant', local: true, noteKey: 'verified-note' });
+      renderHistory(true);
+    }
+
+    function pendingFailed(err) {
+      if (err.code === 'expired' || err.code === 'invalid_resume') { clearResume(); resetChat(); }
+      else if (err.code === 'email_cooldown' && resume) saveResume({ ...resume, resendAt: Date.now() });
+      else if (err.code === 'resend_limit' && resume) saveResume({ ...resume, left: 0 });
+      assistantError.textContent = translations[currentLang][ERR[err.code]] || translations[currentLang]['err-network'];
+      setAssistantStatus('status-failed', 'error');
+    }
+
+    async function resendVerification() {
+      if (busy || !resume || resendWait() > 0 || resume.left === 0) return;
+      busy = true; assistantError.textContent = ''; syncResendBtn();
+      try {
+        const d = await pendingCall('resend');
+        if (d.state === 'verified') { markVerified(); return; }
+        saveResume({ ...resume, resendAt: Date.now(), left: d.left });
+        setAssistantStatus('status-resent', 'ready');
+      } catch (err) { pendingFailed(err); }
+      finally { busy = false; renderHistory(); }
+    }
+
+    async function restartChat() {
+      if (busy) return;
+      busy = true; assistantError.textContent = '';
+      try { if (resume) await pendingCall('restart').catch(() => {}); } finally { busy = false; }
+      clearResume(); resetChat();
+      setAssistantStatus('status-waiting', 'ready');
+      assistantPrompt.focus();
+    }
+
+    // Al abrir el panel: comprueba una sola vez si el correo ya se verificó (p. ej. desde otra pestaña)
+    async function checkPending() {
+      if (!resume || statusChecked) return;
+      statusChecked = true;
+      try { const d = await pendingCall('status'); if (d.state === 'verified') markVerified(); }
+      catch (err) { if (err.code === 'expired' || err.code === 'invalid_resume') { clearResume(); resetChat(); } }
+    }
+
+    if (resume) chatHistory.push({ role: 'assistant', local: true, pending: true, leadClosed: true });
+
     // Apertura desde el botón flotante (sin servicios elegidos): Brandi saluda primero.
     assistantTrigger.addEventListener('click', () => {
       if (!chatHistory.length) {
@@ -1781,6 +2206,8 @@ textarea { resize: vertical; }
     const isLeadClosed = () => chatHistory.some((e) => e.leadClosed);
 
     function entryText(entry) {
+      if (entry.noteKey) return translations[currentLang][entry.noteKey];
+      if (entry.pending) return translations[currentLang]['pending-msg'].replace('{email}', resume ? resume.email : '');
       if (entry.intro) return translations[currentLang]['intro'];
       if (!entry.greeting) return entry.text || '';
       const ids = entry.info.services;
@@ -1799,10 +2226,27 @@ textarea { resize: vertical; }
         chatHistory.forEach((e) => { e.canConfirm = false; });
         lastConfirmSig = '';
       } else {
-        chatHistory.length = 0; chatHistory.push(greeting); lastBrand = ''; lastConfirmSig = '';
+        clearResume(); chatHistory.length = 0; chatHistory.push(greeting); lastBrand = ''; lastConfirmSig = '';
       }
       openAssistantPanel(opener);
       renderHistory();
+    }
+
+    function buildPendingActions(t) {
+      const wrap = document.createElement('div');
+      wrap.className = 'mt-3 flex flex-col sm:flex-row gap-2';
+      const again = document.createElement('button');
+      again.type = 'button'; again.id = 'resend-btn';
+      again.className = 'flex-1 py-2.5 px-4 bg-brand text-[#0A0A0C] font-semibold rounded-xl text-xs hover:bg-brand-soft disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer';
+      again.addEventListener('click', resendVerification);
+      const restart = document.createElement('button');
+      restart.type = 'button';
+      restart.className = 'py-2.5 px-4 bg-ink/40 border border-line text-paper font-semibold rounded-xl text-xs hover:border-brand/60 cursor-pointer';
+      restart.textContent = t['restart'];
+      restart.addEventListener('click', restartChat);
+      wrap.append(again, restart);
+      queueMicrotask(syncResendBtn);
+      return wrap;
     }
 
     function buildRow(entry, isLast, closed) {
@@ -1846,6 +2290,7 @@ textarea { resize: vertical; }
         badge.className = 'mt-2.5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono lowercase w-fit';
         badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span><span>${esc(t['lead-closed-badge'])}</span>`;
         bubble.appendChild(badge);
+        if (isLast && resume) bubble.appendChild(buildPendingActions(t));
       }
 
       row.appendChild(bubble);
@@ -1909,7 +2354,7 @@ textarea { resize: vertical; }
       // Servicios: los de las tarjetas, o los que Brandi haya deducido de la conversación (null si aún no hay ninguno)
       const services = activeServices.length ? activeServices : null;
       const messages = [
-        ...chatHistory.filter((e) => !e.greeting).map((e) => ({ role: e.role, text: e.text || '', sig: e.sig })),
+        ...chatHistory.filter((e) => !e.greeting && !e.local).map((e) => ({ role: e.role, text: e.text || '', sig: e.sig })),
         { role: 'user', text }
       ].slice(-24);
 
@@ -1940,6 +2385,7 @@ textarea { resize: vertical; }
         if (!res.ok) throw Object.assign(new Error(data.error || 'http_' + res.status), { code: data.error });
 
         if (data.brand) lastBrand = data.brand;
+        if (data.leadClosed && data.resume) saveResume({ token: data.resume, email: data.emailHint || '', at: Date.now(), resendAt: Date.now(), left: MAX_RESENDS });
         if (Array.isArray(data.services) && data.services.length) activeServices = data.services;
         lastConfirmSig = data.confirmSig || '';
         chatHistory.push({ role: 'assistant', text: data.reply, sig: data.sig, leadClosed: data.leadClosed, canConfirm: data.canConfirm });
@@ -2012,7 +2458,7 @@ textarea { resize: vertical; }
       setToggleLabel();
     });
 
-    const sectionIds = ['top', 'planes', 'sobre-nosotros', 'testimonios', 'terminos'];
+    const sectionIds = ['top', 'casos', 'planes', 'sobre-nosotros', 'testimonios', 'terminos'];
     const sectionObserver = new IntersectionObserver((entries) => {
       for (const entry of entries) {
         if (!entry.isIntersecting) continue;
@@ -2030,31 +2476,15 @@ textarea { resize: vertical; }
     }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
     document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
 
-    // Rotador de citas del hero: entra por la derecha, sale por la izquierda. Se pausa con el ratón y no rota con "reducir movimiento".
-    (() => {
-      const box = document.querySelector('[data-quote-rotator]');
-      if (!box || reduceMotion.matches) return;
-      const slides = [...box.querySelectorAll('.quote-slide')];
-      const dots = [...box.querySelectorAll('.quote-dot')];
-      if (slides.length < 2) return;
-      let i = 0, timer = null;
-      const show = (n) => {
-        const prev = slides[i];
-        prev.classList.remove('is-active'); prev.classList.add('is-leaving'); prev.setAttribute('aria-hidden', 'true');
-        setTimeout(() => prev.classList.remove('is-leaving'), 900);
-        i = n;
-        slides[i].classList.remove('is-leaving'); slides[i].classList.add('is-active'); slides[i].removeAttribute('aria-hidden');
-        dots.forEach((d, k) => d.classList.toggle('is-active', k === i));
-      };
-      const stop = () => { clearInterval(timer); timer = null; };
-      const start = () => { stop(); timer = setInterval(() => { if (!document.hidden) show((i + 1) % slides.length); }, 7000); };
-      box.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') stop(); });
-      box.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') start(); });
-      box.addEventListener('focusin', stop);
-      box.addEventListener('focusout', start);
-      slides.forEach((el, k) => { if (k) el.setAttribute('aria-hidden', 'true'); });
-      start();
-    })();
+    // Comparador antes/después de los casos. Si falta una imagen, se retira y queda el degradado con su etiqueta.
+    document.querySelectorAll('[data-ba]').forEach((box) => {
+      const range = box.querySelector('.ba-range');
+      range.addEventListener('input', () => box.style.setProperty('--pos', range.value + '%'));
+      box.querySelectorAll('.case-img').forEach((img) => {
+        const drop = () => img.remove();
+        if (img.complete && img.naturalWidth === 0) drop(); else img.addEventListener('error', drop);
+      });
+    });
 
     updateTheme();
     applyTranslations();

@@ -1,0 +1,13 @@
+{
+  "name": "cloudflare",
+  "owner": {
+    "name": "Cloudflare"
+  },
+  "plugins": [
+    {
+      "name": "cloudflare",
+      "source": "./",
+      "description": "Build, test, and deploy applications on Cloudflare with platform guidance Skills and the Cloudflare MCP server."
+    }
+  ]
+}

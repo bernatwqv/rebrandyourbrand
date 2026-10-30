@@ -1,0 +1,21 @@
+name: Reference code blocks
+on:
+  pull_request:
+    paths:
+      - 'skills/cloudflare/references/**'
+      - '.github/scripts/check-reference-code-blocks.py'
+      - '.github/workflows/references-check.yml'
+  workflow_dispatch: {}
+permissions:
+  contents: read
+jobs:
+  check:
+    name: reference-code-blocks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+      # Advisory: annotates code blocks as warnings and never fails the job.
+      # Add --strict once the maintainers agree to require it.
+      - run: python3 .github/scripts/check-reference-code-blocks.py

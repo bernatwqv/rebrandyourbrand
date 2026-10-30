@@ -1,0 +1,12 @@
+{
+  "name": "cloudflare",
+  "version": "1.0.2",
+  "description": "Build, test, and deploy applications on Cloudflare with platform guidance Skills and the Cloudflare MCP server.",
+  "author": {
+    "name": "Cloudflare",
+    "email": "support@cloudflare.com",
+    "url": "https://workers.cloudflare.com"
+  },
+  "keywords": ["cloudflare", "workers", "durable-objects", "agents", "mcp", "wrangler", "serverless", "compute", "storage", "applications"],
+  "logo": "logo.svg"
+}
