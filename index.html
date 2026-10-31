@@ -543,8 +543,8 @@ textarea { resize: vertical; }
   header nav a[data-section-target="planes"]::after { background: #cf172f; }
   header nav a[data-section-target="sobre-nosotros"]::after { background: rgb(var(--color-ai)); }
   header nav a[data-section-target="testimonios"]::after { background: rgb(var(--color-brand)); }
-  #theme-toggle:hover, #mobile-menu-toggle:hover {
-    background: rgb(var(--color-brand) / .08); box-shadow: 0 0 0 4px rgb(var(--color-brand) / .06);
+  #theme-toggle:hover, #mobile-menu-toggle:hover, #mobile-menu-toggle[aria-expanded="true"] {
+    border-color: rgb(var(--color-brand) / .6); background: rgb(var(--color-brand) / .1); box-shadow: 0 0 0 4px rgb(var(--color-brand) / .07);
   }
   #theme-toggle:active, #mobile-menu-toggle:active {
     transform: scale(0.94);
@@ -702,16 +702,17 @@ textarea { resize: vertical; }
   #top p[data-i18n="hero-desc"]{max-width:36rem}
 
   /* Barra flotante estilo dock (inspiración Decimals con liquid glass) */
-  .header-dock{position:fixed;top:1rem;left:50%;transform:translateX(-50%);width:min(calc(100% - 2.5rem),1160px);z-index:50;border-radius:9999px;border:1px solid rgb(var(--color-line));background:linear-gradient(135deg,rgb(var(--color-bg)/.82) 0%,rgb(var(--color-panel)/.72) 100%);backdrop-filter:blur(24px) saturate(190%);-webkit-backdrop-filter:blur(24px) saturate(190%);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 16px 36px -10px rgba(0,0,0,.1);transform-origin:center top;transition:top 350ms cubic-bezier(.16,1,.3,1),box-shadow 350ms cubic-bezier(.16,1,.3,1),background-color 300ms ease,border-color 300ms ease,transform 440ms cubic-bezier(.22,1,.36,1),opacity 320ms ease,filter 380ms ease}
+  .header-dock{--header-dropdown-gap:.75rem;position:fixed;top:1rem;left:50%;transform:translateX(-50%);width:min(calc(100% - 2.5rem),1160px);z-index:50;border-radius:9999px;border:1px solid rgb(var(--color-line));background:linear-gradient(135deg,rgb(var(--color-bg)/.82) 0%,rgb(var(--color-panel)/.72) 100%);backdrop-filter:blur(24px) saturate(190%);-webkit-backdrop-filter:blur(24px) saturate(190%);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 16px 36px -10px rgba(0,0,0,.1);transform-origin:center top;transition:top 350ms cubic-bezier(.16,1,.3,1),box-shadow 350ms cubic-bezier(.16,1,.3,1),background-color 300ms ease,border-color 300ms ease,transform 440ms cubic-bezier(.22,1,.36,1),opacity 320ms ease,filter 380ms ease}
   html.light .header-dock{background:linear-gradient(135deg,rgba(255,255,255,.88) 0%,rgba(246,241,232,.76) 100%);border-color:rgba(228,222,208,.85);box-shadow:inset 0 1px 0 rgba(255,255,255,.95),0 14px 34px -10px rgba(50,40,25,.07)}
   .header-dock.is-scrolled{top:.75rem;box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 18px 40px -10px rgba(0,0,0,.16)}
   html.light .header-dock.is-scrolled{box-shadow:inset 0 1px 0 rgba(255,255,255,1),0 16px 36px -10px rgba(50,40,25,.09)}
   .header-dock.is-genie-hidden{transform:translateX(-50%) translateY(-1.5rem) scale(.35,.15);opacity:0;filter:blur(8px);pointer-events:none}
   .header-dock-inner{height:3.5rem;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;transition:padding 350ms cubic-bezier(.16,1,.3,1)}
   @media(max-width:47.99rem){
-    .header-dock{top:.75rem;width:calc(100% - 1.25rem)}
+    .header-dock{top:.75rem;width:calc(100% - 1.25rem);--header-dropdown-gap:.75rem}
     .header-dock.is-scrolled{top:.5rem}
     .header-dock-inner{height:3.25rem;padding:0 .875rem}
+    .lang-menu{top:calc(100% + 0.5rem + var(--header-dropdown-gap,.75rem))}
   }
 
   /* Separador amplio del dock */
@@ -726,7 +727,7 @@ textarea { resize: vertical; }
   .header-dock.is-scrolled .logo-full{max-width:0;opacity:0;transform:scale(.7) translateX(-10px);pointer-events:none;margin-right:2.85rem}
   .header-dock.is-scrolled .logo-favicon{opacity:1;transform:scale(1) rotate(0deg);pointer-events:auto}
   @media(prefers-reduced-motion:reduce){
-    .header-dock,.header-dock-inner,.logo-full,.logo-favicon{transition:none !important}
+    .header-dock,.header-dock-inner,.logo-full,.logo-favicon,.header-dock #mobile-nav,.lang-menu{transition:none !important}
     .header-dock.is-genie-hidden{transform:translateX(-50%) !important;filter:none !important;opacity:0 !important}
   }
 
@@ -736,7 +737,14 @@ textarea { resize: vertical; }
   .quote-glass:hover{transform:translateY(-3px) scale(1.004);border-color:rgb(var(--color-brand)/.6);box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 20px 42px -10px rgb(var(--color-brand)/.14)}
 
   /* Menú móvil flotante */
-  .header-dock #mobile-nav{position:absolute;top:calc(100% + .5rem);left:0;right:0;border-radius:1.25rem;border:1px solid rgb(var(--color-line));background:rgb(var(--color-panel)/.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 20px 40px -15px rgba(0,0,0,.25)}
+  .header-dock #mobile-nav{position:absolute;top:calc(100% + var(--header-dropdown-gap,.75rem));left:0;right:0;border-radius:1.35rem;padding:.45rem;border:1px solid rgb(var(--color-line));background:linear-gradient(145deg,rgb(var(--color-panel)/.85) 0%,rgb(var(--color-bg)/.75) 100%);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 20px 44px -12px rgba(0,0,0,.28);opacity:0;visibility:hidden;pointer-events:none;transform:translateY(-.4rem) scale(.98);transform-origin:top center;transition:opacity 220ms var(--ease-editorial),transform 260ms var(--ease-editorial),visibility 0s linear 260ms}
+  html.light .header-dock #mobile-nav{background:linear-gradient(145deg,rgba(255,255,255,.94) 0%,rgba(246,241,232,.82) 100%);border-color:rgba(228,222,208,.92);box-shadow:inset 0 1px 0 rgba(255,255,255,.95),0 18px 40px -12px rgba(50,40,25,.09)}
+  .header-dock #mobile-nav.is-open{opacity:1;visibility:visible;pointer-events:auto;transform:translateY(0) scale(1);transition:opacity 220ms var(--ease-editorial),transform 260ms var(--ease-editorial),visibility 0s}
+  .header-dock #mobile-nav a{display:flex;align-items:center;padding:.75rem 1rem;border-radius:.875rem;font-size:.9rem;font-weight:500;letter-spacing:-.01em;color:rgb(var(--color-muted));transition:color 180ms var(--ease-editorial),background-color 180ms var(--ease-editorial),transform 150ms var(--ease-editorial);will-change:transform}
+  .header-dock #mobile-nav a[hidden]{display:none !important}
+  .header-dock #mobile-nav a:hover,.header-dock #mobile-nav a:focus-visible{color:rgb(var(--color-text));background:rgb(var(--color-line)/.45)}
+  html.light .header-dock #mobile-nav a:hover,html.light .header-dock #mobile-nav a:focus-visible{background:rgba(228,222,208,.5)}
+  .header-dock #mobile-nav a:active{transform:scale(0.98)}
 
 
   /* Liquid glass para el bloque de total y precio */
@@ -758,12 +766,12 @@ textarea { resize: vertical; }
   .lang-trigger-code{font:600 .72rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.06em;text-transform:uppercase;color:rgb(var(--color-text))}
   .lang-chevron{width:12px;height:12px;flex-shrink:0;color:rgb(var(--color-muted));transition:transform 260ms var(--ease-editorial),color 220ms var(--ease-editorial)}
   .lang-trigger[aria-expanded="true"] .lang-chevron{transform:rotate(180deg);color:rgb(var(--color-text))}
-  .lang-menu{position:absolute;right:0;top:calc(100% + .6rem);width:11.75rem;padding:.375rem;border-radius:1rem;z-index:50;
+  .lang-menu{position:absolute;right:0;top:calc(100% + 0.625rem + var(--header-dropdown-gap,.75rem));width:11.75rem;padding:.375rem;border-radius:1rem;z-index:50;
     border:1px solid rgb(var(--color-brand)/.28);background:linear-gradient(155deg,rgb(var(--color-panel)/.96),rgb(var(--color-bg)/.94));
-    backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:var(--shadow-panel),inset 0 1px 0 rgb(255 255 255/.05);
+    backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);box-shadow:var(--shadow-panel),inset 0 1px 0 rgb(255 255 255/.08);
     opacity:0;visibility:hidden;pointer-events:none;transform:translateY(-.4rem) scale(.96);transform-origin:top right;
     transition:opacity 220ms var(--ease-editorial),transform 260ms var(--ease-editorial),visibility 0s linear 260ms}
-  html.light .lang-menu{background:linear-gradient(155deg,rgb(var(--color-bg)/.97),rgb(var(--color-panel)/.88));border-color:rgb(var(--color-brand)/.35);box-shadow:var(--shadow-panel),inset 0 1px 0 rgb(255 255 255/.85)}
+  html.light .lang-menu{background:linear-gradient(155deg,rgba(255,255,255,.95),rgba(246,241,232,.88));border-color:rgb(var(--color-brand)/.35);box-shadow:var(--shadow-panel),inset 0 1px 0 rgb(255 255 255/.95)}
   .lang-menu.is-open{opacity:1;visibility:visible;pointer-events:auto;transform:translateY(0) scale(1);transition:opacity 220ms var(--ease-editorial),transform 260ms var(--ease-editorial),visibility 0s}
   .lang-track{position:relative;display:flex;flex-direction:column;gap:.25rem}
   .lang-glider{position:absolute;left:0;right:0;top:0;height:2.25rem;border-radius:.625rem;pointer-events:none;z-index:0;
@@ -917,10 +925,10 @@ textarea { resize: vertical; }
       </div>
     </div>
 
-    <div id="mobile-nav" class="md:hidden hidden px-6 py-4 flex flex-col gap-3 text-sm">
-      <a href="#planes" data-section-target="planes" class="lang-trans lowercase text-muted hover:text-paper py-1" data-i18n="nav-planes">servicios</a>
-      <a href="#sobre-nosotros" data-section-target="sobre-nosotros" class="lang-trans lowercase text-muted hover:text-paper py-1" data-i18n="nav-about">sobre nosotros</a>
-      <a href="#testimonios" data-section-target="testimonios" hidden class="lang-trans lowercase text-muted hover:text-paper py-1" data-i18n="nav-testimonials">testimonios</a>
+    <div id="mobile-nav" inert class="md:hidden flex flex-col gap-1 text-sm">
+      <a href="#planes" data-section-target="planes" class="lang-trans lowercase" data-i18n="nav-planes">servicios</a>
+      <a href="#sobre-nosotros" data-section-target="sobre-nosotros" class="lang-trans lowercase" data-i18n="nav-about">sobre nosotros</a>
+      <a href="#testimonios" data-section-target="testimonios" hidden class="lang-trans lowercase" data-i18n="nav-testimonials">testimonios</a>
     </div>
   </header>
 
@@ -1808,6 +1816,7 @@ textarea { resize: vertical; }
     };
     function toggleLangDropdown(force, focusActive) {
       const open = force ?? !langDropdown.classList.contains('is-open');
+      if (open) toggleMobileMenu(false);
       langDropdown.classList.toggle('is-open', open);
       if (open) langDropdown.removeAttribute('inert');
       else langDropdown.setAttribute('inert', '');
@@ -1824,6 +1833,7 @@ textarea { resize: vertical; }
     });
     document.addEventListener('click', (e) => {
       if (!langDropdown.contains(e.target) && !langToggle.contains(e.target)) toggleLangDropdown(false);
+      if (!mobileNav.contains(e.target) && !mobileMenuToggle.contains(e.target)) toggleMobileMenu(false);
     });
     langDropdown.addEventListener('mouseleave', () => setLangGlider(currentLang));
     langDropdown.addEventListener('focusout', (e) => {
@@ -1848,11 +1858,14 @@ textarea { resize: vertical; }
     });
 
     function toggleMobileMenu(force) {
-      const open = force ?? mobileNav.classList.contains('hidden');
-      mobileNav.classList.toggle('hidden', !open);
+      const open = force ?? !mobileNav.classList.contains('is-open');
+      if (open) toggleLangDropdown(false);
+      mobileNav.classList.toggle('is-open', open);
+      if (open) mobileNav.removeAttribute('inert');
+      else mobileNav.setAttribute('inert', '');
       mobileMenuToggle.setAttribute('aria-expanded', String(open));
     }
-    mobileMenuToggle.addEventListener('click', () => toggleMobileMenu());
+    mobileMenuToggle.addEventListener('click', (e) => { e.stopPropagation(); toggleMobileMenu(); });
     mobileNav.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => toggleMobileMenu(false)));
 
     function updateLangDropdownUI() {
@@ -2645,7 +2658,7 @@ textarea { resize: vertical; }
 
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
-        if (!mobileNav.classList.contains('hidden')) { toggleMobileMenu(false); mobileMenuToggle.focus(); return; }
+        if (mobileNav.classList.contains('is-open')) { toggleMobileMenu(false); mobileMenuToggle.focus(); return; }
         if (langDropdown.classList.contains('is-open')) { toggleLangDropdown(false); langToggle.focus(); return; }
         const m = modals.find((x) => x.isOpen());
         if (m) { m.close(); return; }
