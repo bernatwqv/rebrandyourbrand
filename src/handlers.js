@@ -46,6 +46,7 @@ async function handleVerify(request, env, ctx, url) {
       plan,
       lang: L,
       messages: data.messages,
+      domain: data.domain,
     });
     data.projectToken = proj.token;
   }
@@ -1495,9 +1496,11 @@ async function handleProject(request, env, url) {
       }
 
       const nowIso = new Date().toISOString();
+      let createdMatItem = null;
+      let createdRefItem = null;
 
       if (hasMaterial) {
-        const matItem = {
+        createdMatItem = {
           id: crypto.randomUUID().replace(/-/g, "").slice(0, 12),
           createdAt: nowIso,
           domain,
@@ -1509,7 +1512,7 @@ async function handleProject(request, env, url) {
           fileId: materialsFileId,
           fileSize: materialsFileSize,
         };
-        proj.materialsList.push(matItem);
+        proj.materialsList.push(createdMatItem);
         if (!proj.onboarding) {
           proj.onboarding = {
             domain: domain || "",
@@ -1521,7 +1524,7 @@ async function handleProject(request, env, url) {
       }
 
       if (hasReference) {
-        const refItem = {
+        createdRefItem = {
           id: crypto.randomUUID().replace(/-/g, "").slice(0, 12),
           createdAt: nowIso,
           url: referenceUrl,
@@ -1531,8 +1534,16 @@ async function handleProject(request, env, url) {
           fileId: referenceFileId,
           fileSize: referenceFileSize,
         };
-        proj.referencesList.push(refItem);
+        proj.referencesList.push(createdRefItem);
       }
+
+      proj.lastAdded = {
+        matId: createdMatItem?.id || null,
+        matFileId: createdMatItem?.fileId || null,
+        refId: createdRefItem?.id || null,
+        refFileId: createdRefItem?.fileId || null,
+        timestamp: Date.now(),
+      };
 
       await env.LEADS_KV.put(`project:${token}`, JSON.stringify(proj));
 
@@ -1579,18 +1590,52 @@ async function handleProject(request, env, url) {
         ).catch((e) => console.error("materials email failed:", e?.message));
       }
 
-      const noticeText = T.actionRegisteredNotice || "aviso: esta acción ya ha quedado registrada en el sistema y nuestro equipo ha recibido la notificación para continuar con el trabajo.";
-      const succ = T.obSuccess || ["¡enviado correctamente!", "materiales registrados con éxito", "hemos recibido tus materiales y referencias correctamente y nuestro equipo los revisará para incorporarlos al proyecto."];
-      return htmlResponse(
-        page(succ[0], succ[1], succ[2], {
-          lang: L,
-          eyebrow: T.obEyebrow,
-          html: `<div class="notice-box"><p>${esc(noticeText)}</p></div><a class="btn" href="${esc(projectPageUrl)}">${esc(PG[L].common.openTracker)}</a>`,
-          footerUrl: projectPageUrl,
-          footerLabel: PG[L].common.openTracker,
-        }),
-        200
-      );
+      return redirectTo(buildUrl("/proyecto", { token, undo: "1" }));
+    }
+
+    if (op === "undo_onboarding") {
+      if (!proj.paid) return redirectTo(projectPageUrl);
+      if (proj.lastAdded) {
+        const { matId, matFileId, refId, refFileId } = proj.lastAdded;
+        if (matId && Array.isArray(proj.materialsList)) {
+          proj.materialsList = proj.materialsList.filter((m) => m.id !== matId);
+        }
+        if (matFileId) {
+          await env.LEADS_KV.delete(`file:${token}:mat:${matFileId}`).catch(() => {});
+        }
+        if (refId && Array.isArray(proj.referencesList)) {
+          proj.referencesList = proj.referencesList.filter((r) => r.id !== refId);
+        }
+        if (refFileId) {
+          await env.LEADS_KV.delete(`file:${token}:ref:${refFileId}`).catch(() => {});
+        }
+        if (proj.onboarding && (!Array.isArray(proj.materialsList) || proj.materialsList.length === 0)) {
+          delete proj.onboarding;
+        }
+        proj.lastAdded = null;
+        await env.LEADS_KV.put(`project:${token}`, JSON.stringify(proj));
+
+        if (env.RESEND_API_KEY) {
+          await resendSend(
+            env,
+            {
+              to: ["hola@rebrandyourbrand.es"],
+              reply_to: proj.clientEmail,
+              subject: `envío de materiales cancelado por el cliente — ${proj.brand}`,
+              ...renderEmail("es", {
+                paras: [
+                  `el cliente de ${bold(proj.brand)} ha deshecho y cancelado su último envío de materiales o referencias.`,
+                  `— cliente: ${bold(proj.clientEmail)}`,
+                  "el registro correspondiente ha sido eliminado del historial del proyecto.",
+                ],
+                secondaryLink: { label: "ver seguimiento del cliente", url: projectPageUrl },
+              }),
+            },
+            `undo-mat-${token}-${Date.now()}`
+          ).catch((e) => console.error("undo notification email failed:", e?.message));
+        }
+      }
+      return redirectTo(buildUrl("/proyecto", { token, undone: "1" }));
     }
 
     return redirectTo(projectPageUrl);
@@ -1649,8 +1694,33 @@ async function handleProject(request, env, url) {
     );
   }
 
+  const undoneBanner =
+    url.searchParams.get("undone") === "1"
+      ? `<div class="banner-ok">${esc(T.obUndoneBanner)}</div>`
+      : "";
+
   const bannerHtml =
-    url.searchParams.get("ob") === "1" ? `<div class="banner-ok">${esc(T.obSentBanner)}</div>` : "";
+    url.searchParams.get("ob") === "1"
+      ? `<div class="banner-ok">${esc(T.obSentBanner)}</div>`
+      : undoneBanner;
+
+  const undoHtml =
+    url.searchParams.get("undo") === "1" && proj.lastAdded && Date.now() - proj.lastAdded.timestamp < 60000
+      ? `
+      <div class="undo-bar-wrap">
+        <div class="undo-progress"><div class="undo-progress-fill"></div></div>
+        <div class="undo-bar-content">
+          <div class="undo-bar-text"><span class="undo-dot"></span><span>${esc(T.obUndoBanner)}</span></div>
+          <div class="undo-bar-actions">
+            <form method="POST" style="margin:0;padding:0;display:inline;">
+              <input type="hidden" name="op" value="undo_onboarding">
+              <button type="submit" class="btn-undo">${esc(T.obUndoBtn)}</button>
+            </form>
+            <a class="btn-dismiss" href="${esc(projectPageUrl)}">${esc(T.obDismissBtn)}</a>
+          </div>
+        </div>
+      </div>`
+      : "";
 
   if (checkAllServicesApproved(proj) && (!proj.finishedAt || !proj.reviewInvited || proj.status !== "done")) {
     await finalizeProjectClosure(env, proj, token);
@@ -1878,7 +1948,8 @@ async function handleProject(request, env, url) {
     ${reviewCardHtml}
     ${materialsBox}
     ${referencesBox}
-    ${addFormHtml}`;
+    ${addFormHtml}
+    ${undoHtml}`;
 
   return htmlResponse(
     page(`${T.title} — ${proj.brand}`, T.heading, "", {

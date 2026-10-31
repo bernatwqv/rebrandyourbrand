@@ -398,6 +398,110 @@ button.secondary:hover,.btn.secondary:hover,button.no:hover{
   color:#17171A;
   text-align:left;
 }
+.undo-bar-wrap{
+  position:fixed;
+  bottom:1.25rem;
+  left:50%;
+  transform:translateX(-50%);
+  width:calc(100% - 2rem);
+  max-width:480px;
+  z-index:100;
+  background:#17171A;
+  color:#F5F2EA;
+  border:1px solid #232226;
+  border-radius:14px;
+  box-shadow:0 16px 40px rgba(0,0,0,.28);
+  overflow:hidden;
+  animation:undoDismiss .4s cubic-bezier(.16,1,.3,1) 15s forwards;
+}
+@keyframes undoDismiss{
+  0%,90%{opacity:1;transform:translate(-50%,0);pointer-events:auto;}
+  100%{opacity:0;transform:translate(-50%,20px);pointer-events:none;visibility:hidden;}
+}
+.undo-progress{
+  height:3px;
+  background:rgba(255,255,255,.12);
+  width:100%;
+  overflow:hidden;
+}
+.undo-progress-fill{
+  height:100%;
+  background:#E8A33D;
+  width:100%;
+  animation:undoCountdown 15s linear forwards;
+}
+@keyframes undoCountdown{
+  from{width:100%;}
+  to{width:0%;}
+}
+.undo-bar-content{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:.75rem;
+  padding:.85rem 1rem;
+}
+.undo-bar-text{
+  display:flex;
+  align-items:center;
+  gap:.5rem;
+  font-size:.82rem;
+  font-weight:500;
+  color:#F5F2EA;
+  text-transform:lowercase;
+  min-width:0;
+  flex:1;
+}
+.undo-bar-text span.undo-dot{
+  width:7px;
+  height:7px;
+  border-radius:999px;
+  background:#E8A33D;
+  flex-shrink:0;
+}
+.undo-bar-actions{
+  display:flex;
+  align-items:center;
+  gap:.5rem;
+  flex-shrink:0;
+}
+.btn-undo{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  background:#E8A33D;
+  color:#0A0A0C;
+  border:1px solid #E8A33D;
+  border-radius:8px;
+  padding:.4rem .75rem;
+  font:600 .76rem/1.2 inherit;
+  text-transform:lowercase;
+  cursor:pointer;
+  transition:background .2s,border-color .2s;
+}
+.btn-undo:hover{
+  background:#F0BE82;
+  border-color:#F0BE82;
+}
+.btn-dismiss{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  background:transparent;
+  color:#9C9BA3;
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:8px;
+  padding:.4rem .75rem;
+  font:500 .76rem/1.2 inherit;
+  text-decoration:none;
+  text-transform:lowercase;
+  cursor:pointer;
+  transition:color .2s,border-color .2s;
+}
+.btn-dismiss:hover{
+  color:#F5F2EA;
+  border-color:rgba(255,255,255,.35);
+}
 .foot{
   margin-top:1.25rem;
   display:flex;

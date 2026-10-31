@@ -22,21 +22,25 @@ const ASK = {
     brand: "¿Cómo se llama tu marca o proyecto?",
     services: "¿Qué necesitas: logotipo (400 €, incluye paleta de empresa de regalo), paleta de empresa (100 €), web (400 €) o una combinación?",
     email: "¿A qué correo electrónico te enviamos la verificación?",
+    domain: "¿Cuál es tu dominio o web actual (o cuál te gustaría registrar)?",
   },
   ca: {
     brand: "Com es diu la teva marca o projecte?",
     services: "Què necessites: logotip (400 €, inclou paleta d'empresa de regal), paleta d'empresa (100 €), web (400 €) o una combinació?",
     email: "A quin correu electrònic t'enviem la verificació?",
+    domain: "Quin és el teu domini o web actual (o quin t'agradaria registrar)?",
   },
   eu: {
     brand: "Nola du izena zure marka edo proiektuak?",
     services: "Zer behar duzu: logotipoa (400 €, enpresaren paleta opari barne), enpresaren paleta (100 €), webgunea (400 €) edo konbinazio bat?",
     email: "Ze helbide elektronikotara bidaliko dizugu egiaztapena?",
+    domain: "Zein da zure domeinua edo egungo webgunea (edo zein erregistratu nahiko zenuke)?",
   },
   en: {
     brand: "What is your brand or project called?",
     services: "What do you need: logo (€400, includes complimentary company palette), company color palette (€100), website (€400) or a combination?",
     email: "Which email address should we send the verification to?",
+    domain: "What is your domain or current website (or which one would you like to register)?",
   },
 };
 
@@ -44,6 +48,7 @@ const SUMMARY = {
   es: {
     title: "Resumen de tu propuesta:",
     brand: "Marca",
+    domain: "Dominio",
     email: "Correo",
     services: "Servicios",
     total: "Inversión total",
@@ -54,6 +59,7 @@ const SUMMARY = {
   ca: {
     title: "Resum de la teva proposta:",
     brand: "Marca",
+    domain: "Domini",
     email: "Correu",
     services: "Serveis",
     total: "Inversió total",
@@ -64,6 +70,7 @@ const SUMMARY = {
   eu: {
     title: "Zure proposamenaren laburpena:",
     brand: "Marka",
+    domain: "Domeinua",
     email: "Posta elektronikoa",
     services: "Zerbitzuak",
     total: "Guztizko inbertsioa",
@@ -74,6 +81,7 @@ const SUMMARY = {
   en: {
     title: "Summary of your proposal:",
     brand: "Brand",
+    domain: "Domain",
     email: "Email",
     services: "Services",
     total: "Total investment",
@@ -85,7 +93,7 @@ const SUMMARY = {
 
 const eur = (n, lang) => (lang === "en" ? `€${n}` : `${n} €`);
 
-function buildSummary(lang, { brand, email, plan }) {
+function buildSummary(lang, { brand, email, plan, domain }) {
   const l = pickLang(lang);
   const s = SUMMARY[l] || SUMMARY.es;
   const hasLogo = plan.ids.includes("logo");
@@ -99,6 +107,7 @@ function buildSummary(lang, { brand, email, plan }) {
   return [
     s.title,
     `— ${s.brand}: ${brand}`,
+    domain ? `— ${s.domain}: ${domain}` : null,
     `— ${s.email}: ${email}`,
     `— ${s.services}:`,
     ...items,
@@ -107,7 +116,7 @@ function buildSummary(lang, { brand, email, plan }) {
     s.legal,
     "",
     s.ask,
-  ].join("\n");
+  ].filter(Boolean).join("\n");
 }
 
 // Textos de los correos al cliente, en orden estricto es / ca / eu / en
@@ -196,6 +205,20 @@ const EM = {
       cancelLine: "dar de baja la renovación anual en un clic",
       note: "si decides no renovar, no se realizará ningún cargo adicional y el dominio y la web dejarán de estar activos al finalizar el periodo vigente.",
     },
+    infra: {
+      subject: (br) => `información sobre la infraestructura anual de tu web — ${br}`,
+      hello: "hola,",
+      intro: (br) => `al incluir el desarrollo web en tu proyecto ${bold(br)}, queremos darte total transparencia sobre cómo funciona la cuota anual de infraestructura técnica (100 €/año a partir del segundo año).`,
+      coveredTitle: bold("qué cubre exactamente la cuota de 100 €/año:"),
+      itemDomain: "— registro y renovación anual de tu dominio propio a tu nombre",
+      itemEmail: "— buzón y servicio de correo electrónico corporativo profesional",
+      itemSsl: "— gestión de dns y certificados de seguridad ssl de alta disponibilidad",
+      itemEdge: "— alojamiento y despliegue continuo en red global edge de máxima velocidad",
+      scopeNote: "alcance estricto: esta cuota garantiza la operatividad y renovaciones técnicas de tu web. no incluye mantenimiento de contenidos, textos, fotografías ni nuevas secciones tras la entrega (los ajustes durante la creación incluyen 2 rondas de revisión gratuitas por fase; cualquier cambio extra posterior se factura a 100 € por ronda).",
+      cancelNote: "sin sorpresas ni permanencias: 30 días antes de cada vencimiento anual recibirás un aviso por correo con el enlace de pago y un botón directo de baja en un clic. si decides no renovar, no habrá ningún cobro adicional.",
+      cta: "ver seguimiento de mi proyecto",
+      note: "tienes las condiciones completas disponibles en rebrandyourbrand.es/#terminos.",
+    },
   },
   ca: {
     verify: {
@@ -280,6 +303,20 @@ const EM = {
       ctaPay: "abonar renovació anual",
       cancelLine: "donar de baixa la renovació anual en un clic",
       note: "si decideixes no renovar, no es farà cap càrrec addicional i el domini i la web deixaran d'estar actius en finalitzar el període vigent.",
+    },
+    infra: {
+      subject: (br) => `informació sobre la infraestructura anual del teu web — ${br}`,
+      hello: "hola,",
+      intro: (br) => `en incloure el desenvolupament web al teu projecte ${bold(br)}, volem donar-te total transparència sobre com funciona la quota anual d'infraestructura tècnica (100 €/any a partir del segon any).`,
+      coveredTitle: bold("què cobreix exactament la quota de 100 €/any:"),
+      itemDomain: "— registre i renovació anual del teu domini propi al teu nom",
+      itemEmail: "— bústia i servei de correu electrònic corporatiu professional",
+      itemSsl: "— gestió de dns i certificats de seguretat ssl d'alta disponibilitat",
+      itemEdge: "— allotjament i desplegament continu en xarxa global edge de màxima velocitat",
+      scopeNote: "abast estricte: aquesta quota garanteix l'operativitat i renovacions tècniques del teu web. no inclou manteniment de continguts, textos, fotografies ni noves seccions després de l'entrega (els ajustos durant la creació inclouen 2 rondes de revisió gratuïtes per fase; qualsevol canvi extra posterior es factura a 100 € per ronda).",
+      cancelNote: "sense sorpreses ni permanències: 30 dies abans de cada venciment anual rebràs un avís per correu amb l'enllaç de pagament i un botó directe de baixa en un clic. si decideixes no renovar, no hi haurà cap cobrament addicional.",
+      cta: "veure seguiment del meu projecte",
+      note: "tens les condicions completes disponibles a rebrandyourbrand.es/#terminos.",
     },
   },
   eu: {
@@ -366,6 +403,20 @@ const EM = {
       cancelLine: "utzi bertan behera urteko berritzea klik bakarrean",
       note: "ez berritzea erabakitzen baduzu, ez da kargu gehigarririk egingo eta domeinuak zein webguneak aktibo egoteari utziko diote indarrean dagoen epea amaitzean.",
     },
+    infra: {
+      subject: (br) => `zure webguneko urteko azpiegiturari buruzko informazioa — ${br}`,
+      hello: "kaixo,",
+      intro: (br) => `zure ${bold(br)} proiektuan web garapena sartzean, gardentasun osoa eman nahi dizugu urteko azpiegitura teknikoaren kuotak nola funtzionatzen duen jakiteko (100 €/urte bigarren urtetik aurrera).`,
+      coveredTitle: bold("zer estaltzen du zehazki 100 €/urteko kuotak:"),
+      itemDomain: "— zure izenean dagoen domeinu propioaren erregistroa eta urteko berritzea",
+      itemEmail: "— posta elektroniko korporatibo profesionalaren zerbitzua",
+      itemSsl: "— dns kudeaketa eta eskuragarritasun handiko ssl segurtasun-ziurtagiriak",
+      itemEdge: "— ostatatzea eta etengabeko hedapena abiadura handiko edge sare globalean",
+      scopeNote: "esparru zorrotza: kuota honek zure webgunearen eraginkortasun teknikoa eta berritzeak soilik bermatzen ditu. ez du barne hartzen edukien, testuen, argazkien edo atal berrien mantentzerik entregatu ondoren (sortze-fasean 2 doako berrikuspen-txanda sartzen dira faseko; ondorengo aparteko aldaketa bakoitza 100 €-ko prezio finkoan fakturatzen da).",
+      cancelNote: "ustekaberik eta iraunkortasunik gabe: urteko iraungitze bakoitza baino 30 egun lehenago ohar bat jasoko duzu postaz ordainketa-estekarekin eta klik bakarreko baja-botoiarekin. berritzea ez baduzu nahi, ez da kargu gehigarririk egingo.",
+      cta: "ikusi nire proiektuaren jarraipena",
+      note: "baldintza osoak edozein unetan kontsulta ditzakezu hemen: rebrandyourbrand.es/#terminos.",
+    },
   },
   en: {
     verify: {
@@ -450,6 +501,20 @@ const EM = {
       ctaPay: "pay annual renewal",
       cancelLine: "cancel annual renewal in one click",
       note: "if you choose not to renew, no extra charges will be made and the domain and website will stop being active at the end of the current period.",
+    },
+    infra: {
+      subject: (br) => `information about your website's annual infrastructure — ${br}`,
+      hello: "hello,",
+      intro: (br) => `since your project ${bold(br)} includes web development, we want to provide total transparency on how the annual technical infrastructure fee works (100 €/year starting in year two).`,
+      coveredTitle: bold("what the 100 €/year fee strictly covers:"),
+      itemDomain: "— annual registration and renewal of your custom domain in your name",
+      itemEmail: "— professional corporate email inbox and service",
+      itemSsl: "— dns management and high-availability ssl security certificates",
+      itemEdge: "— continuous hosting and deployment on a top-speed global edge network",
+      scopeNote: "strict scope: this fee guarantees technical uptime and renewals. it does not include content, text, photo maintenance or new sections after delivery (adjustments during creation include 2 free revision rounds per phase; any subsequent extra change is billed at a fixed 100 € per round).",
+      cancelNote: "no surprises and zero lock-in: 30 days before each annual renewal you will receive an email reminder with the payment link and a one-click cancellation button. if you choose not to renew, no additional charges will occur.",
+      cta: "view project tracking",
+      note: "full terms and conditions are always available at rebrandyourbrand.es/#terminos.",
     },
   },
 };
@@ -626,6 +691,10 @@ const PG = {
       obSubmit: "enviar materiales al estudio",
       obSentBanner: "materiales recibidos correctamente. nuestro equipo ya tiene todo registrado.",
       obSentTitle: "materiales iniciales enviados",
+      obUndoBanner: "materiales añadidos correctamente",
+      obUndoBtn: "deshacer",
+      obDismissBtn: "aceptar",
+      obUndoneBanner: "acción deshecha: el último envío de materiales ha sido cancelado con éxito.",
       obLblSocials: "web o redes",
       obLblDomain: "dominio",
       obLblMaterials: "carpeta o notas",
@@ -767,6 +836,10 @@ const PG = {
       obSubmit: "enviar materials a l'estudi",
       obSentBanner: "materials rebuts correctament. el nostre equip ja ho té tot registrat.",
       obSentTitle: "materials inicials enviats",
+      obUndoBanner: "materials afegits correctament",
+      obUndoBtn: "desfer",
+      obDismissBtn: "d'acord",
+      obUndoneBanner: "acció desfeta: l'últim enviament de materials s'ha descartat amb èxit.",
       obLblSocials: "web o xarxes",
       obLblDomain: "domini",
       obLblMaterials: "carpeta o notes",
@@ -908,6 +981,10 @@ const PG = {
       obSubmit: "bidali materialak estudiora",
       obSentBanner: "materialak behar bezala jaso dira. gure taldeak dena erregistratuta dauka jada.",
       obSentTitle: "bidalitako hasierako materialak",
+      obUndoBanner: "materialak behar bezala gehitu dira",
+      obUndoBtn: "desegin",
+      obDismissBtn: "ados",
+      obUndoneBanner: "ekintza desegin da: azken material-bidalketa bertan behera utzi da.",
       obLblSocials: "webgunea edo sareak",
       obLblDomain: "domeinua",
       obLblMaterials: "karpeta edo oharrak",
@@ -1049,6 +1126,10 @@ const PG = {
       obSubmit: "send materials to studio",
       obSentBanner: "materials received. our team has everything logged.",
       obSentTitle: "submitted kickoff materials",
+      obUndoBanner: "materials added successfully",
+      obUndoBtn: "undo",
+      obDismissBtn: "dismiss",
+      obUndoneBanner: "action undone: the latest submission was successfully discarded.",
       obLblSocials: "web or social",
       obLblDomain: "domain",
       obLblMaterials: "folder or notes",

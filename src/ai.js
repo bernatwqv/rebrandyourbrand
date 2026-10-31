@@ -52,24 +52,49 @@ function findEmail(chatMessages) {
   return "";
 }
 
-const missingOf = (brand, email, plan) =>
-  [!brand && "brand", !plan && "services", !email && "email"].filter(Boolean);
+const DOMAIN_FIND = /\b(?:https?:\/\/)?(?:www\.)?([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.[a-z]{2,}(?:\.[a-z]{2,})?)\b/i;
+
+function findDomain(chatMessages, fallback = "") {
+  if (fallback && typeof fallback === "string") {
+    const trimmed = fallback.trim();
+    const m = trimmed.match(DOMAIN_FIND);
+    if (m) return m[1].toLowerCase();
+    if (trimmed.length > 0) return trimmed.toLowerCase();
+  }
+  for (let i = chatMessages.length - 1; i >= 0; i--) {
+    if (chatMessages[i].role !== "user") continue;
+    const m = chatMessages[i].text.match(DOMAIN_FIND);
+    if (m) return m[1].toLowerCase();
+  }
+  return "";
+}
+
+const missingOf = (brand, email, plan, domain) =>
+  [
+    !brand && "brand",
+    !plan && "services",
+    Boolean(plan?.ids?.includes("web") && !domain) && "domain",
+    !email && "email",
+  ].filter(Boolean);
 
 function buildSystemInstruction(lang, ctx) {
-  const { plan, brand, email, denied } = ctx;
+  const { plan, brand, email, domain, denied } = ctx;
   const langName = LANG_NAMES[pickLang(lang)] || LANG_NAMES.es;
 
   const servicesBlock = plan
     ? `SERVICIOS ELEGIDOS: ${svcLabel(plan.ids, "es")} (${plan.total} € en total).`
     : `SERVICIOS: sin elegir todavía. El cliente no ha usado el selector de la web, así que quizá no conoce todas las opciones.`;
-  const missing = missingOf(brand, email, plan);
+  const domainBlock = plan?.ids?.includes("web")
+    ? (domain ? `DOMINIO WEB: ya conocido (${domain}).` : `DOMINIO WEB: estrictamente OBLIGATORIO al contratar la web. Aún falta.`)
+    : "";
+  const missing = missingOf(brand, email, plan, domain);
   const deniedBlock = denied
-    ? `\nEl cliente acaba de RECHAZAR el resumen. Pregúntale con amabilidad qué quiere cambiar (marca, servicios o correo). No repitas el resumen.`
+    ? `\nEl cliente acaba de RECHAZAR el resumen. Pregúntale con amabilidad qué quiere cambiar (marca, servicios, dominio o correo). No repitas el resumen.`
     : "";
 
   return `Eres Brandi, Directora de Arte e Inteligencia Creativa en rebrandyourbrand. Idioma obligatorio de respuesta: ${langName}.
 
-Tu objetivo es entender la marca del cliente, dar una breve pincelada estratégica y reunir tres datos para cerrar la propuesta: MARCA, SERVICIOS y CORREO.
+Tu objetivo es entender la marca del cliente, dar una breve pincelada estratégica y reunir los datos necesarios para cerrar la propuesta: MARCA, SERVICIOS${plan?.ids?.includes("web") ? ", DOMINIO" : ""} y CORREO.
 
 ESTILO:
 - No actúes como un bot de atención al cliente. Eres una consultora de marca directa, aguda y conceptual.
@@ -80,32 +105,35 @@ No hay planes cerrados: el cliente elige solo los servicios que necesita y paga 
 ${CATALOG}
 El logotipo cuesta 400 € e incluye la paleta de empresa de regalo (valorada en 100 €). La paleta de empresa en solitario cuesta 100 €. La web cuesta 400 € de desarrollo (más 100 €/año de infraestructura técnica).
 El precio total de creación es la suma de los servicios elegidos (con la paleta a 0 € si se contrata el logotipo: Logotipo + Paleta = 400 €, Logotipo + Paleta + Web = 800 €, Paleta + Web = 500 €). No hay otros descuentos.
-Si el cliente elige o pregunta por la web (400 € de pago único de desarrollo), aclara si surge la duda que conlleva una cuota obligatoria de 100 €/año exclusivamente por infraestructura técnica gestionada (dominio, correo corporativo, DNS, certificados SSL y despliegue edge): no incluye cambios de contenido, diseño ni nuevas secciones tras la entrega (cada fase incluye 2 rondas de revisión gratuitas durante la creación; cualquier ronda de ajustes extra o cambio posterior tiene un precio cerrado de 100 €).
+Si el cliente elige o pregunta por la web (400 € de pago único de desarrollo), es estrictamente obligatorio conocer su dominio o URL actual (o qué dominio desea registrar) antes de cerrar la propuesta, y aclara si surge la duda que conlleva una cuota obligatoria de 100 €/año exclusivamente por infraestructura técnica gestionada (dominio, correo corporativo, DNS, certificados SSL y despliegue edge): no incluye cambios de contenido, diseño ni nuevas secciones tras la entrega (cada fase incluye 2 rondas de revisión gratuitas durante la creación; cualquier ronda de ajustes extra o cambio posterior tiene un precio cerrado de 100 €).
 En los proyectos web, la página entregada incluye una firma discreta del estudio en el pie de página (footer) con enlace a rebrandyourbrand.es y el estudio puede mostrar el trabajo en su portfolio como referencia profesional.
 
 ESTADO ACTUAL DE LA CONVERSACIÓN:
 - MARCA: ${brand ? `ya conocida (${brand})` : "pendiente"}
 - ${servicesBlock}
-- CORREO: ${email ? "ya recibido" : "pendiente"}
+${domainBlock ? `- ${domainBlock}\n` : ""}- CORREO: ${email ? "ya recibido" : "pendiente"}
 - Datos que aún faltan (por prioridad): ${missing.length ? missing.join(", ") : "ninguno"}.${deniedBlock}
 
 CÓMO CONDUCIR LA CONVERSACIÓN:
-1. Primero incorpora lo que el cliente acaba de decir en su último mensaje (marca, servicios, correo).
-2. Después pregunta por el PRIMER dato que siga faltando, siguiendo el orden: marca -> servicios -> correo.
+1. Primero incorpora lo que el cliente acaba de decir en su último mensaje (marca, servicios, dominio, correo).
+2. Después pregunta por el PRIMER dato que siga faltando, siguiendo el orden: marca -> servicios -> dominio (si incluye web) -> correo.
 3. Si faltan los SERVICIOS: pregunta qué necesita resolver primero y orienta según su caso (por ejemplo, un logotipo que no se ve bien en pequeño, colores incoherentes, o ninguna web). Menciona los tres servicios y que puede combinarlos. No presiones ni des por hecho ninguno.
 4. Si ya hay servicios elegidos, no vuelvas a preguntar por ellos salvo que el cliente quiera cambiarlos. Puedes sugerir en una frase un servicio complementario, una sola vez.
-5. Si falta el CORREO: pídelo diciendo que es para enviarle la verificación y el acceso a su proyecto y pago seguro.
-6. Cuando ya no falte nada NO escribas tú el resumen ni digas que has enviado ningún correo: el sistema mostrará el resumen automáticamente. Limítate a decir en una frase que ya lo tienes todo.
+5. Si ha elegido web y falta el DOMINIO: pídelo de forma clara (cuál es su dominio o web actual, o cuál le gustaría registrar para el proyecto).
+6. Si falta el CORREO: pídelo diciendo que es para enviarle la verificación y el acceso a su proyecto y pago seguro.
+7. Cuando ya no falte nada NO escribas tú el resumen ni digas que has enviado ningún correo: el sistema mostrará el resumen automáticamente. Limítate a decir en una frase que ya lo tienes todo.
 - Habla únicamente de los servicios de rebrandyourbrand. Nunca inventes precios ni porcentajes distintos de los oficiales.
 
 FORMATO DE SALIDA (JSON estricto, sin texto fuera del JSON):
 {
   "reply": "tu respuesta al cliente",
   "brand": "nombre de la marca del cliente, o null si aún no lo sabes",
+  "domain": "dominio indicado por el cliente (ej. mitienda.es), o null",
   "services": ["logo", "paleta", "web"] (solo los elegidos) | null
 }
 - "services": lista de ids elegidos por el cliente (valores posibles: "logo", "paleta", "web")${plan ? ` (ahora mismo: ${JSON.stringify(plan.ids)}; devuélvelo tal cual salvo que el cliente pida cambiarlo explícitamente)` : "; null mientras no los haya elegido claramente"}.
-- "brand": devuelve la marca ya conocida salvo que el cliente la cambie.`;
+- "brand": devuelve la marca ya conocida salvo que el cliente la cambie.
+- "domain": devuelve el dominio web indicado si el proyecto incluye web.`;
 }
 
 function parseModelJson(content) {

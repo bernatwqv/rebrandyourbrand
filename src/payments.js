@@ -24,7 +24,7 @@ const isStripeReceiptUrl = (u) =>
 
 const stripeLocaleFor = (lang) => (pickLang(lang) === "en" ? "en" : "es");
 
-async function createProjectRecord(env, { clientEmail, brand, plan, lang, messages }) {
+async function createProjectRecord(env, { clientEmail, brand, plan, lang, messages, domain }) {
   const safeBrand = brand || "proyecto";
   const projectToken = randomHex(32);
   const projectKey = `project:${projectToken}`;
@@ -33,10 +33,28 @@ async function createProjectRecord(env, { clientEmail, brand, plan, lang, messag
     .slice(-MAX_HISTORY_MESSAGES)
     .map((m) => ({ role: m.role, text: m.text.slice(0, 2000) }));
 
+  const nowIso = new Date().toISOString();
+  const cleanDomain = typeof domain === "string" ? domain.trim().slice(0, 200) : "";
+  const initialMaterials = cleanDomain
+    ? [
+        {
+          id: "init",
+          createdAt: nowIso,
+          domain: cleanDomain,
+          socials: "",
+          url: "",
+          fileUrl: "",
+          filename: "",
+          notes: "",
+        },
+      ]
+    : [];
+
   const projectData = {
     token: projectToken,
     brand: safeBrand,
     clientEmail,
+    domain: cleanDomain,
     lang: pickLang(lang),
     services: plan.ids,
     totalEur: plan.total,
@@ -44,8 +62,11 @@ async function createProjectRecord(env, { clientEmail, brand, plan, lang, messag
     paid: false,
     emailsSent: false,
     currentPhase: 1,
-    createdAt: new Date().toISOString(),
+    createdAt: nowIso,
     phases: newPhases(plan.ids),
+    materialsList: initialMaterials,
+    referencesList: [],
+    ...(cleanDomain ? { onboarding: { domain: cleanDomain, socials: "", materials: "", submittedAt: nowIso } } : {}),
   };
   await env.LEADS_KV.put(projectKey, JSON.stringify(projectData), {
     expirationTtl: PENDING_PROJECT_TTL_SECONDS,
@@ -551,6 +572,39 @@ async function processPaidSession(env, session, { fromWebhook = false } = {}) {
       );
       proj.clientNotified = true;
       dirty = true;
+
+      if (Array.isArray(proj.services) && proj.services.includes("web") && !proj.infraEmailSent) {
+        const inf = EM[lang].infra;
+        if (inf) {
+          await resendSend(
+            env,
+            {
+              to: [proj.clientEmail],
+              subject: inf.subject(proj.brand),
+              ...renderEmail(lang, {
+                paras: [
+                  inf.hello,
+                  inf.intro(bold(proj.brand)),
+                  lines(
+                    inf.coveredTitle,
+                    inf.itemDomain,
+                    inf.itemEmail,
+                    inf.itemSsl,
+                    inf.itemEdge
+                  ),
+                  inf.scopeNote,
+                  inf.cancelNote,
+                ],
+                cta: { label: inf.cta, url: trackingUrl },
+                note: inf.note,
+              }),
+            },
+            `infra-client-${token}`
+          ).catch((e) => console.error("infra email failed:", e?.message));
+          proj.infraEmailSent = true;
+          dirty = true;
+        }
+      }
     }
 
     if (!proj.adminNotified) {

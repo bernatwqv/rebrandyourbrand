@@ -371,21 +371,25 @@ const ASK = {
     brand: "¿Cómo se llama tu marca o proyecto?",
     services: "¿Qué necesitas: logotipo (400 €, incluye paleta de empresa de regalo), paleta de empresa (100 €), web (400 €) o una combinación?",
     email: "¿A qué correo electrónico te enviamos la verificación?",
+    domain: "¿Cuál es tu dominio o web actual (o cuál te gustaría registrar)?",
   },
   ca: {
     brand: "Com es diu la teva marca o projecte?",
     services: "Què necessites: logotip (400 €, inclou paleta d'empresa de regal), paleta d'empresa (100 €), web (400 €) o una combinació?",
     email: "A quin correu electrònic t'enviem la verificació?",
+    domain: "Quin és el teu domini o web actual (o quin t'agradaria registrar)?",
   },
   eu: {
     brand: "Nola du izena zure marka edo proiektuak?",
     services: "Zer behar duzu: logotipoa (400 €, enpresaren paleta opari barne), enpresaren paleta (100 €), webgunea (400 €) edo konbinazio bat?",
     email: "Ze helbide elektronikotara bidaliko dizugu egiaztapena?",
+    domain: "Zein da zure domeinua edo egungo webgunea (edo zein erregistratu nahiko zenuke)?",
   },
   en: {
     brand: "What is your brand or project called?",
     services: "What do you need: logo (€400, includes complimentary company palette), company color palette (€100), website (€400) or a combination?",
     email: "Which email address should we send the verification to?",
+    domain: "What is your domain or current website (or which one would you like to register)?",
   },
 };
 
@@ -393,6 +397,7 @@ const SUMMARY = {
   es: {
     title: "Resumen de tu propuesta:",
     brand: "Marca",
+    domain: "Dominio",
     email: "Correo",
     services: "Servicios",
     total: "Inversión total",
@@ -403,6 +408,7 @@ const SUMMARY = {
   ca: {
     title: "Resum de la teva proposta:",
     brand: "Marca",
+    domain: "Domini",
     email: "Correu",
     services: "Serveis",
     total: "Inversió total",
@@ -413,6 +419,7 @@ const SUMMARY = {
   eu: {
     title: "Zure proposamenaren laburpena:",
     brand: "Marka",
+    domain: "Domeinua",
     email: "Posta elektronikoa",
     services: "Zerbitzuak",
     total: "Guztizko inbertsioa",
@@ -423,6 +430,7 @@ const SUMMARY = {
   en: {
     title: "Summary of your proposal:",
     brand: "Brand",
+    domain: "Domain",
     email: "Email",
     services: "Services",
     total: "Total investment",
@@ -434,7 +442,7 @@ const SUMMARY = {
 
 const eur = (n, lang) => (lang === "en" ? `€${n}` : `${n} €`);
 
-function buildSummary(lang, { brand, email, plan }) {
+function buildSummary(lang, { brand, email, plan, domain }) {
   const l = pickLang(lang);
   const s = SUMMARY[l] || SUMMARY.es;
   const hasLogo = plan.ids.includes("logo");
@@ -448,6 +456,7 @@ function buildSummary(lang, { brand, email, plan }) {
   return [
     s.title,
     `— ${s.brand}: ${brand}`,
+    domain ? `— ${s.domain}: ${domain}` : null,
     `— ${s.email}: ${email}`,
     `— ${s.services}:`,
     ...items,
@@ -456,7 +465,7 @@ function buildSummary(lang, { brand, email, plan }) {
     s.legal,
     "",
     s.ask,
-  ].join("\n");
+  ].filter(Boolean).join("\n");
 }
 
 // Textos de los correos al cliente, en orden estricto es / ca / eu / en
@@ -545,6 +554,20 @@ const EM = {
       cancelLine: "dar de baja la renovación anual en un clic",
       note: "si decides no renovar, no se realizará ningún cargo adicional y el dominio y la web dejarán de estar activos al finalizar el periodo vigente.",
     },
+    infra: {
+      subject: (br) => `información sobre la infraestructura anual de tu web — ${br}`,
+      hello: "hola,",
+      intro: (br) => `al incluir el desarrollo web en tu proyecto ${bold(br)}, queremos darte total transparencia sobre cómo funciona la cuota anual de infraestructura técnica (100 €/año a partir del segundo año).`,
+      coveredTitle: bold("qué cubre exactamente la cuota de 100 €/año:"),
+      itemDomain: "— registro y renovación anual de tu dominio propio a tu nombre",
+      itemEmail: "— buzón y servicio de correo electrónico corporativo profesional",
+      itemSsl: "— gestión de dns y certificados de seguridad ssl de alta disponibilidad",
+      itemEdge: "— alojamiento y despliegue continuo en red global edge de máxima velocidad",
+      scopeNote: "alcance estricto: esta cuota garantiza la operatividad y renovaciones técnicas de tu web. no incluye mantenimiento de contenidos, textos, fotografías ni nuevas secciones tras la entrega (los ajustes durante la creación incluyen 2 rondas de revisión gratuitas por fase; cualquier cambio extra posterior se factura a 100 € por ronda).",
+      cancelNote: "sin sorpresas ni permanencias: 30 días antes de cada vencimiento anual recibirás un aviso por correo con el enlace de pago y un botón directo de baja en un clic. si decides no renovar, no habrá ningún cobro adicional.",
+      cta: "ver seguimiento de mi proyecto",
+      note: "tienes las condiciones completas disponibles en rebrandyourbrand.es/#terminos.",
+    },
   },
   ca: {
     verify: {
@@ -629,6 +652,20 @@ const EM = {
       ctaPay: "abonar renovació anual",
       cancelLine: "donar de baixa la renovació anual en un clic",
       note: "si decideixes no renovar, no es farà cap càrrec addicional i el domini i la web deixaran d'estar actius en finalitzar el període vigent.",
+    },
+    infra: {
+      subject: (br) => `informació sobre la infraestructura anual del teu web — ${br}`,
+      hello: "hola,",
+      intro: (br) => `en incloure el desenvolupament web al teu projecte ${bold(br)}, volem donar-te total transparència sobre com funciona la quota anual d'infraestructura tècnica (100 €/any a partir del segon any).`,
+      coveredTitle: bold("què cobreix exactament la quota de 100 €/any:"),
+      itemDomain: "— registre i renovació anual del teu domini propi al teu nom",
+      itemEmail: "— bústia i servei de correu electrònic corporatiu professional",
+      itemSsl: "— gestió de dns i certificats de seguretat ssl d'alta disponibilitat",
+      itemEdge: "— allotjament i desplegament continu en xarxa global edge de màxima velocitat",
+      scopeNote: "abast estricte: aquesta quota garanteix l'operativitat i renovacions tècniques del teu web. no inclou manteniment de continguts, textos, fotografies ni noves seccions després de l'entrega (els ajustos durant la creació inclouen 2 rondes de revisió gratuïtes per fase; qualsevol canvi extra posterior es factura a 100 € per ronda).",
+      cancelNote: "sense sorpreses ni permanències: 30 dies abans de cada venciment anual rebràs un avís per correu amb l'enllaç de pagament i un botó directe de baixa en un clic. si decideixes no renovar, no hi haurà cap cobrament addicional.",
+      cta: "veure seguiment del meu projecte",
+      note: "tens les condicions completes disponibles a rebrandyourbrand.es/#terminos.",
     },
   },
   eu: {
@@ -715,6 +752,20 @@ const EM = {
       cancelLine: "utzi bertan behera urteko berritzea klik bakarrean",
       note: "ez berritzea erabakitzen baduzu, ez da kargu gehigarririk egingo eta domeinuak zein webguneak aktibo egoteari utziko diote indarrean dagoen epea amaitzean.",
     },
+    infra: {
+      subject: (br) => `zure webguneko urteko azpiegiturari buruzko informazioa — ${br}`,
+      hello: "kaixo,",
+      intro: (br) => `zure ${bold(br)} proiektuan web garapena sartzean, gardentasun osoa eman nahi dizugu urteko azpiegitura teknikoaren kuotak nola funtzionatzen duen jakiteko (100 €/urte bigarren urtetik aurrera).`,
+      coveredTitle: bold("zer estaltzen du zehazki 100 €/urteko kuotak:"),
+      itemDomain: "— zure izenean dagoen domeinu propioaren erregistroa eta urteko berritzea",
+      itemEmail: "— posta elektroniko korporatibo profesionalaren zerbitzua",
+      itemSsl: "— dns kudeaketa eta eskuragarritasun handiko ssl segurtasun-ziurtagiriak",
+      itemEdge: "— ostatatzea eta etengabeko hedapena abiadura handiko edge sare globalean",
+      scopeNote: "esparru zorrotza: kuota honek zure webgunearen eraginkortasun teknikoa eta berritzeak soilik bermatzen ditu. ez du barne hartzen edukien, testuen, argazkien edo atal berrien mantentzerik entregatu ondoren (sortze-fasean 2 doako berrikuspen-txanda sartzen dira faseko; ondorengo aparteko aldaketa bakoitza 100 €-ko prezio finkoan fakturatzen da).",
+      cancelNote: "ustekaberik eta iraunkortasunik gabe: urteko iraungitze bakoitza baino 30 egun lehenago ohar bat jasoko duzu postaz ordainketa-estekarekin eta klik bakarreko baja-botoiarekin. berritzea ez baduzu nahi, ez da kargu gehigarririk egingo.",
+      cta: "ikusi nire proiektuaren jarraipena",
+      note: "baldintza osoak edozein unetan kontsulta ditzakezu hemen: rebrandyourbrand.es/#terminos.",
+    },
   },
   en: {
     verify: {
@@ -799,6 +850,20 @@ const EM = {
       ctaPay: "pay annual renewal",
       cancelLine: "cancel annual renewal in one click",
       note: "if you choose not to renew, no extra charges will be made and the domain and website will stop being active at the end of the current period.",
+    },
+    infra: {
+      subject: (br) => `information about your website's annual infrastructure — ${br}`,
+      hello: "hello,",
+      intro: (br) => `since your project ${bold(br)} includes web development, we want to provide total transparency on how the annual technical infrastructure fee works (100 €/year starting in year two).`,
+      coveredTitle: bold("what the 100 €/year fee strictly covers:"),
+      itemDomain: "— annual registration and renewal of your custom domain in your name",
+      itemEmail: "— professional corporate email inbox and service",
+      itemSsl: "— dns management and high-availability ssl security certificates",
+      itemEdge: "— continuous hosting and deployment on a top-speed global edge network",
+      scopeNote: "strict scope: this fee guarantees technical uptime and renewals. it does not include content, text, photo maintenance or new sections after delivery (adjustments during creation include 2 free revision rounds per phase; any subsequent extra change is billed at a fixed 100 € per round).",
+      cancelNote: "no surprises and zero lock-in: 30 days before each annual renewal you will receive an email reminder with the payment link and a one-click cancellation button. if you choose not to renew, no additional charges will occur.",
+      cta: "view project tracking",
+      note: "full terms and conditions are always available at rebrandyourbrand.es/#terminos.",
     },
   },
 };
@@ -975,6 +1040,10 @@ const PG = {
       obSubmit: "enviar materiales al estudio",
       obSentBanner: "materiales recibidos correctamente. nuestro equipo ya tiene todo registrado.",
       obSentTitle: "materiales iniciales enviados",
+      obUndoBanner: "materiales añadidos correctamente",
+      obUndoBtn: "deshacer",
+      obDismissBtn: "aceptar",
+      obUndoneBanner: "acción deshecha: el último envío de materiales ha sido cancelado con éxito.",
       obLblSocials: "web o redes",
       obLblDomain: "dominio",
       obLblMaterials: "carpeta o notas",
@@ -1116,6 +1185,10 @@ const PG = {
       obSubmit: "enviar materials a l'estudi",
       obSentBanner: "materials rebuts correctament. el nostre equip ja ho té tot registrat.",
       obSentTitle: "materials inicials enviats",
+      obUndoBanner: "materials afegits correctament",
+      obUndoBtn: "desfer",
+      obDismissBtn: "d'acord",
+      obUndoneBanner: "acció desfeta: l'últim enviament de materials s'ha descartat amb èxit.",
       obLblSocials: "web o xarxes",
       obLblDomain: "domini",
       obLblMaterials: "carpeta o notes",
@@ -1257,6 +1330,10 @@ const PG = {
       obSubmit: "bidali materialak estudiora",
       obSentBanner: "materialak behar bezala jaso dira. gure taldeak dena erregistratuta dauka jada.",
       obSentTitle: "bidalitako hasierako materialak",
+      obUndoBanner: "materialak behar bezala gehitu dira",
+      obUndoBtn: "desegin",
+      obDismissBtn: "ados",
+      obUndoneBanner: "ekintza desegin da: azken material-bidalketa bertan behera utzi da.",
       obLblSocials: "webgunea edo sareak",
       obLblDomain: "domeinua",
       obLblMaterials: "karpeta edo oharrak",
@@ -1398,6 +1475,10 @@ const PG = {
       obSubmit: "send materials to studio",
       obSentBanner: "materials received. our team has everything logged.",
       obSentTitle: "submitted kickoff materials",
+      obUndoBanner: "materials added successfully",
+      obUndoBtn: "undo",
+      obDismissBtn: "dismiss",
+      obUndoneBanner: "action undone: the latest submission was successfully discarded.",
       obLblSocials: "web or social",
       obLblDomain: "domain",
       obLblMaterials: "folder or notes",
@@ -1445,7 +1526,7 @@ const signMsg = (key, text) => signRaw(key, `msg|${text}`);
 
 const verifyMsg = (key, text, sig) => verifyRaw(key, `msg|${text}`, sig);
 
-const confirmPayload = (email, brand, plan) => `confirm|${email}|${brand}|${plan.ids.join(",")}`;
+const confirmPayload = (email, brand, plan, domain = "") => `confirm|${email}|${brand}|${plan.ids.join(",")}|${domain || ""}`;
 
 // Tokens deterministas firmados por HMAC (sin depender de claves temporales en KV)
 const getActionToken = (key, projectToken, step) => signRaw(key, `action|${projectToken}|${step}`);
@@ -1665,7 +1746,7 @@ async function sendVerifyEmail(env, { lang, brand, clientEmail }, verifyToken, a
   );
 }
 
-async function startVerification(env, { lang, messages, plan, clientEmail, brand }) {
+async function startVerification(env, { lang, messages, plan, clientEmail, brand, domain }) {
   const cooldownKey = `cooldown:${clientEmail}`;
   if (await env.LEADS_KV.get(cooldownKey)) {
     throw new HttpError(429, "email_cooldown", { "Retry-After": String(EMAIL_COOLDOWN_SECONDS) });
@@ -1681,6 +1762,7 @@ async function startVerification(env, { lang, messages, plan, clientEmail, brand
     services: plan.ids,
     clientEmail,
     brand,
+    domain: domain || "",
     resends: 0,
     timestamp: new Date().toISOString(),
   };
@@ -1808,24 +1890,49 @@ function findEmail(chatMessages) {
   return "";
 }
 
-const missingOf = (brand, email, plan) =>
-  [!brand && "brand", !plan && "services", !email && "email"].filter(Boolean);
+const DOMAIN_FIND = /\b(?:https?:\/\/)?(?:www\.)?([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.[a-z]{2,}(?:\.[a-z]{2,})?)\b/i;
+
+function findDomain(chatMessages, fallback = "") {
+  if (fallback && typeof fallback === "string") {
+    const trimmed = fallback.trim();
+    const m = trimmed.match(DOMAIN_FIND);
+    if (m) return m[1].toLowerCase();
+    if (trimmed.length > 0) return trimmed.toLowerCase();
+  }
+  for (let i = chatMessages.length - 1; i >= 0; i--) {
+    if (chatMessages[i].role !== "user") continue;
+    const m = chatMessages[i].text.match(DOMAIN_FIND);
+    if (m) return m[1].toLowerCase();
+  }
+  return "";
+}
+
+const missingOf = (brand, email, plan, domain) =>
+  [
+    !brand && "brand",
+    !plan && "services",
+    Boolean(plan?.ids?.includes("web") && !domain) && "domain",
+    !email && "email",
+  ].filter(Boolean);
 
 function buildSystemInstruction(lang, ctx) {
-  const { plan, brand, email, denied } = ctx;
+  const { plan, brand, email, domain, denied } = ctx;
   const langName = LANG_NAMES[pickLang(lang)] || LANG_NAMES.es;
 
   const servicesBlock = plan
     ? `SERVICIOS ELEGIDOS: ${svcLabel(plan.ids, "es")} (${plan.total} € en total).`
     : `SERVICIOS: sin elegir todavía. El cliente no ha usado el selector de la web, así que quizá no conoce todas las opciones.`;
-  const missing = missingOf(brand, email, plan);
+  const domainBlock = plan?.ids?.includes("web")
+    ? (domain ? `DOMINIO WEB: ya conocido (${domain}).` : `DOMINIO WEB: estrictamente OBLIGATORIO al contratar la web. Aún falta.`)
+    : "";
+  const missing = missingOf(brand, email, plan, domain);
   const deniedBlock = denied
-    ? `\nEl cliente acaba de RECHAZAR el resumen. Pregúntale con amabilidad qué quiere cambiar (marca, servicios o correo). No repitas el resumen.`
+    ? `\nEl cliente acaba de RECHAZAR el resumen. Pregúntale con amabilidad qué quiere cambiar (marca, servicios, dominio o correo). No repitas el resumen.`
     : "";
 
   return `Eres Brandi, Directora de Arte e Inteligencia Creativa en rebrandyourbrand. Idioma obligatorio de respuesta: ${langName}.
 
-Tu objetivo es entender la marca del cliente, dar una breve pincelada estratégica y reunir tres datos para cerrar la propuesta: MARCA, SERVICIOS y CORREO.
+Tu objetivo es entender la marca del cliente, dar una breve pincelada estratégica y reunir los datos necesarios para cerrar la propuesta: MARCA, SERVICIOS${plan?.ids?.includes("web") ? ", DOMINIO" : ""} y CORREO.
 
 ESTILO:
 - No actúes como un bot de atención al cliente. Eres una consultora de marca directa, aguda y conceptual.
@@ -1836,32 +1943,35 @@ No hay planes cerrados: el cliente elige solo los servicios que necesita y paga 
 ${CATALOG}
 El logotipo cuesta 400 € e incluye la paleta de empresa de regalo (valorada en 100 €). La paleta de empresa en solitario cuesta 100 €. La web cuesta 400 € de desarrollo (más 100 €/año de infraestructura técnica).
 El precio total de creación es la suma de los servicios elegidos (con la paleta a 0 € si se contrata el logotipo: Logotipo + Paleta = 400 €, Logotipo + Paleta + Web = 800 €, Paleta + Web = 500 €). No hay otros descuentos.
-Si el cliente elige o pregunta por la web (400 € de pago único de desarrollo), aclara si surge la duda que conlleva una cuota obligatoria de 100 €/año exclusivamente por infraestructura técnica gestionada (dominio, correo corporativo, DNS, certificados SSL y despliegue edge): no incluye cambios de contenido, diseño ni nuevas secciones tras la entrega (cada fase incluye 2 rondas de revisión gratuitas durante la creación; cualquier ronda de ajustes extra o cambio posterior tiene un precio cerrado de 100 €).
+Si el cliente elige o pregunta por la web (400 € de pago único de desarrollo), es estrictamente obligatorio conocer su dominio o URL actual (o qué dominio desea registrar) antes de cerrar la propuesta, y aclara si surge la duda que conlleva una cuota obligatoria de 100 €/año exclusivamente por infraestructura técnica gestionada (dominio, correo corporativo, DNS, certificados SSL y despliegue edge): no incluye cambios de contenido, diseño ni nuevas secciones tras la entrega (cada fase incluye 2 rondas de revisión gratuitas durante la creación; cualquier ronda de ajustes extra o cambio posterior tiene un precio cerrado de 100 €).
 En los proyectos web, la página entregada incluye una firma discreta del estudio en el pie de página (footer) con enlace a rebrandyourbrand.es y el estudio puede mostrar el trabajo en su portfolio como referencia profesional.
 
 ESTADO ACTUAL DE LA CONVERSACIÓN:
 - MARCA: ${brand ? `ya conocida (${brand})` : "pendiente"}
 - ${servicesBlock}
-- CORREO: ${email ? "ya recibido" : "pendiente"}
+${domainBlock ? `- ${domainBlock}\n` : ""}- CORREO: ${email ? "ya recibido" : "pendiente"}
 - Datos que aún faltan (por prioridad): ${missing.length ? missing.join(", ") : "ninguno"}.${deniedBlock}
 
 CÓMO CONDUCIR LA CONVERSACIÓN:
-1. Primero incorpora lo que el cliente acaba de decir en su último mensaje (marca, servicios, correo).
-2. Después pregunta por el PRIMER dato que siga faltando, siguiendo el orden: marca -> servicios -> correo.
+1. Primero incorpora lo que el cliente acaba de decir en su último mensaje (marca, servicios, dominio, correo).
+2. Después pregunta por el PRIMER dato que siga faltando, siguiendo el orden: marca -> servicios -> dominio (si incluye web) -> correo.
 3. Si faltan los SERVICIOS: pregunta qué necesita resolver primero y orienta según su caso (por ejemplo, un logotipo que no se ve bien en pequeño, colores incoherentes, o ninguna web). Menciona los tres servicios y que puede combinarlos. No presiones ni des por hecho ninguno.
 4. Si ya hay servicios elegidos, no vuelvas a preguntar por ellos salvo que el cliente quiera cambiarlos. Puedes sugerir en una frase un servicio complementario, una sola vez.
-5. Si falta el CORREO: pídelo diciendo que es para enviarle la verificación y el acceso a su proyecto y pago seguro.
-6. Cuando ya no falte nada NO escribas tú el resumen ni digas que has enviado ningún correo: el sistema mostrará el resumen automáticamente. Limítate a decir en una frase que ya lo tienes todo.
+5. Si ha elegido web y falta el DOMINIO: pídelo de forma clara (cuál es su dominio o web actual, o cuál le gustaría registrar para el proyecto).
+6. Si falta el CORREO: pídelo diciendo que es para enviarle la verificación y el acceso a su proyecto y pago seguro.
+7. Cuando ya no falte nada NO escribas tú el resumen ni digas que has enviado ningún correo: el sistema mostrará el resumen automáticamente. Limítate a decir en una frase que ya lo tienes todo.
 - Habla únicamente de los servicios de rebrandyourbrand. Nunca inventes precios ni porcentajes distintos de los oficiales.
 
 FORMATO DE SALIDA (JSON estricto, sin texto fuera del JSON):
 {
   "reply": "tu respuesta al cliente",
   "brand": "nombre de la marca del cliente, o null si aún no lo sabes",
+  "domain": "dominio indicado por el cliente (ej. mitienda.es), o null",
   "services": ["logo", "paleta", "web"] (solo los elegidos) | null
 }
 - "services": lista de ids elegidos por el cliente (valores posibles: "logo", "paleta", "web")${plan ? ` (ahora mismo: ${JSON.stringify(plan.ids)}; devuélvelo tal cual salvo que el cliente pida cambiarlo explícitamente)` : "; null mientras no los haya elegido claramente"}.
-- "brand": devuelve la marca ya conocida salvo que el cliente la cambie.`;
+- "brand": devuelve la marca ya conocida salvo que el cliente la cambie.
+- "domain": devuelve el dominio web indicado si el proyecto incluye web.`;
 }
 
 function parseModelJson(content) {
@@ -1945,7 +2055,7 @@ const isStripeReceiptUrl = (u) =>
 
 const stripeLocaleFor = (lang) => (pickLang(lang) === "en" ? "en" : "es");
 
-async function createProjectRecord(env, { clientEmail, brand, plan, lang, messages }) {
+async function createProjectRecord(env, { clientEmail, brand, plan, lang, messages, domain }) {
   const safeBrand = brand || "proyecto";
   const projectToken = randomHex(32);
   const projectKey = `project:${projectToken}`;
@@ -1954,10 +2064,28 @@ async function createProjectRecord(env, { clientEmail, brand, plan, lang, messag
     .slice(-MAX_HISTORY_MESSAGES)
     .map((m) => ({ role: m.role, text: m.text.slice(0, 2000) }));
 
+  const nowIso = new Date().toISOString();
+  const cleanDomain = typeof domain === "string" ? domain.trim().slice(0, 200) : "";
+  const initialMaterials = cleanDomain
+    ? [
+        {
+          id: "init",
+          createdAt: nowIso,
+          domain: cleanDomain,
+          socials: "",
+          url: "",
+          fileUrl: "",
+          filename: "",
+          notes: "",
+        },
+      ]
+    : [];
+
   const projectData = {
     token: projectToken,
     brand: safeBrand,
     clientEmail,
+    domain: cleanDomain,
     lang: pickLang(lang),
     services: plan.ids,
     totalEur: plan.total,
@@ -1965,8 +2093,11 @@ async function createProjectRecord(env, { clientEmail, brand, plan, lang, messag
     paid: false,
     emailsSent: false,
     currentPhase: 1,
-    createdAt: new Date().toISOString(),
+    createdAt: nowIso,
     phases: newPhases(plan.ids),
+    materialsList: initialMaterials,
+    referencesList: [],
+    ...(cleanDomain ? { onboarding: { domain: cleanDomain, socials: "", materials: "", submittedAt: nowIso } } : {}),
   };
   await env.LEADS_KV.put(projectKey, JSON.stringify(projectData), {
     expirationTtl: PENDING_PROJECT_TTL_SECONDS,
@@ -2472,6 +2603,39 @@ async function processPaidSession(env, session, { fromWebhook = false } = {}) {
       );
       proj.clientNotified = true;
       dirty = true;
+
+      if (Array.isArray(proj.services) && proj.services.includes("web") && !proj.infraEmailSent) {
+        const inf = EM[lang].infra;
+        if (inf) {
+          await resendSend(
+            env,
+            {
+              to: [proj.clientEmail],
+              subject: inf.subject(proj.brand),
+              ...renderEmail(lang, {
+                paras: [
+                  inf.hello,
+                  inf.intro(bold(proj.brand)),
+                  lines(
+                    inf.coveredTitle,
+                    inf.itemDomain,
+                    inf.itemEmail,
+                    inf.itemSsl,
+                    inf.itemEdge
+                  ),
+                  inf.scopeNote,
+                  inf.cancelNote,
+                ],
+                cta: { label: inf.cta, url: trackingUrl },
+                note: inf.note,
+              }),
+            },
+            `infra-client-${token}`
+          ).catch((e) => console.error("infra email failed:", e?.message));
+          proj.infraEmailSent = true;
+          dirty = true;
+        }
+      }
     }
 
     if (!proj.adminNotified) {
@@ -2968,6 +3132,110 @@ button.secondary:hover,.btn.secondary:hover,button.no:hover{
   color:#17171A;
   text-align:left;
 }
+.undo-bar-wrap{
+  position:fixed;
+  bottom:1.25rem;
+  left:50%;
+  transform:translateX(-50%);
+  width:calc(100% - 2rem);
+  max-width:480px;
+  z-index:100;
+  background:#17171A;
+  color:#F5F2EA;
+  border:1px solid #232226;
+  border-radius:14px;
+  box-shadow:0 16px 40px rgba(0,0,0,.28);
+  overflow:hidden;
+  animation:undoDismiss .4s cubic-bezier(.16,1,.3,1) 15s forwards;
+}
+@keyframes undoDismiss{
+  0%,90%{opacity:1;transform:translate(-50%,0);pointer-events:auto;}
+  100%{opacity:0;transform:translate(-50%,20px);pointer-events:none;visibility:hidden;}
+}
+.undo-progress{
+  height:3px;
+  background:rgba(255,255,255,.12);
+  width:100%;
+  overflow:hidden;
+}
+.undo-progress-fill{
+  height:100%;
+  background:#E8A33D;
+  width:100%;
+  animation:undoCountdown 15s linear forwards;
+}
+@keyframes undoCountdown{
+  from{width:100%;}
+  to{width:0%;}
+}
+.undo-bar-content{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:.75rem;
+  padding:.85rem 1rem;
+}
+.undo-bar-text{
+  display:flex;
+  align-items:center;
+  gap:.5rem;
+  font-size:.82rem;
+  font-weight:500;
+  color:#F5F2EA;
+  text-transform:lowercase;
+  min-width:0;
+  flex:1;
+}
+.undo-bar-text span.undo-dot{
+  width:7px;
+  height:7px;
+  border-radius:999px;
+  background:#E8A33D;
+  flex-shrink:0;
+}
+.undo-bar-actions{
+  display:flex;
+  align-items:center;
+  gap:.5rem;
+  flex-shrink:0;
+}
+.btn-undo{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  background:#E8A33D;
+  color:#0A0A0C;
+  border:1px solid #E8A33D;
+  border-radius:8px;
+  padding:.4rem .75rem;
+  font:600 .76rem/1.2 inherit;
+  text-transform:lowercase;
+  cursor:pointer;
+  transition:background .2s,border-color .2s;
+}
+.btn-undo:hover{
+  background:#F0BE82;
+  border-color:#F0BE82;
+}
+.btn-dismiss{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  background:transparent;
+  color:#9C9BA3;
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:8px;
+  padding:.4rem .75rem;
+  font:500 .76rem/1.2 inherit;
+  text-decoration:none;
+  text-transform:lowercase;
+  cursor:pointer;
+  transition:color .2s,border-color .2s;
+}
+.btn-dismiss:hover{
+  color:#F5F2EA;
+  border-color:rgba(255,255,255,.35);
+}
 .foot{
   margin-top:1.25rem;
   display:flex;
@@ -3071,6 +3339,7 @@ async function handleVerify(request, env, ctx, url) {
       plan,
       lang: L,
       messages: data.messages,
+      domain: data.domain,
     });
     data.projectToken = proj.token;
   }
@@ -4520,9 +4789,11 @@ async function handleProject(request, env, url) {
       }
 
       const nowIso = new Date().toISOString();
+      let createdMatItem = null;
+      let createdRefItem = null;
 
       if (hasMaterial) {
-        const matItem = {
+        createdMatItem = {
           id: crypto.randomUUID().replace(/-/g, "").slice(0, 12),
           createdAt: nowIso,
           domain,
@@ -4534,7 +4805,7 @@ async function handleProject(request, env, url) {
           fileId: materialsFileId,
           fileSize: materialsFileSize,
         };
-        proj.materialsList.push(matItem);
+        proj.materialsList.push(createdMatItem);
         if (!proj.onboarding) {
           proj.onboarding = {
             domain: domain || "",
@@ -4546,7 +4817,7 @@ async function handleProject(request, env, url) {
       }
 
       if (hasReference) {
-        const refItem = {
+        createdRefItem = {
           id: crypto.randomUUID().replace(/-/g, "").slice(0, 12),
           createdAt: nowIso,
           url: referenceUrl,
@@ -4556,8 +4827,16 @@ async function handleProject(request, env, url) {
           fileId: referenceFileId,
           fileSize: referenceFileSize,
         };
-        proj.referencesList.push(refItem);
+        proj.referencesList.push(createdRefItem);
       }
+
+      proj.lastAdded = {
+        matId: createdMatItem?.id || null,
+        matFileId: createdMatItem?.fileId || null,
+        refId: createdRefItem?.id || null,
+        refFileId: createdRefItem?.fileId || null,
+        timestamp: Date.now(),
+      };
 
       await env.LEADS_KV.put(`project:${token}`, JSON.stringify(proj));
 
@@ -4604,18 +4883,52 @@ async function handleProject(request, env, url) {
         ).catch((e) => console.error("materials email failed:", e?.message));
       }
 
-      const noticeText = T.actionRegisteredNotice || "aviso: esta acción ya ha quedado registrada en el sistema y nuestro equipo ha recibido la notificación para continuar con el trabajo.";
-      const succ = T.obSuccess || ["¡enviado correctamente!", "materiales registrados con éxito", "hemos recibido tus materiales y referencias correctamente y nuestro equipo los revisará para incorporarlos al proyecto."];
-      return htmlResponse(
-        page(succ[0], succ[1], succ[2], {
-          lang: L,
-          eyebrow: T.obEyebrow,
-          html: `<div class="notice-box"><p>${esc(noticeText)}</p></div><a class="btn" href="${esc(projectPageUrl)}">${esc(PG[L].common.openTracker)}</a>`,
-          footerUrl: projectPageUrl,
-          footerLabel: PG[L].common.openTracker,
-        }),
-        200
-      );
+      return redirectTo(buildUrl("/proyecto", { token, undo: "1" }));
+    }
+
+    if (op === "undo_onboarding") {
+      if (!proj.paid) return redirectTo(projectPageUrl);
+      if (proj.lastAdded) {
+        const { matId, matFileId, refId, refFileId } = proj.lastAdded;
+        if (matId && Array.isArray(proj.materialsList)) {
+          proj.materialsList = proj.materialsList.filter((m) => m.id !== matId);
+        }
+        if (matFileId) {
+          await env.LEADS_KV.delete(`file:${token}:mat:${matFileId}`).catch(() => {});
+        }
+        if (refId && Array.isArray(proj.referencesList)) {
+          proj.referencesList = proj.referencesList.filter((r) => r.id !== refId);
+        }
+        if (refFileId) {
+          await env.LEADS_KV.delete(`file:${token}:ref:${refFileId}`).catch(() => {});
+        }
+        if (proj.onboarding && (!Array.isArray(proj.materialsList) || proj.materialsList.length === 0)) {
+          delete proj.onboarding;
+        }
+        proj.lastAdded = null;
+        await env.LEADS_KV.put(`project:${token}`, JSON.stringify(proj));
+
+        if (env.RESEND_API_KEY) {
+          await resendSend(
+            env,
+            {
+              to: ["hola@rebrandyourbrand.es"],
+              reply_to: proj.clientEmail,
+              subject: `envío de materiales cancelado por el cliente — ${proj.brand}`,
+              ...renderEmail("es", {
+                paras: [
+                  `el cliente de ${bold(proj.brand)} ha deshecho y cancelado su último envío de materiales o referencias.`,
+                  `— cliente: ${bold(proj.clientEmail)}`,
+                  "el registro correspondiente ha sido eliminado del historial del proyecto.",
+                ],
+                secondaryLink: { label: "ver seguimiento del cliente", url: projectPageUrl },
+              }),
+            },
+            `undo-mat-${token}-${Date.now()}`
+          ).catch((e) => console.error("undo notification email failed:", e?.message));
+        }
+      }
+      return redirectTo(buildUrl("/proyecto", { token, undone: "1" }));
     }
 
     return redirectTo(projectPageUrl);
@@ -4674,8 +4987,33 @@ async function handleProject(request, env, url) {
     );
   }
 
+  const undoneBanner =
+    url.searchParams.get("undone") === "1"
+      ? `<div class="banner-ok">${esc(T.obUndoneBanner)}</div>`
+      : "";
+
   const bannerHtml =
-    url.searchParams.get("ob") === "1" ? `<div class="banner-ok">${esc(T.obSentBanner)}</div>` : "";
+    url.searchParams.get("ob") === "1"
+      ? `<div class="banner-ok">${esc(T.obSentBanner)}</div>`
+      : undoneBanner;
+
+  const undoHtml =
+    url.searchParams.get("undo") === "1" && proj.lastAdded && Date.now() - proj.lastAdded.timestamp < 60000
+      ? `
+      <div class="undo-bar-wrap">
+        <div class="undo-progress"><div class="undo-progress-fill"></div></div>
+        <div class="undo-bar-content">
+          <div class="undo-bar-text"><span class="undo-dot"></span><span>${esc(T.obUndoBanner)}</span></div>
+          <div class="undo-bar-actions">
+            <form method="POST" style="margin:0;padding:0;display:inline;">
+              <input type="hidden" name="op" value="undo_onboarding">
+              <button type="submit" class="btn-undo">${esc(T.obUndoBtn)}</button>
+            </form>
+            <a class="btn-dismiss" href="${esc(projectPageUrl)}">${esc(T.obDismissBtn)}</a>
+          </div>
+        </div>
+      </div>`
+      : "";
 
   if (checkAllServicesApproved(proj) && (!proj.finishedAt || !proj.reviewInvited || proj.status !== "done")) {
     await finalizeProjectClosure(env, proj, token);
@@ -4903,7 +5241,8 @@ async function handleProject(request, env, url) {
     ${reviewCardHtml}
     ${materialsBox}
     ${referencesBox}
-    ${addFormHtml}`;
+    ${addFormHtml}
+    ${undoHtml}`;
 
   return htmlResponse(
     page(`${T.title} — ${proj.brand}`, T.heading, "", {
@@ -5347,14 +5686,16 @@ async function handleChatPost(request, env, body, o) {
 
     const email = findEmail(chatMessages);
     const brand0 = cleanBrand(body.brand);
+    const domain0 = cleanInput(body.domain, 200) || findDomain(chatMessages);
     const confirmSigIn = typeof body.confirmSig === "string" ? body.confirmSig : "";
-    const isShown = async (p, b) =>
-      !!(email && b && p) && (await verifyRaw(key, confirmPayload(email, b, p), confirmSigIn));
+    const isShown = async (p, b, d) =>
+      !!(email && b && p && (!p.ids.includes("web") || d)) &&
+      (await verifyRaw(key, confirmPayload(email, b, p, d), confirmSigIn));
 
-    const confirmAndSend = async (plan, brand) => {
+    const confirmAndSend = async (plan, brand, domain) => {
       if (!env.RESEND_API_KEY) throw new HttpError(500, "misconfigured");
       if (!plan) throw new HttpError(400, "plan_required");
-      if (!(await isShown(plan, brand))) throw new HttpError(400, "invalid_confirmation");
+      if (!(await isShown(plan, brand, domain))) throw new HttpError(400, "invalid_confirmation");
 
       if (env.VERIFY_LIMITER) {
         const { success: okV } = await env.VERIFY_LIMITER.limit({ key: `v:${ipKey(ip)}` });
@@ -5367,6 +5708,7 @@ async function handleChatPost(request, env, body, o) {
         plan,
         clientEmail: email,
         brand,
+        domain,
       });
       const reply = MSG[lang].sent;
       return jsonResponse(
@@ -5377,6 +5719,7 @@ async function handleChatPost(request, env, body, o) {
           canConfirm: false,
           confirmSig: "",
           brand,
+          domain: domain || undefined,
           services: planOut(plan),
           resume: `${verifyToken}.${await resumeSig(key, verifyToken)}`,
           emailHint: maskEmail(email),
@@ -5387,7 +5730,7 @@ async function handleChatPost(request, env, body, o) {
     };
 
     if (body.confirm === true) {
-      return await confirmAndSend(plan0, brand0);
+      return await confirmAndSend(plan0, brand0, domain0);
     }
 
     const lastText = chatMessages.at(-1)?.text || "";
@@ -5395,9 +5738,9 @@ async function handleChatPost(request, env, body, o) {
     const userAgreed =
       lastText.length <= 60 && AGREE_RE.test(lastText) && !userDenied && !CHANGE_INTENT_RE.test(lastText);
 
-    const summaryResponse = async (plan, brand) => {
-      const reply = buildSummary(lang, { brand, email, plan });
-      const confirmSig = await signRaw(key, confirmPayload(email, brand, plan));
+    const summaryResponse = async (plan, brand, domain) => {
+      const reply = buildSummary(lang, { brand, email, plan, domain });
+      const confirmSig = await signRaw(key, confirmPayload(email, brand, plan, domain));
       return jsonResponse(
         {
           reply,
@@ -5406,6 +5749,7 @@ async function handleChatPost(request, env, body, o) {
           canConfirm: true,
           confirmSig,
           brand,
+          domain: domain || undefined,
           services: planOut(plan),
         },
         200,
@@ -5413,15 +5757,15 @@ async function handleChatPost(request, env, body, o) {
       );
     };
 
-    const wasShown = await isShown(plan0, brand0);
+    const wasShown = await isShown(plan0, brand0, domain0);
 
     // Si el resumen ya estaba en pantalla y el cliente escribe "sí"/"vale"/"ok"/"bai", confirmamos sin bucle
     if (wasShown && userAgreed) {
-      return await confirmAndSend(plan0, brand0);
+      return await confirmAndSend(plan0, brand0, domain0);
     }
 
-    // Si el cliente acaba de dar el último dato que faltaba (p. ej. el correo) sin pedir cambios, devolvemos el resumen al instante sin llamar a Groq
-    const missing0 = missingOf(brand0, email, plan0);
+    // Si el cliente acaba de dar el último dato que faltaba sin pedir cambios, devolvemos el resumen al instante sin llamar a Groq
+    const missing0 = missingOf(brand0, email, plan0, domain0);
     const textWithoutEmail = lastText.replace(EMAIL_FIND, "").trim();
     if (
       !missing0.length &&
@@ -5430,23 +5774,24 @@ async function handleChatPost(request, env, body, o) {
       !CHANGE_INTENT_RE.test(textWithoutEmail) &&
       !SERVICE_MENTION_RE.test(textWithoutEmail)
     ) {
-      return await summaryResponse(plan0, brand0);
+      return await summaryResponse(plan0, brand0, domain0);
     }
 
     const out = await askGroq(
       env,
       lang,
-      { plan: plan0, brand: brand0, email, denied: wasShown && userDenied },
+      { plan: plan0, brand: brand0, email, domain: domain0, denied: wasShown && userDenied },
       chatMessages
     );
 
     const plan = mergeServices(plan0, out);
     const brand = cleanBrand(out.brand) || brand0;
-    const missing = missingOf(brand, email, plan);
+    const domain = cleanInput(out.domain, 200) || domain0 || findDomain(chatMessages);
+    const missing = missingOf(brand, email, plan, domain);
 
     if (!missing.length) {
-      const shownNow = await isShown(plan, brand);
-      if (!shownNow) return await summaryResponse(plan, brand);
+      const shownNow = await isShown(plan, brand, domain);
+      if (!shownNow) return await summaryResponse(plan, brand, domain);
     }
 
     let reply = String(out.reply ?? "").trim().slice(0, 2000);
@@ -5463,6 +5808,7 @@ async function handleChatPost(request, env, body, o) {
         canConfirm: false,
         confirmSig: keepSig,
         brand,
+        domain: domain || undefined,
         services: planOut(plan),
       },
       200,

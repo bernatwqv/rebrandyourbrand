@@ -609,46 +609,14 @@ textarea { resize: vertical; }
   .btn-ghost:hover{background:rgb(var(--color-brand)/.1);transform:translateY(-2px)}
   @media(max-width:39.99rem){.cta-row .btn{width:100%}}
   #top p[data-i18n="hero-desc"]{max-width:36rem}
-  .problem-grid,.steps-grid{display:grid;gap:1rem;grid-template-columns:1fr}
-  @media(min-width:48rem){.problem-grid{grid-template-columns:repeat(2,1fr)}.steps-grid{grid-template-columns:repeat(3,1fr)}}
-  .problem-card,.step-card{border:1px solid rgb(var(--color-line));border-radius:1rem;padding:1.5rem;background:rgb(var(--color-panel)/.7);display:flex;gap:1rem;align-items:flex-start;line-height:1.6}
-  .step-card{flex-direction:column;gap:.5rem}
-  .step-card h3{font-size:1.25rem}.step-card p{color:rgb(var(--color-muted));font-size:.9rem}
-  .problem-x{color:rgb(var(--color-ai));font-weight:700}
-  .step-num{font:700 .75rem ui-monospace,monospace;color:rgb(var(--color-ai))}
   .terms-summary{color:rgb(var(--color-muted));font-size:.9rem;line-height:1.6;margin-bottom:1.5rem;max-width:40rem}
-  #problema{background:radial-gradient(circle at 12% 0%,rgb(var(--color-ai)/.07),transparent 26rem),radial-gradient(circle at 92% 100%,rgb(var(--color-brand)/.08),transparent 24rem)}
-  .problem-grid{gap:1.25rem}
-  .problem-card{position:relative;overflow:hidden;align-items:center;gap:1.25rem;padding:1.75rem;border-radius:1.25rem;font-size:1rem;color:rgb(var(--color-text)/.92);
-    background:linear-gradient(145deg,rgb(var(--color-panel)/.98),rgb(var(--color-panel)/.7));box-shadow:inset 0 1px 0 rgb(255 255 255/.035);
-    transition:opacity 600ms var(--ease-editorial),transform 600ms var(--ease-editorial),border-color 300ms var(--ease-editorial),box-shadow 300ms var(--ease-editorial)}
-  .problem-card::before{content:"";position:absolute;left:0;top:1.25rem;bottom:1.25rem;width:2px;border-radius:2px;background:rgb(var(--color-ai));opacity:0;transition:opacity 300ms var(--ease-editorial)}
-  .problem-card.reveal.in-view:hover{transform:translateY(-4px);border-color:rgb(var(--color-ai)/.45);box-shadow:0 18px 44px rgb(var(--color-ai)/.1),inset 0 1px 0 rgb(255 255 255/.05)}
-  .problem-card:hover::before{opacity:1}
-  .problem-card p{line-height:1.55}
-  .problem-x{flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;width:2.4rem;height:2.4rem;border-radius:999px;font-size:.8rem;
-    background:rgb(var(--color-ai)/.12);border:1px solid rgb(var(--color-ai)/.35);transition:background-color 300ms var(--ease-editorial),transform 300ms var(--ease-editorial)}
-  .problem-card:hover .problem-x{background:rgb(var(--color-ai)/.22);transform:rotate(90deg)}
-  .problem-close{display:flex;align-items:center;gap:1.25rem;margin-top:2.5rem;padding:1.5rem 1.75rem;border-radius:1.25rem;border:1px solid rgb(var(--color-brand)/.4);
-    background:linear-gradient(135deg,rgb(var(--color-brand)/.12),rgb(var(--color-brand)/.03));box-shadow:var(--shadow-brand)}
-  .problem-close p{font-size:clamp(1.2rem,2.4vw,1.75rem);line-height:1.25;letter-spacing:-.02em}
-  .problem-check{flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;width:2.6rem;height:2.6rem;border-radius:999px;font-weight:700;background:rgb(var(--color-brand));color:#0A0A0C}
-  @media(max-width:39.99rem){.problem-card{padding:1.4rem 1.25rem;gap:1rem}.problem-close{padding:1.25rem;gap:1rem}}
-
-  #proceso{background:radial-gradient(circle at 90% 0%,rgb(var(--color-brand)/.09),transparent 26rem),radial-gradient(circle at 8% 100%,rgb(var(--color-ai)/.06),transparent 24rem)}
-  .steps-grid{gap:1.25rem}
-  .step-card{position:relative;overflow:hidden;gap:1rem;padding:1.75rem;border-radius:1.25rem;
-    background:linear-gradient(145deg,rgb(var(--color-panel)/.98),rgb(var(--color-panel)/.7));box-shadow:inset 0 1px 0 rgb(255 255 255/.035);
-    transition:opacity 600ms var(--ease-editorial),transform 600ms var(--ease-editorial),border-color 300ms var(--ease-editorial),box-shadow 300ms var(--ease-editorial)}
-  .step-card::before{content:"";position:absolute;left:0;top:1.25rem;bottom:1.25rem;width:2px;border-radius:2px;background:rgb(var(--color-ai));opacity:0;transition:opacity 300ms var(--ease-editorial)}
-  .step-card.reveal.in-view:hover{transform:translateY(-4px);border-color:rgb(var(--color-ai)/.45);box-shadow:0 18px 44px rgb(var(--color-ai)/.1),inset 0 1px 0 rgb(255 255 255/.05)}
-  .step-card:hover::before{opacity:1}
-  .step-num{display:inline-flex;align-items:center;justify-content:center;width:2.4rem;height:2.4rem;border-radius:999px;font-size:.8rem;letter-spacing:.04em;
-    background:rgb(var(--color-ai)/.12);border:1px solid rgb(var(--color-ai)/.35);transition:background-color 300ms var(--ease-editorial),transform 300ms var(--ease-editorial)}
-  .step-card:hover .step-num{background:rgb(var(--color-ai)/.22);transform:scale(1.08)}
-  .step-card h3{font-size:1.4rem;line-height:1.2;letter-spacing:-.02em;color:rgb(var(--color-text))}
-  .step-card p{line-height:1.6;font-size:.95rem}
-  @media(max-width:39.99rem){.step-card{padding:1.4rem 1.25rem}}
+  .hero-authority-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem;margin-top:2.5rem;max-width:54rem}
+  @media(min-width:48rem){.hero-authority-grid{grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:3.25rem}}
+  .authority-item{display:flex;align-items:flex-start;gap:.75rem;padding:1rem 1.15rem;border-radius:1rem;border:1px solid rgb(var(--color-line));background:linear-gradient(145deg,rgb(var(--color-panel)/.95),rgb(var(--color-panel)/.6));text-decoration:none;color:inherit;transition:transform 300ms var(--ease-editorial),border-color 300ms var(--ease-editorial),box-shadow 300ms var(--ease-editorial)}
+  .authority-item:hover{transform:translateY(-3px);border-color:rgb(var(--color-brand)/.5);box-shadow:0 12px 28px rgb(var(--color-brand)/.08)}
+  .authority-dot{width:8px;height:8px;border-radius:999px;background:rgb(var(--color-brand));margin-top:.4rem;flex-shrink:0}
+  .authority-title{display:block;font-size:.86rem;font-weight:600;color:rgb(var(--color-text));line-height:1.2;text-transform:lowercase}
+  .authority-desc{display:block;font-size:.76rem;color:rgb(var(--color-muted));line-height:1.3;margin-top:.2rem}
 
   /* Logotipo principal (header y footer) */
   .brand-logo{display:block;width:auto;fill:currentColor;color:rgb(var(--color-text));transition:color 300ms var(--ease-editorial),opacity 220ms var(--ease-editorial)}
@@ -801,38 +769,35 @@ textarea { resize: vertical; }
           <a href="#planes" data-section-target="planes" class="btn btn-primary lang-trans" data-i18n="cta-plans">ver servicios y precios</a>
           <button type="button" data-open-brandi class="btn btn-ghost lang-trans" data-i18n="cta-brandi">hablar con brandi</button>
         </div>
-      </div>
-    </section>
-
-    <section id="problema" class="relative px-6 md:px-10 py-24 md:py-32 border-b border-line overflow-hidden z-10">
-      <div class="max-w-6xl mx-auto relative z-10">
-        <div class="reveal mb-12">
-          <span class="lang-trans lowercase block text-xs tracking-widest text-brand font-mono mb-2" data-i18n="problem-eyebrow">el problema</span>
-          <h2 class="lang-trans lowercase font-display text-3xl md:text-4xl" data-i18n="problem-title">¿te suena alguna de estas?</h2>
-        </div>
-        <div class="problem-grid">
-          <div class="problem-card reveal"><span class="problem-x" aria-hidden="true">✕</span><p class="lang-trans" data-i18n="problem-1">Tu logo se ve mal en cuanto lo reduces: en Instagram, en un cartel, en una factura.</p></div>
-          <div class="problem-card reveal"><span class="problem-x" aria-hidden="true">✕</span><p class="lang-trans" data-i18n="problem-2">Cada cosa que publicas parece de una marca distinta.</p></div>
-          <div class="problem-card reveal"><span class="problem-x" aria-hidden="true">✕</span><p class="lang-trans" data-i18n="problem-3">Tu competencia parece más seria, aunque tú trabajes mejor.</p></div>
-          <div class="problem-card reveal"><span class="problem-x" aria-hidden="true">✕</span><p class="lang-trans" data-i18n="problem-4">Has pedido presupuestos y nadie te ha explicado con claridad qué recibes.</p></div>
-        </div>
-        <div class="problem-close reveal">
-          <span class="problem-check" aria-hidden="true">✓</span>
-          <p class="lang-trans font-display" data-i18n="problem-close">Tiene arreglo, y es más sencillo de lo que imaginas.</p>
-        </div>
-      </div>
-    </section>
-
-    <section id="proceso" class="relative px-6 md:px-10 py-24 md:py-32 border-b border-line overflow-hidden z-10">
-      <div class="max-w-6xl mx-auto relative z-10">
-        <div class="reveal mb-12">
-          <span class="lang-trans lowercase block text-xs tracking-widest text-brand font-mono mb-2" data-i18n="how-eyebrow">cómo funciona</span>
-          <h2 class="lang-trans lowercase font-display text-3xl md:text-4xl" data-i18n="how-title">así de simple</h2>
-        </div>
-        <div class="steps-grid">
-          <div class="step-card reveal"><span class="step-num">01</span><h3 class="lang-trans lowercase font-display" data-i18n="how-1-title">eliges lo que necesitas</h3><p class="lang-trans" data-i18n="how-1-desc">Marcas los servicios que quieres o hablas con Brandi, nuestro asistente. Solo necesitamos entender qué haces y a quién te diriges.</p></div>
-          <div class="step-card reveal"><span class="step-num">02</span><h3 class="lang-trans lowercase font-display" data-i18n="how-2-title">lo diseñamos</h3><p class="lang-trans" data-i18n="how-2-desc">Te presentamos cada servicio que hayas elegido. Dos rondas de revisión incluidas.</p></div>
-          <div class="step-card reveal"><span class="step-num">03</span><h3 class="lang-trans lowercase font-display" data-i18n="how-3-title">te lo entregamos listo</h3><p class="lang-trans" data-i18n="how-3-desc">Recibes los archivos finales. Si añades web, la publicamos y te la entregamos llave en mano, a tu nombre.</p></div>
+        <div class="hero-authority-grid hero-fade delay-300">
+          <a href="#planes" data-section-target="planes" class="authority-item">
+            <span class="authority-dot"></span>
+            <div>
+              <strong class="lang-trans authority-title" data-i18n="trust-1-title">precio cerrado</strong>
+              <span class="lang-trans authority-desc" data-i18n="trust-1-desc">sin cuotas ni sorpresas</span>
+            </div>
+          </a>
+          <a href="#planes" data-section-target="planes" class="authority-item">
+            <span class="authority-dot"></span>
+            <div>
+              <strong class="lang-trans authority-title" data-i18n="trust-2-title">2 rondas por fase</strong>
+              <span class="lang-trans authority-desc" data-i18n="trust-2-desc">revisión y control total</span>
+            </div>
+          </a>
+          <a href="#planes" data-section-target="planes" class="authority-item">
+            <span class="authority-dot"></span>
+            <div>
+              <strong class="lang-trans authority-title" data-i18n="trust-3-title">llave en mano</strong>
+              <span class="lang-trans authority-desc" data-i18n="trust-3-desc">archivos y web a tu nombre</span>
+            </div>
+          </a>
+          <a href="#planes" data-section-target="planes" class="authority-item">
+            <span class="authority-dot"></span>
+            <div>
+              <strong class="lang-trans authority-title" data-i18n="trust-4-title">garantía de 14 días</strong>
+              <span class="lang-trans authority-desc" data-i18n="trust-4-desc">soporte tras la entrega</span>
+            </div>
+          </a>
         </div>
       </div>
     </section>
@@ -1165,6 +1130,13 @@ textarea { resize: vertical; }
         "svc-paleta": "paleta de empresa", "svc-paleta-desc": "Los colores y tipografías de tu marca, para que todo lo que publiques parezca de la misma empresa.", "svc-paleta-included": "0 € — incluida con logotipo",
         "svc-web": "web", "svc-web-desc": "Tu página web rápida y a tu nombre, entregada llave en mano: pago único de desarrollo de 400 € más una cuota obligatoria de 100 €/año de infraestructura gestionada (dominio, correo corporativo, DNS y despliegue edge).", "svc-web-annual": "+ 100 €/año infraestructura técnica",
         "plans-infra-note": "Sin cuotas mensuales. Si incluyes la web, la cuota de 100 €/año cubre únicamente la disponibilidad técnica, certificados SSL y renovaciones (dominio, correo corporativo, DNS y despliegue edge): no incluye modificaciones de contenido, cambios de diseño ni nuevas secciones tras la entrega. Solo se incluyen las 2 rondas de revisión gratuitas durante la creación; cualquier ronda de revisión adicional o cambio posterior tiene un precio cerrado de 100 € por ronda (cláusula 1.2).",
+        "trust-1-title": "precio cerrado", "trust-1-desc": "sin cuotas ni sorpresas",
+        "trust-2-title": "2 rondas por fase", "trust-2-desc": "revisión y control total",
+        "trust-3-title": "llave en mano", "trust-3-desc": "archivos y web a tu nombre",
+        "trust-4-title": "garantía de 14 días", "trust-4-desc": "soporte tras la entrega",
+        "web-domain-label": "dominio o web actual (obligatorio para la web)",
+        "web-domain-ph": "ej. tumarca.es o el dominio que quieres registrar",
+        "web-domain-error": "indica tu dominio o el que deseas registrar antes de empezar el proyecto.",
         "svc-total": "total", "svc-cta": "empezar mi proyecto", "svc-hint": "marca al menos un servicio para continuar",
         "terms-btn-hide": "- ocultar condiciones",
         "terms-summary": "En resumen: pago único de diseño y desarrollo (sin cuotas mensuales), 2 rondas de revisión gratuitas por fase durante la creación y el proyecto es tuyo al pagar. Si contratas la web (400 € de desarrollo), aplicamos una cuota obligatoria de 100 €/año exclusivamente por infraestructura técnica gestionada (dominio, correo corporativo, DNS, certificados y despliegue edge, con aviso previo y baja en un clic), que no incluye cambios de contenido, diseño ni nuevas secciones tras la entrega. Las páginas web desarrolladas incluyen en el pie de página la firma discreta del estudio y pueden mostrarse en nuestro portfolio. Cualquier ronda de revisión adicional o modificación posterior solicitada tiene un precio cerrado de 100 € por ronda (cláusula 1.2), y no hay reembolsos una vez iniciado el proyecto.",
@@ -1228,6 +1200,13 @@ textarea { resize: vertical; }
         "svc-logo": "logo", "svc-logo-desc": "A logo that looks good big and small: primary and secondary versions, ready for social media, signs and invoices. Includes complimentary company palette.", "svc-logo-included": "+ includes complimentary company palette",
         "svc-paleta": "company palette", "svc-paleta-desc": "Your brand's colors and typefaces, so everything you post looks like it comes from the same company.", "svc-paleta-included": "€0 — included with logo",
         "svc-web": "website", "svc-web-desc": "A fast website in your name, delivered turnkey: €400 one-time development payment plus a mandatory €100/year managed infrastructure fee (domain, corporate email, DNS and edge deployment).", "svc-web-annual": "+ €100/year technical infrastructure",
+        "trust-1-title": "fixed pricing", "trust-1-desc": "no retainers or surprises",
+        "trust-2-title": "2 rounds per phase", "trust-2-desc": "revision and full control",
+        "trust-3-title": "turnkey delivery", "trust-3-desc": "files and website in your name",
+        "trust-4-title": "14-day guarantee", "trust-4-desc": "support after delivery",
+        "web-domain-label": "domain or current website (mandatory for web projects)",
+        "web-domain-ph": "e.g. yourbrand.com or the domain you wish to register",
+        "web-domain-error": "please specify your domain or preferred domain before starting the project.",
         "svc-total": "total", "svc-cta": "start my project", "svc-hint": "tick at least one service to continue",
         "studio-heading": "about us",
         "studio-sub": "An illustrator and an engineer: one makes your brand look right, the other makes your website work.",
@@ -1360,6 +1339,13 @@ textarea { resize: vertical; }
         "svc-logo": "logotip", "svc-logo-desc": "Un logotip que es veu bé gran i petit: versió principal i secundària, llestos per a xarxes, cartells i factures. Inclou la paleta d'empresa de regal.", "svc-logo-included": "+ inclou paleta d'empresa de regal",
         "svc-paleta": "paleta d'empresa", "svc-paleta-desc": "Els colors i tipografies de la teva marca, perquè tot el que publiquis sembli de la mateixa empresa.", "svc-paleta-included": "0 € — inclosa amb logotip",
         "svc-web": "web", "svc-web-desc": "La teva pàgina web ràpida i a nom teu, lliurada clau en mà: pagament únic de desenvolupament de 400 € més una quota obligatòria de 100 €/any d'infraestructura gestionada (domini, correu corporatiu, DNS i desplegament edge).", "svc-web-annual": "+ 100 €/any infraestructura tècnica",
+        "trust-1-title": "preu tancat", "trust-1-desc": "sense quotes ni sorpreses",
+        "trust-2-title": "2 rondes per fase", "trust-2-desc": "revisió i control total",
+        "trust-3-title": "clau en mà", "trust-3-desc": "arxius i web al teu nom",
+        "trust-4-title": "garantia de 14 dies", "trust-4-desc": "suport després del lliurament",
+        "web-domain-label": "domini o web actual (obligatori per a la web)",
+        "web-domain-ph": "ex. latevamarca.cat o el domini que vols registrar",
+        "web-domain-error": "indica el teu domini o el que vols registrar abans de començar el projecte.",
         "svc-total": "total", "svc-cta": "començar el meu projecte", "svc-hint": "marca almenys un servei per continuar",
         "studio-heading": "sobre nosaltres",
         "studio-sub": "Un il·lustrador i un enginyer: un fa que la teva marca es vegi bé, l'altre que la teva web funcioni.",
@@ -1827,6 +1813,7 @@ textarea { resize: vertical; }
     // ── SELECTOR DE SERVICIOS ──
     const selected = new Set();
     let activeServices = []; // servicios que viajan al worker (elegidos en las tarjetas o deducidos por Brandi)
+    let activeDomain = ''; // dominio indicado para proyectos que incluyen web
     const pickedIds = () => SERVICES.filter((s) => selected.has(s.id)).map((s) => s.id);
     const svcTotal = (ids) => {
       const hasLogo = ids.includes('logo');
@@ -1879,7 +1866,17 @@ textarea { resize: vertical; }
           ${priceBlock}
         </button>`;
       }).join('');
+      const hasWeb = selected.has('web');
+      const domainBlock = hasWeb
+        ? `<div id="web-domain-block" class="mt-4 p-4 rounded-xl border border-line bg-panel/70">
+            <label for="web-domain-input" class="block text-xs font-mono lowercase text-muted mb-2">${esc(t['web-domain-label'])}</label>
+            <input id="web-domain-input" type="text" placeholder="${esc(t['web-domain-ph'])}" value="${esc(activeDomain)}"
+              class="w-full bg-ink/50 border border-line rounded-lg px-3 py-2 text-sm text-paper focus:border-brand focus:outline-none font-mono">
+            <p id="web-domain-error" class="hidden text-xs text-ai mt-2 lowercase">${esc(t['web-domain-error'])}</p>
+          </div>`
+        : '';
       root.innerHTML = `<div class="grid lg:grid-cols-3 gap-6">${cards}</div>
+        ${domainBlock}
         <div class="mt-8 p-6 rounded-2xl border border-line bg-panel flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <span class="block text-xs font-mono lowercase text-muted mb-1">${esc(t['svc-total'])}</span>
@@ -1917,6 +1914,13 @@ textarea { resize: vertical; }
       }
       const go = e.target.closest('[data-start-project]');
       if (go && selected.size) startProject(go);
+    });
+
+    $('services-builder').addEventListener('input', (e) => {
+      if (e.target.id === 'web-domain-input') {
+        activeDomain = e.target.value.trim();
+        $('web-domain-error')?.classList.add('hidden');
+      }
     });
 
     function setToggleLabel() {
@@ -2242,6 +2246,17 @@ textarea { resize: vertical; }
     function startProject(opener) {
       const ids = pickedIds();
       if (!ids.length) return;
+      if (selected.has('web')) {
+        const domInput = $('web-domain-input');
+        const domVal = domInput ? domInput.value.trim() : activeDomain;
+        if (!domVal) {
+          $('web-domain-error')?.classList.remove('hidden');
+          domInput?.focus();
+          return;
+        }
+        activeDomain = domVal;
+        $('web-domain-error')?.classList.add('hidden');
+      }
       const first = chatHistory[0];
       const same = !!first && first.greeting && !first.intro && JSON.stringify(first.info.services) === JSON.stringify(ids);
       activeServices = ids;
@@ -2413,13 +2428,14 @@ textarea { resize: vertical; }
         const res = await fetch(WORKER_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ messages, services, session: chatSession.s, lang: currentLang, confirm, brand: lastBrand, confirmSig: lastConfirmSig }),
+          body: JSON.stringify({ messages, services, session: chatSession.s, lang: currentLang, confirm, brand: lastBrand, domain: activeDomain, confirmSig: lastConfirmSig }),
           signal: AbortSignal.timeout(30000)
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw Object.assign(new Error(data.error || 'http_' + res.status), { code: data.error });
 
         if (data.brand) lastBrand = data.brand;
+        if (data.domain) activeDomain = data.domain;
         if (data.leadClosed && data.resume) saveResume({ token: data.resume, email: data.emailHint || '', at: Date.now(), resendAt: Date.now(), left: MAX_RESENDS });
         if (Array.isArray(data.services) && data.services.length) activeServices = data.services;
         lastConfirmSig = data.confirmSig || '';

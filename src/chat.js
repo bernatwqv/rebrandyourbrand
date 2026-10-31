@@ -103,14 +103,16 @@ async function handleChatPost(request, env, body, o) {
 
     const email = findEmail(chatMessages);
     const brand0 = cleanBrand(body.brand);
+    const domain0 = cleanInput(body.domain, 200) || findDomain(chatMessages);
     const confirmSigIn = typeof body.confirmSig === "string" ? body.confirmSig : "";
-    const isShown = async (p, b) =>
-      !!(email && b && p) && (await verifyRaw(key, confirmPayload(email, b, p), confirmSigIn));
+    const isShown = async (p, b, d) =>
+      !!(email && b && p && (!p.ids.includes("web") || d)) &&
+      (await verifyRaw(key, confirmPayload(email, b, p, d), confirmSigIn));
 
-    const confirmAndSend = async (plan, brand) => {
+    const confirmAndSend = async (plan, brand, domain) => {
       if (!env.RESEND_API_KEY) throw new HttpError(500, "misconfigured");
       if (!plan) throw new HttpError(400, "plan_required");
-      if (!(await isShown(plan, brand))) throw new HttpError(400, "invalid_confirmation");
+      if (!(await isShown(plan, brand, domain))) throw new HttpError(400, "invalid_confirmation");
 
       if (env.VERIFY_LIMITER) {
         const { success: okV } = await env.VERIFY_LIMITER.limit({ key: `v:${ipKey(ip)}` });
@@ -123,6 +125,7 @@ async function handleChatPost(request, env, body, o) {
         plan,
         clientEmail: email,
         brand,
+        domain,
       });
       const reply = MSG[lang].sent;
       return jsonResponse(
@@ -133,6 +136,7 @@ async function handleChatPost(request, env, body, o) {
           canConfirm: false,
           confirmSig: "",
           brand,
+          domain: domain || undefined,
           services: planOut(plan),
           resume: `${verifyToken}.${await resumeSig(key, verifyToken)}`,
           emailHint: maskEmail(email),
@@ -143,7 +147,7 @@ async function handleChatPost(request, env, body, o) {
     };
 
     if (body.confirm === true) {
-      return await confirmAndSend(plan0, brand0);
+      return await confirmAndSend(plan0, brand0, domain0);
     }
 
     const lastText = chatMessages.at(-1)?.text || "";
@@ -151,9 +155,9 @@ async function handleChatPost(request, env, body, o) {
     const userAgreed =
       lastText.length <= 60 && AGREE_RE.test(lastText) && !userDenied && !CHANGE_INTENT_RE.test(lastText);
 
-    const summaryResponse = async (plan, brand) => {
-      const reply = buildSummary(lang, { brand, email, plan });
-      const confirmSig = await signRaw(key, confirmPayload(email, brand, plan));
+    const summaryResponse = async (plan, brand, domain) => {
+      const reply = buildSummary(lang, { brand, email, plan, domain });
+      const confirmSig = await signRaw(key, confirmPayload(email, brand, plan, domain));
       return jsonResponse(
         {
           reply,
@@ -162,6 +166,7 @@ async function handleChatPost(request, env, body, o) {
           canConfirm: true,
           confirmSig,
           brand,
+          domain: domain || undefined,
           services: planOut(plan),
         },
         200,
@@ -169,15 +174,15 @@ async function handleChatPost(request, env, body, o) {
       );
     };
 
-    const wasShown = await isShown(plan0, brand0);
+    const wasShown = await isShown(plan0, brand0, domain0);
 
     // Si el resumen ya estaba en pantalla y el cliente escribe "sí"/"vale"/"ok"/"bai", confirmamos sin bucle
     if (wasShown && userAgreed) {
-      return await confirmAndSend(plan0, brand0);
+      return await confirmAndSend(plan0, brand0, domain0);
     }
 
-    // Si el cliente acaba de dar el último dato que faltaba (p. ej. el correo) sin pedir cambios, devolvemos el resumen al instante sin llamar a Groq
-    const missing0 = missingOf(brand0, email, plan0);
+    // Si el cliente acaba de dar el último dato que faltaba sin pedir cambios, devolvemos el resumen al instante sin llamar a Groq
+    const missing0 = missingOf(brand0, email, plan0, domain0);
     const textWithoutEmail = lastText.replace(EMAIL_FIND, "").trim();
     if (
       !missing0.length &&
@@ -186,23 +191,24 @@ async function handleChatPost(request, env, body, o) {
       !CHANGE_INTENT_RE.test(textWithoutEmail) &&
       !SERVICE_MENTION_RE.test(textWithoutEmail)
     ) {
-      return await summaryResponse(plan0, brand0);
+      return await summaryResponse(plan0, brand0, domain0);
     }
 
     const out = await askGroq(
       env,
       lang,
-      { plan: plan0, brand: brand0, email, denied: wasShown && userDenied },
+      { plan: plan0, brand: brand0, email, domain: domain0, denied: wasShown && userDenied },
       chatMessages
     );
 
     const plan = mergeServices(plan0, out);
     const brand = cleanBrand(out.brand) || brand0;
-    const missing = missingOf(brand, email, plan);
+    const domain = cleanInput(out.domain, 200) || domain0 || findDomain(chatMessages);
+    const missing = missingOf(brand, email, plan, domain);
 
     if (!missing.length) {
-      const shownNow = await isShown(plan, brand);
-      if (!shownNow) return await summaryResponse(plan, brand);
+      const shownNow = await isShown(plan, brand, domain);
+      if (!shownNow) return await summaryResponse(plan, brand, domain);
     }
 
     let reply = String(out.reply ?? "").trim().slice(0, 2000);
@@ -219,6 +225,7 @@ async function handleChatPost(request, env, body, o) {
         canConfirm: false,
         confirmSig: keepSig,
         brand,
+        domain: domain || undefined,
         services: planOut(plan),
       },
       200,

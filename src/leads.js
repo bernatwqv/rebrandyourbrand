@@ -17,7 +17,7 @@ async function sendVerifyEmail(env, { lang, brand, clientEmail }, verifyToken, a
   );
 }
 
-async function startVerification(env, { lang, messages, plan, clientEmail, brand }) {
+async function startVerification(env, { lang, messages, plan, clientEmail, brand, domain }) {
   const cooldownKey = `cooldown:${clientEmail}`;
   if (await env.LEADS_KV.get(cooldownKey)) {
     throw new HttpError(429, "email_cooldown", { "Retry-After": String(EMAIL_COOLDOWN_SECONDS) });
@@ -33,6 +33,7 @@ async function startVerification(env, { lang, messages, plan, clientEmail, brand
     services: plan.ids,
     clientEmail,
     brand,
+    domain: domain || "",
     resends: 0,
     timestamp: new Date().toISOString(),
   };

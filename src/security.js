@@ -35,7 +35,7 @@ const signMsg = (key, text) => signRaw(key, `msg|${text}`);
 
 const verifyMsg = (key, text, sig) => verifyRaw(key, `msg|${text}`, sig);
 
-const confirmPayload = (email, brand, plan) => `confirm|${email}|${brand}|${plan.ids.join(",")}`;
+const confirmPayload = (email, brand, plan, domain = "") => `confirm|${email}|${brand}|${plan.ids.join(",")}|${domain || ""}`;
 
 // Tokens deterministas firmados por HMAC (sin depender de claves temporales en KV)
 const getActionToken = (key, projectToken, step) => signRaw(key, `action|${projectToken}|${step}`);
