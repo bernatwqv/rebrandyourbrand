@@ -304,7 +304,7 @@ const SECURITY_HEADERS = {
   "Referrer-Policy": "no-referrer",
 };
 
-const PAGE_CSP = "default-src 'none'; style-src 'unsafe-inline'; form-action 'self' https://checkout.stripe.com; base-uri 'none'; frame-ancestors 'none'";
+const PAGE_CSP = "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; form-action 'self' https://checkout.stripe.com; base-uri 'none'; frame-ancestors 'none'";
 
 const HTML_HEADERS = {
   "Content-Type": "text/html; charset=utf-8",
@@ -2826,6 +2826,10 @@ const RYBB_BRAND_MARK = `<span class="brand-link-inner" style="display:inline-fl
 const RYBB_LOGO_SVG = `<svg viewBox="0 0 726 261" width="96" height="34" fill="currentColor" aria-hidden="true" style="display:block;height:28px;width:auto;"><path fill-rule="evenodd" d="${RYBB_LOGO_PATH}"></path></svg>`;
 
 const PAGE_CSS = `
+:root{
+  --ease-editorial: cubic-bezier(.16, 1, .3, 1);
+  --ease-out-back: cubic-bezier(.23, 1, .32, 1);
+}
 *{box-sizing:border-box;margin:0;padding:0}
 html{background:#FAF7F3;color:#17171A;-webkit-text-size-adjust:100%}
 body{
@@ -3133,9 +3137,11 @@ button,.btn{
   border-radius:12px;
   cursor:pointer;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 8px 18px -4px rgba(95,122,158,.25);
-  transition:all 240ms cubic-bezier(.16,1,.3,1);
+  transition:all 240ms var(--ease-editorial);
+  will-change:transform;
 }
 button:hover,.btn:hover{background:linear-gradient(150deg,#5F7A9E,#4E6A8E);border-color:#5F7A9E;color:#FFFFFF;transform:translateY(-1px);box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 12px 24px -6px rgba(95,122,158,.3)}
+button:active,.btn:active{transform:scale(0.97);box-shadow:inset 0 1px 0 rgba(0,0,0,.15),0 4px 10px -2px rgba(95,122,158,.2)}
 button.secondary,.btn.secondary,button.no{
   background:linear-gradient(150deg,rgba(255,255,255,.95),rgba(246,241,232,.75));
   backdrop-filter:blur(12px);
@@ -3150,6 +3156,9 @@ button.secondary:hover,.btn.secondary:hover,button.no:hover{
   background:#FFFFFF;
   color:#17171A;
   transform:translateY(-1px);
+}
+button.secondary:active,.btn.secondary:active,button.no:active{
+  transform:scale(0.97);
 }
 .btn-inline{
   width:auto;
@@ -3245,9 +3254,11 @@ button.secondary:hover,.btn.secondary:hover,button.no:hover{
   backdrop-filter:blur(8px);
   -webkit-backdrop-filter:blur(8px);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.7);
-  transition:all 200ms ease;
+  transition:all 200ms var(--ease-editorial);
+  will-change:transform;
 }
 .pill-link:hover{background:#8CA3C4;color:#0A0A0C;border-color:#8CA3C4;transform:translateY(-1px)}
+.pill-link:active{transform:scale(0.96)}
 .banner-ok{
   background:linear-gradient(145deg,rgba(255,255,255,.94),rgba(240,245,252,.75));
   backdrop-filter:blur(12px);
@@ -3278,27 +3289,17 @@ button.secondary:hover,.btn.secondary:hover,button.no:hover{
   border-radius:16px;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.15),0 16px 40px rgba(0,0,0,.35);
   overflow:hidden;
-  animation:undoDismiss .4s cubic-bezier(.16,1,.3,1) 15s forwards;
+  animation:undoDismiss .4s var(--ease-editorial) 15s forwards;
+  transition:opacity .35s var(--ease-editorial),transform .35s var(--ease-editorial),visibility .35s;
+}
+.undo-bar-wrap.is-dismissed{
+  opacity:0;
+  transform:translate(-50%,20px);
+  pointer-events:none;
 }
 @keyframes undoDismiss{
   0%,90%{opacity:1;transform:translate(-50%,0);pointer-events:auto;}
   100%{opacity:0;transform:translate(-50%,20px);pointer-events:none;visibility:hidden;}
-}
-.undo-progress{
-  height:3px;
-  background:rgba(255,255,255,.12);
-  width:100%;
-  overflow:hidden;
-}
-.undo-progress-fill{
-  height:100%;
-  background:#E8A33D;
-  width:100%;
-  animation:undoCountdown 15s linear forwards;
-}
-@keyframes undoCountdown{
-  from{width:100%;}
-  to{width:0%;}
 }
 .undo-bar-content{
   display:flex;
@@ -3310,7 +3311,7 @@ button.secondary:hover,.btn.secondary:hover,button.no:hover{
 .undo-bar-text{
   display:flex;
   align-items:center;
-  gap:.5rem;
+  gap:.65rem;
   font-size:.82rem;
   font-weight:500;
   color:#F5F2EA;
@@ -3318,12 +3319,25 @@ button.secondary:hover,.btn.secondary:hover,button.no:hover{
   min-width:0;
   flex:1;
 }
-.undo-bar-text span.undo-dot{
-  width:7px;
-  height:7px;
-  border-radius:999px;
-  background:#E8A33D;
+.undo-ring{
+  width:20px;
+  height:20px;
+  transform:rotate(-90deg);
   flex-shrink:0;
+}
+.undo-ring-bg{
+  stroke:rgba(255,255,255,.16);
+}
+.undo-ring-stroke{
+  stroke:#E8A33D;
+  stroke-dasharray:56.55;
+  stroke-dashoffset:0;
+  animation:undoRingCountdown 15s linear forwards;
+  stroke-linecap:round;
+}
+@keyframes undoRingCountdown{
+  from{stroke-dashoffset:0;}
+  to{stroke-dashoffset:56.55;}
 }
 .undo-bar-actions{
   display:flex;
@@ -3343,11 +3357,16 @@ button.secondary:hover,.btn.secondary:hover,button.no:hover{
   font:600 .76rem/1.2 inherit;
   text-transform:lowercase;
   cursor:pointer;
-  transition:background .2s,border-color .2s;
+  transition:background .2s var(--ease-editorial),border-color .2s var(--ease-editorial),transform .2s var(--ease-editorial);
+  will-change:transform;
 }
 .btn-undo:hover{
   background:#F0BE82;
   border-color:#F0BE82;
+  transform:translateY(-1px);
+}
+.btn-undo:active{
+  transform:scale(0.96);
 }
 .btn-dismiss{
   display:inline-flex;
@@ -3362,11 +3381,16 @@ button.secondary:hover,.btn.secondary:hover,button.no:hover{
   text-decoration:none;
   text-transform:lowercase;
   cursor:pointer;
-  transition:color .2s,border-color .2s;
+  transition:color .2s var(--ease-editorial),border-color .2s var(--ease-editorial),transform .2s var(--ease-editorial);
+  will-change:transform;
 }
 .btn-dismiss:hover{
   color:#F5F2EA;
   border-color:rgba(255,255,255,.35);
+  transform:translateY(-1px);
+}
+.btn-dismiss:active{
+  transform:scale(0.96);
 }
 .foot{
   margin-top:1.25rem;
@@ -5150,19 +5174,42 @@ async function handleProject(request, env, url) {
   const undoHtml =
     url.searchParams.get("undo") === "1" && proj.lastAdded && Date.now() - proj.lastAdded.timestamp < 60000
       ? `
-      <div class="undo-bar-wrap">
-        <div class="undo-progress"><div class="undo-progress-fill"></div></div>
+      <div class="undo-bar-wrap" id="undo-bar">
         <div class="undo-bar-content">
-          <div class="undo-bar-text"><span class="undo-dot"></span><span>${esc(T.obUndoBanner)}</span></div>
+          <div class="undo-bar-text">
+            <svg class="undo-ring" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+              <circle class="undo-ring-bg" cx="12" cy="12" r="9" fill="none" stroke-width="2.5"></circle>
+              <circle class="undo-ring-stroke" cx="12" cy="12" r="9" fill="none" stroke-width="2.5"></circle>
+            </svg>
+            <span>${esc(T.obUndoBanner)}</span>
+          </div>
           <div class="undo-bar-actions">
             <form method="POST" style="margin:0;padding:0;display:inline;">
               <input type="hidden" name="op" value="undo_onboarding">
               <button type="submit" class="btn-undo">${esc(T.obUndoBtn)}</button>
             </form>
-            <a class="btn-dismiss" href="${esc(projectPageUrl)}">${esc(T.obDismissBtn)}</a>
+            <a class="btn-dismiss" id="undo-dismiss-btn" href="${esc(projectPageUrl)}">${esc(T.obDismissBtn)}</a>
           </div>
         </div>
-      </div>`
+      </div>
+      <script>
+        (function(){
+          var bar = document.getElementById("undo-bar");
+          if (!bar) return;
+          var dismiss = function(e){
+            if (e && e.preventDefault) e.preventDefault();
+            bar.classList.add("is-dismissed");
+            setTimeout(function(){
+              if (bar && bar.parentNode) bar.parentNode.removeChild(bar);
+            }, 360);
+          };
+          var btn = document.getElementById("undo-dismiss-btn");
+          if (btn) btn.addEventListener("click", dismiss);
+          window.addEventListener("keydown", function(e){
+            if (e.key === "Escape" || e.keyCode === 27) dismiss();
+          });
+        })();
+      </script>`
       : "";
 
   if (checkAllServicesApproved(proj) && (!proj.finishedAt || !proj.reviewInvited || proj.status !== "done")) {

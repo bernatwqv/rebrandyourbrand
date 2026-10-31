@@ -1725,19 +1725,42 @@ async function handleProject(request, env, url) {
   const undoHtml =
     url.searchParams.get("undo") === "1" && proj.lastAdded && Date.now() - proj.lastAdded.timestamp < 60000
       ? `
-      <div class="undo-bar-wrap">
-        <div class="undo-progress"><div class="undo-progress-fill"></div></div>
+      <div class="undo-bar-wrap" id="undo-bar">
         <div class="undo-bar-content">
-          <div class="undo-bar-text"><span class="undo-dot"></span><span>${esc(T.obUndoBanner)}</span></div>
+          <div class="undo-bar-text">
+            <svg class="undo-ring" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+              <circle class="undo-ring-bg" cx="12" cy="12" r="9" fill="none" stroke-width="2.5"></circle>
+              <circle class="undo-ring-stroke" cx="12" cy="12" r="9" fill="none" stroke-width="2.5"></circle>
+            </svg>
+            <span>${esc(T.obUndoBanner)}</span>
+          </div>
           <div class="undo-bar-actions">
             <form method="POST" style="margin:0;padding:0;display:inline;">
               <input type="hidden" name="op" value="undo_onboarding">
               <button type="submit" class="btn-undo">${esc(T.obUndoBtn)}</button>
             </form>
-            <a class="btn-dismiss" href="${esc(projectPageUrl)}">${esc(T.obDismissBtn)}</a>
+            <a class="btn-dismiss" id="undo-dismiss-btn" href="${esc(projectPageUrl)}">${esc(T.obDismissBtn)}</a>
           </div>
         </div>
-      </div>`
+      </div>
+      <script>
+        (function(){
+          var bar = document.getElementById("undo-bar");
+          if (!bar) return;
+          var dismiss = function(e){
+            if (e && e.preventDefault) e.preventDefault();
+            bar.classList.add("is-dismissed");
+            setTimeout(function(){
+              if (bar && bar.parentNode) bar.parentNode.removeChild(bar);
+            }, 360);
+          };
+          var btn = document.getElementById("undo-dismiss-btn");
+          if (btn) btn.addEventListener("click", dismiss);
+          window.addEventListener("keydown", function(e){
+            if (e.key === "Escape" || e.keyCode === 27) dismiss();
+          });
+        })();
+      </script>`
       : "";
 
   if (checkAllServicesApproved(proj) && (!proj.finishedAt || !proj.reviewInvited || proj.status !== "done")) {
