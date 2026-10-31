@@ -18,10 +18,10 @@ function renderEmail(lang, { paras = [], cta = null, secondaryLink = null, note 
   const pStyle = "color:#58575E;font-size:14px;line-height:1.65;margin:0 0 20px;";
   const body = paras.map((p) => `<p style="${pStyle}">${p}</p>`).join("");
   const quoteHtml = quote
-    ? `<blockquote style="margin:0 0 24px;padding:14px 16px;background-color:#FFFFFF;border-left:2px solid #8CA3C4;border-radius:0 8px 8px 0;color:#17171A;font-size:13px;line-height:1.6;white-space:pre-wrap;word-break:break-word;">${esc(quote)}</blockquote>`
+    ? `<blockquote style="margin:0 0 24px;padding:14px 16px;background:linear-gradient(145deg,rgba(255,255,255,0.95),rgba(246,241,232,0.7));background-color:#FFFFFF;border:1px solid #E4DED0;border-left:3px solid #8CA3C4;border-radius:0 10px 10px 0;box-shadow:inset 0 1px 0 rgba(255,255,255,0.9),0 4px 14px rgba(60,50,30,0.04);color:#17171A;font-size:13px;line-height:1.6;white-space:pre-wrap;word-break:break-word;">${esc(quote)}</blockquote>`
     : "";
   const button = cta
-    ? `<div style="text-align:center;margin:32px 0 20px;"><a href="${esc(cta.url)}" target="_blank" style="background-color:#8CA3C4;color:#0A0A0C;padding:14px 28px;text-decoration:none;font-weight:600;font-size:13px;border-radius:10px;display:inline-block;text-transform:lowercase;">${esc(cta.label)}</a></div>`
+    ? `<div style="text-align:center;margin:32px 0 20px;"><a href="${esc(cta.url)}" target="_blank" style="background:linear-gradient(150deg,#8CA3C4,#7893B8);background-color:#8CA3C4;color:#0A0A0C;padding:14px 28px;text-decoration:none;font-weight:600;font-size:13px;border-radius:12px;display:inline-block;text-transform:lowercase;box-shadow:inset 0 1px 0 rgba(255,255,255,0.4),0 8px 18px -4px rgba(95,122,158,0.25);">${esc(cta.label)}</a></div>`
     : "";
   const secondary = secondaryLink
     ? `<p style="text-align:center;margin:0 0 24px;font-size:12px;"><a href="${esc(secondaryLink.url)}" target="_blank" style="color:#3D5A85;text-decoration:underline;text-transform:lowercase;">${esc(secondaryLink.label)}</a></p>`
@@ -30,8 +30,8 @@ function renderEmail(lang, { paras = [], cta = null, secondaryLink = null, note 
 
   const html = `<!DOCTYPE html>
 <html lang="${l}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light only"></head>
-<body style="background-color:#FFFFFF;color:#17171A;font-family:'Inter',Arial,sans-serif;padding:40px 20px;margin:0;">
-  <div style="max-width:560px;margin:0 auto;background-color:#EDE6D6;border:1px solid #E4DED0;padding:40px;border-radius:16px;">
+<body style="background-color:#FAF7F3;color:#17171A;font-family:'Inter',Arial,sans-serif;padding:40px 20px;margin:0;">
+  <div style="max-width:560px;margin:0 auto;background:linear-gradient(150deg,rgba(255,255,255,0.96) 0%,rgba(246,241,232,0.85) 100%);background-color:#EDE6D6;border:1px solid #E4DED0;border-radius:20px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.95),0 16px 36px -10px rgba(60,50,30,0.08);padding:40px;-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);">
     <h2 style="font-family:'Fraunces',Georgia,serif;font-size:22px;letter-spacing:-0.03em;margin:0 0 24px;color:#17171A;font-weight:400;text-transform:lowercase;">rebrandyourbrand</h2>
     ${body}${quoteHtml}${button}${secondary}${footer}
   </div>

@@ -1345,6 +1345,20 @@ async function handleProject(request, env, url) {
 
       // Bloque 1 — Materiales del negocio:
       const domain = cleanInput(form?.get("domain") ?? "", 200);
+      const hasWeb = Array.isArray(proj.services) && proj.services.includes("web");
+      const hasDomainAlready = Boolean(proj.onboarding?.domain || (Array.isArray(proj.materialsList) && proj.materialsList.some((m) => m.domain)));
+      if (hasWeb && !hasDomainAlready && !domain) {
+        return htmlResponse(
+          page(T.obDomainMissing[0], T.obDomainMissing[1], T.obDomainMissing[2], {
+            lang: L,
+            eyebrow: T.obEyebrow,
+            html: `<a class="btn" href="${esc(projectPageUrl)}">${esc(PG[L].common.openTracker)}</a>`,
+            footerUrl: projectPageUrl,
+            footerLabel: PG[L].common.openTracker,
+          }),
+          400
+        );
+      }
       const socials = cleanInput(form?.get("socials") ?? "", 250);
       const rawMaterialsUrl = String(form?.get("materials_url") ?? "").trim();
       const materialsUrl = cleanHttpsUrl(rawMaterialsUrl, 500);
@@ -1814,14 +1828,17 @@ async function handleProject(request, env, url) {
 
   let addFormHtml = "";
   if (!allDone) {
+    const hasWeb = Array.isArray(proj.services) && proj.services.includes("web");
+    const hasDomainAlready = Boolean(proj.onboarding?.domain || materialsList.some((m) => m.domain));
+    const domainRequired = hasWeb && !hasDomainAlready;
     const formFields = `
       <form method="POST" enctype="multipart/form-data" style="text-align:left;">
         <input type="hidden" name="op" value="onboarding">
 
         <div class="section-subheading">${esc(T.blockAMaterials)}</div>
 
-        <label for="domain">${esc(T.obDomain)}</label>
-        <input id="domain" name="domain" type="text" maxlength="200" placeholder="${esc(T.obDomainPh)}">
+        <label for="domain">${esc(T.obDomain)}${domainRequired ? ` <span style="color:#cf172f;font-weight:600;">(${esc(T.obDomainRequired)})</span>` : ""}</label>
+        <input id="domain" name="domain" type="text" maxlength="200" placeholder="${esc(T.obDomainPh)}" ${domainRequired ? "required" : ""}>
 
         <label for="socials">${esc(T.obSocials)}</label>
         <input id="socials" name="socials" type="text" maxlength="250" placeholder="${esc(T.obSocialsPh)}">
