@@ -113,7 +113,7 @@ Los colores son variables con triplete RGB (`rgb(var(--color-x))`). **No pongas 
 
 ## 10. Legal y privacidad
 
-- **El aviso legal contiene placeholders** (`[NOMBRE O RAZÓN SOCIAL]`, `[NIF]`, `[DIRECCIÓN COMPLETA]`). No los rellenes tú: avisa al usuario de que deben completarse antes de publicar.
+- **Datos identificativos del aviso legal:** Bernat Domènech Sevillano, NIF 47132030Q, C/Sant Jaume 3, Santa Margarida de Montbui. No modificarlos sin orden expresa.
 - **Términos B2B:** 2 rondas de revisión por fase, validación obligatoria del cliente (pausa indefinida si no responde, sin avance unilateral), garantía de 14 días, 100 € fijos por ronda extra, sin reembolsos tras iniciar. No los modifiques sin orden expresa.
 - **Datos locales actuales:** `localStorage` (`rybb-lang`, `rybb-theme`, `rrb_verified_session`) y `sessionStorage` (`rybb-session`). No hay analítica ni cookies publicitarias.
 - Si añades analítica, cookies, formularios o un servicio de terceros, actualiza **en los tres idiomas** la política de privacidad y cookies, y la CSP.
