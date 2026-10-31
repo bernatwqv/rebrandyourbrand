@@ -46,6 +46,8 @@ const cancelRenewalToken = (key, projectToken, dueIso) => signRaw(key, `crenew|$
 
 const fileDownloadToken = (key, projectToken, step, fileId) => signRaw(key, `file|${projectToken}|${step}|${fileId}`);
 
+const adminChatToken = (key, projectToken) => signRaw(key, `adminchat|${projectToken}`);
+
 const testimonialDeleteToken = (key, id) => signRaw(key, `tdel|${id}`);
 
 const reviewSig = (key, projectToken) => signRaw(key, `review|${projectToken}`);
@@ -74,6 +76,12 @@ async function fileDownloadUrl(env, projectToken, step, fileId) {
   const key = await getKey(env);
   const t = await fileDownloadToken(key, projectToken, step, fileId);
   return buildUrl("/file", { p: projectToken, step, id: fileId, t });
+}
+
+async function studioChatUrl(env, projectToken) {
+  const key = await getKey(env);
+  const t = await adminChatToken(key, projectToken);
+  return buildUrl("/responder-chat", { p: projectToken, t });
 }
 
 // Sesión de chat: se emite tras resolver Turnstile una vez. Va firmada (HMAC), caduca y está ligada a la IP.

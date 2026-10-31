@@ -595,6 +595,15 @@ const EM = {
       cta: "ver estado del expediente",
       note: "de conformidad con la cláusula 3.2, los importes abonados se conservan en concepto de compensación por reserva de agenda y trabajos preparatorios.",
     },
+    chat: {
+      confirmSubject: (br) => `hemos recibido tu mensaje — ${br}`,
+      hello: "hola,",
+      confirmReceived: (br) => `hemos recibido correctamente tu mensaje para el equipo en el chat del proyecto ${br}:`,
+      confirmSoon: "gael o bernat te responderán en breve desde el estudio en tu panel de seguimiento.",
+      replySubject: (br) => `nueva respuesta de gael y bernat — ${br}`,
+      replyIntro: (br) => `gael y bernat han respondido a tu consulta en el proyecto ${br}:`,
+      viewPortal: "ver respuesta en el panel de seguimiento",
+    },
   },
   ca: {
     verify: {
@@ -709,6 +718,15 @@ const EM = {
       body: "havent transcorregut més de 37 dies naturals sense recepció de materials ni resposta després del preavís reglamentari, l'expedient ha quedat tancat definitivament.",
       cta: "veure estat de l'expedient",
       note: "de conformitat amb la clàusula 3.2, els imports abonats es conserven en concepte de compensació per reserva d'agenda i treballs preparatoris.",
+    },
+    chat: {
+      confirmSubject: (br) => `hem rebut el teu missatge — ${br}`,
+      hello: "hola,",
+      confirmReceived: (br) => `hem rebut correctament el teu missatge per a l'equip al xat del projecte ${br}:`,
+      confirmSoon: "en gael o en bernat et respondran ben aviat des de l'estudi al teu panell de seguiment.",
+      replySubject: (br) => `nova resposta d'en gael i en bernat — ${br}`,
+      replyIntro: (br) => `en gael i en bernat han respost a la teva consulta al projecte ${br}:`,
+      viewPortal: "veure resposta al panell de seguiment",
     },
   },
   eu: {
@@ -825,6 +843,15 @@ const EM = {
       cta: "espedientearen egoera ikusi",
       note: "3.2 klausularekin bat etorriz, ordaindutako zenbatekoak agenda-erreserbagatiko eta aldez aurreko lanengatiko kalte-ordain gisa gordetzen dira.",
     },
+    chat: {
+      confirmSubject: (br) => `zure mezua jaso dugu — ${br}`,
+      hello: "kaixo,",
+      confirmReceived: (br) => `behar bezala jaso dugu ${br} proiektuaren txatean lan-taldeari bidalitako mezua:`,
+      confirmSoon: "gaelek edo bernatek laster erantzungo dizute estudiotik zure jarraipen-panelean.",
+      replySubject: (br) => `gael eta bernaten erantzun berria — ${br}`,
+      replyIntro: (br) => `gaelek eta bernatek zure kontsultari erantzun diote ${br} proiektuan:`,
+      viewPortal: "ikusi erantzuna jarraipen-panelean",
+    },
   },
   en: {
     verify: {
@@ -939,6 +966,15 @@ const EM = {
       body: "having exceeded 37 calendar days without receiving materials or a response following the formal notice, the file has been definitively closed.",
       cta: "view file status",
       note: "pursuant to clause 3.2, fees paid are retained as compensation for schedule reservation and preparatory work.",
+    },
+    chat: {
+      confirmSubject: (br) => `we received your message — ${br}`,
+      hello: "hello,",
+      confirmReceived: (br) => `we have successfully received your message for the team in the project chat for ${br}:`,
+      confirmSoon: "gael or bernat will reply shortly from the studio in your tracking portal.",
+      replySubject: (br) => `new reply from gael and bernat — ${br}`,
+      replyIntro: (br) => `gael and bernat have replied to your question in project ${br}:`,
+      viewPortal: "view reply in tracking portal",
     },
   },
 };
@@ -1125,6 +1161,23 @@ const PG = {
       obLblDomain: "dominio",
       obLblMaterials: "carpeta o notas",
       obMissing: ["faltan datos", "indica al menos un dato", "rellena al menos uno de los campos antes de enviar el formulario."],
+      chatEyebrow: "soporte directo e ia",
+      chatHeading: "asistencia y chat del proyecto",
+      chatTabBrandi: "brandi (ia)",
+      chatTabHuman: "gael y bernat (equipo)",
+      brandiIntro: "brandi conoce el estado exacto de tu proyecto, servicios contratados, fases y plazos para resolver tus dudas al instante.",
+      switchToHuman: "hablar con el equipo humano",
+      brandiWelcome: (brand) => `hola, estoy al tanto de todo lo relativo a tu proyecto para ${brand}. ¿en qué puedo ayudarte hoy?`,
+      brandiPlaceholder: "pregunta a brandi sobre fases, entregables, revisiones...",
+      humanIntro: "escribe directamente a gael y bernat. te responderemos en tu panel y por correo.",
+      humanPlaceholder: "escribe tu mensaje para gael y bernat...",
+      humanSentSuccess: "mensaje enviado al equipo. te responderemos a la mayor brevedad.",
+      humanEmptyMsg: "escribe un mensaje antes de enviar.",
+      sendBtn: "enviar",
+      chatYou: "tú",
+      chatStudio: "gael y bernat",
+      chatBrandi: "brandi (ia)",
+      chatNoMessages: "aún no hay mensajes con el equipo. escribe abajo para iniciar la conversación.",
     },
   },
   ca: {
@@ -1272,6 +1325,23 @@ const PG = {
       obLblDomain: "domini",
       obLblMaterials: "carpeta o notes",
       obMissing: ["falten dades", "indica almenys una dada", "omple almenys un dels camps abans d'enviar el formulari."],
+      chatEyebrow: "suport directe i ia",
+      chatHeading: "assistència i xat del projecte",
+      chatTabBrandi: "brandi (ia)",
+      chatTabHuman: "gael i bernat (equip)",
+      brandiIntro: "la brandi coneix l'estat exacte del teu projecte, serveis contractats, fases i terminis per resoldre els teus dubtes a l'instant.",
+      switchToHuman: "parlar amb l'equip humà",
+      brandiWelcome: (brand) => `hola, estic al corrent de tot el relatiu al teu projecte per a ${brand}. en què et puc ajudar avui?`,
+      brandiPlaceholder: "pregunta a la brandi sobre fases, lliurables, revisions...",
+      humanIntro: "escriu directament a en gael i en bernat. et respondrem al teu panell i per correu.",
+      humanPlaceholder: "escriu el teu missatge per a en gael i en bernat...",
+      humanSentSuccess: "missatge enviat a l'equip. et respondrem com més aviat millor.",
+      humanEmptyMsg: "escriu un missatge abans d'enviar.",
+      sendBtn: "enviar",
+      chatYou: "tu",
+      chatStudio: "gael i bernat",
+      chatBrandi: "brandi (ia)",
+      chatNoMessages: "encara no hi ha missatges amb l'equip. escriu a sota per iniciar la conversa.",
     },
   },
   eu: {
@@ -1419,6 +1489,23 @@ const PG = {
       obLblDomain: "domeinua",
       obLblMaterials: "karpeta edo oharrak",
       obMissing: ["datuak falta dira", "adierazi gutxienez datu bat", "bete gutxienez eremuetako bat inprimakia bidali aurretik."],
+      chatEyebrow: "zuzeneko laguntza eta adimen artifiziala",
+      chatHeading: "laguntza eta proiektuaren txata",
+      chatTabBrandi: "brandi (ia)",
+      chatTabHuman: "gael eta bernat (lan-taldea)",
+      brandiIntro: "brandik zure proiektuaren egoera zehatza, kontratatutako zerbitzuak, faseak eta epeak ezagutzen ditu zure zalantzak berehala argitzeko.",
+      switchToHuman: "giza taldearekin hitz egin",
+      brandiWelcome: (brand) => `kaixo, ${brand} proiektuari buruzko guztiaren berri dut. zertan lagun zaitzaket gaur?`,
+      brandiPlaceholder: "galdetu brandiri faseei, entrega-lanei edo berrikuspenei buruz...",
+      humanIntro: "idatzi zuzenean gael eta bernati. zure panelean eta posta elektronikoz erantzungo dizugu.",
+      humanPlaceholder: "idatzi zure mezua gael eta bernati...",
+      humanSentSuccess: "mezua lan-taldeari bidali zaio. ahalik eta lasterren erantzungo dizugu.",
+      humanEmptyMsg: "idatzi mezu bat bidali aurretik.",
+      sendBtn: "bidali",
+      chatYou: "zu",
+      chatStudio: "gael eta bernat",
+      chatBrandi: "brandi (ia)",
+      chatNoMessages: "oraindik ez dago mezurik lan-taldearekin. idatzi behean elkarrizketa hasteko.",
     },
   },
   en: {
@@ -1566,6 +1653,23 @@ const PG = {
       obLblDomain: "domain",
       obLblMaterials: "folder or notes",
       obMissing: ["missing details", "please fill in at least one field", "enter at least one detail before sending the form."],
+      chatEyebrow: "direct support and ai",
+      chatHeading: "assistance and project chat",
+      chatTabBrandi: "brandi (ai)",
+      chatTabHuman: "gael and bernat (team)",
+      brandiIntro: "brandi knows the exact status of your project, contracted services, phases and deadlines to resolve your questions instantly.",
+      switchToHuman: "talk to the human team",
+      brandiWelcome: (brand) => `hello, i am up to date with everything regarding your project for ${brand}. how can i help you today?`,
+      brandiPlaceholder: "ask brandi about phases, deliverables, revisions...",
+      humanIntro: "write directly to gael and bernat. we will reply in your portal and by email.",
+      humanPlaceholder: "write your message for gael and bernat...",
+      humanSentSuccess: "message sent to the team. we will reply as soon as possible.",
+      humanEmptyMsg: "write a message before sending.",
+      sendBtn: "send",
+      chatYou: "you",
+      chatStudio: "gael and bernat",
+      chatBrandi: "brandi (ai)",
+      chatNoMessages: "no messages with the team yet. write below to start the conversation.",
     },
   },
 };
@@ -1620,6 +1724,8 @@ const cancelRenewalToken = (key, projectToken, dueIso) => signRaw(key, `crenew|$
 
 const fileDownloadToken = (key, projectToken, step, fileId) => signRaw(key, `file|${projectToken}|${step}|${fileId}`);
 
+const adminChatToken = (key, projectToken) => signRaw(key, `adminchat|${projectToken}`);
+
 const testimonialDeleteToken = (key, id) => signRaw(key, `tdel|${id}`);
 
 const reviewSig = (key, projectToken) => signRaw(key, `review|${projectToken}`);
@@ -1648,6 +1754,12 @@ async function fileDownloadUrl(env, projectToken, step, fileId) {
   const key = await getKey(env);
   const t = await fileDownloadToken(key, projectToken, step, fileId);
   return buildUrl("/file", { p: projectToken, step, id: fileId, t });
+}
+
+async function studioChatUrl(env, projectToken) {
+  const key = await getKey(env);
+  const t = await adminChatToken(key, projectToken);
+  return buildUrl("/responder-chat", { p: projectToken, t });
 }
 
 // Sesión de chat: se emite tras resolver Turnstile una vez. Va firmada (HMAC), caduca y está ligada a la IP.
@@ -2105,6 +2217,93 @@ async function askGroq(env, lang, ctx, chatMessages, retries = 1) {
     } catch (err) {
       if (err instanceof HttpError) throw err;
       if (attempt === retries) throw new HttpError(503, "upstream_busy", { "Retry-After": "10" });
+      await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
+    }
+  }
+}
+
+function buildProjectSystemInstruction(lang, proj) {
+  const l = pickLang(lang);
+  const langName = LANG_NAMES[l] || LANG_NAMES.es;
+  const servicesStr = svcLabel(proj.services, l);
+  const phasesStr = (proj.phases || [])
+    .map((ph) => {
+      const st =
+        ph.status === "done"
+          ? "completado"
+          : ph.status === "review"
+          ? "en revisión por el cliente"
+          : ph.status === "active"
+          ? "en curso por el estudio"
+          : "pendiente";
+      return `- Fase ${ph.step} (${phaseTitle(ph, l)}): estado ${st}`;
+    })
+    .join("\n");
+
+  const materialsCount = (proj.materialsList || []).length;
+  const refsCount = (proj.referencesList || []).length;
+
+  return `Eres Brandi, Directora Creativa e Inteligencia Artística de rebrandyourbrand.
+El cliente ya ha contratado su proyecto y se encuentra en su portal privado de seguimiento.
+Idioma obligatorio de respuesta: ${langName}.
+
+DATOS OFICIALES DEL PROYECTO:
+- Marca: ${proj.brand}
+- Servicios contratados: ${servicesStr}
+- Fases y estado actual:
+${phasesStr}
+- Materiales aportados: ${materialsCount} registros aportados
+- Referencias visuales: ${refsCount} referencias aportadas
+- Condiciones B2B: cada fase incluye hasta 2 rondas de revisión gratuitas durante el diseño; revisiones extra o modificaciones posteriores cuestan 100 € cerrados por ronda. En proyectos con web, hay una cuota anual de 100 €/año exclusivamente de infraestructura técnica (dominio, correo, SSL, DNS y despliegue edge).
+- La aprobación de cada fase es obligatoria por escrito por parte del cliente para avanzar; avanzamos a su ritmo.
+
+TU MISIÓN:
+- Resuelve cualquier duda del cliente sobre el estado de su proyecto, fases, plazos, entregables o condiciones con precisión, cercanía y profesionalidad.
+- Respuestas directas, concisas (máximo 3 o 4 frases), en minúsculas relajadas si encaja con el tono editorial, sin tecnicismos innecesarios.
+- NUNCA uses puntos medios ni el carácter ampersand en tus textos. Usa conjunciones o guiones largos.
+- Si el cliente solicita cambios complejos, negociaciones, aprobaciones directas de fase o pide expresamente hablar con personas, indícale amablemente que use la pestaña del equipo humano o pulse el botón de "hablar con el equipo humano" para contactar directamente con Gael y Bernat.`;
+}
+
+async function askGroqProject(env, lang, proj, chatMessages, retries = 1) {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const groq = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${env.GROQ_API_KEY}` },
+        body: JSON.stringify({
+          model: GROQ_MODEL,
+          messages: [
+            { role: "system", content: buildProjectSystemInstruction(lang, proj) },
+            ...chatMessages.map((m) => ({ role: m.role, content: m.text })),
+          ],
+          max_tokens: 450,
+          temperature: 0.4,
+          reasoning_effort: "low",
+        }),
+        signal: AbortSignal.timeout(10000),
+      });
+
+      if (!groq.ok) throw new Error(`Groq HTTP ${groq.status}`);
+      const data = await groq.json().catch(() => null);
+      const text = data?.choices?.[0]?.message?.content?.trim();
+      if (!text) throw new Error("empty_reply");
+
+      const clean = text
+        .replace(/[\u00b7\u2022]/g, " — ")
+        .replace(new RegExp("\\x26", "g"), lang === "ca" ? " i " : lang === "en" ? " and " : lang === "eu" ? " eta " : " y ");
+      return clean;
+    } catch (e) {
+      if (attempt === retries) {
+        console.error("askGroqProject failed:", e?.message);
+        const l = pickLang(lang);
+        return l === "ca"
+          ? "No he pogut processar la consulta ara mateix. Pots escriure directament a en Gael i en Bernat a la pestanya de l'equip."
+          : l === "en"
+          ? "I could not process your query right now. You can write directly to Gael and Bernat in the team tab."
+          : l === "eu"
+          ? "Ezin izan dut kontsulta prozesatu oraintxe bertan. Gael eta bernati idatzi diezaiekezu zuzenean lan-taldearen fitxan."
+          : "No he podido procesar la consulta ahora mismo. Puedes escribir directamente a Gael y Bernat en la pestaña del equipo.";
+      }
       await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
     }
   }
@@ -3405,6 +3604,241 @@ button.secondary:active,.btn.secondary:active,button.no:active{
 }
 .foot a{color:#3D5A85;text-decoration:none}
 .foot a:hover{text-decoration:underline}
+
+/* Hybrid Chat Widget (Liquid Glass y Editorial Physics) */
+.chat-section{
+  margin-top:1.5rem;
+  border-radius:18px;
+  border:1px solid rgba(228,222,208,.95);
+  background:linear-gradient(150deg,rgba(255,255,255,.94) 0%,rgba(246,241,232,.8) 100%);
+  backdrop-filter:blur(20px) saturate(160%);
+  -webkit-backdrop-filter:blur(20px) saturate(160%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.95),0 16px 36px -10px rgba(60,50,30,.07);
+  overflow:hidden;
+  text-align:left;
+}
+.chat-header{
+  padding:1.15rem 1.35rem;
+  border-bottom:1px solid rgba(228,222,208,.85);
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:space-between;
+  gap:.85rem;
+  background:rgba(255,255,255,.4);
+}
+.chat-header-info{min-width:0}
+.chat-mode-tabs{
+  display:inline-flex;
+  align-items:center;
+  background:rgba(228,222,208,.5);
+  padding:.25rem;
+  border-radius:9999px;
+  border:1px solid rgba(228,222,208,.9);
+}
+.chat-tab-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:.45rem;
+  padding:.42rem .85rem;
+  border-radius:9999px;
+  border:none;
+  background:transparent;
+  color:#58575E;
+  font:600 .76rem/1.2 inherit;
+  text-transform:lowercase;
+  letter-spacing:.02em;
+  cursor:pointer;
+  transition:all 220ms var(--ease-editorial);
+  width:auto;
+  box-shadow:none;
+}
+.chat-tab-btn:hover{
+  color:#17171A;
+  background:rgba(255,255,255,.6);
+  transform:none;
+}
+.chat-tab-btn.is-active{
+  background:#FFFFFF;
+  color:#17171A;
+  box-shadow:0 2px 8px rgba(60,50,30,.08),inset 0 1px 0 rgba(255,255,255,.9);
+}
+.tab-dot{
+  width:7px;
+  height:7px;
+  border-radius:9999px;
+  display:inline-block;
+}
+.tab-dot.ai{background:#E8A33D;box-shadow:0 0 6px rgba(232,163,61,.5)}
+.tab-dot.human{background:#8CA3C4;box-shadow:0 0 6px rgba(140,163,196,.6)}
+.chat-panel{
+  display:none;
+  padding:1.15rem 1.35rem 1.35rem;
+}
+.chat-panel.is-active{display:block}
+.chat-intro-banner{
+  padding:.75rem 1rem;
+  border-radius:12px;
+  background:rgba(251,249,244,.85);
+  border:1px solid rgba(228,222,208,.9);
+  font-size:.80rem;
+  line-height:1.5;
+  color:#58575E;
+  margin-bottom:1rem;
+  display:flex;
+  flex-direction:column;
+  gap:.5rem;
+}
+.chat-intro-banner.human-banner{border-left:3px solid #8CA3C4}
+.chat-intro-banner p{margin:0}
+.btn-switch-human{
+  align-self:flex-start;
+  background:transparent;
+  border:none;
+  color:#3D5A85;
+  font:600 .76rem/1.2 inherit;
+  cursor:pointer;
+  padding:0;
+  text-decoration:underline;
+  text-transform:lowercase;
+  box-shadow:none;
+  width:auto;
+}
+.btn-switch-human:hover{color:#17171A;background:transparent;transform:none}
+.chat-msg-list{
+  display:flex;
+  flex-direction:column;
+  gap:.75rem;
+  max-height:380px;
+  overflow-y:auto;
+  padding-right:.35rem;
+  margin-bottom:1rem;
+  scroll-behavior:smooth;
+}
+.chat-empty{
+  text-align:center;
+  padding:2rem 1rem;
+  font-size:.82rem;
+  color:#9C9BA3;
+  font-style:italic;
+}
+.chat-msg-row{display:flex;width:100%}
+.chat-msg-row.is-client{justify-content:flex-end}
+.chat-msg-row.is-studio,.chat-msg-row.is-ai{justify-content:flex-start}
+.chat-msg-bubble{
+  max-width:88%;
+  border-radius:14px;
+  padding:.75rem .95rem;
+  font-size:.84rem;
+  line-height:1.55;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8),0 4px 12px rgba(60,50,30,.03);
+  word-break:break-word;
+}
+.chat-msg-row.is-client .chat-msg-bubble{
+  background:linear-gradient(150deg,#8CA3C4,#7893B8);
+  color:#0A0A0C;
+  border:1px solid rgba(140,163,196,.85);
+  border-bottom-right-radius:4px;
+}
+.chat-msg-row.is-studio .chat-msg-bubble{
+  background:linear-gradient(145deg,rgba(255,255,255,.95),rgba(246,241,232,.8));
+  color:#17171A;
+  border:1px solid rgba(140,163,196,.55);
+  border-bottom-left-radius:4px;
+}
+.chat-msg-row.is-ai .chat-msg-bubble{
+  background:linear-gradient(145deg,rgba(255,253,249,.95),rgba(255,248,236,.85));
+  color:#17171A;
+  border:1px solid rgba(232,163,61,.6);
+  border-bottom-left-radius:4px;
+}
+.chat-msg-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:.75rem;
+  margin-bottom:.25rem;
+  font-size:.72rem;
+}
+.chat-msg-row.is-client .chat-msg-head{color:rgba(10,10,12,.75)}
+.chat-msg-row.is-studio .chat-msg-head{color:#3D5A85}
+.chat-msg-row.is-ai .chat-msg-head{color:#825008}
+.chat-msg-author{font-weight:600;text-transform:lowercase}
+.chat-msg-date{font-size:.68rem;opacity:.8}
+.chat-msg-text{white-space:pre-wrap}
+.chat-input-wrap{
+  display:flex;
+  align-items:flex-end;
+  gap:.65rem;
+  background:rgba(255,255,255,.85);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  border:1px solid rgba(228,222,208,.95);
+  border-radius:14px;
+  padding:.5rem .65rem;
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.02);
+  transition:border-color .2s ease,box-shadow .2s ease;
+}
+.chat-input-wrap:focus-within{
+  border-color:#8CA3C4;
+  box-shadow:0 0 0 3px rgba(140,163,196,.2);
+}
+.chat-input-wrap textarea{
+  flex:1;
+  background:transparent;
+  border:none;
+  border-radius:0;
+  padding:.4rem .3rem;
+  font:inherit;
+  font-size:.84rem;
+  color:#17171A;
+  margin-bottom:0;
+  box-shadow:none;
+  min-block-size:2.2lh;
+  max-block-size:6lh;
+  resize:none;
+}
+.chat-input-wrap textarea:focus{outline:none;box-shadow:none}
+.chat-send-btn{
+  width:36px;
+  height:36px;
+  min-width:36px;
+  border-radius:10px;
+  background:linear-gradient(150deg,#8CA3C4,#7893B8);
+  color:#0A0A0C;
+  border:1px solid rgba(140,163,196,.9);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  padding:0;
+  transition:all 200ms var(--ease-editorial);
+  box-shadow:0 2px 6px rgba(95,122,158,.2);
+}
+.chat-send-btn:hover{background:#5F7A9E;color:#FFFFFF;transform:translateY(-1px)}
+.chat-send-btn:active{transform:scale(0.94)}
+.chat-send-btn.btn-ai{background:#E8A33D;border-color:#E8A33D}
+.chat-send-btn.btn-ai:hover{background:#F0BE82;border-color:#F0BE82}
+.chat-send-btn svg{width:15px;height:15px}
+.chat-typing{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  padding:.5rem .75rem;
+}
+.chat-typing span{
+  width:5px;
+  height:5px;
+  background:#E8A33D;
+  border-radius:999px;
+  animation:typingBounce 1s infinite alternate;
+}
+.chat-typing span:nth-child(2){animation-delay:.2s}
+.chat-typing span:nth-child(3){animation-delay:.4s}
+@keyframes typingBounce{
+  from{transform:translateY(0);opacity:.4}
+  to{transform:translateY(-4px);opacity:1}
+}
 `;
 
 function page(
@@ -4774,8 +5208,108 @@ async function handleProject(request, env, url) {
   const projectPageUrl = buildUrl("/proyecto", { token });
 
   if (request.method === "POST") {
-    const form = await request.formData().catch(() => null);
-    const op = String(form?.get("op") || (!proj.paid ? "pay" : ""));
+    let bodyJson = null;
+    let form = null;
+    const cType = request.headers.get("Content-Type") || "";
+    if (cType.includes("application/json")) {
+      bodyJson = await request.json().catch(() => null);
+    } else {
+      form = await request.formData().catch(() => null);
+    }
+    const op = String(bodyJson?.op || form?.get("op") || (!proj.paid ? "pay" : ""));
+
+    if (op === "brandi_chat") {
+      const msgText = cleanInput(bodyJson?.message || form?.get("message") || "", 1000);
+      if (!msgText) {
+        if (bodyJson) return jsonResponse({ error: "empty_message" }, 400);
+        return redirectTo(projectPageUrl + "#chat");
+      }
+      const rawHistory = Array.isArray(bodyJson?.history) ? bodyJson.history : [];
+      const history = rawHistory
+        .filter((m) => m && (m.role === "user" || m.role === "assistant") && typeof m.text === "string")
+        .slice(-6);
+      history.push({ role: "user", text: msgText });
+
+      const reply = await askGroqProject(env, L, proj, history);
+      if (bodyJson) {
+        return jsonResponse({ ok: true, reply }, 200);
+      }
+      return redirectTo(projectPageUrl + "#chat");
+    }
+
+    if (op === "human_chat") {
+      const msgText = cleanInput(bodyJson?.message || form?.get("message") || "", 2000);
+      if (!msgText) {
+        if (bodyJson) return jsonResponse({ error: "empty_message" }, 400);
+        return redirectTo(projectPageUrl + "#chat");
+      }
+
+      const chatKey = `project_chat:${token}`;
+      const chatList = (await env.LEADS_KV.get(chatKey, { type: "json" })) || [];
+      const msgId = randomHex(8);
+      const newMsg = {
+        id: msgId,
+        sender: "client",
+        text: msgText,
+        date: new Date().toISOString(),
+      };
+      chatList.push(newMsg);
+      await env.LEADS_KV.put(chatKey, JSON.stringify(chatList));
+
+      if (env.RESEND_API_KEY) {
+        const studioUrl = await studioChatUrl(env, token);
+        try {
+          await resendSend(
+            env,
+            {
+              to: ["hola@rebrandyourbrand.es"],
+              reply_to: proj.clientEmail,
+              subject: `nuevo mensaje de ${proj.brand} en el chat del proyecto`,
+              ...renderEmail("es", {
+                paras: [
+                  `el cliente de ${bold(proj.brand)} (${proj.clientEmail}) ha escrito un nuevo mensaje en el chat directo del proyecto:`,
+                ],
+                quote: msgText,
+                cta: { label: "responder al cliente", url: studioUrl },
+                secondaryLink: { label: "ver panel del proyecto", url: projectPageUrl },
+              }),
+            },
+            `chat-studio-alert-${token}-${msgId}`
+          );
+        } catch (e) {
+          console.error("chat studio alert failed:", e?.message);
+        }
+
+        const emChat = EM[L].chat;
+        try {
+          await resendSend(
+            env,
+            {
+              to: [proj.clientEmail],
+              reply_to: "hola@rebrandyourbrand.es",
+              subject: emChat.confirmSubject(proj.brand),
+              ...renderEmail(L, {
+                paras: [
+                  emChat.hello,
+                  emChat.confirmReceived(bold(proj.brand)),
+                  emChat.confirmSoon,
+                ],
+                quote: msgText,
+                cta: { label: emChat.viewPortal, url: projectPageUrl + "#chat" },
+              }),
+            },
+            `chat-client-confirm-${token}-${msgId}`
+          );
+        } catch (e) {
+          console.error("chat client confirm failed:", e?.message);
+        }
+      }
+
+      if (bodyJson) {
+        return jsonResponse({ ok: true, message: newMsg }, 200);
+      }
+      return redirectTo(projectPageUrl + "?msg_sent=1#chat");
+    }
 
     if (op === "pay") {
       if (proj.paid) return redirectTo(projectPageUrl);
@@ -5433,11 +5967,260 @@ async function handleProject(request, env, url) {
     }
   }
 
+  // ── SISTEMA DE CHAT HÍBRIDO (BRANDI IA + EQUIPO HUMANO) ──
+  const chatKey = `project_chat:${token}`;
+  const humanChatHistory = (await env.LEADS_KV.get(chatKey, { type: "json" })) || [];
+
+  const humanMessagesHtml = humanChatHistory.length
+    ? humanChatHistory
+        .map((m) => {
+          const isClient = m.sender === "client";
+          const author = isClient ? T.chatYou : T.chatStudio;
+          const cls = isClient ? "is-client" : "is-studio";
+          return `<div class="chat-msg-row ${cls}">
+            <div class="chat-msg-bubble">
+              <div class="chat-msg-head">
+                <span class="chat-msg-author">${esc(author)}</span>
+                <span class="chat-msg-date">${esc(fmtDate(m.date, L))}</span>
+              </div>
+              <div class="chat-msg-text">${esc(m.text)}</div>
+            </div>
+          </div>`;
+        })
+        .join("")
+    : `<div class="chat-empty" id="human-empty-msg">${esc(T.chatNoMessages)}</div>`;
+
+  const brandiWelcomeMsg = T.brandiWelcome(proj.brand);
+
+  const msgSentBanner = url.searchParams.get("msg_sent") === "1"
+    ? `<div class="banner-ok" style="margin-bottom:1rem;"><p>${esc(T.humanSentSuccess)}</p></div>`
+    : "";
+
+  const chatSectionHtml = `
+    <section id="chat" class="chat-section">
+      <div class="chat-header">
+        <div class="chat-header-info">
+          <span class="eyebrow" style="margin-bottom:.2rem;">${esc(T.chatEyebrow)}</span>
+          <h3 style="margin-bottom:0;">${esc(T.chatHeading)}</h3>
+        </div>
+        <div class="chat-mode-tabs" role="tablist">
+          <button type="button" class="chat-tab-btn is-active" id="tab-brandi" role="tab" aria-selected="true" aria-controls="panel-brandi" data-chat-tab="brandi">
+            <span class="tab-dot ai"></span>
+            <span>${esc(T.chatTabBrandi)}</span>
+          </button>
+          <button type="button" class="chat-tab-btn" id="tab-human" role="tab" aria-selected="false" aria-controls="panel-human" data-chat-tab="human">
+            <span class="tab-dot human"></span>
+            <span>${esc(T.chatTabHuman)}</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="panel-brandi" class="chat-panel is-active" role="tabpanel" aria-labelledby="tab-brandi">
+        <div class="chat-intro-banner">
+          <p>${esc(T.brandiIntro)}</p>
+          <button type="button" class="btn-switch-human" id="btn-switch-human">${esc(T.switchToHuman)} →</button>
+        </div>
+        <div class="chat-msg-list" id="brandi-msg-list">
+          <div class="chat-msg-row is-ai">
+            <div class="chat-msg-bubble">
+              <div class="chat-msg-head">
+                <span class="chat-msg-author">${esc(T.chatBrandi)}</span>
+              </div>
+              <div class="chat-msg-text">${esc(brandiWelcomeMsg)}</div>
+            </div>
+          </div>
+        </div>
+        <form id="brandi-chat-form" method="POST" action="${esc(projectPageUrl)}#chat">
+          <input type="hidden" name="op" value="brandi_chat">
+          <div class="chat-input-wrap">
+            <textarea name="message" id="brandi-input" placeholder="${esc(T.brandiPlaceholder)}" maxlength="1000" rows="1" required></textarea>
+            <button type="submit" class="chat-send-btn btn-ai" aria-label="${esc(T.sendBtn)}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div id="panel-human" class="chat-panel" role="tabpanel" aria-labelledby="tab-human">
+        <div class="chat-intro-banner human-banner">
+          <p>${esc(T.humanIntro)}</p>
+        </div>
+        ${msgSentBanner}
+        <div class="chat-msg-list" id="human-msg-list">
+          ${humanMessagesHtml}
+        </div>
+        <form id="human-chat-form" method="POST" action="${esc(projectPageUrl)}#chat">
+          <input type="hidden" name="op" value="human_chat">
+          <div class="chat-input-wrap">
+            <textarea name="message" id="human-input" placeholder="${esc(T.humanPlaceholder)}" maxlength="2000" rows="2" required></textarea>
+            <button type="submit" class="chat-send-btn" aria-label="${esc(T.sendBtn)}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <script>
+      (function(){
+        var tabBrandi = document.getElementById("tab-brandi");
+        var tabHuman = document.getElementById("tab-human");
+        var panelBrandi = document.getElementById("panel-brandi");
+        var panelHuman = document.getElementById("panel-human");
+        var switchBtn = document.getElementById("btn-switch-human");
+        var brandiForm = document.getElementById("brandi-chat-form");
+        var humanForm = document.getElementById("human-chat-form");
+        var brandiInput = document.getElementById("brandi-input");
+        var humanInput = document.getElementById("human-input");
+        var brandiList = document.getElementById("brandi-msg-list");
+        var humanList = document.getElementById("human-msg-list");
+
+        var brandiHistory = [];
+
+        function activateTab(tab) {
+          if (tab === "human") {
+            tabBrandi.classList.remove("is-active");
+            tabBrandi.setAttribute("aria-selected", "false");
+            tabHuman.classList.add("is-active");
+            tabHuman.setAttribute("aria-selected", "true");
+            panelBrandi.classList.remove("is-active");
+            panelHuman.classList.add("is-active");
+            if (humanList) humanList.scrollTop = humanList.scrollHeight;
+            if (humanInput) humanInput.focus();
+          } else {
+            tabHuman.classList.remove("is-active");
+            tabHuman.setAttribute("aria-selected", "false");
+            tabBrandi.classList.add("is-active");
+            tabBrandi.setAttribute("aria-selected", "true");
+            panelHuman.classList.remove("is-active");
+            panelBrandi.classList.add("is-active");
+            if (brandiList) brandiList.scrollTop = brandiList.scrollHeight;
+            if (brandiInput) brandiInput.focus();
+          }
+        }
+
+        if (tabBrandi) tabBrandi.addEventListener("click", function(){ activateTab("brandi"); });
+        if (tabHuman) tabHuman.addEventListener("click", function(){ activateTab("human"); });
+        if (switchBtn) switchBtn.addEventListener("click", function(){ activateTab("human"); });
+
+        if (window.location.search.indexOf("msg_sent=1") !== -1 || window.location.hash === "#chat-human") {
+          activateTab("human");
+        }
+
+        function createMsgRow(authorText, text, cls, dateText) {
+          var row = document.createElement("div");
+          row.className = "chat-msg-row " + cls;
+          var bubble = document.createElement("div");
+          bubble.className = "chat-msg-bubble";
+          var head = document.createElement("div");
+          head.className = "chat-msg-head";
+          var authorSpan = document.createElement("span");
+          authorSpan.className = "chat-msg-author";
+          authorSpan.textContent = authorText;
+          head.appendChild(authorSpan);
+          if (dateText) {
+            var dateSpan = document.createElement("span");
+            dateSpan.className = "chat-msg-date";
+            dateSpan.textContent = dateText;
+            head.appendChild(dateSpan);
+          }
+          var textDiv = document.createElement("div");
+          textDiv.className = "chat-msg-text";
+          textDiv.textContent = text;
+          bubble.appendChild(head);
+          bubble.appendChild(textDiv);
+          row.appendChild(bubble);
+          return row;
+        }
+
+        if (brandiForm) {
+          brandiForm.addEventListener("submit", function(e){
+            var text = (brandiInput.value || "").trim();
+            if (!text) return;
+            if (!window.fetch) return;
+            e.preventDefault();
+
+            var userRow = createMsgRow("${esc(T.chatYou)}", text, "is-client");
+            brandiList.appendChild(userRow);
+            brandiInput.value = "";
+            brandiList.scrollTop = brandiList.scrollHeight;
+
+            var typingRow = document.createElement("div");
+            typingRow.className = "chat-msg-row is-ai";
+            var typingBubble = document.createElement("div");
+            typingBubble.className = "chat-msg-bubble";
+            var typingDiv = document.createElement("div");
+            typingDiv.className = "chat-typing";
+            typingDiv.appendChild(document.createElement("span"));
+            typingDiv.appendChild(document.createElement("span"));
+            typingDiv.appendChild(document.createElement("span"));
+            typingBubble.appendChild(typingDiv);
+            typingRow.appendChild(typingBubble);
+            brandiList.appendChild(typingRow);
+            brandiList.scrollTop = brandiList.scrollHeight;
+
+            brandiHistory.push({ role: "user", text: text });
+
+            fetch(window.location.href, {
+              method: "POST",
+              headers: { "Content-Type": "application/json", "Accept": "application/json" },
+              body: JSON.stringify({ op: "brandi_chat", message: text, history: brandiHistory })
+            })
+            .then(function(r){ return r.json(); })
+            .then(function(res){
+              if (typingRow && typingRow.parentNode) typingRow.parentNode.removeChild(typingRow);
+              var replyText = res && res.reply ? res.reply : "no se ha podido procesar la respuesta.";
+              brandiHistory.push({ role: "assistant", text: replyText });
+
+              var aiRow = createMsgRow("${esc(T.chatBrandi)}", replyText, "is-ai");
+              brandiList.appendChild(aiRow);
+              brandiList.scrollTop = brandiList.scrollHeight;
+            })
+            .catch(function(){
+              if (typingRow && typingRow.parentNode) typingRow.parentNode.removeChild(typingRow);
+              var errRow = createMsgRow("${esc(T.chatBrandi)}", "error de conexi\\u00f3n. int\\u00e9ntalo de nuevo.", "is-ai");
+              brandiList.appendChild(errRow);
+            });
+          });
+        }
+
+        if (humanForm) {
+          humanForm.addEventListener("submit", function(e){
+            var text = (humanInput.value || "").trim();
+            if (!text) return;
+            if (!window.fetch) return;
+            e.preventDefault();
+
+            var emptyMsg = document.getElementById("human-empty-msg");
+            if (emptyMsg) emptyMsg.style.display = "none";
+
+            var nowStr = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+            var userRow = createMsgRow("${esc(T.chatYou)}", text, "is-client", nowStr);
+            humanList.appendChild(userRow);
+            humanInput.value = "";
+            humanList.scrollTop = humanList.scrollHeight;
+
+            fetch(window.location.href, {
+              method: "POST",
+              headers: { "Content-Type": "application/json", "Accept": "application/json" },
+              body: JSON.stringify({ op: "human_chat", message: text })
+            })
+            .then(function(r){ return r.json(); })
+            .catch(function(err){
+              console.error("human chat error:", err);
+            });
+          });
+        }
+      })();
+    </script>
+  `;
+
   const fullHtml = `
     ${bannerHtml}
     ${headerHtml}
     <h3>${esc(T.state)}</h3>
     <div class="timeline">${phaseCards.join("")}</div>
+    ${chatSectionHtml}
     ${reviewCardHtml}
     ${materialsBox}
     ${referencesBox}
@@ -5450,6 +6233,141 @@ async function handleProject(request, env, url) {
       eyebrow: T.eyebrow,
       wide: true,
       html: fullHtml,
+    }),
+    200
+  );
+}
+
+// ── GESTIÓN Y RESPUESTA DE CHAT DEL ESTUDIO (/responder-chat) ──
+async function handleStudioChat(request, env, url) {
+  if (!env.LEADS_KV || !env.RESEND_API_KEY) {
+    return htmlResponse(page("configuración", "error de configuración", "faltan variables en el servidor."), 500);
+  }
+
+  const p = url.searchParams.get("p");
+  const t = url.searchParams.get("t");
+  if (!p || !/^[a-f0-9]{64}$/.test(p) || !t || !/^[a-f0-9]{64}$/.test(t)) {
+    return htmlResponse(page("enlace inválido", "enlace inválido", "el enlace de gestión del chat no es válido."), 400);
+  }
+
+  const key = await getKey(env);
+  const ok = await verifyRaw(key, `adminchat|${p}`, t);
+  if (!ok) {
+    return htmlResponse(page("no autorizado", "enlace caducado o alterado", "el token de seguridad no coincide."), 403);
+  }
+
+  const rawProj = await env.LEADS_KV.get(`project:${p}`);
+  if (!rawProj) {
+    return htmlResponse(page("no encontrado", "proyecto no encontrado", "no hemos encontrado este proyecto."), 404);
+  }
+  const proj = JSON.parse(rawProj);
+  const projectPageUrl = buildUrl("/proyecto", { token: p });
+  const chatKey = `project_chat:${p}`;
+  const chatHistory = (await env.LEADS_KV.get(chatKey, { type: "json" })) || [];
+
+  if (request.method === "POST") {
+    const form = await request.formData().catch(() => null);
+    const replyText = cleanInput(form?.get("reply") || "", 2500);
+    if (!replyText) {
+      return htmlResponse(
+        page("mensaje vacío", "falta el texto de la respuesta", "escribe un mensaje para enviar al cliente.", {
+          eyebrow: "panel interno del estudio",
+          footerUrl: url.href,
+          footerLabel: "volver al chat",
+        }),
+        400
+      );
+    }
+
+    const msgId = randomHex(8);
+    const newMsg = {
+      id: msgId,
+      sender: "studio",
+      text: replyText,
+      date: new Date().toISOString(),
+    };
+    chatHistory.push(newMsg);
+    await env.LEADS_KV.put(chatKey, JSON.stringify(chatHistory));
+
+    const lang = pickLang(proj.lang);
+    const emChat = EM[lang].chat;
+    try {
+      await resendSend(
+        env,
+        {
+          to: [proj.clientEmail],
+          reply_to: "hola@rebrandyourbrand.es",
+          subject: emChat.replySubject(proj.brand),
+          ...renderEmail(lang, {
+            paras: [
+              emChat.hello,
+              emChat.replyIntro(bold(proj.brand)),
+            ],
+            quote: replyText,
+            cta: { label: emChat.viewPortal, url: projectPageUrl + "#chat-human" },
+            note: emChat.confirmSoon,
+          }),
+        },
+        `chat-reply-${p}-${msgId}`
+      );
+    } catch (e) {
+      console.error("error sending studio chat reply email:", e?.message);
+    }
+
+    return redirectTo(buildUrl("/responder-chat", { p, t, sent: "1" }));
+  }
+
+  const sentNotice = url.searchParams.get("sent") === "1"
+    ? `<div class="banner-ok" style="margin-bottom:1.25rem;"><p>respuesta enviada con éxito a ${esc(proj.clientEmail)}. el cliente ha recibido la notificación por correo y el mensaje se ha guardado en su panel.</p></div>`
+    : "";
+
+  const historyHtml = chatHistory.length
+    ? chatHistory
+        .map((m) => {
+          const isStudio = m.sender === "studio";
+          const author = isStudio ? "estudio (gael y bernat)" : `cliente (${proj.brand})`;
+          const cls = isStudio ? "is-studio" : "is-client";
+          return `<div class="chat-msg-row ${cls}" style="margin-bottom:.75rem;">
+            <div class="chat-msg-bubble">
+              <div class="chat-msg-head">
+                <span class="chat-msg-author">${esc(author)}</span>
+                <span class="chat-msg-date">${esc(fmtDate(m.date, "es"))}</span>
+              </div>
+              <div class="chat-msg-text">${esc(m.text)}</div>
+            </div>
+          </div>`;
+        })
+        .join("")
+    : `<div class="chat-empty">no hay mensajes en el historial todavía.</div>`;
+
+  const html = `
+    ${sentNotice}
+    <div class="box" style="margin-bottom:1.5rem;">
+      <div class="kv">
+        <div class="kv-row"><span>marca</span><span class="kv-val">${esc(proj.brand)}</span></div>
+        <div class="kv-row"><span>correo del cliente</span><span class="kv-val">${esc(proj.clientEmail)}</span></div>
+        <div class="kv-row"><span>servicios</span><span class="kv-val">${esc(svcLabel(proj.services, "es"))}</span></div>
+        <div class="kv-row"><span>estado</span><span class="kv-val">${esc(proj.status)}</span></div>
+      </div>
+    </div>
+    <h3>conversación con el cliente</h3>
+    <div class="chat-msg-list" style="margin-bottom:1.5rem;background:rgba(255,255,255,.5);padding:1rem;border-radius:14px;border:1px solid rgba(228,222,208,.8);">
+      ${historyHtml}
+    </div>
+    <form method="POST">
+      <label for="reply-input">responder a ${esc(proj.brand)}:</label>
+      <textarea id="reply-input" name="reply" rows="4" placeholder="escribe tu respuesta para el cliente..." required></textarea>
+      <button type="submit">enviar respuesta al cliente</button>
+    </form>
+  `;
+
+  return htmlResponse(
+    page(`chat con ${proj.brand}`, `chat — ${proj.brand}`, "historial y respuesta directa al cliente.", {
+      eyebrow: "panel interno del estudio",
+      wide: true,
+      html,
+      footerUrl: projectPageUrl,
+      footerLabel: "ver panel público del cliente",
     }),
     200
   );
@@ -6346,7 +7264,7 @@ async function handleScheduled(controller, env, ctx) {
 
 const HTML_CLIENT_PATHS = new Set(["/verify", "/valorar", "/approve-phase", "/cancel-renewal"]);
 
-const HTML_ADMIN_PATHS = new Set(["/testimonial", "/testimonial-delete", "/advance-phase"]);
+const HTML_ADMIN_PATHS = new Set(["/testimonial", "/testimonial-delete", "/advance-phase", "/responder-chat"]);
 
 export default {
   async fetch(request, env, ctx) {
@@ -6370,6 +7288,7 @@ export default {
         if (url.pathname === "/testimonial") return await handleTestimonialReview(request, env, url);
         if (url.pathname === "/testimonial-delete") return await handleTestimonialDelete(request, env, url);
         if (url.pathname === "/advance-phase") return await handlePhaseAdvance(request, env, url);
+        if (url.pathname === "/responder-chat") return await handleStudioChat(request, env, url);
         if (url.pathname === "/approve-phase") return await handlePhaseApprove(request, env, url);
         if (url.pathname === "/cancel-renewal") return await handleCancelRenewal(request, env, url);
         if (url.pathname === "/valorar") return await handleReview(request, env, url);

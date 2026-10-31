@@ -1325,8 +1325,108 @@ async function handleProject(request, env, url) {
   const projectPageUrl = buildUrl("/proyecto", { token });
 
   if (request.method === "POST") {
-    const form = await request.formData().catch(() => null);
-    const op = String(form?.get("op") || (!proj.paid ? "pay" : ""));
+    let bodyJson = null;
+    let form = null;
+    const cType = request.headers.get("Content-Type") || "";
+    if (cType.includes("application/json")) {
+      bodyJson = await request.json().catch(() => null);
+    } else {
+      form = await request.formData().catch(() => null);
+    }
+    const op = String(bodyJson?.op || form?.get("op") || (!proj.paid ? "pay" : ""));
+
+    if (op === "brandi_chat") {
+      const msgText = cleanInput(bodyJson?.message || form?.get("message") || "", 1000);
+      if (!msgText) {
+        if (bodyJson) return jsonResponse({ error: "empty_message" }, 400);
+        return redirectTo(projectPageUrl + "#chat");
+      }
+      const rawHistory = Array.isArray(bodyJson?.history) ? bodyJson.history : [];
+      const history = rawHistory
+        .filter((m) => m && (m.role === "user" || m.role === "assistant") && typeof m.text === "string")
+        .slice(-6);
+      history.push({ role: "user", text: msgText });
+
+      const reply = await askGroqProject(env, L, proj, history);
+      if (bodyJson) {
+        return jsonResponse({ ok: true, reply }, 200);
+      }
+      return redirectTo(projectPageUrl + "#chat");
+    }
+
+    if (op === "human_chat") {
+      const msgText = cleanInput(bodyJson?.message || form?.get("message") || "", 2000);
+      if (!msgText) {
+        if (bodyJson) return jsonResponse({ error: "empty_message" }, 400);
+        return redirectTo(projectPageUrl + "#chat");
+      }
+
+      const chatKey = `project_chat:${token}`;
+      const chatList = (await env.LEADS_KV.get(chatKey, { type: "json" })) || [];
+      const msgId = randomHex(8);
+      const newMsg = {
+        id: msgId,
+        sender: "client",
+        text: msgText,
+        date: new Date().toISOString(),
+      };
+      chatList.push(newMsg);
+      await env.LEADS_KV.put(chatKey, JSON.stringify(chatList));
+
+      if (env.RESEND_API_KEY) {
+        const studioUrl = await studioChatUrl(env, token);
+        try {
+          await resendSend(
+            env,
+            {
+              to: ["hola@rebrandyourbrand.es"],
+              reply_to: proj.clientEmail,
+              subject: `nuevo mensaje de ${proj.brand} en el chat del proyecto`,
+              ...renderEmail("es", {
+                paras: [
+                  `el cliente de ${bold(proj.brand)} (${proj.clientEmail}) ha escrito un nuevo mensaje en el chat directo del proyecto:`,
+                ],
+                quote: msgText,
+                cta: { label: "responder al cliente", url: studioUrl },
+                secondaryLink: { label: "ver panel del proyecto", url: projectPageUrl },
+              }),
+            },
+            `chat-studio-alert-${token}-${msgId}`
+          );
+        } catch (e) {
+          console.error("chat studio alert failed:", e?.message);
+        }
+
+        const emChat = EM[L].chat;
+        try {
+          await resendSend(
+            env,
+            {
+              to: [proj.clientEmail],
+              reply_to: "hola@rebrandyourbrand.es",
+              subject: emChat.confirmSubject(proj.brand),
+              ...renderEmail(L, {
+                paras: [
+                  emChat.hello,
+                  emChat.confirmReceived(bold(proj.brand)),
+                  emChat.confirmSoon,
+                ],
+                quote: msgText,
+                cta: { label: emChat.viewPortal, url: projectPageUrl + "#chat" },
+              }),
+            },
+            `chat-client-confirm-${token}-${msgId}`
+          );
+        } catch (e) {
+          console.error("chat client confirm failed:", e?.message);
+        }
+      }
+
+      if (bodyJson) {
+        return jsonResponse({ ok: true, message: newMsg }, 200);
+      }
+      return redirectTo(projectPageUrl + "?msg_sent=1#chat");
+    }
 
     if (op === "pay") {
       if (proj.paid) return redirectTo(projectPageUrl);
@@ -1984,11 +2084,260 @@ async function handleProject(request, env, url) {
     }
   }
 
+  // ── SISTEMA DE CHAT HÍBRIDO (BRANDI IA + EQUIPO HUMANO) ──
+  const chatKey = `project_chat:${token}`;
+  const humanChatHistory = (await env.LEADS_KV.get(chatKey, { type: "json" })) || [];
+
+  const humanMessagesHtml = humanChatHistory.length
+    ? humanChatHistory
+        .map((m) => {
+          const isClient = m.sender === "client";
+          const author = isClient ? T.chatYou : T.chatStudio;
+          const cls = isClient ? "is-client" : "is-studio";
+          return `<div class="chat-msg-row ${cls}">
+            <div class="chat-msg-bubble">
+              <div class="chat-msg-head">
+                <span class="chat-msg-author">${esc(author)}</span>
+                <span class="chat-msg-date">${esc(fmtDate(m.date, L))}</span>
+              </div>
+              <div class="chat-msg-text">${esc(m.text)}</div>
+            </div>
+          </div>`;
+        })
+        .join("")
+    : `<div class="chat-empty" id="human-empty-msg">${esc(T.chatNoMessages)}</div>`;
+
+  const brandiWelcomeMsg = T.brandiWelcome(proj.brand);
+
+  const msgSentBanner = url.searchParams.get("msg_sent") === "1"
+    ? `<div class="banner-ok" style="margin-bottom:1rem;"><p>${esc(T.humanSentSuccess)}</p></div>`
+    : "";
+
+  const chatSectionHtml = `
+    <section id="chat" class="chat-section">
+      <div class="chat-header">
+        <div class="chat-header-info">
+          <span class="eyebrow" style="margin-bottom:.2rem;">${esc(T.chatEyebrow)}</span>
+          <h3 style="margin-bottom:0;">${esc(T.chatHeading)}</h3>
+        </div>
+        <div class="chat-mode-tabs" role="tablist">
+          <button type="button" class="chat-tab-btn is-active" id="tab-brandi" role="tab" aria-selected="true" aria-controls="panel-brandi" data-chat-tab="brandi">
+            <span class="tab-dot ai"></span>
+            <span>${esc(T.chatTabBrandi)}</span>
+          </button>
+          <button type="button" class="chat-tab-btn" id="tab-human" role="tab" aria-selected="false" aria-controls="panel-human" data-chat-tab="human">
+            <span class="tab-dot human"></span>
+            <span>${esc(T.chatTabHuman)}</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="panel-brandi" class="chat-panel is-active" role="tabpanel" aria-labelledby="tab-brandi">
+        <div class="chat-intro-banner">
+          <p>${esc(T.brandiIntro)}</p>
+          <button type="button" class="btn-switch-human" id="btn-switch-human">${esc(T.switchToHuman)} →</button>
+        </div>
+        <div class="chat-msg-list" id="brandi-msg-list">
+          <div class="chat-msg-row is-ai">
+            <div class="chat-msg-bubble">
+              <div class="chat-msg-head">
+                <span class="chat-msg-author">${esc(T.chatBrandi)}</span>
+              </div>
+              <div class="chat-msg-text">${esc(brandiWelcomeMsg)}</div>
+            </div>
+          </div>
+        </div>
+        <form id="brandi-chat-form" method="POST" action="${esc(projectPageUrl)}#chat">
+          <input type="hidden" name="op" value="brandi_chat">
+          <div class="chat-input-wrap">
+            <textarea name="message" id="brandi-input" placeholder="${esc(T.brandiPlaceholder)}" maxlength="1000" rows="1" required></textarea>
+            <button type="submit" class="chat-send-btn btn-ai" aria-label="${esc(T.sendBtn)}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div id="panel-human" class="chat-panel" role="tabpanel" aria-labelledby="tab-human">
+        <div class="chat-intro-banner human-banner">
+          <p>${esc(T.humanIntro)}</p>
+        </div>
+        ${msgSentBanner}
+        <div class="chat-msg-list" id="human-msg-list">
+          ${humanMessagesHtml}
+        </div>
+        <form id="human-chat-form" method="POST" action="${esc(projectPageUrl)}#chat">
+          <input type="hidden" name="op" value="human_chat">
+          <div class="chat-input-wrap">
+            <textarea name="message" id="human-input" placeholder="${esc(T.humanPlaceholder)}" maxlength="2000" rows="2" required></textarea>
+            <button type="submit" class="chat-send-btn" aria-label="${esc(T.sendBtn)}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <script>
+      (function(){
+        var tabBrandi = document.getElementById("tab-brandi");
+        var tabHuman = document.getElementById("tab-human");
+        var panelBrandi = document.getElementById("panel-brandi");
+        var panelHuman = document.getElementById("panel-human");
+        var switchBtn = document.getElementById("btn-switch-human");
+        var brandiForm = document.getElementById("brandi-chat-form");
+        var humanForm = document.getElementById("human-chat-form");
+        var brandiInput = document.getElementById("brandi-input");
+        var humanInput = document.getElementById("human-input");
+        var brandiList = document.getElementById("brandi-msg-list");
+        var humanList = document.getElementById("human-msg-list");
+
+        var brandiHistory = [];
+
+        function activateTab(tab) {
+          if (tab === "human") {
+            tabBrandi.classList.remove("is-active");
+            tabBrandi.setAttribute("aria-selected", "false");
+            tabHuman.classList.add("is-active");
+            tabHuman.setAttribute("aria-selected", "true");
+            panelBrandi.classList.remove("is-active");
+            panelHuman.classList.add("is-active");
+            if (humanList) humanList.scrollTop = humanList.scrollHeight;
+            if (humanInput) humanInput.focus();
+          } else {
+            tabHuman.classList.remove("is-active");
+            tabHuman.setAttribute("aria-selected", "false");
+            tabBrandi.classList.add("is-active");
+            tabBrandi.setAttribute("aria-selected", "true");
+            panelHuman.classList.remove("is-active");
+            panelBrandi.classList.add("is-active");
+            if (brandiList) brandiList.scrollTop = brandiList.scrollHeight;
+            if (brandiInput) brandiInput.focus();
+          }
+        }
+
+        if (tabBrandi) tabBrandi.addEventListener("click", function(){ activateTab("brandi"); });
+        if (tabHuman) tabHuman.addEventListener("click", function(){ activateTab("human"); });
+        if (switchBtn) switchBtn.addEventListener("click", function(){ activateTab("human"); });
+
+        if (window.location.search.indexOf("msg_sent=1") !== -1 || window.location.hash === "#chat-human") {
+          activateTab("human");
+        }
+
+        function createMsgRow(authorText, text, cls, dateText) {
+          var row = document.createElement("div");
+          row.className = "chat-msg-row " + cls;
+          var bubble = document.createElement("div");
+          bubble.className = "chat-msg-bubble";
+          var head = document.createElement("div");
+          head.className = "chat-msg-head";
+          var authorSpan = document.createElement("span");
+          authorSpan.className = "chat-msg-author";
+          authorSpan.textContent = authorText;
+          head.appendChild(authorSpan);
+          if (dateText) {
+            var dateSpan = document.createElement("span");
+            dateSpan.className = "chat-msg-date";
+            dateSpan.textContent = dateText;
+            head.appendChild(dateSpan);
+          }
+          var textDiv = document.createElement("div");
+          textDiv.className = "chat-msg-text";
+          textDiv.textContent = text;
+          bubble.appendChild(head);
+          bubble.appendChild(textDiv);
+          row.appendChild(bubble);
+          return row;
+        }
+
+        if (brandiForm) {
+          brandiForm.addEventListener("submit", function(e){
+            var text = (brandiInput.value || "").trim();
+            if (!text) return;
+            if (!window.fetch) return;
+            e.preventDefault();
+
+            var userRow = createMsgRow("${esc(T.chatYou)}", text, "is-client");
+            brandiList.appendChild(userRow);
+            brandiInput.value = "";
+            brandiList.scrollTop = brandiList.scrollHeight;
+
+            var typingRow = document.createElement("div");
+            typingRow.className = "chat-msg-row is-ai";
+            var typingBubble = document.createElement("div");
+            typingBubble.className = "chat-msg-bubble";
+            var typingDiv = document.createElement("div");
+            typingDiv.className = "chat-typing";
+            typingDiv.appendChild(document.createElement("span"));
+            typingDiv.appendChild(document.createElement("span"));
+            typingDiv.appendChild(document.createElement("span"));
+            typingBubble.appendChild(typingDiv);
+            typingRow.appendChild(typingBubble);
+            brandiList.appendChild(typingRow);
+            brandiList.scrollTop = brandiList.scrollHeight;
+
+            brandiHistory.push({ role: "user", text: text });
+
+            fetch(window.location.href, {
+              method: "POST",
+              headers: { "Content-Type": "application/json", "Accept": "application/json" },
+              body: JSON.stringify({ op: "brandi_chat", message: text, history: brandiHistory })
+            })
+            .then(function(r){ return r.json(); })
+            .then(function(res){
+              if (typingRow && typingRow.parentNode) typingRow.parentNode.removeChild(typingRow);
+              var replyText = res && res.reply ? res.reply : "no se ha podido procesar la respuesta.";
+              brandiHistory.push({ role: "assistant", text: replyText });
+
+              var aiRow = createMsgRow("${esc(T.chatBrandi)}", replyText, "is-ai");
+              brandiList.appendChild(aiRow);
+              brandiList.scrollTop = brandiList.scrollHeight;
+            })
+            .catch(function(){
+              if (typingRow && typingRow.parentNode) typingRow.parentNode.removeChild(typingRow);
+              var errRow = createMsgRow("${esc(T.chatBrandi)}", "error de conexi\\u00f3n. int\\u00e9ntalo de nuevo.", "is-ai");
+              brandiList.appendChild(errRow);
+            });
+          });
+        }
+
+        if (humanForm) {
+          humanForm.addEventListener("submit", function(e){
+            var text = (humanInput.value || "").trim();
+            if (!text) return;
+            if (!window.fetch) return;
+            e.preventDefault();
+
+            var emptyMsg = document.getElementById("human-empty-msg");
+            if (emptyMsg) emptyMsg.style.display = "none";
+
+            var nowStr = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+            var userRow = createMsgRow("${esc(T.chatYou)}", text, "is-client", nowStr);
+            humanList.appendChild(userRow);
+            humanInput.value = "";
+            humanList.scrollTop = humanList.scrollHeight;
+
+            fetch(window.location.href, {
+              method: "POST",
+              headers: { "Content-Type": "application/json", "Accept": "application/json" },
+              body: JSON.stringify({ op: "human_chat", message: text })
+            })
+            .then(function(r){ return r.json(); })
+            .catch(function(err){
+              console.error("human chat error:", err);
+            });
+          });
+        }
+      })();
+    </script>
+  `;
+
   const fullHtml = `
     ${bannerHtml}
     ${headerHtml}
     <h3>${esc(T.state)}</h3>
     <div class="timeline">${phaseCards.join("")}</div>
+    ${chatSectionHtml}
     ${reviewCardHtml}
     ${materialsBox}
     ${referencesBox}
@@ -2001,6 +2350,141 @@ async function handleProject(request, env, url) {
       eyebrow: T.eyebrow,
       wide: true,
       html: fullHtml,
+    }),
+    200
+  );
+}
+
+// ── GESTIÓN Y RESPUESTA DE CHAT DEL ESTUDIO (/responder-chat) ──
+async function handleStudioChat(request, env, url) {
+  if (!env.LEADS_KV || !env.RESEND_API_KEY) {
+    return htmlResponse(page("configuración", "error de configuración", "faltan variables en el servidor."), 500);
+  }
+
+  const p = url.searchParams.get("p");
+  const t = url.searchParams.get("t");
+  if (!p || !/^[a-f0-9]{64}$/.test(p) || !t || !/^[a-f0-9]{64}$/.test(t)) {
+    return htmlResponse(page("enlace inválido", "enlace inválido", "el enlace de gestión del chat no es válido."), 400);
+  }
+
+  const key = await getKey(env);
+  const ok = await verifyRaw(key, `adminchat|${p}`, t);
+  if (!ok) {
+    return htmlResponse(page("no autorizado", "enlace caducado o alterado", "el token de seguridad no coincide."), 403);
+  }
+
+  const rawProj = await env.LEADS_KV.get(`project:${p}`);
+  if (!rawProj) {
+    return htmlResponse(page("no encontrado", "proyecto no encontrado", "no hemos encontrado este proyecto."), 404);
+  }
+  const proj = JSON.parse(rawProj);
+  const projectPageUrl = buildUrl("/proyecto", { token: p });
+  const chatKey = `project_chat:${p}`;
+  const chatHistory = (await env.LEADS_KV.get(chatKey, { type: "json" })) || [];
+
+  if (request.method === "POST") {
+    const form = await request.formData().catch(() => null);
+    const replyText = cleanInput(form?.get("reply") || "", 2500);
+    if (!replyText) {
+      return htmlResponse(
+        page("mensaje vacío", "falta el texto de la respuesta", "escribe un mensaje para enviar al cliente.", {
+          eyebrow: "panel interno del estudio",
+          footerUrl: url.href,
+          footerLabel: "volver al chat",
+        }),
+        400
+      );
+    }
+
+    const msgId = randomHex(8);
+    const newMsg = {
+      id: msgId,
+      sender: "studio",
+      text: replyText,
+      date: new Date().toISOString(),
+    };
+    chatHistory.push(newMsg);
+    await env.LEADS_KV.put(chatKey, JSON.stringify(chatHistory));
+
+    const lang = pickLang(proj.lang);
+    const emChat = EM[lang].chat;
+    try {
+      await resendSend(
+        env,
+        {
+          to: [proj.clientEmail],
+          reply_to: "hola@rebrandyourbrand.es",
+          subject: emChat.replySubject(proj.brand),
+          ...renderEmail(lang, {
+            paras: [
+              emChat.hello,
+              emChat.replyIntro(bold(proj.brand)),
+            ],
+            quote: replyText,
+            cta: { label: emChat.viewPortal, url: projectPageUrl + "#chat-human" },
+            note: emChat.confirmSoon,
+          }),
+        },
+        `chat-reply-${p}-${msgId}`
+      );
+    } catch (e) {
+      console.error("error sending studio chat reply email:", e?.message);
+    }
+
+    return redirectTo(buildUrl("/responder-chat", { p, t, sent: "1" }));
+  }
+
+  const sentNotice = url.searchParams.get("sent") === "1"
+    ? `<div class="banner-ok" style="margin-bottom:1.25rem;"><p>respuesta enviada con éxito a ${esc(proj.clientEmail)}. el cliente ha recibido la notificación por correo y el mensaje se ha guardado en su panel.</p></div>`
+    : "";
+
+  const historyHtml = chatHistory.length
+    ? chatHistory
+        .map((m) => {
+          const isStudio = m.sender === "studio";
+          const author = isStudio ? "estudio (gael y bernat)" : `cliente (${proj.brand})`;
+          const cls = isStudio ? "is-studio" : "is-client";
+          return `<div class="chat-msg-row ${cls}" style="margin-bottom:.75rem;">
+            <div class="chat-msg-bubble">
+              <div class="chat-msg-head">
+                <span class="chat-msg-author">${esc(author)}</span>
+                <span class="chat-msg-date">${esc(fmtDate(m.date, "es"))}</span>
+              </div>
+              <div class="chat-msg-text">${esc(m.text)}</div>
+            </div>
+          </div>`;
+        })
+        .join("")
+    : `<div class="chat-empty">no hay mensajes en el historial todavía.</div>`;
+
+  const html = `
+    ${sentNotice}
+    <div class="box" style="margin-bottom:1.5rem;">
+      <div class="kv">
+        <div class="kv-row"><span>marca</span><span class="kv-val">${esc(proj.brand)}</span></div>
+        <div class="kv-row"><span>correo del cliente</span><span class="kv-val">${esc(proj.clientEmail)}</span></div>
+        <div class="kv-row"><span>servicios</span><span class="kv-val">${esc(svcLabel(proj.services, "es"))}</span></div>
+        <div class="kv-row"><span>estado</span><span class="kv-val">${esc(proj.status)}</span></div>
+      </div>
+    </div>
+    <h3>conversación con el cliente</h3>
+    <div class="chat-msg-list" style="margin-bottom:1.5rem;background:rgba(255,255,255,.5);padding:1rem;border-radius:14px;border:1px solid rgba(228,222,208,.8);">
+      ${historyHtml}
+    </div>
+    <form method="POST">
+      <label for="reply-input">responder a ${esc(proj.brand)}:</label>
+      <textarea id="reply-input" name="reply" rows="4" placeholder="escribe tu respuesta para el cliente..." required></textarea>
+      <button type="submit">enviar respuesta al cliente</button>
+    </form>
+  `;
+
+  return htmlResponse(
+    page(`chat con ${proj.brand}`, `chat — ${proj.brand}`, "historial y respuesta directa al cliente.", {
+      eyebrow: "panel interno del estudio",
+      wide: true,
+      html,
+      footerUrl: projectPageUrl,
+      footerLabel: "ver panel público del cliente",
     }),
     200
   );

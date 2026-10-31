@@ -188,3 +188,90 @@ async function askGroq(env, lang, ctx, chatMessages, retries = 1) {
     }
   }
 }
+
+function buildProjectSystemInstruction(lang, proj) {
+  const l = pickLang(lang);
+  const langName = LANG_NAMES[l] || LANG_NAMES.es;
+  const servicesStr = svcLabel(proj.services, l);
+  const phasesStr = (proj.phases || [])
+    .map((ph) => {
+      const st =
+        ph.status === "done"
+          ? "completado"
+          : ph.status === "review"
+          ? "en revisión por el cliente"
+          : ph.status === "active"
+          ? "en curso por el estudio"
+          : "pendiente";
+      return `- Fase ${ph.step} (${phaseTitle(ph, l)}): estado ${st}`;
+    })
+    .join("\n");
+
+  const materialsCount = (proj.materialsList || []).length;
+  const refsCount = (proj.referencesList || []).length;
+
+  return `Eres Brandi, Directora Creativa e Inteligencia Artística de rebrandyourbrand.
+El cliente ya ha contratado su proyecto y se encuentra en su portal privado de seguimiento.
+Idioma obligatorio de respuesta: ${langName}.
+
+DATOS OFICIALES DEL PROYECTO:
+- Marca: ${proj.brand}
+- Servicios contratados: ${servicesStr}
+- Fases y estado actual:
+${phasesStr}
+- Materiales aportados: ${materialsCount} registros aportados
+- Referencias visuales: ${refsCount} referencias aportadas
+- Condiciones B2B: cada fase incluye hasta 2 rondas de revisión gratuitas durante el diseño; revisiones extra o modificaciones posteriores cuestan 100 € cerrados por ronda. En proyectos con web, hay una cuota anual de 100 €/año exclusivamente de infraestructura técnica (dominio, correo, SSL, DNS y despliegue edge).
+- La aprobación de cada fase es obligatoria por escrito por parte del cliente para avanzar; avanzamos a su ritmo.
+
+TU MISIÓN:
+- Resuelve cualquier duda del cliente sobre el estado de su proyecto, fases, plazos, entregables o condiciones con precisión, cercanía y profesionalidad.
+- Respuestas directas, concisas (máximo 3 o 4 frases), en minúsculas relajadas si encaja con el tono editorial, sin tecnicismos innecesarios.
+- NUNCA uses puntos medios ni el carácter ampersand en tus textos. Usa conjunciones o guiones largos.
+- Si el cliente solicita cambios complejos, negociaciones, aprobaciones directas de fase o pide expresamente hablar con personas, indícale amablemente que use la pestaña del equipo humano o pulse el botón de "hablar con el equipo humano" para contactar directamente con Gael y Bernat.`;
+}
+
+async function askGroqProject(env, lang, proj, chatMessages, retries = 1) {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const groq = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${env.GROQ_API_KEY}` },
+        body: JSON.stringify({
+          model: GROQ_MODEL,
+          messages: [
+            { role: "system", content: buildProjectSystemInstruction(lang, proj) },
+            ...chatMessages.map((m) => ({ role: m.role, content: m.text })),
+          ],
+          max_tokens: 450,
+          temperature: 0.4,
+          reasoning_effort: "low",
+        }),
+        signal: AbortSignal.timeout(10000),
+      });
+
+      if (!groq.ok) throw new Error(`Groq HTTP ${groq.status}`);
+      const data = await groq.json().catch(() => null);
+      const text = data?.choices?.[0]?.message?.content?.trim();
+      if (!text) throw new Error("empty_reply");
+
+      const clean = text
+        .replace(/[\u00b7\u2022]/g, " — ")
+        .replace(new RegExp("\\x26", "g"), lang === "ca" ? " i " : lang === "en" ? " and " : lang === "eu" ? " eta " : " y ");
+      return clean;
+    } catch (e) {
+      if (attempt === retries) {
+        console.error("askGroqProject failed:", e?.message);
+        const l = pickLang(lang);
+        return l === "ca"
+          ? "No he pogut processar la consulta ara mateix. Pots escriure directament a en Gael i en Bernat a la pestanya de l'equip."
+          : l === "en"
+          ? "I could not process your query right now. You can write directly to Gael and Bernat in the team tab."
+          : l === "eu"
+          ? "Ezin izan dut kontsulta prozesatu oraintxe bertan. Gael eta bernati idatzi diezaiekezu zuzenean lan-taldearen fitxan."
+          : "No he podido procesar la consulta ahora mismo. Puedes escribir directamente a Gael y Bernat en la pestaña del equipo.";
+      }
+      await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
+    }
+  }
+}

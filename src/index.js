@@ -1,6 +1,6 @@
 const HTML_CLIENT_PATHS = new Set(["/verify", "/valorar", "/approve-phase", "/cancel-renewal"]);
 
-const HTML_ADMIN_PATHS = new Set(["/testimonial", "/testimonial-delete", "/advance-phase"]);
+const HTML_ADMIN_PATHS = new Set(["/testimonial", "/testimonial-delete", "/advance-phase", "/responder-chat"]);
 
 export default {
   async fetch(request, env, ctx) {
@@ -24,6 +24,7 @@ export default {
         if (url.pathname === "/testimonial") return await handleTestimonialReview(request, env, url);
         if (url.pathname === "/testimonial-delete") return await handleTestimonialDelete(request, env, url);
         if (url.pathname === "/advance-phase") return await handlePhaseAdvance(request, env, url);
+        if (url.pathname === "/responder-chat") return await handleStudioChat(request, env, url);
         if (url.pathname === "/approve-phase") return await handlePhaseApprove(request, env, url);
         if (url.pathname === "/cancel-renewal") return await handleCancelRenewal(request, env, url);
         if (url.pathname === "/valorar") return await handleReview(request, env, url);
