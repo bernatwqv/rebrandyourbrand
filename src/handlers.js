@@ -99,18 +99,203 @@ async function handleVerify(request, env, ctx, url) {
   });
 }
 
+function checkAllServicesApproved(proj) {
+  if (!proj || !Array.isArray(proj.phases) || proj.phases.length === 0) return false;
+  const servicePhases = proj.phases.filter((ph) => ph.key !== "delivery");
+  if (servicePhases.length === 0) {
+    return proj.phases.every((ph) => ph.status === "done");
+  }
+  return servicePhases.every((ph) => ph.status === "done");
+}
+
+async function finalizeProjectClosure(
+  env,
+  proj,
+  projectToken,
+  { deliverableUrl = "", deliverableFilename = "", note = "" } = {}
+) {
+  if (!proj || !projectToken) return { ok: false, reason: "invalid_args" };
+
+  const now = new Date().toISOString();
+  let changed = false;
+
+  // 1. Asegurar que todas las fases (incluida entrega final) queden con status "done"
+  if (Array.isArray(proj.phases)) {
+    for (const ph of proj.phases) {
+      if (ph.status !== "done") {
+        ph.status = "done";
+        if (!ph.date) ph.date = now;
+        if (!ph.approvedBy) ph.approvedBy = "client";
+        if (!ph.approvedAt) ph.approvedAt = now;
+        changed = true;
+      }
+    }
+  }
+
+  // 2. Establecer campos globales del proyecto
+  if (proj.status !== "done") {
+    proj.status = "done";
+    changed = true;
+  }
+  if (!proj.finishedAt) {
+    proj.finishedAt = now;
+    changed = true;
+  }
+  const maxStep = Array.isArray(proj.phases) ? proj.phases.length : 1;
+  if (Number(proj.currentPhase) <= maxStep) {
+    proj.currentPhase = maxStep + 1;
+    changed = true;
+  }
+  if (Array.isArray(proj.services) && proj.services.includes("web") && !proj.nextRenewalAt) {
+    proj.nextRenewalAt = addOneYearIso(now);
+    changed = true;
+  }
+
+  // Determinar el mejor entregable definitivo disponible
+  const effectiveDelivUrl =
+    deliverableUrl ||
+    [...proj.phases].reverse().find((ph) => ph.deliverableUrl)?.deliverableUrl ||
+    "";
+  const effectiveDelivFilename =
+    deliverableFilename ||
+    [...proj.phases].reverse().find((ph) => ph.deliverableFilename)?.deliverableFilename ||
+    "";
+  const effectiveNote =
+    note ||
+    [...proj.phases].reverse().find((ph) => ph.note)?.note ||
+    "";
+
+  // Si deliveryPhase existe y no tenía entregable asignado, hereda el definitivo
+  const deliveryPhase = proj.phases.find((ph) => ph.key === "delivery");
+  if (deliveryPhase) {
+    if (!deliveryPhase.deliverableUrl && effectiveDelivUrl) {
+      deliveryPhase.deliverableUrl = effectiveDelivUrl;
+      if (effectiveDelivFilename) deliveryPhase.deliverableFilename = effectiveDelivFilename;
+      if (effectiveNote) deliveryPhase.note = effectiveNote;
+      changed = true;
+    }
+  }
+
+  const lang = pickLang(proj.lang);
+  const trackingUrl = buildUrl("/proyecto", { token: projectToken });
+
+  // 3. Correo de entrega final / cierre de proyecto al cliente con archivos definitivos (idempotente)
+  if (!proj.completionEmailSent && env.RESEND_API_KEY) {
+    const tc = EM[lang].completion || EM[lang].phase;
+    try {
+      await resendSend(
+        env,
+        {
+          to: [proj.clientEmail],
+          subject: tc.subject(proj.brand),
+          ...renderEmail(lang, {
+            paras: [
+              tc.hello,
+              tc.intro(bold(proj.brand)),
+              tc.body,
+              effectiveDelivUrl
+                ? `${tc.deliverable}: <a href="${esc(effectiveDelivUrl)}" target="_blank" style="color:#3D5A85;font-weight:600;">${esc(effectiveDelivFilename || effectiveDelivUrl)}</a>`
+                : "",
+            ].filter(Boolean),
+            quote: effectiveNote,
+            cta: { label: tc.cta, url: trackingUrl },
+            secondaryLink: effectiveDelivUrl
+              ? { label: tc.deliverable, url: effectiveDelivUrl }
+              : null,
+            note: tc.note,
+          }),
+        },
+        `completion-client-${projectToken}`
+      );
+      proj.completionEmailSent = true;
+      changed = true;
+    } catch (e) {
+      console.error("completion client email failed:", e?.message);
+    }
+  }
+
+  // 4. Notificación de cierre con éxito al estudio (idempotente)
+  if (!proj.adminCompletionSent && env.RESEND_API_KEY) {
+    try {
+      await resendSend(
+        env,
+        {
+          to: ["hola@rebrandyourbrand.es"],
+          reply_to: proj.clientEmail,
+          subject: `proyecto finalizado con éxito — ${proj.brand}`,
+          ...renderEmail("es", {
+            paras: [
+              "el cliente ha validado todas las fases y el proyecto ha finalizado con éxito.",
+              lines(
+                `— proyecto: ${bold(proj.brand)}`,
+                `— cliente: ${bold(proj.clientEmail)}`,
+                `— servicios: ${bold(svcLabel(proj.services, "es"))}`,
+                `— fecha de finalización (iso): ${bold(now)}`,
+                effectiveDelivUrl ? `— entregable final: ${bold(effectiveDelivUrl)}` : ""
+              ).filter(Boolean),
+            ],
+            cta: { label: "ver ficha del proyecto", url: trackingUrl },
+          }),
+        },
+        `completion-admin-${projectToken}`
+      );
+      proj.adminCompletionSent = true;
+      changed = true;
+    } catch (e) {
+      console.error("completion admin email failed:", e?.message);
+    }
+  }
+
+  // 5. Correo automatizado con enlace único a reseña verificada (idempotente)
+  if (!proj.reviewInvited && env.RESEND_API_KEY) {
+    try {
+      await sendReviewInvite(env, proj, projectToken);
+      proj.reviewInvited = true;
+      changed = true;
+    } catch (e) {
+      console.error("review invite failed in closure:", e?.message);
+      await alertAdmin(
+        env,
+        "fallo al enviar la invitación a valorar en el cierre",
+        `proyecto: ${proj.brand}\ncliente: ${proj.clientEmail}\nenlace de valoración (envíaselo a mano): ${await reviewUrl(env, projectToken)}`
+      ).catch(() => {});
+    }
+  }
+
+  if (changed) {
+    await env.LEADS_KV.put(`project:${projectToken}`, JSON.stringify(proj));
+  }
+
+  return { ok: true, finished: true };
+}
+
 async function completeProjectPhase(
   env,
   proj,
   projectToken,
-  { approvedBy = "studio", deliverableUrl = "", deliverableFilename = "", note = "", legacyActionToken = "" } = {}
+  { step = 0, approvedBy = "studio", deliverableUrl = "", deliverableFilename = "", note = "", legacyActionToken = "" } = {}
 ) {
-  const idx = proj.phases.findIndex(
-    (ph) => ph.step === Number(proj.currentPhase) && (ph.status === "active" || ph.status === "review")
-  );
-  const targetIdx =
-    idx >= 0 ? idx : proj.phases.findIndex((ph) => ph.status === "active" || ph.status === "review");
-  if (targetIdx < 0) return { ok: false, reason: "already_finished" };
+  let targetIdx = -1;
+  if (step > 0) {
+    targetIdx = proj.phases.findIndex(
+      (ph) => ph.step === Number(step) && (ph.status === "active" || ph.status === "review")
+    );
+  }
+  if (targetIdx < 0) {
+    targetIdx = proj.phases.findIndex(
+      (ph) => ph.step === Number(proj.currentPhase) && (ph.status === "active" || ph.status === "review")
+    );
+  }
+  if (targetIdx < 0) {
+    targetIdx = proj.phases.findIndex((ph) => ph.status === "active" || ph.status === "review");
+  }
+  if (targetIdx < 0) {
+    if (checkAllServicesApproved(proj)) {
+      await finalizeProjectClosure(env, proj, projectToken, { deliverableUrl, deliverableFilename, note });
+      return { ok: true, finished: true };
+    }
+    return { ok: false, reason: "already_finished" };
+  }
 
   const now = new Date().toISOString();
   const advancedPhase = proj.phases[targetIdx];
@@ -122,23 +307,26 @@ async function completeProjectPhase(
   if (deliverableFilename) advancedPhase.deliverableFilename = deliverableFilename;
   if (note) advancedPhase.note = note;
 
+  // Comprobar si se ha alcanzado el final del último servicio contratado o de todas las fases
+  const allServicesApproved = checkAllServicesApproved(proj);
   let nextPhase = null;
   let nextStep = 0;
   let finished = false;
 
-  if (targetIdx + 1 < proj.phases.length) {
+  if (allServicesApproved || targetIdx + 1 >= proj.phases.length) {
+    finished = true;
+    await finalizeProjectClosure(env, proj, projectToken, {
+      deliverableUrl: deliverableUrl || advancedPhase.deliverableUrl || "",
+      deliverableFilename: deliverableFilename || advancedPhase.deliverableFilename || "",
+      note: note || advancedPhase.note || "",
+    });
+  } else {
     nextPhase = proj.phases[targetIdx + 1];
     nextPhase.status = "active";
     nextPhase.date = now;
     nextStep = nextPhase.step;
     proj.currentPhase = nextStep;
-  } else {
-    finished = true;
-    proj.finishedAt = now;
-    proj.currentPhase = advancedPhase.step + 1;
-    if (Array.isArray(proj.services) && proj.services.includes("web") && !proj.nextRenewalAt) {
-      proj.nextRenewalAt = addOneYearIso(now);
-    }
+    await env.LEADS_KV.put(`project:${projectToken}`, JSON.stringify(proj));
   }
 
   const lang = pickLang(proj.lang);
@@ -163,7 +351,7 @@ async function completeProjectPhase(
             `— fase aprobada: ${bold(advancedTitleEs)}`,
             `— registro de aprobación (iso): ${bold(now)}`,
             finished
-              ? `— estado: ${bold("proyecto finalizado")}`
+              ? `— estado: ${bold("proyecto finalizado con éxito")}`
               : `— nueva fase activa: ${bold(`paso ${nextStep} — ${nextTitleEs}`)}`
           ),
         ]
@@ -171,81 +359,67 @@ async function completeProjectPhase(
           "hola,",
           `la fase ${bold(advancedTitleEs)} del proyecto ${bold(proj.brand)} se ha completado con éxito.`,
           finished
-            ? "el proyecto ha completado todas sus fases y ha finalizado."
+            ? "el proyecto ha completado todas sus fases y ha finalizado con éxito."
             : `la nueva fase activa es: ${bold(`paso ${nextStep} — ${nextTitleEs}`)}.`,
         ];
 
-  try {
-    await Promise.all([
-      resendSend(
-        env,
-        {
-          to: ["hola@rebrandyourbrand.es"],
-          reply_to: proj.clientEmail,
-          subject: adminSubject,
-          ...renderEmail("es", {
-            paras: adminParas,
-            cta: nextActionUrl
-              ? { label: `gestionar siguiente fase (${nextTitleEs})`, url: nextActionUrl }
-              : { label: "ver ficha del proyecto", url: trackingUrl },
-          }),
-        },
-        `phase-admin-${projectToken}-${advancedPhase.step}`
-      ),
-      resendSend(
-        env,
-        {
-          to: [proj.clientEmail],
-          subject: t.subject(proj.brand),
-          ...renderEmail(lang, {
-            paras: [
-              t.hello,
-              t.intro(bold(proj.brand)),
-              lines(
-                `— ${t.done}: ${bold(phaseTitle(advancedPhase, lang))}`,
-                finished ? `— ${bold(t.finished)}` : `— ${t.next}: ${bold(phaseTitle(nextPhase, lang))}`
-              ),
-            ],
-            quote: advancedPhase.note || "",
-            cta: { label: t.cta, url: trackingUrl },
-            secondaryLink: advancedPhase.deliverableUrl
-              ? { label: t.deliverable, url: advancedPhase.deliverableUrl }
-              : null,
-            note: t.note,
-          }),
-        },
-        `phase-client-${projectToken}-${advancedPhase.step}`
-      ),
-    ]);
-
-    await env.LEADS_KV.put(`project:${projectToken}`, JSON.stringify(proj));
-    if (legacyActionToken) {
-      await env.LEADS_KV.delete(`phase_action:${legacyActionToken}`).catch(() => {});
-    }
-  } catch (e) {
-    console.error("phase advance email failed:", e?.message);
-    const retryAdvanceUrl = await advancePhaseUrl(env, projectToken, advancedPhase.step);
-    await alertAdmin(
-      env,
-      "fallo al enviar correos de avance de fase",
-      `proyecto: ${proj.brand}\nerror: ${e?.message}\nenlace de gestión: ${retryAdvanceUrl}`
-    );
-    return { ok: false, reason: "email_failed" };
-  }
-
-  if (finished && !proj.reviewInvited) {
+  if (!finished) {
     try {
-      await sendReviewInvite(env, proj, projectToken);
-      proj.reviewInvited = true;
-      await env.LEADS_KV.put(`project:${projectToken}`, JSON.stringify(proj));
+      await Promise.all([
+        resendSend(
+          env,
+          {
+            to: ["hola@rebrandyourbrand.es"],
+            reply_to: proj.clientEmail,
+            subject: adminSubject,
+            ...renderEmail("es", {
+              paras: adminParas,
+              cta: nextActionUrl
+                ? { label: `gestionar siguiente fase (${nextTitleEs})`, url: nextActionUrl }
+                : { label: "ver ficha del proyecto", url: trackingUrl },
+            }),
+          },
+          `phase-admin-${projectToken}-${advancedPhase.step}`
+        ),
+        resendSend(
+          env,
+          {
+            to: [proj.clientEmail],
+            subject: t.subject(proj.brand),
+            ...renderEmail(lang, {
+              paras: [
+                t.hello,
+                t.intro(bold(proj.brand)),
+                lines(
+                  `— ${t.done}: ${bold(phaseTitle(advancedPhase, lang))}`,
+                  `— ${t.next}: ${bold(phaseTitle(nextPhase, lang))}`
+                ),
+              ],
+              quote: advancedPhase.note || "",
+              cta: { label: t.cta, url: trackingUrl },
+              secondaryLink: advancedPhase.deliverableUrl
+                ? { label: t.deliverable, url: advancedPhase.deliverableUrl }
+                : null,
+              note: t.note,
+            }),
+          },
+          `phase-client-${projectToken}-${advancedPhase.step}`
+        ),
+      ]);
     } catch (e) {
-      console.error("review invite failed:", e?.message);
+      console.error("phase advance email failed:", e?.message);
+      const retryAdvanceUrl = await advancePhaseUrl(env, projectToken, advancedPhase.step);
       await alertAdmin(
         env,
-        "fallo al enviar la invitación a valorar",
-        `proyecto: ${proj.brand}\ncliente: ${proj.clientEmail}\nenlace de valoración (envíaselo a mano): ${await reviewUrl(env, projectToken)}`
+        "fallo al enviar correos de avance de fase",
+        `proyecto: ${proj.brand}\nerror: ${e?.message}\nenlace de gestión: ${retryAdvanceUrl}`
       );
+      return { ok: false, reason: "email_failed" };
     }
+  }
+
+  if (legacyActionToken) {
+    await env.LEADS_KV.delete(`phase_action:${legacyActionToken}`).catch(() => {});
   }
 
   return {
@@ -322,7 +496,12 @@ async function handlePhaseAdvance(request, env, url) {
   }
 
   const allDone = Array.isArray(proj.phases) && proj.phases.every((ph) => ph.status === "done");
-  if (allDone) {
+  if (allDone || checkAllServicesApproved(proj)) {
+    if (!allDone || !proj.finishedAt || !proj.reviewInvited || proj.status !== "done") {
+      await finalizeProjectClosure(env, proj, projectToken).catch((e) =>
+        console.error("handlePhaseAdvance auto-finalize failed:", e?.message)
+      );
+    }
     return htmlResponse(
       page("proyecto finalizado", "proyecto ya finalizado", `todas las fases de ${proj.brand} ya figuran como completadas.`, {
         eyebrow: "gestión interna",
@@ -483,7 +662,7 @@ async function handlePhaseAdvance(request, env, url) {
         <input id="deliverable_url" name="deliverable_url" type="url" maxlength="500" placeholder="https://..." value="${esc(currentPhaseObj.deliverableUrl || "")}">
         <label for="note">nota para el cliente (opcional)</label>
         <textarea id="note" name="note" rows="4" maxlength="600" placeholder="contexto breve sobre la entrega, qué revisar o pasos siguientes...">${esc(currentPhaseObj.note || "")}</textarea>
-        <button type="submit" name="decision" value="review">enviar propuesta a revisión del cliente</button>
+        <button type="submit" name="decision" value="review">${currentPhaseObj.key === "delivery" ? "completar entrega final y cerrar proyecto" : "enviar propuesta a revisión del cliente"}</button>
       </form>
     `;
 
@@ -591,6 +770,38 @@ async function handlePhaseAdvance(request, env, url) {
 
   const note = cleanNote(form?.get("note") ?? "", 600);
   const decision = String(form?.get("decision") ?? "review");
+
+  if (currentPhaseObj.key === "delivery") {
+    const now = new Date().toISOString();
+    currentPhaseObj.status = "done";
+    currentPhaseObj.date = now;
+    currentPhaseObj.deliverableUrl = effectiveDeliverableUrl;
+    if (effectiveDeliverableFilename) {
+      currentPhaseObj.deliverableFilename = effectiveDeliverableFilename;
+    }
+    currentPhaseObj.note = note;
+
+    await finalizeProjectClosure(env, proj, projectToken, {
+      deliverableUrl: effectiveDeliverableUrl,
+      deliverableFilename: effectiveDeliverableFilename,
+      note,
+    });
+
+    return htmlResponse(
+      page(
+        "¡enviado correctamente!",
+        "entrega final completada",
+        `has completado la entrega final de ${proj.brand}. se han enviado los archivos definitivos y la invitación a valorar al cliente.`,
+        {
+          eyebrow: "panel interno del estudio",
+          html: `<div class="notice-box"><p>aviso: el proyecto ha finalizado con éxito y el cliente ha recibido la notificación y los archivos.</p></div><a class="btn" href="${esc(trackingUrl)}">ver página pública del cliente</a>`,
+          footerUrl: trackingUrl,
+          footerLabel: "ver página pública del cliente",
+        }
+      ),
+      200
+    );
+  }
 
   if (decision === "review") {
     const now = new Date().toISOString();
@@ -719,12 +930,25 @@ async function handlePhaseApprove(request, env, url) {
   const ph = (proj.phases || []).find((x) => x.step === step);
   if (!ph || !proj.paid) return msgPage(L, "invalid", 400);
 
+  if (checkAllServicesApproved(proj) && (!proj.finishedAt || !proj.reviewInvited || proj.status !== "done")) {
+    await finalizeProjectClosure(env, proj, p);
+  }
+
   if (ph.status === "done" || Number(proj.currentPhase) !== step) {
+    const isCompleted = proj.status === "done" || checkAllServicesApproved(proj);
+    const completedInfo = isCompleted && A.completed ? A.completed : A.already;
+    let reviewBtn = "";
+    if (isCompleted) {
+      const revUrl = await reviewUrl(env, p);
+      if (revUrl) {
+        reviewBtn = `<a class="btn" href="${esc(revUrl)}" style="margin-bottom:.75rem;">${esc(PG[L].common?.openReview || "dejar valoración del proyecto")}</a>`;
+      }
+    }
     return htmlResponse(
-      page(A.already[0], A.already[1], A.already[2], {
+      page(completedInfo[0], completedInfo[1], completedInfo[2], {
         lang: L,
         eyebrow: A.eyebrow,
-        html: `<a class="btn" href="${esc(trackingUrl)}">${esc(PG[L].common.openTracker)}</a>`,
+        html: `${reviewBtn}<a class="btn secondary" href="${esc(trackingUrl)}">${esc(PG[L].common.openTracker)}</a>`,
         footerUrl: trackingUrl,
         footerLabel: PG[L].common.openTracker,
       }),
@@ -903,6 +1127,7 @@ async function handlePhaseApprove(request, env, url) {
   }
 
   const res = await completeProjectPhase(env, proj, p, {
+    step,
     approvedBy: "client",
     deliverableUrl: ph.deliverableUrl || "",
     deliverableFilename: ph.deliverableFilename || "",
@@ -912,11 +1137,19 @@ async function handlePhaseApprove(request, env, url) {
   if (!res.ok && res.reason === "email_failed") return errorPage(L);
 
   const noticeText = PG[L].track?.actionRegisteredNotice || "aviso: esta acción ya ha quedado registrada en el sistema y nuestro equipo ha recibido la notificación para continuar con el trabajo.";
+  const succ = res.finished && A.completed ? A.completed : A.done;
+  let reviewBtn = "";
+  if (res.finished) {
+    const revUrl = await reviewUrl(env, p);
+    if (revUrl) {
+      reviewBtn = `<a class="btn" href="${esc(revUrl)}" style="margin-bottom:.75rem;">${esc(PG[L].common?.openReview || "dejar valoración del proyecto")}</a>`;
+    }
+  }
   return htmlResponse(
-    page(A.done[0], A.done[1], A.done[2], {
+    page(succ[0], succ[1], succ[2], {
       lang: L,
       eyebrow: A.eyebrow,
-      html: `<div class="notice-box"><p>${esc(noticeText)}</p></div><a class="btn" href="${esc(trackingUrl)}">${esc(PG[L].common.openTracker)}</a>`,
+      html: `<div class="notice-box"><p>${esc(noticeText)}</p></div>${reviewBtn}<a class="btn secondary" href="${esc(trackingUrl)}">${esc(PG[L].common.openTracker)}</a>`,
       footerUrl: trackingUrl,
       footerLabel: PG[L].common.openTracker,
     }),
@@ -1419,6 +1652,10 @@ async function handleProject(request, env, url) {
   const bannerHtml =
     url.searchParams.get("ob") === "1" ? `<div class="banner-ok">${esc(T.obSentBanner)}</div>` : "";
 
+  if (checkAllServicesApproved(proj) && (!proj.finishedAt || !proj.reviewInvited || proj.status !== "done")) {
+    await finalizeProjectClosure(env, proj, token);
+  }
+
   const allDone = Array.isArray(proj.phases) && proj.phases.every((ph) => ph.status === "done");
 
   // Normalizar lista de materiales y referencias (modo append-only)
@@ -1619,11 +1856,26 @@ async function handleProject(request, env, url) {
     })
   );
 
+  let reviewCardHtml = "";
+  if (allDone && !proj.reviewSubmitted) {
+    const revUrl = await reviewUrl(env, token);
+    if (revUrl) {
+      reviewCardHtml = `
+        <div class="box accent" style="margin-top:1.25rem;">
+          <span class="eyebrow">${esc(PG[L].rv?.eyebrow || "opinión verificada")}</span>
+          <h2>${esc(PG[L].rv?.heading || "cuéntanos qué tal ha ido")}</h2>
+          <p class="lead" style="margin-bottom:1.15rem;font-size:.85rem;">${esc(PG[L].rv?.intro || "gracias por confiar en nosotros.")}</p>
+          <a class="btn" href="${esc(revUrl)}">${esc(PG[L].common?.openReview || "dejar valoración del proyecto")}</a>
+        </div>`;
+    }
+  }
+
   const fullHtml = `
     ${bannerHtml}
     ${headerHtml}
     <h3>${esc(T.state)}</h3>
     <div class="timeline">${phaseCards.join("")}</div>
+    ${reviewCardHtml}
     ${materialsBox}
     ${referencesBox}
     ${addFormHtml}`;
@@ -1656,12 +1908,19 @@ async function handleReview(request, env, url) {
   L = pickLang(proj.lang);
   const trackingUrl = buildUrl("/proyecto", { token: p });
 
-  const finished =
+  let finished =
     proj.paid &&
     Array.isArray(proj.phases) &&
     proj.phases.length > 0 &&
     proj.phases.every((ph) => ph.status === "done");
-  if (!finished) return msgPage(L, "rvNotReady", 403, { footerUrl: trackingUrl, footerLabel: PG[L].common.openTracker });
+  if (!finished) {
+    if (checkAllServicesApproved(proj)) {
+      await finalizeProjectClosure(env, proj, p);
+      finished = true;
+    } else {
+      return msgPage(L, "rvNotReady", 403, { footerUrl: trackingUrl, footerLabel: PG[L].common.openTracker });
+    }
+  }
   if (proj.reviewSubmitted) return msgPage(L, "rvDone", 200, { footerUrl: trackingUrl, footerLabel: PG[L].common.openTracker });
 
   const R = PG[L].rv;

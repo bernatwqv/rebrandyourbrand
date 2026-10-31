@@ -169,6 +169,15 @@ const EM = {
       cta: "revisar propuesta, aprobar o pedir ajustes",
       note: "avanzamos estrictamente a tu ritmo: si necesitas más tiempo el proyecto permanece en pausa indefinida esperando tus indicaciones, sin que el estudio avance de fase por su cuenta.",
     },
+    completion: {
+      subject: (br) => `proyecto finalizado con éxito — entrega definitiva de ${br}`,
+      hello: "hola,",
+      intro: (br) => `¡enhorabuena! tu proyecto ${bold(br)} ha completado todas sus fases y ha finalizado con éxito.`,
+      body: "hemos registrado la validación final y ya tienes disponibles todos los archivos definitivos y entregables de tu proyecto.",
+      deliverable: "enlace a los archivos definitivos o entregable final",
+      cta: "abrir mi proyecto y acceder a los archivos",
+      note: "guarda este correo para acceder a tus archivos maestros, facturas y seguimiento en cualquier momento.",
+    },
     review: {
       subject: (br) => `¿qué tal ha ido ${br}? tu opinión nos importa`,
       hello: "hola,",
@@ -244,6 +253,15 @@ const EM = {
       body: "des del botó inferior pots aprovar la proposta per avançar a l'etapa següent o demanar ajustos si encara tens rondes de revisió disponibles.",
       cta: "revisar proposta, aprovar o demanar ajustos",
       note: "avancem estrictament al teu ritme: si necessites més temps el projecte roman en pausa indefinida esperant les teves indicacions, sense que l'estudi avanci de fase pel seu compte.",
+    },
+    completion: {
+      subject: (br) => `projecte finalitzat amb èxit — lliurament definitiu de ${br}`,
+      hello: "hola,",
+      intro: (br) => `enhorabona! el teu projecte ${bold(br)} ha completat totes les fases i ha finalitzat amb èxit.`,
+      body: "hem registrat la validació final i ja tens disponibles tots els arxius definitius i lliurables del teu projecte.",
+      deliverable: "enllaç als arxius definitius o lliurable final",
+      cta: "obrir el meu projecte i accedir als arxius",
+      note: "guarda aquest correu per accedir als teus arxius mestres, factures i seguiment en qualsevol moment.",
     },
     review: {
       subject: (br) => `com ha anat ${br}? la teva opinió ens importa`,
@@ -321,6 +339,15 @@ const EM = {
       cta: "proposamena berrikusi, onartu edo doikuntzak eskatu",
       note: "zorrotz zure erritmora mugitzen gara: denbora gehiago behar baduzu proiektuak etenaldi mugagabean jarraituko du zure jarraibideen zain, estudioak bere kabuz faserik aurreratu gabe.",
     },
+    completion: {
+      subject: (br) => `proiektua arrakastaz amaitu da — ${br}-(r)en behin betiko entrega`,
+      hello: "kaixo,",
+      intro: (br) => `zorionak! zure ${bold(br)} proiektuak fase guztiak osatu ditu eta arrakastaz amaitu da.`,
+      body: "azken baliozkotzea erregistratu dugu eta dagoeneko eskuragarri dituzu zure proiektuko behin betiko fitxategi eta entregagai guztiak.",
+      deliverable: "behin betiko fitxategietarako edo azken entregagairako esteka",
+      cta: "ireki nire proiektua eta atzitu fitxategiak",
+      note: "gorde mezu hau zure fitxategi nagusiak, fakturak eta jarraipena edozein unetan kontsultatzeko.",
+    },
     review: {
       subject: (br) => `zer moduz joan da ${br}? zure iritziak axola digu`,
       hello: "kaixo,",
@@ -397,6 +424,15 @@ const EM = {
       cta: "review proposal, approve or request adjustments",
       note: "we work strictly at your pace: if you need more time, your project remains paused indefinitely waiting for your feedback, without the studio advancing any phase on its own.",
     },
+    completion: {
+      subject: (br) => `project successfully completed — final delivery for ${br}`,
+      hello: "hello,",
+      intro: (br) => `congratulations! your project ${bold(br)} has completed all phases and is now finished.`,
+      body: "we have recorded the final approval and all your final master files and deliverables are now ready for you.",
+      deliverable: "link to final master files or deliverable",
+      cta: "open my project and access files",
+      note: "keep this email handy to access your master files, invoices and project tracking at any time.",
+    },
     review: {
       subject: (br) => `how did ${br} go? your opinion matters`,
       hello: "hello,",
@@ -468,6 +504,7 @@ const PG = {
     common: {
       backSite: "volver a rebrandyourbrand.es",
       openTracker: "ver seguimiento de mi proyecto",
+      openReview: "dejar valoración del proyecto",
       studioTag: "estudio de rebranding y web",
     },
     rv: {
@@ -511,6 +548,7 @@ const PG = {
       revWorking: ["ajustes en curso", "estamos aplicando tus ajustes", (r, m) => `ya tenemos registrada tu petición de la ronda ${r} de ${m} y estamos preparando la nueva versión. te avisaremos por correo en cuanto esté lista.`],
       done: ["¡enviado correctamente!", "fase aprobada con éxito", "hemos registrado tu validación por escrito y ya hemos activado la siguiente etapa de tu proyecto."],
       already: ["fase ya gestionada", "esta fase ya está cerrada", "esta fase ya consta como aprobada y completada en tu proyecto."],
+      completed: ["¡proyecto finalizado con éxito!", "todas las fases completadas", "todas las fases de tu proyecto han sido validadas con éxito. ya tienes disponibles todos los archivos definitivos en tu panel de seguimiento."],
     },
     rn: {
       eyebrow: "infraestructura web",
@@ -607,6 +645,7 @@ const PG = {
     common: {
       backSite: "tornar a rebrandyourbrand.es",
       openTracker: "veure el seguiment del meu projecte",
+      openReview: "deixar valoració del projecte",
       studioTag: "estudi de rebranding i web",
     },
     rv: {
@@ -650,6 +689,7 @@ const PG = {
       revWorking: ["ajustos en curs", "estem aplicant els teus ajustos", (r, m) => `ja tenim registrada la teva petició de la ronda ${r} de ${m} i estem preparant la nova versió. t'avisarem per correu tan bon punt estigui a punt.`],
       done: ["enviat correctament!", "fase aprovada amb èxit", "hem registrat la teva validació per escrit i ja hem activat l'etapa següent del teu projecte."],
       already: ["fase ja gestionada", "aquesta fase ja està tancada", "aquesta fase ja consta com a aprovada i completada al teu projecte."],
+      completed: ["projecte finalitzat amb èxit!", "totes les fases completades", "totes les fases del teu projecte han estat validades amb èxit. ja tens disponibles tots els arxius definitius al teu tauler de seguiment."],
     },
     rn: {
       eyebrow: "infraestructura web",
@@ -746,6 +786,7 @@ const PG = {
     common: {
       backSite: "itzuli rebrandyourbrand.es webgunera",
       openTracker: "ikusi nire proiektuaren jarraipena",
+      openReview: "eman proiektuaren balorazioa",
       studioTag: "rebranding eta web estudioa",
     },
     rv: {
@@ -789,6 +830,7 @@ const PG = {
       revWorking: ["doikuntzak abian", "zure doikuntzak aplikatzen ari gara", (r, m) => `dagoeneko erregistratuta dugu ${m}-tik ${r}. txandako zure eskaera eta bertsio berria prestatzen ari gara. prest dagoenean postaz jakinaraziko dizugu.`],
       done: ["behar bezala bidalita!", "fasea arrakastaz onartuta", "zure idatzizko baliozkotzea erregistratu dugu eta dagoeneko aktibatu dugu zure proiektuaren hurrengo etapa."],
       already: ["fasea kudeatuta", "fase hau itxita dago jada", "fase hau dagoeneko onartuta eta osatuta agertzen da zure proiektuan."],
+      completed: ["proiektua arrakastaz amaitu da!", "fase guztiak osatuta", "zure proiektuko fase guztiak arrakastaz baliozkotu dira. dagoeneko eskuragarri dituzu behin betiko fitxategi guztiak zure jarraipen-panelean."],
     },
     rn: {
       eyebrow: "web-azpiegitura",
@@ -885,6 +927,7 @@ const PG = {
     common: {
       backSite: "back to rebrandyourbrand.es",
       openTracker: "view my project tracking",
+      openReview: "leave project review",
       studioTag: "rebranding and web studio",
     },
     rv: {
@@ -928,6 +971,7 @@ const PG = {
       revWorking: ["adjustments in progress", "applying your adjustments", (r, m) => `we have recorded your request for round ${r} of ${m} and are preparing the new version. we will email you as soon as it is ready.`],
       done: ["submitted successfully!", "phase approved successfully", "we have recorded your written approval and activated the next stage of your project."],
       already: ["already approved", "this phase is already closed", "this phase is already marked as approved and completed on your project."],
+      completed: ["project successfully completed!", "all phases completed", "all phases of your project have been successfully approved. all your final files are now ready in your tracking dashboard."],
     },
     rn: {
       eyebrow: "web infrastructure",

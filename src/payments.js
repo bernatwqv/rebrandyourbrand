@@ -332,7 +332,24 @@ async function unlockExtraRevision(env, proj, step, sessionId, sessionData = nul
   ph.maxRevisions = baseMax + 1;
   ph.paidRevisionSessions = [...paidSessions, sessionId];
 
+  // Asegurar coherencia de estados: no bloquear ni desincronizar la fase ni el proyecto
+  if (proj.status !== "done") {
+    proj.status = "in_progress";
+  }
+  if (ph.status !== "done") {
+    ph.status = "review";
+  }
+
   await env.LEADS_KV.put(`project:${proj.token}`, JSON.stringify(proj));
+
+  // Si todas las fases de servicio ya estuviesen aprobadas, asegurar la secuencia de cierre
+  if (typeof checkAllServicesApproved === "function" && checkAllServicesApproved(proj)) {
+    if (typeof finalizeProjectClosure === "function") {
+      await finalizeProjectClosure(env, proj, proj.token).catch((e) =>
+        console.error("finalizeProjectClosure on unlockExtraRevision failed:", e?.message)
+      );
+    }
+  }
 
   if (env.RESEND_API_KEY) {
     const manageUrl = await advancePhaseUrl(env, proj.token, ph.step);

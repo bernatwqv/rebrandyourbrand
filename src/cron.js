@@ -17,6 +17,12 @@ async function inspectProjectDeadlines(env, keyName, nowMs) {
   const nowIso = new Date(nowMs).toISOString();
   let changed = false;
 
+  // 0. Cierre automático y rescate si todos los servicios contratados están aprobados
+  if (checkAllServicesApproved(proj) && (!proj.finishedAt || !proj.reviewInvited || proj.status !== "done")) {
+    await finalizeProjectClosure(env, proj, projectToken);
+    changed = true;
+  }
+
   // 1. Cláusula 3.3 — Recordatorio amistoso a los 15 días si la fase sigue en espera de validación (el proyecto avanza al ritmo del cliente)
   if (Array.isArray(proj.phases)) {
     for (const ph of proj.phases) {
