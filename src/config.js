@@ -36,6 +36,10 @@ const TACIT_REMINDER_DAYS = 15; // retrocompatibilidad
 
 const RENEWAL_NOTICE_DAYS = 30;
 
+const ABANDON_WARNING_DAYS = 30;
+
+const ABANDON_GRACE_DAYS = 7;
+
 const MAX_PHASE_REVISIONS = 2;
 
 // Importe anual obligatorio de infraestructura técnica web (dominio, correo corporativo, DNS/SSL y despliegue edge) si env.WEB_RENEWAL_EUR no está definida en Cloudflare

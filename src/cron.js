@@ -64,7 +64,108 @@ async function inspectProjectDeadlines(env, keyName, nowMs) {
     }
   }
 
-  // 2. Cláusula 3.1 — Preaviso de 30 días para renovación anual de infraestructura web
+  // 2. Cláusula 3.2 — Preaviso a los 30 días y rescisión por abandono a los 37 días sin actividad
+  if (proj.status === "active") {
+    const hasMaterials =
+      (Array.isArray(proj.materialsList) && proj.materialsList.length > 0) ||
+      Boolean(proj.onboarding && (proj.onboarding.materials || proj.onboarding.submittedAt || proj.onboarding.receivedAt));
+    const waitingMaterials = !hasMaterials;
+    const reviewPhase = Array.isArray(proj.phases)
+      ? proj.phases.find((ph) => ph.status === "review" && ph.reviewSentAt)
+      : null;
+    const waitingReview = Boolean(reviewPhase);
+
+    if (waitingMaterials || waitingReview) {
+      const inactiveStart = waitingMaterials ? (proj.paidAt || proj.createdAt) : reviewPhase.reviewSentAt;
+      const inactiveMs = new Date(inactiveStart).getTime();
+      if (!Number.isNaN(inactiveMs)) {
+        const daysInactive = (nowMs - inactiveMs) / DAY_MS;
+        if (daysInactive >= ABANDON_WARNING_DAYS) {
+          const trackingUrl = buildUrl("/proyecto", { token: projectToken });
+          if (!proj.abandonWarningSentAt) {
+            const tWarn = EM[lang].abandonWarning;
+            try {
+              await resendSend(
+                env,
+                {
+                  to: [proj.clientEmail],
+                  reply_to: "hola@rebrandyourbrand.es",
+                  subject: tWarn.subject(proj.brand),
+                  ...renderEmail(lang, {
+                    paras: [tWarn.hello, tWarn.intro(bold(proj.brand)), tWarn.body],
+                    cta: { label: tWarn.cta, url: trackingUrl },
+                    note: tWarn.note,
+                  }),
+                },
+                `abandon-warn-${projectToken}-${nowIso.slice(0, 10)}`
+              );
+              proj.abandonWarningSentAt = nowIso;
+              changed = true;
+            } catch (e) {
+              console.error("abandon warning email failed:", e?.message);
+            }
+          } else {
+            const warnMs = new Date(proj.abandonWarningSentAt).getTime();
+            if (!Number.isNaN(warnMs)) {
+              const daysSinceWarn = (nowMs - warnMs) / DAY_MS;
+              if (daysSinceWarn >= ABANDON_GRACE_DAYS) {
+                proj.status = "abandoned";
+                proj.abandonedAt = nowIso;
+                const tAb = EM[lang].abandoned;
+                try {
+                  await resendSend(
+                    env,
+                    {
+                      to: [proj.clientEmail],
+                      reply_to: "hola@rebrandyourbrand.es",
+                      subject: tAb.subject(proj.brand),
+                      ...renderEmail(lang, {
+                        paras: [tAb.hello, tAb.intro(bold(proj.brand)), tAb.body],
+                        cta: { label: tAb.cta, url: trackingUrl },
+                        note: tAb.note,
+                      }),
+                    },
+                    `abandon-client-${projectToken}-${nowIso.slice(0, 10)}`
+                  );
+
+                  await resendSend(
+                    env,
+                    {
+                      to: ["hola@rebrandyourbrand.es"],
+                      reply_to: proj.clientEmail,
+                      subject: `expediente cerrado por abandono (cláusula 3.2) — ${proj.brand}`,
+                      ...renderEmail("es", {
+                        paras: [
+                          `el expediente de ${bold(proj.brand)} ha sido cerrado definitivamente por abandono tras superar 37 días naturales sin actividad.`,
+                          lines(
+                            `— cliente: ${bold(proj.clientEmail)}`,
+                            `— proyecto: ${bold(proj.brand)}`,
+                            `— fecha de aviso inicial (30d): ${bold(fmtDate(proj.abandonWarningSentAt, "es"))}`,
+                            `— fecha de rescisión (37d): ${bold(fmtDate(nowIso, "es"))}`
+                          ),
+                          "conforme a la cláusula 3.2, el importe abonado se conserva en compensación por los costes y la reserva de agenda.",
+                        ],
+                        cta: { label: "ver ficha del proyecto", url: trackingUrl },
+                      }),
+                    },
+                    `abandon-admin-${projectToken}-${nowIso.slice(0, 10)}`
+                  );
+                  changed = true;
+                } catch (e) {
+                  console.error("abandon termination email failed:", e?.message);
+                }
+              }
+            }
+          }
+        }
+      }
+    } else if (proj.abandonWarningSentAt) {
+      delete proj.abandonWarningSentAt;
+      changed = true;
+    }
+  }
+
+  // 3. Cláusula 3.1 — Preaviso de 30 días para renovación anual de infraestructura web
   if (
     Array.isArray(proj.services) &&
     proj.services.includes("web") &&
@@ -144,6 +245,50 @@ async function inspectProjectDeadlines(env, keyName, nowMs) {
             console.error("renewal admin reminder failed:", e?.message);
           }
         }
+      }
+    }
+  }
+
+  // 4. Alerta interna de renovación anual vencida sin pago ni cancelación
+  const renewalDueDate = proj.renewalDueAt || proj.nextRenewalAt;
+  if (
+    Array.isArray(proj.services) &&
+    proj.services.includes("web") &&
+    renewalDueDate &&
+    !proj.renewalCanceled &&
+    !proj.renewalPaid &&
+    !proj.renewalOverdueAlertSentAt
+  ) {
+    const dueMs = new Date(renewalDueDate).getTime();
+    if (!Number.isNaN(dueMs) && nowMs > dueMs) {
+      const trackingUrl = buildUrl("/proyecto", { token: projectToken });
+      try {
+        await resendSend(
+          env,
+          {
+            to: ["hola@rebrandyourbrand.es"],
+            reply_to: proj.clientEmail,
+            subject: `alerta de vencimiento de renovación web — ${proj.brand}`,
+            ...renderEmail("es", {
+              paras: [
+                `la infraestructura técnica web de ${bold(proj.brand)} ha superado su fecha de vencimiento sin haberse renovado ni cancelado.`,
+                lines(
+                  `— cliente: ${bold(proj.clientEmail)}`,
+                  `— proyecto: ${bold(proj.brand)}`,
+                  `— fecha de vencimiento: ${bold(fmtDate(renewalDueDate, "es"))}`,
+                  `— estado actual: pendiente de revisión manual`
+                ),
+                "revisa el estado del dominio y servidor para gestionar la renovación o baja según corresponda.",
+              ],
+              cta: { label: "ver ficha del proyecto", url: trackingUrl },
+            }),
+          },
+          `renewal-overdue-${projectToken}-${String(renewalDueDate).slice(0, 10)}`
+        );
+        proj.renewalOverdueAlertSentAt = nowIso;
+        changed = true;
+      } catch (e) {
+        console.error("renewal overdue alert failed:", e?.message);
       }
     }
   }

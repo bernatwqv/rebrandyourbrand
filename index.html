@@ -837,7 +837,7 @@ textarea { resize: vertical; }
       <nav class="hidden md:flex items-center gap-6 lg:gap-8 ml-auto text-sm text-muted">
         <a href="#planes" data-section-target="planes" class="lang-trans lowercase hover:text-paper text-[13px] font-medium tracking-wide" data-i18n="nav-planes">servicios</a>
         <a href="#sobre-nosotros" data-section-target="sobre-nosotros" class="lang-trans lowercase hover:text-paper text-[13px] font-medium tracking-wide" data-i18n="nav-about">sobre nosotros</a>
-        <a href="#testimonios" data-section-target="testimonios" class="lang-trans lowercase hover:text-paper text-[13px] font-medium tracking-wide" data-i18n="nav-testimonials">testimonios</a>
+        <a href="#testimonios" data-section-target="testimonios" hidden class="lang-trans lowercase hover:text-paper text-[13px] font-medium tracking-wide" data-i18n="nav-testimonials">testimonios</a>
       </nav>
 
       <span class="dock-divider" aria-hidden="true"></span>
@@ -903,7 +903,7 @@ textarea { resize: vertical; }
     <div id="mobile-nav" class="md:hidden hidden px-6 py-4 flex flex-col gap-3 text-sm">
       <a href="#planes" data-section-target="planes" class="lang-trans lowercase text-muted hover:text-paper py-1" data-i18n="nav-planes">servicios</a>
       <a href="#sobre-nosotros" data-section-target="sobre-nosotros" class="lang-trans lowercase text-muted hover:text-paper py-1" data-i18n="nav-about">sobre nosotros</a>
-      <a href="#testimonios" data-section-target="testimonios" class="lang-trans lowercase text-muted hover:text-paper py-1" data-i18n="nav-testimonials">testimonios</a>
+      <a href="#testimonios" data-section-target="testimonios" hidden class="lang-trans lowercase text-muted hover:text-paper py-1" data-i18n="nav-testimonials">testimonios</a>
     </div>
   </header>
 
@@ -977,7 +977,7 @@ textarea { resize: vertical; }
       </div>
     </section>
 
-    <section id="testimonios" class="relative px-6 md:px-10 py-24 md:py-32 border-b border-line overflow-hidden z-10">
+    <section id="testimonios" hidden class="relative px-6 md:px-10 py-24 md:py-32 border-b border-line overflow-hidden z-10">
       <div class="max-w-6xl mx-auto relative z-10">
         <div class="reveal flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
           <div>
@@ -1319,17 +1319,7 @@ textarea { resize: vertical; }
         "hero-title": "your business is better than it looks.",
         "hero-desc": "If your image doesn't match the quality of your work, customers pick someone else before they meet you. We redesign it at a fixed price with no monthly fees.",
         "cta-plans": "see services and prices", "cta-brandi": "talk to brandi",
-        "problem-eyebrow": "the problem", "how-eyebrow": "how it works", "plans-eyebrow": "services and pricing", "studio-eyebrow": "about us",
-        "problem-title": "does any of this sound familiar?",
-        "problem-1": "Your logo falls apart when you shrink it: on Instagram, on a sign, on an invoice.",
-        "problem-2": "Everything you post looks like it comes from a different brand.",
-        "problem-3": "Your competitors look more serious, even though you do better work.",
-        "problem-4": "You've asked for quotes and nobody told you clearly what you'd get.",
-        "problem-close": "This is fixable, and it's simpler than you think.",
-        "how-title": "it's this simple",
-        "how-1-title": "you pick what you need", "how-1-desc": "Tick the services you want or chat with Brandi, our assistant. We just need to understand what you do and who you serve.",
-        "how-2-title": "we design it", "how-2-desc": "We present each service you chose. Two revision rounds included.",
-        "how-3-title": "we deliver it ready", "how-3-desc": "You get the final files. If you add a website, we publish it and hand it over turnkey, in your name.",
+        "plans-eyebrow": "services and pricing", "studio-eyebrow": "about us",
         "plans-heading": "choose only what you need",
         "plans-sub": "Tick the services you need and pay only for those. One payment when you accept the project, no monthly fees.",
         "plans-quote": "we skip the .99 marketing gimmicks to deliver uncompromising quality.",
@@ -1467,17 +1457,7 @@ textarea { resize: vertical; }
         "hero-title": "el teu negoci és millor del que sembla.",
         "hero-desc": "Si la teva imatge no està a l'altura del que fas, els clients trien un altre abans de conèixer-te. Te la redissenyem a preu tancat i sense quotes mensuals.",
         "cta-plans": "veure serveis i preus", "cta-brandi": "parlar amb la brandi",
-        "problem-eyebrow": "el problema", "how-eyebrow": "com funciona", "plans-eyebrow": "serveis i preus", "studio-eyebrow": "sobre nosaltres",
-        "problem-title": "et sona alguna d'aquestes?",
-        "problem-1": "El teu logo es veu malament quan el redueixes: a Instagram, en un cartell, en una factura.",
-        "problem-2": "Cada cosa que publiques sembla d'una marca diferent.",
-        "problem-3": "La competència sembla més seriosa, encara que tu treballis millor.",
-        "problem-4": "Has demanat pressupostos i ningú t'ha explicat amb claredat què reps.",
-        "problem-close": "Té solució, i és més senzill del que imagines.",
-        "how-title": "així de simple",
-        "how-1-title": "tries el que necessites", "how-1-desc": "Marques els serveis que vols o parles amb la Brandi, el nostre assistent. Només necessitem entendre què fas i a qui t'adreces.",
-        "how-2-title": "ho dissenyem", "how-2-desc": "Et presentem cada servei que has triat. Dues rondes de revisió incloses.",
-        "how-3-title": "t'ho lliurem llest", "how-3-desc": "Reps els arxius finals. Si afegeixes web, la publiquem i te la lliurem clau en mà, a nom teu.",
+        "plans-eyebrow": "serveis i preus", "studio-eyebrow": "sobre nosaltres",
         "plans-heading": "tria només el que necessites",
         "plans-sub": "Marca els serveis que necessites i paga només per ells. Un únic pagament en acceptar el projecte, sense quotes mensuals.",
         "plans-quote": "ens estalviem el .99 en trucs de màrqueting per oferir-te una qualitat innegociable.",
@@ -1619,23 +1599,8 @@ textarea { resize: vertical; }
         "hero-desc": "Zure irudia ez badator bat zure lanaren kalitatearekin, bezeroek beste norbait aukeratuko dute zu ezagutu aurretik. Prezio itxian eta hileroko kuotarik gabe berdiseinatzen dizugu.",
         "cta-plans": "ikusi zerbitzuak eta prezioak",
         "cta-brandi": "hitz egin brandirekin",
-        "problem-eyebrow": "arazoa",
-        "how-eyebrow": "nola dabilen",
         "plans-eyebrow": "zerbitzuak eta prezioak",
         "studio-eyebrow": "guri buruz",
-        "problem-title": "hauetako batek ezaguna egiten al zaizu?",
-        "problem-1": "Zure logotipoa desitxuratu egiten da txikitzean: Instagramen, errotulu batean, faktura batean.",
-        "problem-2": "Argitaratzen duzun gauza bakoitzak marka desberdin batekoa dirudi.",
-        "problem-3": "Lehiakideek itxura serioagoa dute, nahiz eta zuk lan hobea egin.",
-        "problem-4": "Aurrekontuak eskatu dituzu eta inork ez dizu argi azaldu zer jasoko duzun.",
-        "problem-close": "Konponbidea du, eta uste baino sinpleagoa da.",
-        "how-title": "horren sinplea da",
-        "how-1-title": "behar duzuna aukeratzen duzu",
-        "how-1-desc": "Markatu nahi dituzun zerbitzuak edo hitz egin Brandirekin, gure laguntzailearekin. Zer egiten duzun eta norengana zuzentzen zaren ulertzea besterik ez dugu behar.",
-        "how-2-title": "guk diseinatzen dugu",
-        "how-2-desc": "Aukeratutako zerbitzu bakoitza aurkezten dizugu. Bi berrikuspen-txanda barne.",
-        "how-3-title": "prest entregatzen dizugu",
-        "how-3-desc": "Azken fitxategiak jasotzen dituzu. Weba gehitzen baduzu, argitaratu eta giltza eskuan entregatzen dizugu, zure izenean.",
         "plans-heading": "aukeratu soilik behar duzuna",
         "plans-sub": "Markatu behar dituzun zerbitzuak eta ordaindu horiengatik bakarrik. Ordainketa bakarra proiektua onartzean, hileroko kuotarik gabe.",
         "plans-quote": "marketin trikimailuen .99 hori saihesten dugu kalitate ukaezina eskaintzeko.",
@@ -1962,29 +1927,37 @@ textarea { resize: vertical; }
     let testimonialsCache = null;
     const testimonialsSection = $('testimonios');
     function showTestimonials(show) {
-      if (testimonialsSection) testimonialsSection.hidden = false;
-      document.querySelectorAll('[data-section-target="testimonios"]').forEach((a) => { a.hidden = false; });
+      if (testimonialsSection) testimonialsSection.hidden = !show;
+      document.querySelectorAll('[data-section-target="testimonios"]').forEach((a) => { a.hidden = !show; });
     }
     async function renderApprovedTestimonials() {
       const container = $('approved-testimonials-container');
       try {
         if (testimonialsCache === null) { const res = await fetch(WORKER_URL); testimonialsCache = res.ok ? await res.json() : []; }
         const list = testimonialsCache;
-        if (!Array.isArray(list) || !list.length) return;
-        container.innerHTML = list.map((item) => {
-          const r = Math.min(5, Math.max(1, Number(item.rating) || 5));
-          return `<div class="reveal in-view quote-glass p-6 flex flex-col justify-between h-full">
-            <div>
-              <div class="flex items-center justify-between mb-3">
-                <span class="text-ai text-sm">${'★'.repeat(r)}${'☆'.repeat(5 - r)}</span>
-                <span class="text-[10px] font-mono text-muted uppercase tracking-wider bg-ink/40 px-2 py-1 rounded">${esc(item.business)}</span>
+        if (!Array.isArray(list) || !list.length) {
+          showTestimonials(false);
+          return;
+        }
+        showTestimonials(true);
+        if (container) {
+          container.innerHTML = list.map((item) => {
+            const r = Math.min(5, Math.max(1, Number(item.rating) || 5));
+            return `<div class="reveal in-view quote-glass p-6 flex flex-col justify-between h-full">
+              <div>
+                <div class="flex items-center justify-between mb-3">
+                  <span class="text-ai text-sm">${'★'.repeat(r)}${'☆'.repeat(5 - r)}</span>
+                  <span class="text-[10px] font-mono text-muted uppercase tracking-wider bg-ink/40 px-2 py-1 rounded">${esc(item.business)}</span>
+                </div>
+                <p class="text-paper/90 text-sm leading-relaxed mb-6 italic">"${esc(item.comment)}"</p>
               </div>
-              <p class="text-paper/90 text-sm leading-relaxed mb-6 italic">"${esc(item.comment)}"</p>
-            </div>
-            <div class="pt-4 border-t border-line/60 text-xs font-mono text-brand">— ${esc(item.name)}</div>
-          </div>`;
-        }).join('');
-      } catch (e) {}
+              <div class="pt-4 border-t border-line/60 text-xs font-mono text-brand">— ${esc(item.name)}</div>
+            </div>`;
+          }).join('');
+        }
+      } catch (e) {
+        showTestimonials(false);
+      }
     }
 
     const ERR = { rate_limited: 'err-rate', email_cooldown: 'err-cooldown', captcha_failed: 'err-turnstile', captcha_unavailable: 'err-turnstile', upstream_busy: 'err-busy', upstream_error: 'err-busy', email_error: 'err-busy', payload_too_large: 'err-busy', invalid_confirmation: 'err-busy', invalid_messages: 'err-busy', plan_required: 'err-plan', session_invalid: 'err-turnstile', missing_fields: 'err-busy', misconfigured: 'err-busy', internal_error: 'err-busy', invalid_resume: 'err-busy', expired: 'err-expired', resend_limit: 'err-resend-limit' };

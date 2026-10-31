@@ -233,7 +233,7 @@ async function finalizeProjectClosure(
                 `— servicios: ${bold(svcLabel(proj.services, "es"))}`,
                 `— fecha de finalización (iso): ${bold(now)}`,
                 effectiveDelivUrl ? `— entregable final: ${bold(effectiveDelivUrl)}` : ""
-              ).filter(Boolean),
+              ),
             ],
             cta: { label: "ver ficha del proyecto", url: trackingUrl },
           }),
@@ -1112,9 +1112,10 @@ async function handlePhaseApprove(request, env, url) {
     ph.lastRevisionAt = now;
     delete ph.reminderSentAt;
     delete ph.tacitAlertSentAt;
+    delete proj.abandonWarningSentAt;
     await env.LEADS_KV.put(`project:${p}`, JSON.stringify(proj));
 
-    const noticeText = PG[L].track?.actionRegisteredNotice || "aviso: esta acción ya ha quedado registrada en el sistema y nuestro equipo ha recibido la notificación para continuar con el trabajo.";
+    const noticeText = PG[L].tr?.actionRegisteredNotice || "aviso: esta acción ya ha quedado registrada en el sistema y nuestro equipo ha recibido la notificación para continuar con el trabajo.";
     return htmlResponse(
       page(A.revDone[0], A.revDone[1], A.revDone[2](round, maxRevs), {
         lang: L,
@@ -1137,7 +1138,7 @@ async function handlePhaseApprove(request, env, url) {
 
   if (!res.ok && res.reason === "email_failed") return errorPage(L);
 
-  const noticeText = PG[L].track?.actionRegisteredNotice || "aviso: esta acción ya ha quedado registrada en el sistema y nuestro equipo ha recibido la notificación para continuar con el trabajo.";
+  const noticeText = PG[L].tr?.actionRegisteredNotice || "aviso: esta acción ya ha quedado registrada en el sistema y nuestro equipo ha recibido la notificación para continuar con el trabajo.";
   const succ = res.finished && A.completed ? A.completed : A.done;
   let reviewBtn = "";
   if (res.finished) {
@@ -1558,6 +1559,9 @@ async function handleProject(request, env, url) {
         refFileId: createdRefItem?.fileId || null,
         timestamp: Date.now(),
       };
+      if (hasMaterial) {
+        delete proj.abandonWarningSentAt;
+      }
 
       await env.LEADS_KV.put(`project:${token}`, JSON.stringify(proj));
 

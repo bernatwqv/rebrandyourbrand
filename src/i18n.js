@@ -93,17 +93,24 @@ const SUMMARY = {
 
 const eur = (n, lang) => (lang === "en" ? `€${n}` : `${n} €`);
 
-function buildSummary(lang, { brand, email, plan, domain }) {
+function buildSummary(lang, { brand, email, plan, domain } = {}) {
   const l = pickLang(lang);
   const s = SUMMARY[l] || SUMMARY.es;
-  const hasLogo = plan.ids.includes("logo");
-  const items = plan.ids.map((id) => {
+  const ids = plan?.ids || plan?.services || [];
+  const hasLogo = ids.includes("logo");
+  const items = ids.map((id) => {
+    const svc = SERVICES[id];
+    if (!svc) return `   — ${id}`;
     const isFreePalette = id === "paleta" && hasLogo;
     const priceStr = isFreePalette
       ? (l === "en" ? "€0 — included with logo" : l === "ca" ? "0 € — inclosa amb logotip" : l === "eu" ? "0 € — logotipoarekin barne" : "0 € — incluida con logotipo")
-      : eur(SERVICES[id].price, l);
-    return `   — ${SERVICES[id].names[l]} (${priceStr}): ${SERVICES[id].includes[l]}`;
+      : eur(svc.price, l);
+    return `   — ${svc.names[l] || svc.names.es} (${priceStr}): ${svc.includes[l] || svc.includes.es}`;
   });
+  const total = plan?.total != null ? plan.total : ids.reduce((sum, id) => {
+    if (id === "paleta" && hasLogo) return sum;
+    return sum + (SERVICES[id]?.price || 0);
+  }, 0);
   return [
     s.title,
     `— ${s.brand}: ${brand}`,
@@ -111,7 +118,7 @@ function buildSummary(lang, { brand, email, plan, domain }) {
     `— ${s.email}: ${email}`,
     `— ${s.services}:`,
     ...items,
-    `— ${s.total}: ${eur(plan.total, l)} (${s.pay})`,
+    `— ${s.total}: ${eur(total, l)} (${s.pay})`,
     "",
     s.legal,
     "",
@@ -219,6 +226,22 @@ const EM = {
       cta: "ver seguimiento de mi proyecto",
       note: "tienes las condiciones completas disponibles en rebrandyourbrand.es/#terminos.",
     },
+    abandonWarning: {
+      subject: (br) => `aviso de inactividad — plazo de 7 días antes de la rescisión de ${br}`,
+      hello: "hola,",
+      intro: (br) => `tu proyecto ${bold(br)} acumula 30 días naturales sin actividad ni respuesta conforme a la cláusula 3.2 de las condiciones del servicio.`,
+      body: "dispones de un plazo final de 7 días naturales para aportar los materiales pendientes o validar la propuesta en curso. si transcurrido este plazo no recibimos respuesta, el expediente se dará por abandonado y quedará rescindido formalmente.",
+      cta: "acceder a mi proyecto y retomar el trabajo",
+      note: "puedes consultar las condiciones del servicio en rebrandyourbrand.es/#terminos.",
+    },
+    abandoned: {
+      subject: (br) => `notificación de rescisión por abandono — ${br}`,
+      hello: "hola,",
+      intro: (br) => `te comunicamos la rescisión formal de tu proyecto ${bold(br)} por inactividad prolongada conforme a la cláusula 3.2 de las condiciones del servicio.`,
+      body: "habiendo transcurrido más de 37 días naturales sin recepción de materiales ni respuesta tras el preaviso reglamentario, el expediente ha quedado cerrado definitivamente.",
+      cta: "ver estado del expediente",
+      note: "de conformidad con la cláusula 3.2, los importes abonados se conservan en concepto de compensación por reserva de agenda y trabajos preparatorios.",
+    },
   },
   ca: {
     verify: {
@@ -317,6 +340,22 @@ const EM = {
       cancelNote: "sense sorpreses ni permanències: 30 dies abans de cada venciment anual rebràs un avís per correu amb l'enllaç de pagament i un botó directe de baixa en un clic. si decideixes no renovar, no hi haurà cap cobrament addicional.",
       cta: "veure seguiment del meu projecte",
       note: "tens les condicions completes disponibles a rebrandyourbrand.es/#terminos.",
+    },
+    abandonWarning: {
+      subject: (br) => `avís d'inactivitat — termini de 7 dies abans de la rescissió de ${br}`,
+      hello: "hola,",
+      intro: (br) => `el teu projecte ${bold(br)} acumula 30 dies naturals sense activitat ni resposta d'acord amb la clàusula 3.2 de les condicions del servei.`,
+      body: "disposes d'un termini final de 7 dies naturals per aportar els materials pendents o validar la proposta en curs. si transcorregut aquest termini no rebem resposta, l'expedient es donarà per abandonat i quedarà rescindit formalment.",
+      cta: "accedir al meu projecte i reprendre el treball",
+      note: "pots consultar les condicions del servei a rebrandyourbrand.es/#terminos.",
+    },
+    abandoned: {
+      subject: (br) => `notificació de rescissió per abandonament — ${br}`,
+      hello: "hola,",
+      intro: (br) => `et comuniquem la rescissió formal del teu projecte ${bold(br)} per inactivitat prolongada d'acord amb la clàusula 3.2 de les condicions del servei.`,
+      body: "havent transcorregut més de 37 dies naturals sense recepció de materials ni resposta després del preavís reglamentari, l'expedient ha quedat tancat definitivament.",
+      cta: "veure estat de l'expedient",
+      note: "de conformitat amb la clàusula 3.2, els imports abonats es conserven en concepte de compensació per reserva d'agenda i treballs preparatoris.",
     },
   },
   eu: {
@@ -417,6 +456,22 @@ const EM = {
       cta: "ikusi nire proiektuaren jarraipena",
       note: "baldintza osoak edozein unetan kontsulta ditzakezu hemen: rebrandyourbrand.es/#terminos.",
     },
+    abandonWarning: {
+      subject: (br) => `jarduerarik gabeko abisua — 7 eguneko epea ${br} deuseztatu aurretik`,
+      hello: "kaixo,",
+      intro: (br) => `zure ${bold(br)} proiektuak 30 egun natural daramatza jarduerarik edo erantzunik gabe, zerbitzu-baldintzen 3.2 klausularekin bat etorriz.`,
+      body: "azken 7 egun naturaleko epea duzu falta diren materialak bidaltzeko edo martxan dagoen proposamena baliozkotzeko. epe hori igaro ondoren erantzunik jaso ezean, espedientea bertan behera utzitzat joko da eta formalki deuseztatuko da.",
+      cta: "nire proiektura sartu eta lanari berrekin",
+      note: "zerbitzu-baldintzak rebrandyourbrand.es/#terminos helbidean kontsulta ditzakezu.",
+    },
+    abandoned: {
+      subject: (br) => `utzikeriagatiko deuseztatze-jakinarazpena — ${br}`,
+      hello: "kaixo,",
+      intro: (br) => `zure ${bold(br)} proiektuaren deuseztapen formala jakinarazten dizugu, ezarritako epean jarduerarik ez izateagatik, zerbitzu-baldintzen 3.2 klausularekin bat etorriz.`,
+      body: "arauzko aurreabisua bidali eta falta diren materialak edo erantzuna jaso gabe 37 egun natural baino gehiago igaro ondoren, espedientea behin betiko itxita geratu da.",
+      cta: "espedientearen egoera ikusi",
+      note: "3.2 klausularekin bat etorriz, ordaindutako zenbatekoak agenda-erreserbagatiko eta aldez aurreko lanengatiko kalte-ordain gisa gordetzen dira.",
+    },
   },
   en: {
     verify: {
@@ -515,6 +570,22 @@ const EM = {
       cancelNote: "no surprises and zero lock-in: 30 days before each annual renewal you will receive an email reminder with the payment link and a one-click cancellation button. if you choose not to renew, no additional charges will occur.",
       cta: "view project tracking",
       note: "full terms and conditions are always available at rebrandyourbrand.es/#terminos.",
+    },
+    abandonWarning: {
+      subject: (br) => `inactivity notice — 7-day period prior to termination of ${br}`,
+      hello: "hello,",
+      intro: (br) => `your project ${bold(br)} has recorded 30 calendar days without activity or response pursuant to clause 3.2 of the terms of service.`,
+      body: "you have a final period of 7 calendar days to provide the pending materials or validate the proposal in progress. if no response is received within this period, the project will be considered abandoned and formally terminated.",
+      cta: "access my project and resume work",
+      note: "you can review the terms of service at rebrandyourbrand.es/#terminos.",
+    },
+    abandoned: {
+      subject: (br) => `termination notice due to abandonment — ${br}`,
+      hello: "hello,",
+      intro: (br) => `we inform you of the formal termination of your project ${bold(br)} due to prolonged inactivity pursuant to clause 3.2 of the terms of service.`,
+      body: "having exceeded 37 calendar days without receiving materials or a response following the formal notice, the file has been definitively closed.",
+      cta: "view file status",
+      note: "pursuant to clause 3.2, fees paid are retained as compensation for schedule reservation and preparatory work.",
     },
   },
 };
