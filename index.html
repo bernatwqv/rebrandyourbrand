@@ -602,7 +602,8 @@ textarea { resize: vertical; }
     border-color: rgb(var(--color-brand) / .6);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, .15), 0 18px 38px -10px rgb(var(--color-brand) / .14);
   }
-  #terminos, #legal { background: rgb(var(--color-panel) / .3); }
+  #terminos { background: rgb(var(--color-panel) / .3); }
+  #legal { background: transparent; }
   #terminos .terms-inner > div {
     border-radius: 1.25rem;
     border: 1px solid rgb(var(--color-line));
@@ -1001,7 +1002,7 @@ textarea { resize: vertical; }
           <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-3">
             <h2 class="lang-trans lowercase font-display text-3xl md:text-4xl" data-i18n="terms-heading">condiciones de servicio</h2>
             <button type="button" id="terms-toggle" class="text-xs font-mono text-brand hover:underline inline-flex items-center gap-1.5 cursor-pointer shrink-0 pb-1" aria-expanded="false" aria-controls="terms-content">
-              <span class="toggle-text" data-i18n="terms-btn-show">+ ver condiciones</span>
+              <span class="toggle-text" data-i18n="terms-btn-show">+ ver condiciones de servicio</span>
             </button>
           </div>
           <p class="lang-trans text-muted text-sm md:text-base leading-relaxed max-w-xl" data-i18n="terms-sub">Lo que debes saber sobre cómo trabajamos, pagos únicos, revisiones y garantías de tu proyecto.</p>
@@ -1102,7 +1103,7 @@ textarea { resize: vertical; }
           </div>
         </div>
 
-        <div id="legal" class="reveal pt-2">
+        <div id="legal" class="reveal mt-20 sm:mt-28">
           <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-3">
             <h2 class="lang-trans lowercase font-display text-3xl md:text-4xl" data-i18n="legal-heading">legal y privacidad</h2>
             <button type="button" id="legal-toggle" class="text-xs font-mono text-brand hover:underline inline-flex items-center gap-1.5 cursor-pointer shrink-0 pb-1" aria-expanded="false" aria-controls="legal-content">
@@ -1144,9 +1145,8 @@ textarea { resize: vertical; }
         <p class="lang-trans text-xs md:text-sm text-muted lowercase" data-i18n="footer-copy">rebrandyourbrand — rebranding y web para negocios</p>
         <p class="text-xs md:text-sm font-mono"><a href="mailto:hola@rebrandyourbrand.es" class="text-brand hover:underline">hola@rebrandyourbrand.es</a></p>
       </div>
-      <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 text-xs md:text-sm text-muted">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center gap-6 text-xs md:text-sm text-muted">
         <span>&copy; <span id="year"></span> <span class="lang-trans" data-i18n="footer-rights">Todos los derechos reservados</span></span>
-        <span class="hidden sm:inline-block w-1 h-1 rounded-full bg-muted/60" aria-hidden="true"></span>
         <a href="#top" data-section-target="top" class="lowercase hover:text-paper transition-colors">↑ <span class="lang-trans" data-i18n="footer-top">volver arriba</span></a>
       </div>
     </div>
@@ -1273,8 +1273,8 @@ textarea { resize: vertical; }
         "svc-paleta-b1": "Colores de marca", "svc-paleta-b2": "Tipografías de marca", "svc-paleta-b3": "Imagen coherente en todo", "svc-paleta-tag": "100% original y hecho por humanos",
         "svc-web-tdesc": "Tu web *rápida y a tu nombre*, entregada *llave en mano*.",
         "svc-web-b1": "Web rápida a tu nombre", "svc-web-b2": "Despliegue y entrega llave en mano", "svc-web-b3": "Dominio y correo gestionados", "svc-web-tag": "acceso directo y llave en mano",
-        "terms-btn-show": "+ ver condiciones",
-        "terms-btn-hide": "- ocultar condiciones",
+        "terms-btn-show": "+ ver condiciones de servicio",
+        "terms-btn-hide": "- ocultar condiciones de servicio",
         "legal-btn-show": "+ ver legal y privacidad",
         "legal-btn-hide": "- ocultar legal y privacidad",
         "t1-l2": "1.2. Exclusiones y revisiones adicionales:",
@@ -1370,8 +1370,8 @@ textarea { resize: vertical; }
         "terms-eyebrow": "legal and operational framework",
         "terms-heading": "terms of service",
         "terms-sub": "The essentials about how we work, one-off payments, revisions and project guarantees.",
-        "terms-btn-show": "+ view terms",
-        "terms-btn-hide": "- hide terms",
+        "terms-btn-show": "+ view terms of service",
+        "terms-btn-hide": "- hide terms of service",
         "legal-btn-show": "+ view legal and privacy",
         "legal-btn-hide": "- hide legal and privacy",
         "t1-title": "1. nature of services and scope",
@@ -1518,8 +1518,8 @@ textarea { resize: vertical; }
         "terms-eyebrow": "marc legal i operatiu",
         "terms-heading": "condicions de servei",
         "terms-sub": "El que has de saber sobre com treballem, pagaments únics, revisions i garanties del teu projecte.",
-        "terms-btn-show": "+ veure condicions",
-        "terms-btn-hide": "- amagar condicions",
+        "terms-btn-show": "+ veure condicions de servei",
+        "terms-btn-hide": "- amagar condicions de servei",
         "legal-btn-show": "+ veure legal i privacitat",
         "legal-btn-hide": "- amagar legal i privacitat",
         "t1-title": "1. naturalesa dels serveis i abast",
@@ -1676,8 +1676,8 @@ textarea { resize: vertical; }
         "terms-eyebrow": "esparru legala eta operatiboa",
         "terms-heading": "zerbitzu-baldintzak",
         "terms-sub": "Nola lan egiten dugun, ordainketa bakarrak, berrikuspenak eta zure proiektuaren bermeei buruz jakin behar duzuna.",
-        "terms-btn-show": "+ ikusi baldintzak",
-        "terms-btn-hide": "- ezkutatu baldintzak",
+        "terms-btn-show": "+ ikusi zerbitzu-baldintzak",
+        "terms-btn-hide": "- ezkutatu zerbitzu-baldintzak",
         "legal-btn-show": "+ legezkoa eta pribatutasuna ikusi",
         "legal-btn-hide": "- legezkoa eta pribatutasuna ezkutatu",
         "t1-title": "1. zerbitzuen izaera eta irismena",
