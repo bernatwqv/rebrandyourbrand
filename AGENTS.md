@@ -9,7 +9,7 @@ Reglas para agentes de código (Antigravity, Claude, Gemini…). Léelas antes d
 
 - **Qué es:** rebrandyourbrand.es, estudio de rebranding y web para negocios. Promesa: *"tu negocio es mejor de lo que parece"*. Servicios sueltos, precio cerrado, pago único, sin cuotas mensuales.
 - **Cliente:** exclusivamente B2B (empresas y autónomos). Sin derecho de desistimiento de consumidor. Ley española; tribunales de Barcelona.
-- **Servicios y precios actuales:** logotipo 200 €, paleta de empresa 100 €, web 400 €. Trabajo extra: 50 €/h.
+- **Servicios y precios actuales:** logotipo 400 € (incluye paleta de empresa de regalo), paleta de empresa 100 € (0 € si se contrata el logotipo), web 400 €. Rondas de revisión o cambios extra: 100 € fijos por ronda.
 - **Equipo:** Gael Domènech (dirección de arte y diseño visual) y Bernat Domènech (web).
 - **Idiomas:** español (principal), catalán, inglés y euskera.
 - **Voz de marca:** cercana y directa, tutea, frases cortas, beneficio claro, cero jerga técnica. Titulares en minúscula (clase `lowercase`). Nunca prometas lo que el servicio no incluye.
@@ -114,7 +114,7 @@ Los colores son variables con triplete RGB (`rgb(var(--color-x))`). **No pongas 
 ## 10. Legal y privacidad
 
 - **El aviso legal contiene placeholders** (`[NOMBRE O RAZÓN SOCIAL]`, `[NIF]`, `[DIRECCIÓN COMPLETA]`). No los rellenes tú: avisa al usuario de que deben completarse antes de publicar.
-- **Términos B2B:** 2 rondas de revisión por fase, aprobación tácita a los 20 días, garantía de 14 días, 50 €/h de extras, sin reembolsos tras iniciar. No los modifiques sin orden expresa.
+- **Términos B2B:** 2 rondas de revisión por fase, aprobación tácita a los 20 días, garantía de 14 días, 100 € fijos por ronda extra, sin reembolsos tras iniciar. No los modifiques sin orden expresa.
 - **Datos locales actuales:** `localStorage` (`rybb-lang`, `rybb-theme`, `rrb_verified_session`) y `sessionStorage` (`rybb-session`). No hay analítica ni cookies publicitarias.
 - Si añades analítica, cookies, formularios o un servicio de terceros, actualiza **en los tres idiomas** la política de privacidad y cookies, y la CSP.
 

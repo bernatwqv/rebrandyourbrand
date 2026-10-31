@@ -48,6 +48,9 @@ const MAX_PHASE_REVISIONS = 2;
 // Importe anual obligatorio de infraestructura técnica web (dominio, correo corporativo, DNS/SSL y despliegue edge) si env.WEB_RENEWAL_EUR no está definida en Cloudflare
 const WEB_RENEWAL_EUR = 100;
 
+// Importe fijo de una ronda de ajustes adicional una vez agotadas las incluidas en la fase
+const EXTRA_REVISION_EUR = 100;
+
 const DAY_MS = 86400 * 1000;
 
 const APPROVED_KEY = "rybb:approved_testimonials";
@@ -78,7 +81,7 @@ const LANG_NAMES = {
 const SERVICES = {
   logo: {
     id: "logo",
-    price: 200,
+    price: 400,
     names: {
       es: "logotipo",
       ca: "logotip",
@@ -86,10 +89,10 @@ const SERVICES = {
       en: "logo",
     },
     includes: {
-      es: "logotipo principal y versión secundaria, listos para redes, cartelería y facturas",
-      ca: "logotip principal i versió secundària, llestos per a xarxes, cartelleria i factures",
-      eu: "logotipo nagusia eta bigarren mailako bertsioa, sareetarako, karteletarako eta fakturetarako prest",
-      en: "primary and secondary logo, ready for social media, signage and invoices",
+      es: "logotipo principal y versión secundaria, listos para redes, cartelería y facturas (incluye la paleta de empresa de regalo)",
+      ca: "logotip principal i versió secundària, llestos per a xarxes, cartelleria i factures (inclou la paleta d'empresa de regal)",
+      eu: "logotipo nagusia eta bigarren mailako bertsioa, sareetarako, karteletarako eta fakturetarako prest (opari gisa enpresaren paleta barne)",
+      en: "primary and secondary logo, ready for social media, signage and invoices (includes complimentary company palette)",
     },
   },
   paleta: {
@@ -102,10 +105,10 @@ const SERVICES = {
       en: "company color palette",
     },
     includes: {
-      es: "colores y tipografías elegidos para tu marca",
-      ca: "colors i tipografies triats per a la teva marca",
-      eu: "zure markarako aukeratutako koloreak eta tipografiak",
-      en: "colors and typefaces chosen for your brand",
+      es: "colores y tipografías elegidos para tu marca (incluida sin coste adicional al contratar el logotipo)",
+      ca: "colors i tipografies triats per a la teva marca (inclosa sense cost addicional en contractar el logotip)",
+      eu: "zure markarako aukeratutako koloreak eta tipografiak (kostu gehigarririk gabe barne logotipoa kontratatzean)",
+      en: "colors and typefaces chosen for your brand (included at no extra cost when hiring the logo)",
     },
   },
   web: {
@@ -128,6 +131,16 @@ const SERVICES = {
 
 const SERVICE_IDS = Object.keys(SERVICES);
 
+const calcPlanTotal = (ids) => {
+  if (!Array.isArray(ids)) return 0;
+  const hasLogo = ids.includes("logo");
+  return ids.reduce((sum, id) => {
+    if (!SERVICES[id]) return sum;
+    if (id === "paleta" && hasLogo) return sum;
+    return sum + SERVICES[id].price;
+  }, 0);
+};
+
 const EMAIL_RE = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/;
 
 const EMAIL_FIND = /[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}/g;
@@ -136,16 +149,14 @@ const AGREE_RE = /(?<![\p{L}\p{N}])(?:confirmo|confirm|vale|adelante|procedemos|
 
 const DENY_RE = /^\s*(?:no|nope|ez|ezeztatu|cancel\w*)(?![\p{L}\p{N}])/iu;
 
-// Precios que Brandi puede mencionar: 50 (hora extra), renovación anual web y cualquier combinación de servicios
-const ALLOWED_EUR = new Set([50, WEB_RENEWAL_EUR]);
+// Precios oficiales que Brandi puede mencionar: 100 (paleta suelta, cuota anual o ronda extra), 400 (logo o web), 500 (paleta y web) y 800 (pack completo)
+const ALLOWED_EUR = new Set([100, 400, 500, 800]);
 
-for (let m = 1; m < (1 << SERVICE_IDS.length); m++) {
-  ALLOWED_EUR.add(SERVICE_IDS.reduce((sum, id, i) => sum + (m & (1 << i) ? SERVICES[id].price : 0), 0));
-}
-
-const CATALOG = SERVICE_IDS
-  .map((id) => `   - ${SERVICES[id].names.es}: ${SERVICES[id].price} € — ${SERVICES[id].includes.es}.`)
-  .join("\n");
+const CATALOG = [
+  `   - ${SERVICES.logo.names.es}: 400 € — ${SERVICES.logo.includes.es}.`,
+  `   - ${SERVICES.paleta.names.es}: 100 € (o 0 € incluida de regalo al contratar el logotipo) — ${SERVICES.paleta.includes.es}.`,
+  `   - ${SERVICES.web.names.es}: 400 € — ${SERVICES.web.includes.es}.`,
+].join("\n");
 
 // ══ utils.js — Utilidades comunes: idioma, fechas, formato de texto y limpieza de entradas. ══
 
@@ -358,22 +369,22 @@ const MSG = {
 const ASK = {
   es: {
     brand: "¿Cómo se llama tu marca o proyecto?",
-    services: "¿Qué necesitas: logotipo (200 €), paleta de empresa (100 €), web (400 €) o una combinación?",
+    services: "¿Qué necesitas: logotipo (400 €, incluye paleta de empresa de regalo), paleta de empresa (100 €), web (400 €) o una combinación?",
     email: "¿A qué correo electrónico te enviamos la verificación?",
   },
   ca: {
     brand: "Com es diu la teva marca o projecte?",
-    services: "Què necessites: logotip (200 €), paleta d'empresa (100 €), web (400 €) o una combinació?",
+    services: "Què necessites: logotip (400 €, inclou paleta d'empresa de regal), paleta d'empresa (100 €), web (400 €) o una combinació?",
     email: "A quin correu electrònic t'enviem la verificació?",
   },
   eu: {
     brand: "Nola du izena zure marka edo proiektuak?",
-    services: "Zer behar duzu: logotipoa (200 €), enpresaren paleta (100 €), webgunea (400 €) edo konbinazio bat?",
+    services: "Zer behar duzu: logotipoa (400 €, enpresaren paleta opari barne), enpresaren paleta (100 €), webgunea (400 €) edo konbinazio bat?",
     email: "Ze helbide elektronikotara bidaliko dizugu egiaztapena?",
   },
   en: {
     brand: "What is your brand or project called?",
-    services: "What do you need: logo (€200), company color palette (€100), website (€400) or a combination?",
+    services: "What do you need: logo (€400, includes complimentary company palette), company color palette (€100), website (€400) or a combination?",
     email: "Which email address should we send the verification to?",
   },
 };
@@ -426,7 +437,14 @@ const eur = (n, lang) => (lang === "en" ? `€${n}` : `${n} €`);
 function buildSummary(lang, { brand, email, plan }) {
   const l = pickLang(lang);
   const s = SUMMARY[l] || SUMMARY.es;
-  const items = plan.ids.map((id) => `   — ${SERVICES[id].names[l]} (${eur(SERVICES[id].price, l)}): ${SERVICES[id].includes[l]}`);
+  const hasLogo = plan.ids.includes("logo");
+  const items = plan.ids.map((id) => {
+    const isFreePalette = id === "paleta" && hasLogo;
+    const priceStr = isFreePalette
+      ? (l === "en" ? "€0 — included with logo" : l === "ca" ? "0 € — inclosa amb logotip" : l === "eu" ? "0 € — logotipoarekin barne" : "0 € — incluida con logotipo")
+      : eur(SERVICES[id].price, l);
+    return `   — ${SERVICES[id].names[l]} (${priceStr}): ${SERVICES[id].includes[l]}`;
+  });
   return [
     s.title,
     `— ${s.brand}: ${brand}`,
@@ -822,18 +840,22 @@ const PG = {
       heading: "revisar propuesta de fase",
       intro: (ph, br) => `revisa el entregable de la fase "${ph}" del proyecto ${br}. puedes aprobarla para avanzar a la siguiente etapa o solicitar ajustes puntuales.`,
       deliverable: "abrir entregable o vista previa",
-      roundsUsed: (u, m) => `rondas gratuitas usadas en esta fase: ${u} de ${m}`,
-      legal: "al aprobar, das por cerrada esta fase según las condiciones de servicio. si necesitas cambios dentro de tus 2 rondas gratuitas de revisión, despliega el botón secundario de abajo.",
+      roundsUsed: (u, m) => `rondas de revisión usadas en esta fase: ${u} de ${m}`,
+      legal: "al aprobar, das por cerrada esta fase según las condiciones de servicio. si necesitas cambios dentro de las rondas disponibles, despliega el botón secundario de abajo.",
       confirmApprove: "confirmo que he revisado la propuesta y quiero aprobar definitivamente esta fase",
       confirmRevise: "confirmo que he revisado las correcciones y quiero enviar esta ronda de ajustes",
+      confirmBuyRevision: "confirmo que quiero desbloquear 1 ronda de ajustes adicional por 100 € mediante pago seguro en stripe",
       confirmRequired: "es obligatorio marcar la casilla de confirmación antes de enviar.",
       btn: "aprobar fase y continuar",
+      btnBuyRevision: "desbloquear 1 ronda de ajustes adicional",
+      unlockedBanner: "¡ronda extra desbloqueada con éxito! ya puedes indicar tus ajustes en el formulario desplegable de abajo.",
+      stripeError: "no se pudo iniciar la pasarela de pago seguro. por favor, inténtalo de nuevo en unos instantes.",
       revToggle: (r, m) => `pedir ajustes (ronda ${r} de ${m})`,
       revLabel: (r, m) => `describe con claridad los ajustes que necesitas (ronda ${r} de ${m})`,
       revPh: "indica en un solo mensaje todos los cambios puntuales para aplicar en esta ronda...",
       revSubmit: (r, m) => `enviar ajustes de la ronda ${r} de ${m}`,
       revEmpty: "escribe los ajustes que necesitas antes de enviar la ronda.",
-      revExhausted: "ya has utilizado las 2 rondas de revisión gratuitas incluidas en esta fase. puedes aprobar la propuesta arriba para continuar o escribirnos a hola@rebrandyourbrand.es para presupuestar ajustes adicionales (50 €/hora, cláusula 1.2).",
+      revExhausted: "has utilizado las rondas de revisión incluidas en esta fase. puedes aprobar la propuesta arriba para continuar o desbloquear una ronda adicional de ajustes (+100 €).",
       revDone: ["ajustes enviados", "ajustes registrados con éxito", (r, m) => `hemos recibido tus indicaciones de la ronda ${r} de ${m} y te avisaremos por correo en cuanto la versión actualizada esté lista para revisar.`],
       revWorking: ["ajustes en curso", "estamos aplicando tus ajustes", (r, m) => `ya tenemos registrada tu petición de la ronda ${r} de ${m} y estamos preparando la nueva versión. te avisaremos por correo en cuanto esté lista.`],
       done: ["fase aprobada", "fase aprobada con éxito", "hemos registrado tu validación por escrito y ya hemos activado la siguiente etapa de tu proyecto."],
@@ -953,18 +975,22 @@ const PG = {
       heading: "revisar proposta de fase",
       intro: (ph, br) => `revisa el lliurable de la fase "${ph}" del projecte ${br}. pots aprovar-la per avançar a l'etapa següent o demanar ajustos puntuals.`,
       deliverable: "obrir lliurable o vista prèvia",
-      roundsUsed: (u, m) => `rondes gratuïtes usades en aquesta fase: ${u} de ${m}`,
-      legal: "en aprovar, dónes per tancada aquesta fase segons les condicions de servei. si necessites canvis dins de les teves 2 rondes gratuïtes de revisió, desplega el botó secundari de sota.",
+      roundsUsed: (u, m) => `rondes de revisió usades en aquesta fase: ${u} de ${m}`,
+      legal: "en aprovar, dones per tancada aquesta fase segons les condicions de servei. si necessites canvis dins de les rondes disponibles, desplega el botó secundari de sota.",
       confirmApprove: "confirmo que he revisat la proposta i vull aprovar definitivament aquesta fase",
       confirmRevise: "confirmo que he revisat les correccions i vull enviar aquesta ronda d'ajustos",
+      confirmBuyRevision: "confirmo que vull desbloquejar 1 ronda d'ajustos addicional per 100 € mitjançant pagament segur a stripe",
       confirmRequired: "és obligatori marcar la casella de confirmació abans d'enviar.",
       btn: "aprovar fase i continuar",
+      btnBuyRevision: "desbloquejar 1 ronda d'ajustos addicional",
+      unlockedBanner: "ronda extra desbloquejada amb èxit! ja pots indicar els teus ajustos al formulari desplegable de sota.",
+      stripeError: "no s'ha pogut iniciar el pagament segur. si us plau, torna-ho a provar d'aquí a uns instants.",
       revToggle: (r, m) => `demanar ajustos (ronda ${r} de ${m})`,
       revLabel: (r, m) => `descriu amb claredat els ajustos que necessites (ronda ${r} de ${m})`,
       revPh: "indica en un sol missatge tots els canvis puntuals per aplicar en aquesta ronda...",
       revSubmit: (r, m) => `enviar ajustos de la ronda ${r} de ${m}`,
       revEmpty: "escriu els ajustos que necessites abans d'enviar la ronda.",
-      revExhausted: "ja has utilitzat les 2 rondes de revisió gratuïtes incloses en aquesta fase. pots aprovar la proposta a dalt per continuar o escriure'ns a hola@rebrandyourbrand.es per pressupostar ajustos addicionals (50 €/hora, clàusula 1.2).",
+      revExhausted: "has utilitzat les rondes de revisió incloses en aquesta fase. pots aprovar la proposta a dalt per continuar o desbloquejar una ronda addicional d'ajustos (+100 €).",
       revDone: ["ajustos enviats", "ajustos registrats amb èxit", (r, m) => `hem rebut les teves indicacions de la ronda ${r} de ${m} i t'avisarem per correu tan bon punt la versió actualitzada estigui a punt per revisar.`],
       revWorking: ["ajustos en curs", "estem aplicant els teus ajustos", (r, m) => `ja tenim registrada la teva petició de la ronda ${r} de ${m} i estem preparant la nova versió. t'avisarem per correu tan bon punt estigui a punt.`],
       done: ["fase aprovada", "fase aprovada amb èxit", "hem registrat la teva validació per escrit i ja hem activat l'etapa següent del teu projecte."],
@@ -1084,18 +1110,22 @@ const PG = {
       heading: "berrikusi fasearen proposamena",
       intro: (ph, br) => `berrikusi ${br} proiektuko "${ph}" faseko entregagarria. onar dezakezu hurrengo etaparantz aurrera egiteko edo doikuntza zehatzak eskatu.`,
       deliverable: "ireki entregagarria edo aurrebista",
-      roundsUsed: (u, m) => `fase honetan erabilitako doako txandak: ${m}tik ${u}`,
-      legal: "onartzean, fase hau itxitzat ematen duzu zerbitzu-baldintzen arabera. barne dituzun doako 2 berrikuspen-txanden barruan aldaketak behar badituzu, ireki beheko bigarren botoia.",
+      roundsUsed: (u, m) => `fase honetan erabilitako txandak: ${m}tik ${u}`,
+      legal: "onartzean, fase hau itxitzat ematen duzu zerbitzu-baldintzen arabera. eskuragarri dauden txanden barruan aldaketak behar badituzu, ireki beheko bigarren botoia.",
       confirmApprove: "proposamena berrikusi dudala eta fase hau behin betiko onartu nahi dudala berresten dut",
       confirmRevise: "zuzenketak berrikusi ditudala eta doikuntza-txanda hau bidali nahi dudala berresten dut",
+      confirmBuyRevision: "stripe-ko ordainketa seguruaren bidez 100 €-ren truke doikuntza-txanda gehigarri 1 desblokeatu nahi dudala berresten dut",
       confirmRequired: "nahitaezkoa da berrespen-laukia markatzea bidali aurretik.",
       btn: "onartu fasea eta jarraitu",
+      btnBuyRevision: "desblokeatu doikuntza-txanda gehigarri 1",
+      unlockedBanner: "txanda gehigarria arrakastaz desblokeatu da! dagoeneko beheko formulario tolesgarrian zure doikuntzak adieraz ditzakezu.",
+      stripeError: "ezin izan da ordainketa segurua hasi. mesedez, saiatu berriro une batzuk buruan.",
       revToggle: (r, m) => `eskatu doikuntzak (${m}tik ${r}. txanda)`,
       revLabel: (r, m) => `azaldu argi behar dituzun doikuntzak (${m}tik ${r}. txanda)`,
       revPh: "adierazi mezu bakarrean txanda honetan aplikatu beharreko aldaketa zehatz guztiak...",
       revSubmit: (r, m) => `bidali ${m}tik ${r}. txandako doikuntzak`,
       revEmpty: "idatzi behar dituzun doikuntzak txanda bidali aurretik.",
-      revExhausted: "dagoeneko erabili dituzu fase honetan barne hartutako doako 2 berrikuspen-txandak. goian proposamena onar dezakezu jarraitzeko edo hola@rebrandyourbrand.es helbidera idatzi doikuntza gehigarriak aurrekontatzeko (50 €/orduko, 1.2 klausula).",
+      revExhausted: "fase honetan barne hartutako berrikuspen-txandak erabili dituzu. goian proposamena onar dezakezu jarraitzeko edo doikuntza-txanda gehigarri bat desblokeatu (+100 €).",
       revDone: ["doikuntzak bidalita", "doikuntzak behar bezala erregistratu dira", (r, m) => `jaso ditugu zure ${m}tik ${r}. txandako argibideak eta posta elektronikoz abisatuko dizugu bertsio eguneratua berrikusteko prest dagoenean.`],
       revWorking: ["doikuntzak martxan", "zure doikuntzak aplikatzen ari gara", (r, m) => `dagoeneko erregistratuta daukagu zure ${m}tik ${r}. txandako eskaera eta bertsio berria prestatzen ari gara. prest dagoenean posta elektronikoz abisatuko dizugu.`],
       done: ["fasea onartuta", "fasea behar bezala onartu da", "zure idatzizko onarpena erregistratu dugu eta zure proiektuaren hurrengo etapa aktibatu dugu."],
@@ -1215,18 +1245,22 @@ const PG = {
       heading: "review phase proposal",
       intro: (ph, br) => `review the deliverable for the "${ph}" phase of project ${br}. you can approve it to move on to the next stage or request specific adjustments.`,
       deliverable: "open deliverable or preview",
-      roundsUsed: (u, m) => `free revision rounds used in this phase: ${u} of ${m}`,
-      legal: "by approving, this phase is closed under our terms of service. if you need changes within your 2 free revision rounds, expand the secondary button below.",
+      roundsUsed: (u, m) => `revision rounds used in this phase: ${u} of ${m}`,
+      legal: "by approving, this phase is closed under our terms of service. if you need changes within your available rounds, expand the secondary button below.",
       confirmApprove: "i confirm that i have reviewed the proposal and want to approve this phase definitively",
       confirmRevise: "i confirm that i have reviewed the feedback and want to submit this round of adjustments",
+      confirmBuyRevision: "i confirm that i want to unlock 1 additional revision round for €100 via secure stripe checkout",
       confirmRequired: "you must tick the confirmation checkbox before sending.",
       btn: "approve phase and continue",
+      btnBuyRevision: "unlock 1 additional revision round",
+      unlockedBanner: "extra round successfully unlocked! you can now submit your adjustments using the dropdown form below.",
+      stripeError: "could not initiate secure payment. please try again in a few moments.",
       revToggle: (r, m) => `request adjustments (round ${r} of ${m})`,
       revLabel: (r, m) => `describe clearly the adjustments you need (round ${r} of ${m})`,
       revPh: "list in a single message all the specific changes to apply in this round...",
       revSubmit: (r, m) => `send adjustments for round ${r} of ${m}`,
       revEmpty: "please write the adjustments you need before submitting this round.",
-      revExhausted: "you have already used both free revision rounds included in this phase. you can approve the proposal above to continue or email hola@rebrandyourbrand.es to quote additional adjustments (€50/hour, clause 1.2).",
+      revExhausted: "you have used the revision rounds included in this phase. you can approve the proposal above to proceed or unlock an additional revision round (+€100).",
       revDone: ["adjustments sent", "adjustments recorded successfully", (r, m) => `we have received your round ${r} of ${m} notes and will email you as soon as the updated version is ready for review.`],
       revWorking: ["adjustments in progress", "we are applying your adjustments", (r, m) => `we already have your round ${r} of ${m} request on file and are preparing the updated version. we will email you as soon as it is ready.`],
       done: ["phase approved", "phase approved successfully", "we have recorded your written approval and activated the next stage of your project."],
@@ -1666,7 +1700,10 @@ function normalizeServices(input) {
   if (!Array.isArray(input)) return null;
   const ids = SERVICE_IDS.filter((id) => input.includes(id));
   if (!ids.length) return null;
-  return { ids, total: ids.reduce((sum, id) => sum + SERVICES[id].price, 0) };
+  if (ids.includes("logo") && !ids.includes("paleta")) {
+    ids.push("paleta");
+  }
+  return { ids, total: calcPlanTotal(ids) };
 }
 
 const planOut = (p) => (p ? p.ids : null);
@@ -1737,8 +1774,9 @@ ESTILO:
 
 No hay planes cerrados: el cliente elige solo los servicios que necesita y paga únicamente por ellos (pago único del 100% mediante enlace seguro tras verificar el correo, sin cuotas mensuales). Servicios y precios oficiales:
 ${CATALOG}
-El precio total de creación es la suma de los servicios elegidos. No hay descuentos ni paquetes.
-Si el cliente elige o pregunta por la web (400 € de pago único de desarrollo), aclara si surge la duda que conlleva una cuota obligatoria de 100 €/año exclusivamente por infraestructura técnica gestionada (dominio, correo corporativo, DNS, certificados SSL y despliegue edge): no incluye cambios de contenido, diseño ni nuevas secciones tras la entrega (solo las 2 rondas de revisión gratuitas durante la creación; cualquier cambio posterior se presupuesta aparte o a 50 €/hora).
+El logotipo cuesta 400 € e incluye la paleta de empresa de regalo (valorada en 100 €). La paleta de empresa en solitario cuesta 100 €. La web cuesta 400 € de desarrollo (más 100 €/año de infraestructura técnica).
+El precio total de creación es la suma de los servicios elegidos (con la paleta a 0 € si se contrata el logotipo: Logotipo + Paleta = 400 €, Logotipo + Paleta + Web = 800 €, Paleta + Web = 500 €). No hay otros descuentos.
+Si el cliente elige o pregunta por la web (400 € de pago único de desarrollo), aclara si surge la duda que conlleva una cuota obligatoria de 100 €/año exclusivamente por infraestructura técnica gestionada (dominio, correo corporativo, DNS, certificados SSL y despliegue edge): no incluye cambios de contenido, diseño ni nuevas secciones tras la entrega (cada fase incluye 2 rondas de revisión gratuitas durante la creación; cualquier ronda de ajustes extra o cambio posterior tiene un precio cerrado de 100 €).
 En los proyectos web, la página entregada incluye una firma discreta del estudio en el pie de página (footer) con enlace a rebrandyourbrand.es y el estudio puede mostrar el trabajo en su portfolio como referencia profesional.
 
 ESTADO ACTUAL DE LA CONVERSACIÓN:
@@ -1971,16 +2009,30 @@ async function ensureStripeCheckout(env, proj) {
     "metadata[brand]": safeBrand,
   });
 
-  proj.services.forEach((id, i) => {
+  const hasLogo = proj.services.includes("logo");
+  let itemIdx = 0;
+  proj.services.forEach((id) => {
     if (!SERVICES[id]) return;
+    if (id === "paleta" && hasLogo) {
+      // La paleta va incluida de regalo en el logotipo (0 €). Stripe en mode=payment no admite line_items con importe 0.
+      return;
+    }
     const name = SERVICES[id].names[l] || SERVICES[id].names.es;
-    params.set(`line_items[${i}][price_data][currency]`, "eur");
+    const displayName = (id === "logo" && hasLogo)
+      ? (l === "en" ? `${name} (includes company palette) — ${safeBrand}`
+        : l === "ca" ? `${name} (inclou paleta d'empresa) — ${safeBrand}`
+        : l === "eu" ? `${name} (enpresaren paleta barne) — ${safeBrand}`
+        : `${name} (incluye paleta de empresa) — ${safeBrand}`)
+      : `${name.charAt(0).toUpperCase()}${name.slice(1)} — ${safeBrand}`;
+
+    params.set(`line_items[${itemIdx}][price_data][currency]`, "eur");
     params.set(
-      `line_items[${i}][price_data][product_data][name]`,
-      `${name.charAt(0).toUpperCase()}${name.slice(1)} — ${safeBrand}`.slice(0, 250)
+      `line_items[${itemIdx}][price_data][product_data][name]`,
+      displayName.slice(0, 250)
     );
-    params.set(`line_items[${i}][price_data][unit_amount]`, String(SERVICES[id].price * 100));
-    params.set(`line_items[${i}][quantity]`, "1");
+    params.set(`line_items[${itemIdx}][price_data][unit_amount]`, String(SERVICES[id].price * 100));
+    params.set(`line_items[${itemIdx}][quantity]`, "1");
+    itemIdx++;
   });
 
   try {
@@ -2060,6 +2112,118 @@ async function createRenewalCheckout(env, proj, renewalEur) {
   } catch {
     return "";
   }
+}
+
+async function createExtraRevisionCheckout(env, proj, step, returnUrl, cancelUrl) {
+  if (!env.STRIPE_SECRET_KEY || !proj) return "";
+  const l = pickLang(proj.lang);
+  const safeBrand = proj.brand || "proyecto";
+  const ph = (proj.phases || []).find((p) => Number(p.step) === Number(step)) || { step };
+  const phaseName = phaseTitle(ph, l) || `fase ${step}`;
+
+  const titleByLang = {
+    es: `Ronda de ajustes adicional — ${phaseName}`,
+    ca: `Ronda d'ajustos addicional — ${phaseName}`,
+    eu: `Doikuntza-txanda gehigarria — ${phaseName}`,
+    en: `Additional revision round — ${phaseName}`,
+  };
+
+  const params = new URLSearchParams({
+    "payment_method_types[0]": "card",
+    mode: "payment",
+    locale: stripeLocaleFor(l),
+    customer_email: proj.clientEmail,
+    client_reference_id: proj.token,
+    billing_address_collection: "required",
+    "tax_id_collection[enabled]": "true",
+    customer_creation: "always",
+    success_url: returnUrl,
+    cancel_url: cancelUrl,
+    "metadata[type]": "extra_revision",
+    "metadata[projectToken]": proj.token,
+    "metadata[step]": String(step),
+    "metadata[brand]": safeBrand,
+    "line_items[0][price_data][currency]": "eur",
+    "line_items[0][price_data][product_data][name]": `${titleByLang[l]} — ${safeBrand}`.slice(0, 250),
+    "line_items[0][price_data][unit_amount]": String(EXTRA_REVISION_EUR * 100),
+    "line_items[0][quantity]": "1",
+  });
+
+  try {
+    const res = await fetch("https://api.stripe.com/v1/checkout/sessions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${env.STRIPE_SECRET_KEY}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: params.toString(),
+      signal: AbortSignal.timeout(10000),
+    });
+    if (!res.ok) throw new Error(`Stripe ${res.status}: ${await res.text()}`);
+    const session = await res.json();
+    return isStripeUrl(session.url) ? session.url : "";
+  } catch (e) {
+    console.error("createExtraRevisionCheckout failed:", e?.message);
+    return "";
+  }
+}
+
+async function unlockExtraRevision(env, proj, step, sessionId, sessionData = null) {
+  if (!proj || !sessionId) return false;
+  const ph = (proj.phases || []).find((p) => Number(p.step) === Number(step));
+  if (!ph) return false;
+
+  const paidSessions = Array.isArray(ph.paidRevisionSessions) ? ph.paidRevisionSessions : [];
+  if (paidSessions.includes(sessionId)) {
+    return true;
+  }
+
+  let session = sessionData;
+  if (!session) {
+    session = await fetchStripeSession(env, sessionId);
+  }
+  if (!session || session.payment_status !== "paid") {
+    return false;
+  }
+  if (session.metadata?.type !== "extra_revision") {
+    return false;
+  }
+
+  const baseMax = ph.maxRevisions || MAX_PHASE_REVISIONS;
+  ph.maxRevisions = baseMax + 1;
+  ph.paidRevisionSessions = [...paidSessions, sessionId];
+
+  await env.LEADS_KV.put(`project:${proj.token}`, JSON.stringify(proj));
+
+  if (env.RESEND_API_KEY) {
+    const manageUrl = await advancePhaseUrl(env, proj.token, ph.step);
+    const trackingUrl = buildUrl("/proyecto", { token: proj.token });
+    const phaseName = phaseTitle(ph, "es");
+    await resendSend(
+      env,
+      {
+        to: ["hola@rebrandyourbrand.es"],
+        reply_to: proj.clientEmail,
+        subject: `ronda extra abonada (100 €) — fase ${ph.step} — ${proj.brand}`,
+        ...renderEmail("es", {
+          paras: [
+            `el cliente ha abonado 100 € por una ronda de ajustes adicional en ${bold(proj.brand)}.`,
+            lines(
+              `— cliente: ${bold(proj.clientEmail)}`,
+              `— fase: ${bold(`paso ${ph.step} — ${phaseName}`)}`,
+              `— límite ampliado: ${bold(`${ph.maxRevisions} rondas en total`)}`,
+              `— id sesión stripe: ${bold(sessionId)}`
+            ),
+          ],
+          cta: { label: "abrir gestión de la fase actual", url: manageUrl },
+          secondaryLink: { label: "ver seguimiento del cliente", url: trackingUrl },
+        }),
+      },
+      `extra-rev-${proj.token}-${ph.step}-${sessionId}`
+    ).catch((e) => console.error("extra revision alert email failed:", e?.message));
+  }
+
+  return true;
 }
 
 async function verifyStripeSignature(env, rawBody, header) {
@@ -2146,6 +2310,13 @@ async function processPaidSession(env, session, { fromWebhook = false } = {}) {
       `renovación anual abonada — ${proj.brand}`,
       `cliente: ${proj.clientEmail}\nmarca: ${proj.brand}\nimporte: ${(Number(session.amount_total || 0) / 100).toFixed(2)} eur\npróximo vencimiento: ${fmtDate(proj.nextRenewalAt, "es")}`
     );
+    return;
+  }
+
+  // Caso especial: ronda de ajustes adicional (cláusula 1.2)
+  if (session.metadata?.type === "extra_revision") {
+    const step = parseInt(session.metadata?.step || "1", 10);
+    await unlockExtraRevision(env, proj, step, session.id, session);
     return;
   }
 
@@ -3081,12 +3252,13 @@ async function handlePhaseAdvance(request, env, url) {
   }
 
   const currentTitleEs = phaseTitle(currentPhaseObj, "es");
-  const revsUsed = Math.min(MAX_PHASE_REVISIONS, Math.max(0, Number(currentPhaseObj.revisionsUsed) || 0));
+  const revsMax = currentPhaseObj.maxRevisions || MAX_PHASE_REVISIONS;
+  const revsUsed = Math.min(revsMax, Math.max(0, Number(currentPhaseObj.revisionsUsed) || 0));
   const stateLabel =
     currentPhaseObj.status === "review"
       ? `en revisión del cliente (enviada el ${fmtDate(currentPhaseObj.reviewSentAt || currentPhaseObj.date, "es")})`
       : revsUsed > 0
-        ? `aplicando ajustes del cliente (ronda ${revsUsed} de ${MAX_PHASE_REVISIONS})`
+        ? `aplicando ajustes del cliente (ronda ${revsUsed} de ${revsMax})`
         : "en curso en el estudio";
 
   if (request.method === "GET" || request.method === "HEAD") {
@@ -3173,7 +3345,7 @@ async function handlePhaseAdvance(request, env, url) {
             ${currentPhaseObj.revisions
               .map(
                 (rv) => `<div style="margin-bottom:.75rem;">
-                  <span style="display:block;font-size:.75rem;font-weight:600;color:#825008;margin-bottom:.25rem;">ronda ${Number(rv.round) || 1} de ${MAX_PHASE_REVISIONS}${rv.requestedAt ? ` — ${esc(fmtDate(rv.requestedAt, "es"))}` : ""}</span>
+                  <span style="display:block;font-size:.75rem;font-weight:600;color:#825008;margin-bottom:.25rem;">ronda ${Number(rv.round) || 1} de ${revsMax}${rv.requestedAt ? ` — ${esc(fmtDate(rv.requestedAt, "es"))}` : ""}</span>
                   <div class="phase-note" style="margin-top:0;">${esc(rv.text || "")}</div>
                 </div>`
               )
@@ -3190,7 +3362,7 @@ async function handlePhaseAdvance(request, env, url) {
           <div class="kv-row"><span>servicios</span><span class="kv-val">${esc(svcLabel(proj.services, "es"))}</span></div>
           <div class="kv-row"><span>fase actual</span><span class="kv-val">paso ${currentPhaseObj.step} — ${esc(currentTitleEs)}</span></div>
           <div class="kv-row"><span>estado</span><span class="kv-val">${esc(stateLabel)}</span></div>
-          <div class="kv-row"><span>rondas gratuitas usadas</span><span class="kv-val">${revsUsed} de ${MAX_PHASE_REVISIONS}</span></div>
+          <div class="kv-row"><span>rondas de revisión usadas</span><span class="kv-val">${revsUsed} de ${revsMax}</span></div>
         </div>
       </div>
       ${obHtml}
@@ -3509,12 +3681,13 @@ async function handlePhaseApprove(request, env, url) {
     );
   }
 
-  const used = Math.min(MAX_PHASE_REVISIONS, Math.max(0, Number(ph.revisionsUsed) || 0));
+  const maxRevs = ph.maxRevisions || MAX_PHASE_REVISIONS;
+  const used = Math.min(maxRevs, Math.max(0, Number(ph.revisionsUsed) || 0));
   const nextRound = used + 1;
 
   if (ph.status === "active" && used > 0) {
     return htmlResponse(
-      page(A.revWorking[0], A.revWorking[1], A.revWorking[2](used, MAX_PHASE_REVISIONS), {
+      page(A.revWorking[0], A.revWorking[1], A.revWorking[2](used, maxRevs), {
         lang: L,
         eyebrow: A.eyebrow,
         html: `<a class="btn" href="${esc(trackingUrl)}">${esc(PG[L].common.openTracker)}</a>`,
@@ -3526,24 +3699,28 @@ async function handlePhaseApprove(request, env, url) {
   }
 
   const renderReviewScreen = (revError = "", statusCode = 200) => {
+    const unlockedBanner =
+      url.searchParams.get("unlocked") === "1" ? `<div class="banner-ok">${esc(A.unlockedBanner)}</div>` : "";
+
     const detailHtml =
-      ph.note || ph.deliverableUrl || used > 0
+      ph.note || ph.deliverableUrl || used > 0 || unlockedBanner
         ? `<div class="box">
+            ${unlockedBanner}
             ${ph.note ? `<p style="font-size:.84rem;color:#17171A;margin-bottom:${ph.deliverableUrl || used > 0 ? ".75rem" : "0"};white-space:pre-wrap;"><strong>${esc(T.studioNote)}:</strong> ${esc(ph.note)}</p>` : ""}
             ${ph.deliverableUrl ? `<a class="pill-link" href="${esc(ph.deliverableUrl)}" target="_blank" rel="noopener noreferrer">${esc(ph.deliverableFilename ? `${A.deliverable} (${ph.deliverableFilename})` : A.deliverable)}</a>` : ""}
-            ${used > 0 ? `<p style="font-size:.75rem;color:#58575E;margin-top:${ph.deliverableUrl ? ".65rem" : "0"};">${esc(A.roundsUsed(used, MAX_PHASE_REVISIONS))}</p>` : ""}
+            ${used > 0 ? `<p style="font-size:.75rem;color:#58575E;margin-top:${ph.deliverableUrl ? ".65rem" : "0"};">${esc(A.roundsUsed(used, maxRevs))}</p>` : ""}
           </div>`
         : "";
 
-    const canRevise = ph.status === "review" && used < MAX_PHASE_REVISIONS;
+    const canRevise = ph.status === "review" && used < maxRevs;
     const reviseHtml = canRevise
       ? `<details class="rev-details"${revError ? " open" : ""}>
-          <summary class="btn secondary">${esc(A.revToggle(nextRound, MAX_PHASE_REVISIONS))}</summary>
+          <summary class="btn secondary">${esc(A.revToggle(nextRound, maxRevs))}</summary>
           <div class="rev-body">
             ${revError ? `<p class="rev-err">${esc(revError)}</p>` : ""}
             <form method="POST">
               <input type="hidden" name="decision" value="revise">
-              <label for="feedback">${esc(A.revLabel(nextRound, MAX_PHASE_REVISIONS))}</label>
+              <label for="feedback">${esc(A.revLabel(nextRound, maxRevs))}</label>
               <textarea id="feedback" name="feedback" rows="4" minlength="5" maxlength="1500" required placeholder="${esc(A.revPh)}"></textarea>
               <div class="confirm-box">
                 <label class="confirm-label">
@@ -3551,12 +3728,25 @@ async function handlePhaseApprove(request, env, url) {
                   <span>${esc(A.confirmRevise)}</span>
                 </label>
               </div>
-              <button type="submit">${esc(A.revSubmit(nextRound, MAX_PHASE_REVISIONS))}</button>
+              <button type="submit">${esc(A.revSubmit(nextRound, maxRevs))}</button>
             </form>
           </div>
         </details>`
-      : used >= MAX_PHASE_REVISIONS
-        ? `<div class="box" style="margin-top:.85rem;margin-bottom:0;font-size:.8rem;color:#58575E;">${esc(A.revExhausted)}</div>`
+      : used >= maxRevs
+        ? `<div class="box" style="margin-top:.85rem;margin-bottom:.85rem;font-size:.82rem;color:#58575E;">
+            <p style="margin-bottom:.75rem;">${esc(A.revExhausted)}</p>
+            ${revError ? `<p class="rev-err" style="margin-bottom:.75rem;">${esc(revError)}</p>` : ""}
+            <form method="POST">
+              <input type="hidden" name="decision" value="buy_revision">
+              <div class="confirm-box" style="margin-top:0;margin-bottom:.85rem;">
+                <label class="confirm-label">
+                  <input type="checkbox" name="confirm_action" value="yes" required>
+                  <span>${esc(A.confirmBuyRevision)}</span>
+                </label>
+              </div>
+              <button type="submit" class="btn secondary">${esc(A.btnBuyRevision)} (+100 €)</button>
+            </form>
+          </div>`
         : "";
 
     const bodyHtml = `${detailHtml}<p class="lead" style="font-size:.82rem;margin-bottom:1.25rem;">${esc(A.legal)}</p><form method="POST"><input type="hidden" name="decision" value="approve"><div class="confirm-box"><label class="confirm-label"><input type="checkbox" name="confirm_action" value="yes" required><span>${esc(A.confirmApprove)}</span></label></div><button type="submit">${esc(A.btn)}</button></form>${reviseHtml}`;
@@ -3574,6 +3764,13 @@ async function handlePhaseApprove(request, env, url) {
   };
 
   if (request.method === "GET" || request.method === "HEAD") {
+    const revSessionId = url.searchParams.get("rev_session_id");
+    if (revSessionId && /^cs_[A-Za-z0-9_]+$/.test(revSessionId)) {
+      const unlocked = await unlockExtraRevision(env, proj, step, revSessionId);
+      if (unlocked) {
+        return redirectTo(buildUrl("/approve-phase", { p, step: String(step), t, unlocked: "1" }));
+      }
+    }
     return renderReviewScreen();
   }
 
@@ -3588,8 +3785,19 @@ async function handlePhaseApprove(request, env, url) {
     return renderReviewScreen(A.confirmRequired, 400);
   }
 
+  if (decision === "buy_revision") {
+    const qJoin = String.fromCharCode(38);
+    const returnUrl = `${WORKER_URL}/approve-phase?p=${p}${qJoin}step=${step}${qJoin}t=${t}${qJoin}rev_session_id={CHECKOUT_SESSION_ID}`;
+    const cancelUrl = `${WORKER_URL}/approve-phase?p=${p}${qJoin}step=${step}${qJoin}t=${t}`;
+    const checkoutUrl = await createExtraRevisionCheckout(env, proj, step, returnUrl, cancelUrl);
+    if (!checkoutUrl) {
+      return renderReviewScreen(A.stripeError, 500);
+    }
+    return redirectTo(checkoutUrl);
+  }
+
   if (decision === "revise") {
-    if (ph.status !== "review" || used >= MAX_PHASE_REVISIONS) {
+    if (ph.status !== "review" || used >= maxRevs) {
       return renderReviewScreen("", 400);
     }
     const feedback = cleanNote(form?.get("feedback") ?? "", 1500);
@@ -3608,7 +3816,7 @@ async function handlePhaseApprove(request, env, url) {
         {
           to: ["hola@rebrandyourbrand.es"],
           reply_to: proj.clientEmail,
-          subject: `ajustes solicitados (ronda ${round} de ${MAX_PHASE_REVISIONS}) — "${phaseTitleEs}" — ${proj.brand}`,
+          subject: `ajustes solicitados (ronda ${round} de ${maxRevs}) — "${phaseTitleEs}" — ${proj.brand}`,
           ...renderEmail("es", {
             paras: [
               "el cliente ha solicitado ajustes directamente desde la página de revisión de fase.",
@@ -3616,7 +3824,7 @@ async function handlePhaseApprove(request, env, url) {
                 `— proyecto: ${bold(proj.brand)}`,
                 `— cliente: ${bold(proj.clientEmail)}`,
                 `— fase: ${bold(`paso ${ph.step} — ${phaseTitleEs}`)}`,
-                `— ronda consumida: ${bold(`ronda ${round} de ${MAX_PHASE_REVISIONS}`)}`,
+                `— ronda consumida: ${bold(`ronda ${round} de ${maxRevs}`)}`,
                 `— fecha (iso): ${bold(now)}`
               ),
               "cambios solicitados por el cliente:",
@@ -3625,8 +3833,8 @@ async function handlePhaseApprove(request, env, url) {
             cta: { label: "abrir panel de la fase para subir nueva versión", url: manageUrl },
             secondaryLink: { label: "ver seguimiento público del cliente", url: trackingUrl },
             note:
-              round >= MAX_PHASE_REVISIONS
-                ? "esta ha sido la segunda y última ronda gratuita incluida en esta fase. cualquier ajuste posterior se tarifica aparte o a 50 €/h (cláusula 1.2)."
+              round >= maxRevs
+                ? "esta ha sido la última ronda incluida en esta fase. el cliente puede desbloquear rondas adicionales directamente por 100 € (cláusula 1.2)."
                 : "cuando tengas lista la propuesta ajustada, vuelve a enviarla a revisión desde el panel de la fase.",
           }),
         },
@@ -3647,7 +3855,7 @@ async function handlePhaseApprove(request, env, url) {
     await env.LEADS_KV.put(`project:${p}`, JSON.stringify(proj));
 
     return htmlResponse(
-      page(A.revDone[0], A.revDone[1], A.revDone[2](round, MAX_PHASE_REVISIONS), {
+      page(A.revDone[0], A.revDone[1], A.revDone[2](round, maxRevs), {
         lang: L,
         eyebrow: A.eyebrow,
         html: `<a class="btn" href="${esc(trackingUrl)}">${esc(PG[L].common.openTracker)}</a>`,
@@ -4330,8 +4538,9 @@ async function handleProject(request, env, url) {
       } else if (isReview) {
         meta = T.review;
       } else if (isActive) {
-        const rUsed = Math.min(MAX_PHASE_REVISIONS, Math.max(0, Number(ph.revisionsUsed) || 0));
-        meta = rUsed > 0 ? T.activeRev(rUsed, MAX_PHASE_REVISIONS) : T.active;
+        const maxR = ph.maxRevisions || MAX_PHASE_REVISIONS;
+        const rUsed = Math.min(maxR, Math.max(0, Number(ph.revisionsUsed) || 0));
+        meta = rUsed > 0 ? T.activeRev(rUsed, maxR) : T.active;
       }
 
       const safeDeliv = cleanHttpsUrl(ph.deliverableUrl || "", 500);

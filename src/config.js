@@ -41,6 +41,9 @@ const MAX_PHASE_REVISIONS = 2;
 // Importe anual obligatorio de infraestructura técnica web (dominio, correo corporativo, DNS/SSL y despliegue edge) si env.WEB_RENEWAL_EUR no está definida en Cloudflare
 const WEB_RENEWAL_EUR = 100;
 
+// Importe fijo de una ronda de ajustes adicional una vez agotadas las incluidas en la fase
+const EXTRA_REVISION_EUR = 100;
+
 const DAY_MS = 86400 * 1000;
 
 const APPROVED_KEY = "rybb:approved_testimonials";
@@ -71,7 +74,7 @@ const LANG_NAMES = {
 const SERVICES = {
   logo: {
     id: "logo",
-    price: 200,
+    price: 400,
     names: {
       es: "logotipo",
       ca: "logotip",
@@ -79,10 +82,10 @@ const SERVICES = {
       en: "logo",
     },
     includes: {
-      es: "logotipo principal y versión secundaria, listos para redes, cartelería y facturas",
-      ca: "logotip principal i versió secundària, llestos per a xarxes, cartelleria i factures",
-      eu: "logotipo nagusia eta bigarren mailako bertsioa, sareetarako, karteletarako eta fakturetarako prest",
-      en: "primary and secondary logo, ready for social media, signage and invoices",
+      es: "logotipo principal y versión secundaria, listos para redes, cartelería y facturas (incluye la paleta de empresa de regalo)",
+      ca: "logotip principal i versió secundària, llestos per a xarxes, cartelleria i factures (inclou la paleta d'empresa de regal)",
+      eu: "logotipo nagusia eta bigarren mailako bertsioa, sareetarako, karteletarako eta fakturetarako prest (opari gisa enpresaren paleta barne)",
+      en: "primary and secondary logo, ready for social media, signage and invoices (includes complimentary company palette)",
     },
   },
   paleta: {
@@ -95,10 +98,10 @@ const SERVICES = {
       en: "company color palette",
     },
     includes: {
-      es: "colores y tipografías elegidos para tu marca",
-      ca: "colors i tipografies triats per a la teva marca",
-      eu: "zure markarako aukeratutako koloreak eta tipografiak",
-      en: "colors and typefaces chosen for your brand",
+      es: "colores y tipografías elegidos para tu marca (incluida sin coste adicional al contratar el logotipo)",
+      ca: "colors i tipografies triats per a la teva marca (inclosa sense cost addicional en contractar el logotip)",
+      eu: "zure markarako aukeratutako koloreak eta tipografiak (kostu gehigarririk gabe barne logotipoa kontratatzean)",
+      en: "colors and typefaces chosen for your brand (included at no extra cost when hiring the logo)",
     },
   },
   web: {
@@ -121,6 +124,16 @@ const SERVICES = {
 
 const SERVICE_IDS = Object.keys(SERVICES);
 
+const calcPlanTotal = (ids) => {
+  if (!Array.isArray(ids)) return 0;
+  const hasLogo = ids.includes("logo");
+  return ids.reduce((sum, id) => {
+    if (!SERVICES[id]) return sum;
+    if (id === "paleta" && hasLogo) return sum;
+    return sum + SERVICES[id].price;
+  }, 0);
+};
+
 const EMAIL_RE = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/;
 
 const EMAIL_FIND = /[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}/g;
@@ -129,13 +142,11 @@ const AGREE_RE = /(?<![\p{L}\p{N}])(?:confirmo|confirm|vale|adelante|procedemos|
 
 const DENY_RE = /^\s*(?:no|nope|ez|ezeztatu|cancel\w*)(?![\p{L}\p{N}])/iu;
 
-// Precios que Brandi puede mencionar: 50 (hora extra), renovación anual web y cualquier combinación de servicios
-const ALLOWED_EUR = new Set([50, WEB_RENEWAL_EUR]);
+// Precios oficiales que Brandi puede mencionar: 100 (paleta suelta, cuota anual o ronda extra), 400 (logo o web), 500 (paleta y web) y 800 (pack completo)
+const ALLOWED_EUR = new Set([100, 400, 500, 800]);
 
-for (let m = 1; m < (1 << SERVICE_IDS.length); m++) {
-  ALLOWED_EUR.add(SERVICE_IDS.reduce((sum, id, i) => sum + (m & (1 << i) ? SERVICES[id].price : 0), 0));
-}
-
-const CATALOG = SERVICE_IDS
-  .map((id) => `   - ${SERVICES[id].names.es}: ${SERVICES[id].price} € — ${SERVICES[id].includes.es}.`)
-  .join("\n");
+const CATALOG = [
+  `   - ${SERVICES.logo.names.es}: 400 € — ${SERVICES.logo.includes.es}.`,
+  `   - ${SERVICES.paleta.names.es}: 100 € (o 0 € incluida de regalo al contratar el logotipo) — ${SERVICES.paleta.includes.es}.`,
+  `   - ${SERVICES.web.names.es}: 400 € — ${SERVICES.web.includes.es}.`,
+].join("\n");

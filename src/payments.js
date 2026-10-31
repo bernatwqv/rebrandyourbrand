@@ -148,16 +148,30 @@ async function ensureStripeCheckout(env, proj) {
     "metadata[brand]": safeBrand,
   });
 
-  proj.services.forEach((id, i) => {
+  const hasLogo = proj.services.includes("logo");
+  let itemIdx = 0;
+  proj.services.forEach((id) => {
     if (!SERVICES[id]) return;
+    if (id === "paleta" && hasLogo) {
+      // La paleta va incluida de regalo en el logotipo (0 €). Stripe en mode=payment no admite line_items con importe 0.
+      return;
+    }
     const name = SERVICES[id].names[l] || SERVICES[id].names.es;
-    params.set(`line_items[${i}][price_data][currency]`, "eur");
+    const displayName = (id === "logo" && hasLogo)
+      ? (l === "en" ? `${name} (includes company palette) — ${safeBrand}`
+        : l === "ca" ? `${name} (inclou paleta d'empresa) — ${safeBrand}`
+        : l === "eu" ? `${name} (enpresaren paleta barne) — ${safeBrand}`
+        : `${name} (incluye paleta de empresa) — ${safeBrand}`)
+      : `${name.charAt(0).toUpperCase()}${name.slice(1)} — ${safeBrand}`;
+
+    params.set(`line_items[${itemIdx}][price_data][currency]`, "eur");
     params.set(
-      `line_items[${i}][price_data][product_data][name]`,
-      `${name.charAt(0).toUpperCase()}${name.slice(1)} — ${safeBrand}`.slice(0, 250)
+      `line_items[${itemIdx}][price_data][product_data][name]`,
+      displayName.slice(0, 250)
     );
-    params.set(`line_items[${i}][price_data][unit_amount]`, String(SERVICES[id].price * 100));
-    params.set(`line_items[${i}][quantity]`, "1");
+    params.set(`line_items[${itemIdx}][price_data][unit_amount]`, String(SERVICES[id].price * 100));
+    params.set(`line_items[${itemIdx}][quantity]`, "1");
+    itemIdx++;
   });
 
   try {
@@ -237,6 +251,118 @@ async function createRenewalCheckout(env, proj, renewalEur) {
   } catch {
     return "";
   }
+}
+
+async function createExtraRevisionCheckout(env, proj, step, returnUrl, cancelUrl) {
+  if (!env.STRIPE_SECRET_KEY || !proj) return "";
+  const l = pickLang(proj.lang);
+  const safeBrand = proj.brand || "proyecto";
+  const ph = (proj.phases || []).find((p) => Number(p.step) === Number(step)) || { step };
+  const phaseName = phaseTitle(ph, l) || `fase ${step}`;
+
+  const titleByLang = {
+    es: `Ronda de ajustes adicional — ${phaseName}`,
+    ca: `Ronda d'ajustos addicional — ${phaseName}`,
+    eu: `Doikuntza-txanda gehigarria — ${phaseName}`,
+    en: `Additional revision round — ${phaseName}`,
+  };
+
+  const params = new URLSearchParams({
+    "payment_method_types[0]": "card",
+    mode: "payment",
+    locale: stripeLocaleFor(l),
+    customer_email: proj.clientEmail,
+    client_reference_id: proj.token,
+    billing_address_collection: "required",
+    "tax_id_collection[enabled]": "true",
+    customer_creation: "always",
+    success_url: returnUrl,
+    cancel_url: cancelUrl,
+    "metadata[type]": "extra_revision",
+    "metadata[projectToken]": proj.token,
+    "metadata[step]": String(step),
+    "metadata[brand]": safeBrand,
+    "line_items[0][price_data][currency]": "eur",
+    "line_items[0][price_data][product_data][name]": `${titleByLang[l]} — ${safeBrand}`.slice(0, 250),
+    "line_items[0][price_data][unit_amount]": String(EXTRA_REVISION_EUR * 100),
+    "line_items[0][quantity]": "1",
+  });
+
+  try {
+    const res = await fetch("https://api.stripe.com/v1/checkout/sessions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${env.STRIPE_SECRET_KEY}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: params.toString(),
+      signal: AbortSignal.timeout(10000),
+    });
+    if (!res.ok) throw new Error(`Stripe ${res.status}: ${await res.text()}`);
+    const session = await res.json();
+    return isStripeUrl(session.url) ? session.url : "";
+  } catch (e) {
+    console.error("createExtraRevisionCheckout failed:", e?.message);
+    return "";
+  }
+}
+
+async function unlockExtraRevision(env, proj, step, sessionId, sessionData = null) {
+  if (!proj || !sessionId) return false;
+  const ph = (proj.phases || []).find((p) => Number(p.step) === Number(step));
+  if (!ph) return false;
+
+  const paidSessions = Array.isArray(ph.paidRevisionSessions) ? ph.paidRevisionSessions : [];
+  if (paidSessions.includes(sessionId)) {
+    return true;
+  }
+
+  let session = sessionData;
+  if (!session) {
+    session = await fetchStripeSession(env, sessionId);
+  }
+  if (!session || session.payment_status !== "paid") {
+    return false;
+  }
+  if (session.metadata?.type !== "extra_revision") {
+    return false;
+  }
+
+  const baseMax = ph.maxRevisions || MAX_PHASE_REVISIONS;
+  ph.maxRevisions = baseMax + 1;
+  ph.paidRevisionSessions = [...paidSessions, sessionId];
+
+  await env.LEADS_KV.put(`project:${proj.token}`, JSON.stringify(proj));
+
+  if (env.RESEND_API_KEY) {
+    const manageUrl = await advancePhaseUrl(env, proj.token, ph.step);
+    const trackingUrl = buildUrl("/proyecto", { token: proj.token });
+    const phaseName = phaseTitle(ph, "es");
+    await resendSend(
+      env,
+      {
+        to: ["hola@rebrandyourbrand.es"],
+        reply_to: proj.clientEmail,
+        subject: `ronda extra abonada (100 €) — fase ${ph.step} — ${proj.brand}`,
+        ...renderEmail("es", {
+          paras: [
+            `el cliente ha abonado 100 € por una ronda de ajustes adicional en ${bold(proj.brand)}.`,
+            lines(
+              `— cliente: ${bold(proj.clientEmail)}`,
+              `— fase: ${bold(`paso ${ph.step} — ${phaseName}`)}`,
+              `— límite ampliado: ${bold(`${ph.maxRevisions} rondas en total`)}`,
+              `— id sesión stripe: ${bold(sessionId)}`
+            ),
+          ],
+          cta: { label: "abrir gestión de la fase actual", url: manageUrl },
+          secondaryLink: { label: "ver seguimiento del cliente", url: trackingUrl },
+        }),
+      },
+      `extra-rev-${proj.token}-${ph.step}-${sessionId}`
+    ).catch((e) => console.error("extra revision alert email failed:", e?.message));
+  }
+
+  return true;
 }
 
 async function verifyStripeSignature(env, rawBody, header) {
@@ -323,6 +449,13 @@ async function processPaidSession(env, session, { fromWebhook = false } = {}) {
       `renovación anual abonada — ${proj.brand}`,
       `cliente: ${proj.clientEmail}\nmarca: ${proj.brand}\nimporte: ${(Number(session.amount_total || 0) / 100).toFixed(2)} eur\npróximo vencimiento: ${fmtDate(proj.nextRenewalAt, "es")}`
     );
+    return;
+  }
+
+  // Caso especial: ronda de ajustes adicional (cláusula 1.2)
+  if (session.metadata?.type === "extra_revision") {
+    const step = parseInt(session.metadata?.step || "1", 10);
+    await unlockExtraRevision(env, proj, step, session.id, session);
     return;
   }
 

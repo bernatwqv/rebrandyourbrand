@@ -4,7 +4,10 @@ function normalizeServices(input) {
   if (!Array.isArray(input)) return null;
   const ids = SERVICE_IDS.filter((id) => input.includes(id));
   if (!ids.length) return null;
-  return { ids, total: ids.reduce((sum, id) => sum + SERVICES[id].price, 0) };
+  if (ids.includes("logo") && !ids.includes("paleta")) {
+    ids.push("paleta");
+  }
+  return { ids, total: calcPlanTotal(ids) };
 }
 
 const planOut = (p) => (p ? p.ids : null);
@@ -75,8 +78,9 @@ ESTILO:
 
 No hay planes cerrados: el cliente elige solo los servicios que necesita y paga únicamente por ellos (pago único del 100% mediante enlace seguro tras verificar el correo, sin cuotas mensuales). Servicios y precios oficiales:
 ${CATALOG}
-El precio total de creación es la suma de los servicios elegidos. No hay descuentos ni paquetes.
-Si el cliente elige o pregunta por la web (400 € de pago único de desarrollo), aclara si surge la duda que conlleva una cuota obligatoria de 100 €/año exclusivamente por infraestructura técnica gestionada (dominio, correo corporativo, DNS, certificados SSL y despliegue edge): no incluye cambios de contenido, diseño ni nuevas secciones tras la entrega (solo las 2 rondas de revisión gratuitas durante la creación; cualquier cambio posterior se presupuesta aparte o a 50 €/hora).
+El logotipo cuesta 400 € e incluye la paleta de empresa de regalo (valorada en 100 €). La paleta de empresa en solitario cuesta 100 €. La web cuesta 400 € de desarrollo (más 100 €/año de infraestructura técnica).
+El precio total de creación es la suma de los servicios elegidos (con la paleta a 0 € si se contrata el logotipo: Logotipo + Paleta = 400 €, Logotipo + Paleta + Web = 800 €, Paleta + Web = 500 €). No hay otros descuentos.
+Si el cliente elige o pregunta por la web (400 € de pago único de desarrollo), aclara si surge la duda que conlleva una cuota obligatoria de 100 €/año exclusivamente por infraestructura técnica gestionada (dominio, correo corporativo, DNS, certificados SSL y despliegue edge): no incluye cambios de contenido, diseño ni nuevas secciones tras la entrega (cada fase incluye 2 rondas de revisión gratuitas durante la creación; cualquier ronda de ajustes extra o cambio posterior tiene un precio cerrado de 100 €).
 En los proyectos web, la página entregada incluye una firma discreta del estudio en el pie de página (footer) con enlace a rebrandyourbrand.es y el estudio puede mostrar el trabajo en su portfolio como referencia profesional.
 
 ESTADO ACTUAL DE LA CONVERSACIÓN:
