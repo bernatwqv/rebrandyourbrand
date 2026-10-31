@@ -483,14 +483,7 @@ async function handlePhaseAdvance(request, env, url) {
         <input id="deliverable_url" name="deliverable_url" type="url" maxlength="500" placeholder="https://..." value="${esc(currentPhaseObj.deliverableUrl || "")}">
         <label for="note">nota para el cliente (opcional)</label>
         <textarea id="note" name="note" rows="4" maxlength="600" placeholder="contexto breve sobre la entrega, qué revisar o pasos siguientes...">${esc(currentPhaseObj.note || "")}</textarea>
-        <div class="confirm-box">
-          <label class="confirm-label">
-            <input type="checkbox" name="confirm_action" value="yes" required>
-            <span>confirmo que he revisado el contenido y el entregable antes de enviarlo definitivamente</span>
-          </label>
-        </div>
         <button type="submit" name="decision" value="review">enviar propuesta a revisión del cliente</button>
-        <button type="submit" name="decision" value="complete" class="secondary">marcar fase como completada y avanzar directamente</button>
       </form>
     `;
 
@@ -498,7 +491,7 @@ async function handlePhaseAdvance(request, env, url) {
       page(
         `gestionar fase — ${proj.brand}`,
         "gestionar fase del proyecto",
-        "puedes enviar un entregable para que el cliente lo valide por escrito en un clic, o cerrar la fase directamente si ya está aprobada.",
+        "puedes subir un entregable o indicar un enlace para que el cliente lo revise y valide por escrito en su panel privado.",
         {
           eyebrow: "panel interno del estudio",
           wide: true,
@@ -517,22 +510,6 @@ async function handlePhaseAdvance(request, env, url) {
 
   const form = await request.formData().catch(() => null);
   const currentManageUrl = await advancePhaseUrl(env, projectToken, step);
-
-  if (String(form?.get("confirm_action") || "") !== "yes") {
-    return htmlResponse(
-      page(
-        "confirmación obligatoria",
-        "marca la casilla de confirmación",
-        "es obligatorio marcar la casilla de confirmación antes de enviar la propuesta o completar la fase.",
-        {
-          eyebrow: "panel interno del estudio",
-          footerUrl: currentManageUrl,
-          footerLabel: "volver a la fase",
-        }
-      ),
-      400
-    );
-  }
 
   const rawUrl = String(form?.get("deliverable_url") ?? form?.get("deliverableUrl") ?? "").trim();
   const directUrl = cleanHttpsUrl(rawUrl, 500);
@@ -613,7 +590,7 @@ async function handlePhaseAdvance(request, env, url) {
   }
 
   const note = cleanNote(form?.get("note") ?? "", 600);
-  const decision = String(form?.get("decision") ?? "complete");
+  const decision = String(form?.get("decision") ?? "review");
 
   if (decision === "review") {
     const now = new Date().toISOString();
@@ -678,65 +655,32 @@ async function handlePhaseAdvance(request, env, url) {
 
     return htmlResponse(
       page(
-        "propuesta enviada",
-        "propuesta enviada a revisión",
-        `hemos avisado a ${proj.clientEmail} con el enlace para revisar, aprobar por escrito o pedir ajustes en "${currentTitleEs}".`,
+        "¡enviado correctamente!",
+        "propuesta enviada a revisión con éxito",
+        `hemos avisado a ${proj.clientEmail} con el enlace para revisar y validar por escrito "${currentTitleEs}".`,
         {
           eyebrow: "panel interno del estudio",
-          html: `<a class="btn secondary" href="${esc(currentManageUrl)}">volver al panel de esta fase</a>`,
+          html: `<div class="notice-box"><p>aviso: esta acción ya ha quedado registrada en el sistema y el cliente ha recibido la notificación para revisar la propuesta.</p></div><a class="btn" href="${esc(currentManageUrl)}">volver al panel de esta fase</a>`,
           footerUrl: trackingUrl,
-          footerLabel: "ver página del cliente",
+          footerLabel: "ver página pública del cliente",
         }
       ),
       200
     );
   }
 
-  const result = await completeProjectPhase(env, proj, projectToken, {
-    approvedBy: "studio",
-    deliverableUrl: effectiveDeliverableUrl,
-    deliverableFilename: effectiveDeliverableFilename,
-    note,
-    legacyActionToken,
-  });
-
-  if (!result.ok) {
-    if (result.reason === "email_failed") {
-      return htmlResponse(
-        page(
-          "error al notificar",
-          "no se ha podido enviar el correo",
-          "no se ha podido enviar el correo de notificación, así que la fase sigue sin cambios en el sistema para que puedas reintentarlo sin perder el estado.",
-          {
-            eyebrow: "panel interno del estudio",
-            html: `<a class="btn" href="${esc(currentManageUrl)}">reintentar ahora</a>`,
-            footerUrl: trackingUrl,
-            footerLabel: "ver página del cliente",
-          }
-        ),
-        500
-      );
-    }
-    return htmlResponse(page("finalizado", "proyecto ya finalizado", "no quedan fases activas."), 400);
-  }
-
-  const nextBtnHtml = result.nextActionUrl
-    ? `<a class="btn" href="${esc(result.nextActionUrl)}">abrir panel de la siguiente fase (${esc(result.nextTitleEs)})</a>`
-    : "";
-
   return htmlResponse(
     page(
-      "fase completada",
-      "fase avanzada con éxito",
-      `has completado "${result.advancedTitleEs}" para ${proj.brand}.${result.finished ? " el proyecto ha finalizado y hemos invitado al cliente a valorarlo." : ` la nueva fase activa es "${result.nextTitleEs}" y se ha notificado al cliente.`}`,
+      "acción no permitida",
+      "validación obligatoria del cliente",
+      "la progresión del proyecto depende exclusivamente de la aprobación por escrito del cliente (cláusula 3.3). no es posible completar fases unilateralmente.",
       {
         eyebrow: "panel interno del estudio",
-        html: nextBtnHtml,
-        footerUrl: trackingUrl,
-        footerLabel: "ver seguimiento del cliente",
+        footerUrl: currentManageUrl,
+        footerLabel: "volver a la fase",
       }
     ),
-    200
+    400
   );
 }
 
@@ -829,12 +773,6 @@ async function handlePhaseApprove(request, env, url) {
               <input type="hidden" name="decision" value="revise">
               <label for="feedback">${esc(A.revLabel(nextRound, maxRevs))}</label>
               <textarea id="feedback" name="feedback" rows="4" minlength="5" maxlength="1500" required placeholder="${esc(A.revPh)}"></textarea>
-              <div class="confirm-box">
-                <label class="confirm-label">
-                  <input type="checkbox" name="confirm_action" value="yes" required>
-                  <span>${esc(A.confirmRevise)}</span>
-                </label>
-              </div>
               <button type="submit">${esc(A.revSubmit(nextRound, maxRevs))}</button>
             </form>
           </div>
@@ -845,18 +783,12 @@ async function handlePhaseApprove(request, env, url) {
             ${revError ? `<p class="rev-err" style="margin-bottom:.75rem;">${esc(revError)}</p>` : ""}
             <form method="POST">
               <input type="hidden" name="decision" value="buy_revision">
-              <div class="confirm-box" style="margin-top:0;margin-bottom:.85rem;">
-                <label class="confirm-label">
-                  <input type="checkbox" name="confirm_action" value="yes" required>
-                  <span>${esc(A.confirmBuyRevision)}</span>
-                </label>
-              </div>
               <button type="submit" class="btn secondary">${esc(A.btnBuyRevision)} (+100 €)</button>
             </form>
           </div>`
         : "";
 
-    const bodyHtml = `${detailHtml}<p class="lead" style="font-size:.82rem;margin-bottom:1.25rem;">${esc(A.legal)}</p><form method="POST"><input type="hidden" name="decision" value="approve"><div class="confirm-box"><label class="confirm-label"><input type="checkbox" name="confirm_action" value="yes" required><span>${esc(A.confirmApprove)}</span></label></div><button type="submit">${esc(A.btn)}</button></form>${reviseHtml}`;
+    const bodyHtml = `${detailHtml}<p class="lead" style="font-size:.82rem;margin-bottom:1.25rem;">${esc(A.legal)}</p><form method="POST"><input type="hidden" name="decision" value="approve"><button type="submit">${esc(A.btn)}</button></form>${reviseHtml}`;
 
     return htmlResponse(
       page(A.title, A.heading, A.intro(phaseTitle(ph, L), proj.brand), {
@@ -887,10 +819,6 @@ async function handlePhaseApprove(request, env, url) {
 
   const form = await request.formData().catch(() => null);
   const decision = String(form?.get("decision") || "approve");
-
-  if (String(form?.get("confirm_action") || "") !== "yes") {
-    return renderReviewScreen(A.confirmRequired, 400);
-  }
 
   if (decision === "buy_revision") {
     const qJoin = String.fromCharCode(38);
@@ -961,11 +889,12 @@ async function handlePhaseApprove(request, env, url) {
     delete ph.tacitAlertSentAt;
     await env.LEADS_KV.put(`project:${p}`, JSON.stringify(proj));
 
+    const noticeText = PG[L].track?.actionRegisteredNotice || "aviso: esta acción ya ha quedado registrada en el sistema y nuestro equipo ha recibido la notificación para continuar con el trabajo.";
     return htmlResponse(
       page(A.revDone[0], A.revDone[1], A.revDone[2](round, maxRevs), {
         lang: L,
         eyebrow: A.eyebrow,
-        html: `<a class="btn" href="${esc(trackingUrl)}">${esc(PG[L].common.openTracker)}</a>`,
+        html: `<div class="notice-box"><p>${esc(noticeText)}</p></div><a class="btn" href="${esc(trackingUrl)}">${esc(PG[L].common.openTracker)}</a>`,
         footerUrl: trackingUrl,
         footerLabel: PG[L].common.openTracker,
       }),
@@ -982,11 +911,12 @@ async function handlePhaseApprove(request, env, url) {
 
   if (!res.ok && res.reason === "email_failed") return errorPage(L);
 
+  const noticeText = PG[L].track?.actionRegisteredNotice || "aviso: esta acción ya ha quedado registrada en el sistema y nuestro equipo ha recibido la notificación para continuar con el trabajo.";
   return htmlResponse(
     page(A.done[0], A.done[1], A.done[2], {
       lang: L,
       eyebrow: A.eyebrow,
-      html: `<a class="btn" href="${esc(trackingUrl)}">${esc(PG[L].common.openTracker)}</a>`,
+      html: `<div class="notice-box"><p>${esc(noticeText)}</p></div><a class="btn" href="${esc(trackingUrl)}">${esc(PG[L].common.openTracker)}</a>`,
       footerUrl: trackingUrl,
       footerLabel: PG[L].common.openTracker,
     }),
@@ -1178,18 +1108,6 @@ async function handleProject(request, env, url) {
 
     if (op === "onboarding") {
       if (!proj.paid) return redirectTo(projectPageUrl);
-      if (String(form?.get("confirm_action") || "") !== "yes") {
-        return htmlResponse(
-          page(T.confirmRequiredTitle || "confirmación obligatoria", T.confirmRequiredHeading || "marca la casilla de confirmación", T.confirmRequired, {
-            lang: L,
-            eyebrow: T.obEyebrow,
-            html: `<a class="btn" href="${esc(projectPageUrl)}">${esc(PG[L].common.openTracker)}</a>`,
-            footerUrl: projectPageUrl,
-            footerLabel: PG[L].common.openTracker,
-          }),
-          400
-        );
-      }
 
       // Bloque 1 — Materiales del negocio:
       const domain = cleanInput(form?.get("domain") ?? "", 200);
@@ -1428,7 +1346,18 @@ async function handleProject(request, env, url) {
         ).catch((e) => console.error("materials email failed:", e?.message));
       }
 
-      return redirectTo(buildUrl("/proyecto", { token, ob: "1" }));
+      const noticeText = T.actionRegisteredNotice || "aviso: esta acción ya ha quedado registrada en el sistema y nuestro equipo ha recibido la notificación para continuar con el trabajo.";
+      const succ = T.obSuccess || ["¡enviado correctamente!", "materiales registrados con éxito", "hemos recibido tus materiales y referencias correctamente y nuestro equipo los revisará para incorporarlos al proyecto."];
+      return htmlResponse(
+        page(succ[0], succ[1], succ[2], {
+          lang: L,
+          eyebrow: T.obEyebrow,
+          html: `<div class="notice-box"><p>${esc(noticeText)}</p></div><a class="btn" href="${esc(projectPageUrl)}">${esc(PG[L].common.openTracker)}</a>`,
+          footerUrl: projectPageUrl,
+          footerLabel: PG[L].common.openTracker,
+        }),
+        200
+      );
     }
 
     return redirectTo(projectPageUrl);
@@ -1576,56 +1505,64 @@ async function handleProject(request, env, url) {
       </div>`
     : "";
 
-  const addFormHtml = !allDone
-    ? `<div class="box accent">
-        <span class="eyebrow">${esc(T.obEyebrow)}</span>
-        <h2>${esc(T.obAddTitle)}</h2>
-        <p class="lead" style="margin-bottom:1.15rem;font-size:.85rem;">${esc(T.obAddIntro)}</p>
-        <form method="POST" enctype="multipart/form-data" style="text-align:left;">
-          <input type="hidden" name="op" value="onboarding">
+  let addFormHtml = "";
+  if (!allDone) {
+    const formFields = `
+      <form method="POST" enctype="multipart/form-data" style="text-align:left;">
+        <input type="hidden" name="op" value="onboarding">
 
-          <div class="section-subheading">${esc(T.blockAMaterials)}</div>
+        <div class="section-subheading">${esc(T.blockAMaterials)}</div>
 
-          <label for="domain">${esc(T.obDomain)}</label>
-          <input id="domain" name="domain" type="text" maxlength="200" placeholder="${esc(T.obDomainPh)}">
+        <label for="domain">${esc(T.obDomain)}</label>
+        <input id="domain" name="domain" type="text" maxlength="200" placeholder="${esc(T.obDomainPh)}">
 
-          <label for="socials">${esc(T.obSocials)}</label>
-          <input id="socials" name="socials" type="text" maxlength="250" placeholder="${esc(T.obSocialsPh)}">
+        <label for="socials">${esc(T.obSocials)}</label>
+        <input id="socials" name="socials" type="text" maxlength="250" placeholder="${esc(T.obSocialsPh)}">
 
-          <label for="materials_url">${esc(T.obMaterialsUrl)}</label>
-          <input id="materials_url" name="materials_url" type="url" maxlength="500" placeholder="${esc(T.obMaterialsUrlPh)}">
+        <label for="materials_url">${esc(T.obMaterialsUrl)}</label>
+        <input id="materials_url" name="materials_url" type="url" maxlength="500" placeholder="${esc(T.obMaterialsUrlPh)}">
 
-          <label for="materials_file">${esc(T.obMaterialsFile)}</label>
-          <input id="materials_file" name="materials_file" type="file">
-          <span class="file-note">${esc(T.obMaterialsFileNote)}</span>
+        <label for="materials_file">${esc(T.obMaterialsFile)}</label>
+        <input id="materials_file" name="materials_file" type="file">
+        <span class="file-note">${esc(T.obMaterialsFileNote)}</span>
 
-          <label for="materials_notes">${esc(T.obMaterialsNotes)}</label>
-          <textarea id="materials_notes" name="materials_notes" rows="3" maxlength="1000" placeholder="${esc(T.obMaterialsNotesPh)}"></textarea>
+        <label for="materials_notes">${esc(T.obMaterialsNotes)}</label>
+        <textarea id="materials_notes" name="materials_notes" rows="3" maxlength="1000" placeholder="${esc(T.obMaterialsNotesPh)}"></textarea>
 
-          <div class="section-subheading">${esc(T.blockBRefs)}</div>
+        <div class="section-subheading">${esc(T.blockBRefs)}</div>
 
-          <label for="reference_url">${esc(T.obRefUrl)}</label>
-          <input id="reference_url" name="reference_url" type="url" maxlength="500" placeholder="${esc(T.obRefUrlPh)}">
+        <label for="reference_url">${esc(T.obRefUrl)}</label>
+        <input id="reference_url" name="reference_url" type="url" maxlength="500" placeholder="${esc(T.obRefUrlPh)}">
 
-          <label for="reference_file">${esc(T.obRefFile)}</label>
-          <input id="reference_file" name="reference_file" type="file">
-          <span class="file-note">${esc(T.obMaterialsFileNote)}</span>
+        <label for="reference_file">${esc(T.obRefFile)}</label>
+        <input id="reference_file" name="reference_file" type="file">
+        <span class="file-note">${esc(T.obMaterialsFileNote)}</span>
 
-          <label for="reference_notes">${esc(T.obRefNotes)}</label>
-          <textarea id="reference_notes" name="reference_notes" rows="3" maxlength="1000" placeholder="${esc(T.obRefNotesPh)}"></textarea>
+        <label for="reference_notes">${esc(T.obRefNotes)}</label>
+        <textarea id="reference_notes" name="reference_notes" rows="3" maxlength="1000" placeholder="${esc(T.obRefNotesPh)}"></textarea>
 
-          <div class="confirm-box">
-            <label class="confirm-label">
-              <input type="checkbox" name="confirm_action" value="yes" required>
-              <span>${esc(T.confirmOnboarding)}</span>
-            </label>
+        <button type="submit">${esc(T.obSubmit)}</button>
+      </form>`;
+
+    if (materialsList.length > 0) {
+      addFormHtml = `
+        <details class="add-materials-slider">
+          <summary class="slider-summary">${esc(T.obAccordionTitle)}</summary>
+          <div class="slider-body">
+            <div class="slider-warning"><p>${esc(T.obDelayWarning)}</p></div>
+            ${formFields}
           </div>
-          <button type="submit">${esc(T.obSubmit)}</button>
-        </form>
-      </div>`
-    : "";
-
-  const onboardingHtml = `${materialsBox}${referencesBox}${addFormHtml}`;
+        </details>`;
+    } else {
+      addFormHtml = `
+        <div class="box accent">
+          <span class="eyebrow">${esc(T.obEyebrow)}</span>
+          <h2>${esc(T.obAddTitle)}</h2>
+          <p class="lead" style="margin-bottom:1.15rem;font-size:.85rem;">${esc(T.obAddIntro)}</p>
+          ${formFields}
+        </div>`;
+    }
+  }
 
   const phaseCards = await Promise.all(
     (proj.phases || []).map(async (ph) => {
@@ -1685,9 +1622,11 @@ async function handleProject(request, env, url) {
   const fullHtml = `
     ${bannerHtml}
     ${headerHtml}
-    ${onboardingHtml}
     <h3>${esc(T.state)}</h3>
-    <div class="timeline">${phaseCards.join("")}</div>`;
+    <div class="timeline">${phaseCards.join("")}</div>
+    ${materialsBox}
+    ${referencesBox}
+    ${addFormHtml}`;
 
   return htmlResponse(
     page(`${T.title} — ${proj.brand}`, T.heading, "", {

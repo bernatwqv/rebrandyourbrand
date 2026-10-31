@@ -17,7 +17,7 @@ async function inspectProjectDeadlines(env, keyName, nowMs) {
   const nowIso = new Date(nowMs).toISOString();
   let changed = false;
 
-  // 1. Cláusula 3.3 — Recordatorio a los 15 días y aviso de aprobación tácita a los 20 días
+  // 1. Cláusula 3.3 — Recordatorio amistoso a los 15 días si la fase sigue en espera de validación (el proyecto avanza al ritmo del cliente)
   if (Array.isArray(proj.phases)) {
     for (const ph of proj.phases) {
       if (ph.status !== "review" || !ph.reviewSentAt) continue;
@@ -25,7 +25,7 @@ async function inspectProjectDeadlines(env, keyName, nowMs) {
       if (Number.isNaN(sentMs)) continue;
       const daysElapsed = (nowMs - sentMs) / DAY_MS;
 
-      if (daysElapsed >= TACIT_REMINDER_DAYS && daysElapsed < TACIT_APPROVAL_DAYS && !ph.reminderSentAt) {
+      if (daysElapsed >= CLIENT_PAUSE_REMINDER_DAYS && !ph.reminderSentAt) {
         const t = EM[lang].tacitReminder;
         const phName = phaseTitle(ph, lang);
         const appUrl = await approvePhaseUrl(env, projectToken, ph.step);
@@ -47,44 +47,12 @@ async function inspectProjectDeadlines(env, keyName, nowMs) {
                 note: t.note,
               }),
             },
-            `tacit-15d-${projectToken}-${ph.step}-${ph.reviewSentAt.slice(0, 10)}`
+            `pause-15d-${projectToken}-${ph.step}-${ph.reviewSentAt.slice(0, 10)}`
           );
           ph.reminderSentAt = nowIso;
           changed = true;
         } catch (e) {
-          console.error("tacit 15d reminder failed:", e?.message);
-        }
-      }
-
-      if (daysElapsed >= TACIT_APPROVAL_DAYS && !ph.tacitAlertSentAt) {
-        const phNameEs = phaseTitle(ph, "es");
-        const manageUrl = await advancePhaseUrl(env, projectToken, ph.step);
-        try {
-          await resendSend(
-            env,
-            {
-              to: ["hola@rebrandyourbrand.es"],
-              reply_to: proj.clientEmail,
-              subject: `plazo de 20 días cumplido (aprobación tácita) — ${proj.brand}`,
-              ...renderEmail("es", {
-                paras: [
-                  `han transcurrido al menos 20 días naturales desde el envío a revisión de ${bold(phNameEs)} en ${bold(proj.brand)}.`,
-                  lines(
-                    `— cliente: ${bold(proj.clientEmail)}`,
-                    `— enviada a revisión: ${bold(fmtDate(ph.reviewSentAt, "es"))}`,
-                    `— fase: ${bold(`paso ${ph.step} — ${phNameEs}`)}`
-                  ),
-                  "si el cliente no ha pedido cambios por correo, puedes cerrar la fase aplicando la cláusula 3.3 desde el botón inferior.",
-                ],
-                cta: { label: "abrir panel y avanzar fase", url: manageUrl },
-              }),
-            },
-            `tacit-20d-${projectToken}-${ph.step}-${ph.reviewSentAt.slice(0, 10)}`
-          );
-          ph.tacitAlertSentAt = nowIso;
-          changed = true;
-        } catch (e) {
-          console.error("tacit 20d studio alert failed:", e?.message);
+          console.error("pause 15d reminder failed:", e?.message);
         }
       }
     }

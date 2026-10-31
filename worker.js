@@ -37,9 +37,9 @@ const PENDING_VERIFY_TTL_SECONDS = 60 * 60 * 24;
 
 const SESSION_TTL_SECONDS = 60 * 60 * 2; // Turnstile se resuelve una vez y vale para toda la conversación
 
-const TACIT_REMINDER_DAYS = 15;
+const CLIENT_PAUSE_REMINDER_DAYS = 15;
 
-const TACIT_APPROVAL_DAYS = 20;
+const TACIT_REMINDER_DAYS = 15; // retrocompatibilidad
 
 const RENEWAL_NOTICE_DAYS = 30;
 
@@ -516,7 +516,7 @@ const EM = {
       intro: (br, ph) => `te escribimos para recordarte que tienes pendiente de validar la propuesta de ${ph} en tu proyecto ${br}.`,
       body: "desde el botón inferior puedes aprobar la propuesta para avanzar a la siguiente etapa o solicitar ajustes si aún tienes rondas de revisión disponibles.",
       cta: "revisar propuesta, aprobar o pedir ajustes",
-      note: "según las condiciones del servicio, transcurridos 20 días naturales desde el envío sin comentarios se aplicará la aprobación tácita de la fase.",
+      note: "avanzamos estrictamente a tu ritmo: si necesitas más tiempo el proyecto permanece en pausa indefinida esperando tus indicaciones, sin que el estudio avance de fase por su cuenta.",
     },
     review: {
       subject: (br) => `¿qué tal ha ido ${br}? tu opinión nos importa`,
@@ -592,7 +592,7 @@ const EM = {
       intro: (br, ph) => `t'escrivim per recordar-te que tens pendent de validar la proposta de ${ph} al teu projecte ${br}.`,
       body: "des del botó inferior pots aprovar la proposta per avançar a l'etapa següent o demanar ajustos si encara tens rondes de revisió disponibles.",
       cta: "revisar proposta, aprovar o demanar ajustos",
-      note: "segons les condicions del servei, passats 20 dies naturals des de l'enviament sense comentaris s'aplicarà l'aprovació tàcita de la fase.",
+      note: "avancem estrictament al teu ritme: si necessites més temps el projecte roman en pausa indefinida esperant les teves indicacions, sense que l'estudi avanci de fase pel seu compte.",
     },
     review: {
       subject: (br) => `com ha anat ${br}? la teva opinió ens importa`,
@@ -668,7 +668,7 @@ const EM = {
       intro: (br, ph) => `zure ${br} proiektuan ${ph} proposamena baliozkotzeko duzula gogorarazteko idazten dizugu.`,
       body: "beheko botoitik proposamena onar dezakezu hurrengo fasera igarotzeko, edo doikuntzak eskatu oraindik berrikuspen-txandak erabilgarri badituzu.",
       cta: "proposamena berrikusi, onartu edo doikuntzak eskatu",
-      note: "zerbitzu-baldintzen arabera, bidalketatik 20 egun natural iruzkinik gabe igarotzean fasearen onespen isila aplikatuko da.",
+      note: "zorrotz zure erritmora mugitzen gara: denbora gehiago behar baduzu proiektuak etenaldi mugagabean jarraituko du zure jarraibideen zain, estudioak bere kabuz faserik aurreratu gabe.",
     },
     review: {
       subject: (br) => `zer moduz joan da ${br}? zure iritziak axola digu`,
@@ -744,7 +744,7 @@ const EM = {
       intro: (br, ph) => `just a friendly reminder that the ${ph} proposal for your project ${br} is awaiting your approval.`,
       body: "use the button below to approve the proposal and move forward, or request adjustments if you still have revision rounds available.",
       cta: "review proposal, approve or request adjustments",
-      note: "under our terms of service, if 20 calendar days pass from delivery without feedback, tacit approval applies to the phase.",
+      note: "we work strictly at your pace: if you need more time, your project remains paused indefinitely waiting for your feedback, without the studio advancing any phase on its own.",
     },
     review: {
       subject: (br) => `how did ${br} go? your opinion matters`,
@@ -856,9 +856,9 @@ const PG = {
       revSubmit: (r, m) => `enviar ajustes de la ronda ${r} de ${m}`,
       revEmpty: "escribe los ajustes que necesitas antes de enviar la ronda.",
       revExhausted: "has utilizado las rondas de revisión incluidas en esta fase. puedes aprobar la propuesta arriba para continuar o desbloquear una ronda adicional de ajustes (+100 €).",
-      revDone: ["ajustes enviados", "ajustes registrados con éxito", (r, m) => `hemos recibido tus indicaciones de la ronda ${r} de ${m} y te avisaremos por correo en cuanto la versión actualizada esté lista para revisar.`],
+      revDone: ["¡enviado correctamente!", "ajustes registrados con éxito", (r, m) => `hemos recibido tus indicaciones de la ronda ${r} de ${m} y te avisaremos por correo en cuanto la versión actualizada esté lista para revisar.`],
       revWorking: ["ajustes en curso", "estamos aplicando tus ajustes", (r, m) => `ya tenemos registrada tu petición de la ronda ${r} de ${m} y estamos preparando la nueva versión. te avisaremos por correo en cuanto esté lista.`],
-      done: ["fase aprobada", "fase aprobada con éxito", "hemos registrado tu validación por escrito y ya hemos activado la siguiente etapa de tu proyecto."],
+      done: ["¡enviado correctamente!", "fase aprobada con éxito", "hemos registrado tu validación por escrito y ya hemos activado la siguiente etapa de tu proyecto."],
       already: ["fase ya gestionada", "esta fase ya está cerrada", "esta fase ya consta como aprobada y completada en tu proyecto."],
     },
     rn: {
@@ -930,6 +930,10 @@ const PG = {
       confirmRequired: "es obligatorio marcar la casilla de confirmación antes de enviar los materiales.",
       confirmRequiredTitle: "confirmación obligatoria",
       confirmRequiredHeading: "marca la casilla de confirmación",
+      obAccordionTitle: "¿quieres añadir más materiales o referencias?",
+      obDelayWarning: "nota: si ya hemos comenzado a trabajar en la fase actual con los materiales previos, añadir nuevos elementos ahora podría quedar fuera de plazo para la propuesta que estás a punto de revisar.",
+      actionRegisteredNotice: "aviso: esta acción ya ha quedado registrada en el sistema y nuestro equipo ha recibido la notificación para continuar con el trabajo.",
+      obSuccess: ["¡enviado correctamente!", "materiales registrados con éxito", "hemos recibido tus materiales y referencias correctamente y nuestro equipo los revisará para incorporarlos al proyecto."],
       obSubmit: "enviar materiales al estudio",
       obSentBanner: "materiales recibidos correctamente. nuestro equipo ya tiene todo registrado.",
       obSentTitle: "materiales iniciales enviados",
@@ -991,9 +995,9 @@ const PG = {
       revSubmit: (r, m) => `enviar ajustos de la ronda ${r} de ${m}`,
       revEmpty: "escriu els ajustos que necessites abans d'enviar la ronda.",
       revExhausted: "has utilitzat les rondes de revisió incloses en aquesta fase. pots aprovar la proposta a dalt per continuar o desbloquejar una ronda addicional d'ajustos (+100 €).",
-      revDone: ["ajustos enviats", "ajustos registrats amb èxit", (r, m) => `hem rebut les teves indicacions de la ronda ${r} de ${m} i t'avisarem per correu tan bon punt la versió actualitzada estigui a punt per revisar.`],
+      revDone: ["enviat correctament!", "ajustos registrats amb èxit", (r, m) => `hem rebut les teves indicacions de la ronda ${r} de ${m} i t'avisarem per correu tan bon punt la versió actualitzada estigui a punt per revisar.`],
       revWorking: ["ajustos en curs", "estem aplicant els teus ajustos", (r, m) => `ja tenim registrada la teva petició de la ronda ${r} de ${m} i estem preparant la nova versió. t'avisarem per correu tan bon punt estigui a punt.`],
-      done: ["fase aprovada", "fase aprovada amb èxit", "hem registrat la teva validació per escrit i ja hem activat l'etapa següent del teu projecte."],
+      done: ["enviat correctament!", "fase aprovada amb èxit", "hem registrat la teva validació per escrit i ja hem activat l'etapa següent del teu projecte."],
       already: ["fase ja gestionada", "aquesta fase ja està tancada", "aquesta fase ja consta com a aprovada i completada al teu projecte."],
     },
     rn: {
@@ -1065,6 +1069,10 @@ const PG = {
       confirmRequired: "és obligatori marcar la casella de confirmació abans d'enviar els materials.",
       confirmRequiredTitle: "confirmació obligatòria",
       confirmRequiredHeading: "marca la casella de confirmació",
+      obAccordionTitle: "vols afegir més materials o referències?",
+      obDelayWarning: "nota: si ja hem començat a treballar en la fase actual amb els materials previs, afegir nous elements ara podria quedar fora de termini per a la proposta que estàs a punt de revisar.",
+      actionRegisteredNotice: "avís: aquesta acció ja ha quedat registrada al sistema i el nostre equip ha rebut la notificació per continuar amb el treball.",
+      obSuccess: ["enviat correctament!", "materials registrats amb èxit", "hem rebut els teus materials i referències correctament i el nostre equip els revisarà per incorporar-los al projecte."],
       obSubmit: "enviar materials a l'estudi",
       obSentBanner: "materials rebuts correctament. el nostre equip ja ho té tot registrat.",
       obSentTitle: "materials inicials enviats",
@@ -1126,9 +1134,9 @@ const PG = {
       revSubmit: (r, m) => `bidali ${m}tik ${r}. txandako doikuntzak`,
       revEmpty: "idatzi behar dituzun doikuntzak txanda bidali aurretik.",
       revExhausted: "fase honetan barne hartutako berrikuspen-txandak erabili dituzu. goian proposamena onar dezakezu jarraitzeko edo doikuntza-txanda gehigarri bat desblokeatu (+100 €).",
-      revDone: ["doikuntzak bidalita", "doikuntzak behar bezala erregistratu dira", (r, m) => `jaso ditugu zure ${m}tik ${r}. txandako argibideak eta posta elektronikoz abisatuko dizugu bertsio eguneratua berrikusteko prest dagoenean.`],
-      revWorking: ["doikuntzak martxan", "zure doikuntzak aplikatzen ari gara", (r, m) => `dagoeneko erregistratuta daukagu zure ${m}tik ${r}. txandako eskaera eta bertsio berria prestatzen ari gara. prest dagoenean posta elektronikoz abisatuko dizugu.`],
-      done: ["fasea onartuta", "fasea behar bezala onartu da", "zure idatzizko onarpena erregistratu dugu eta zure proiektuaren hurrengo etapa aktibatu dugu."],
+      revDone: ["behar bezala bidalita!", "doikuntzak arrakastaz erregistratuta", (r, m) => `${m}-tik ${r}. txandako zure jarraibideak jaso ditugu eta postaz jakinaraziko dizugu bertsio eguneratua berrikusteko prest dagoenean.`],
+      revWorking: ["doikuntzak abian", "zure doikuntzak aplikatzen ari gara", (r, m) => `dagoeneko erregistratuta dugu ${m}-tik ${r}. txandako zure eskaera eta bertsio berria prestatzen ari gara. prest dagoenean postaz jakinaraziko dizugu.`],
+      done: ["behar bezala bidalita!", "fasea arrakastaz onartuta", "zure idatzizko baliozkotzea erregistratu dugu eta dagoeneko aktibatu dugu zure proiektuaren hurrengo etapa."],
       already: ["fasea kudeatuta", "fase hau itxita dago jada", "fase hau dagoeneko onartuta eta osatuta agertzen da zure proiektuan."],
     },
     rn: {
@@ -1200,6 +1208,10 @@ const PG = {
       confirmRequired: "nahitaezkoa da berrespen-laukia markatzea materialak bidali aurretik.",
       confirmRequiredTitle: "derrigorrezko berrespena",
       confirmRequiredHeading: "markatu berrespen-laukia",
+      obAccordionTitle: "material edo erreferentzia gehiago gehitu nahi duzu?",
+      obDelayWarning: "oharra: aurreko materialekin uneko fasean lanean hasi bagara, elementu berriak gehitzea berrikustear zauden proposamenaren epetik kanpo gera liteke.",
+      actionRegisteredNotice: "oharra: ekintza hau sisteman erregistratuta geratu da eta gure lantaldeak jakinarazpena jaso du lanean jarraitzeko.",
+      obSuccess: ["behar bezala bidalita!", "materialak arrakastaz erregistratu dira", "zure materialak eta erreferentziak behar bezala jaso ditugu eta gure lantaldeak berrikusiko ditu proiektuan sartzeko."],
       obSubmit: "bidali materialak estudiora",
       obSentBanner: "materialak behar bezala jaso dira. gure taldeak dena erregistratuta dauka jada.",
       obSentTitle: "bidalitako hasierako materialak",
@@ -1261,9 +1273,9 @@ const PG = {
       revSubmit: (r, m) => `send adjustments for round ${r} of ${m}`,
       revEmpty: "please write the adjustments you need before submitting this round.",
       revExhausted: "you have used the revision rounds included in this phase. you can approve the proposal above to proceed or unlock an additional revision round (+€100).",
-      revDone: ["adjustments sent", "adjustments recorded successfully", (r, m) => `we have received your round ${r} of ${m} notes and will email you as soon as the updated version is ready for review.`],
-      revWorking: ["adjustments in progress", "we are applying your adjustments", (r, m) => `we already have your round ${r} of ${m} request on file and are preparing the updated version. we will email you as soon as it is ready.`],
-      done: ["phase approved", "phase approved successfully", "we have recorded your written approval and activated the next stage of your project."],
+      revDone: ["submitted successfully!", "adjustments recorded successfully", (r, m) => `we have received your instructions for round ${r} of ${m} and will email you as soon as the updated version is ready for review.`],
+      revWorking: ["adjustments in progress", "applying your adjustments", (r, m) => `we have recorded your request for round ${r} of ${m} and are preparing the new version. we will email you as soon as it is ready.`],
+      done: ["submitted successfully!", "phase approved successfully", "we have recorded your written approval and activated the next stage of your project."],
       already: ["already approved", "this phase is already closed", "this phase is already marked as approved and completed on your project."],
     },
     rn: {
@@ -1335,6 +1347,10 @@ const PG = {
       confirmRequired: "you must tick the confirmation checkbox before sending materials.",
       confirmRequiredTitle: "confirmation required",
       confirmRequiredHeading: "please tick the confirmation checkbox",
+      obAccordionTitle: "would you like to add more materials or references?",
+      obDelayWarning: "note: if we have already begun work on the current phase with previous materials, adding new elements now may fall outside the scope or timeframe for the proposal you are about to review.",
+      actionRegisteredNotice: "notice: this action has been recorded in the system and our team has received notification to proceed with the work.",
+      obSuccess: ["submitted successfully!", "assets recorded successfully", "we have received your materials and references successfully and our team will review them for the project."],
       obSubmit: "send materials to studio",
       obSentBanner: "materials received. our team has everything logged.",
       obSentTitle: "submitted kickoff materials",
@@ -2708,6 +2724,61 @@ input[type="file"]::file-selector-button:hover{
   accent-color:#E8A33D;
   cursor:pointer;
 }
+.add-materials-slider{
+  margin-top:1.5rem;
+  border:1px solid #E4DED0;
+  border-radius:14px;
+  background:#EDE6D6;
+  overflow:hidden;
+  text-align:left;
+}
+.add-materials-slider summary.slider-summary{
+  list-style:none;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:.95rem 1.15rem;
+  font-size:.84rem;
+  font-weight:600;
+  color:#17171A;
+  cursor:pointer;
+  background:#EDE6D6;
+  user-select:none;
+  letter-spacing:-.01em;
+}
+.add-materials-slider summary.slider-summary::-webkit-details-marker{display:none}
+.add-materials-slider summary.slider-summary:hover{background:#E4DED0}
+.add-materials-slider summary.slider-summary::after{content:'+';font-weight:700;color:#825008;font-size:.95rem}
+.add-materials-slider[open] summary.slider-summary::after{content:'−'}
+.add-materials-slider .slider-body{
+  padding:1.15rem;
+  background:#FFFDF9;
+  border-top:1px solid #E4DED0;
+}
+.slider-warning{
+  margin-bottom:1.15rem;
+  padding:.85rem 1rem;
+  background:#FBF9F4;
+  border-left:3px solid #E8A33D;
+  border-radius:6px;
+  font-size:.80rem;
+  line-height:1.5;
+  color:#58575E;
+}
+.slider-warning p{margin:0}
+.notice-box{
+  margin-top:1rem;
+  margin-bottom:1.25rem;
+  padding:.85rem 1rem;
+  background:#FBF9F4;
+  border:1px solid #E4DED0;
+  border-radius:10px;
+  font-size:.82rem;
+  line-height:1.45;
+  color:#58575E;
+  text-align:left;
+}
+.notice-box p{margin:0}
 input:focus,select:focus,textarea:focus{outline:none;border-color:#8CA3C4;box-shadow:0 0 0 3px rgba(140,163,196,.2)}
 button,.btn{
   display:inline-flex;
@@ -3376,14 +3447,7 @@ async function handlePhaseAdvance(request, env, url) {
         <input id="deliverable_url" name="deliverable_url" type="url" maxlength="500" placeholder="https://..." value="${esc(currentPhaseObj.deliverableUrl || "")}">
         <label for="note">nota para el cliente (opcional)</label>
         <textarea id="note" name="note" rows="4" maxlength="600" placeholder="contexto breve sobre la entrega, qué revisar o pasos siguientes...">${esc(currentPhaseObj.note || "")}</textarea>
-        <div class="confirm-box">
-          <label class="confirm-label">
-            <input type="checkbox" name="confirm_action" value="yes" required>
-            <span>confirmo que he revisado el contenido y el entregable antes de enviarlo definitivamente</span>
-          </label>
-        </div>
         <button type="submit" name="decision" value="review">enviar propuesta a revisión del cliente</button>
-        <button type="submit" name="decision" value="complete" class="secondary">marcar fase como completada y avanzar directamente</button>
       </form>
     `;
 
@@ -3391,7 +3455,7 @@ async function handlePhaseAdvance(request, env, url) {
       page(
         `gestionar fase — ${proj.brand}`,
         "gestionar fase del proyecto",
-        "puedes enviar un entregable para que el cliente lo valide por escrito en un clic, o cerrar la fase directamente si ya está aprobada.",
+        "puedes subir un entregable o indicar un enlace para que el cliente lo revise y valide por escrito en su panel privado.",
         {
           eyebrow: "panel interno del estudio",
           wide: true,
@@ -3410,22 +3474,6 @@ async function handlePhaseAdvance(request, env, url) {
 
   const form = await request.formData().catch(() => null);
   const currentManageUrl = await advancePhaseUrl(env, projectToken, step);
-
-  if (String(form?.get("confirm_action") || "") !== "yes") {
-    return htmlResponse(
-      page(
-        "confirmación obligatoria",
-        "marca la casilla de confirmación",
-        "es obligatorio marcar la casilla de confirmación antes de enviar la propuesta o completar la fase.",
-        {
-          eyebrow: "panel interno del estudio",
-          footerUrl: currentManageUrl,
-          footerLabel: "volver a la fase",
-        }
-      ),
-      400
-    );
-  }
 
   const rawUrl = String(form?.get("deliverable_url") ?? form?.get("deliverableUrl") ?? "").trim();
   const directUrl = cleanHttpsUrl(rawUrl, 500);
@@ -3506,7 +3554,7 @@ async function handlePhaseAdvance(request, env, url) {
   }
 
   const note = cleanNote(form?.get("note") ?? "", 600);
-  const decision = String(form?.get("decision") ?? "complete");
+  const decision = String(form?.get("decision") ?? "review");
 
   if (decision === "review") {
     const now = new Date().toISOString();
@@ -3571,65 +3619,32 @@ async function handlePhaseAdvance(request, env, url) {
 
     return htmlResponse(
       page(
-        "propuesta enviada",
-        "propuesta enviada a revisión",
-        `hemos avisado a ${proj.clientEmail} con el enlace para revisar, aprobar por escrito o pedir ajustes en "${currentTitleEs}".`,
+        "¡enviado correctamente!",
+        "propuesta enviada a revisión con éxito",
+        `hemos avisado a ${proj.clientEmail} con el enlace para revisar y validar por escrito "${currentTitleEs}".`,
         {
           eyebrow: "panel interno del estudio",
-          html: `<a class="btn secondary" href="${esc(currentManageUrl)}">volver al panel de esta fase</a>`,
+          html: `<div class="notice-box"><p>aviso: esta acción ya ha quedado registrada en el sistema y el cliente ha recibido la notificación para revisar la propuesta.</p></div><a class="btn" href="${esc(currentManageUrl)}">volver al panel de esta fase</a>`,
           footerUrl: trackingUrl,
-          footerLabel: "ver página del cliente",
+          footerLabel: "ver página pública del cliente",
         }
       ),
       200
     );
   }
 
-  const result = await completeProjectPhase(env, proj, projectToken, {
-    approvedBy: "studio",
-    deliverableUrl: effectiveDeliverableUrl,
-    deliverableFilename: effectiveDeliverableFilename,
-    note,
-    legacyActionToken,
-  });
-
-  if (!result.ok) {
-    if (result.reason === "email_failed") {
-      return htmlResponse(
-        page(
-          "error al notificar",
-          "no se ha podido enviar el correo",
-          "no se ha podido enviar el correo de notificación, así que la fase sigue sin cambios en el sistema para que puedas reintentarlo sin perder el estado.",
-          {
-            eyebrow: "panel interno del estudio",
-            html: `<a class="btn" href="${esc(currentManageUrl)}">reintentar ahora</a>`,
-            footerUrl: trackingUrl,
-            footerLabel: "ver página del cliente",
-          }
-        ),
-        500
-      );
-    }
-    return htmlResponse(page("finalizado", "proyecto ya finalizado", "no quedan fases activas."), 400);
-  }
-
-  const nextBtnHtml = result.nextActionUrl
-    ? `<a class="btn" href="${esc(result.nextActionUrl)}">abrir panel de la siguiente fase (${esc(result.nextTitleEs)})</a>`
-    : "";
-
   return htmlResponse(
     page(
-      "fase completada",
-      "fase avanzada con éxito",
-      `has completado "${result.advancedTitleEs}" para ${proj.brand}.${result.finished ? " el proyecto ha finalizado y hemos invitado al cliente a valorarlo." : ` la nueva fase activa es "${result.nextTitleEs}" y se ha notificado al cliente.`}`,
+      "acción no permitida",
+      "validación obligatoria del cliente",
+      "la progresión del proyecto depende exclusivamente de la aprobación por escrito del cliente (cláusula 3.3). no es posible completar fases unilateralmente.",
       {
         eyebrow: "panel interno del estudio",
-        html: nextBtnHtml,
-        footerUrl: trackingUrl,
-        footerLabel: "ver seguimiento del cliente",
+        footerUrl: currentManageUrl,
+        footerLabel: "volver a la fase",
       }
     ),
-    200
+    400
   );
 }
 
@@ -3722,12 +3737,6 @@ async function handlePhaseApprove(request, env, url) {
               <input type="hidden" name="decision" value="revise">
               <label for="feedback">${esc(A.revLabel(nextRound, maxRevs))}</label>
               <textarea id="feedback" name="feedback" rows="4" minlength="5" maxlength="1500" required placeholder="${esc(A.revPh)}"></textarea>
-              <div class="confirm-box">
-                <label class="confirm-label">
-                  <input type="checkbox" name="confirm_action" value="yes" required>
-                  <span>${esc(A.confirmRevise)}</span>
-                </label>
-              </div>
               <button type="submit">${esc(A.revSubmit(nextRound, maxRevs))}</button>
             </form>
           </div>
@@ -3738,18 +3747,12 @@ async function handlePhaseApprove(request, env, url) {
             ${revError ? `<p class="rev-err" style="margin-bottom:.75rem;">${esc(revError)}</p>` : ""}
             <form method="POST">
               <input type="hidden" name="decision" value="buy_revision">
-              <div class="confirm-box" style="margin-top:0;margin-bottom:.85rem;">
-                <label class="confirm-label">
-                  <input type="checkbox" name="confirm_action" value="yes" required>
-                  <span>${esc(A.confirmBuyRevision)}</span>
-                </label>
-              </div>
               <button type="submit" class="btn secondary">${esc(A.btnBuyRevision)} (+100 €)</button>
             </form>
           </div>`
         : "";
 
-    const bodyHtml = `${detailHtml}<p class="lead" style="font-size:.82rem;margin-bottom:1.25rem;">${esc(A.legal)}</p><form method="POST"><input type="hidden" name="decision" value="approve"><div class="confirm-box"><label class="confirm-label"><input type="checkbox" name="confirm_action" value="yes" required><span>${esc(A.confirmApprove)}</span></label></div><button type="submit">${esc(A.btn)}</button></form>${reviseHtml}`;
+    const bodyHtml = `${detailHtml}<p class="lead" style="font-size:.82rem;margin-bottom:1.25rem;">${esc(A.legal)}</p><form method="POST"><input type="hidden" name="decision" value="approve"><button type="submit">${esc(A.btn)}</button></form>${reviseHtml}`;
 
     return htmlResponse(
       page(A.title, A.heading, A.intro(phaseTitle(ph, L), proj.brand), {
@@ -3780,10 +3783,6 @@ async function handlePhaseApprove(request, env, url) {
 
   const form = await request.formData().catch(() => null);
   const decision = String(form?.get("decision") || "approve");
-
-  if (String(form?.get("confirm_action") || "") !== "yes") {
-    return renderReviewScreen(A.confirmRequired, 400);
-  }
 
   if (decision === "buy_revision") {
     const qJoin = String.fromCharCode(38);
@@ -3854,11 +3853,12 @@ async function handlePhaseApprove(request, env, url) {
     delete ph.tacitAlertSentAt;
     await env.LEADS_KV.put(`project:${p}`, JSON.stringify(proj));
 
+    const noticeText = PG[L].track?.actionRegisteredNotice || "aviso: esta acción ya ha quedado registrada en el sistema y nuestro equipo ha recibido la notificación para continuar con el trabajo.";
     return htmlResponse(
       page(A.revDone[0], A.revDone[1], A.revDone[2](round, maxRevs), {
         lang: L,
         eyebrow: A.eyebrow,
-        html: `<a class="btn" href="${esc(trackingUrl)}">${esc(PG[L].common.openTracker)}</a>`,
+        html: `<div class="notice-box"><p>${esc(noticeText)}</p></div><a class="btn" href="${esc(trackingUrl)}">${esc(PG[L].common.openTracker)}</a>`,
         footerUrl: trackingUrl,
         footerLabel: PG[L].common.openTracker,
       }),
@@ -3875,11 +3875,12 @@ async function handlePhaseApprove(request, env, url) {
 
   if (!res.ok && res.reason === "email_failed") return errorPage(L);
 
+  const noticeText = PG[L].track?.actionRegisteredNotice || "aviso: esta acción ya ha quedado registrada en el sistema y nuestro equipo ha recibido la notificación para continuar con el trabajo.";
   return htmlResponse(
     page(A.done[0], A.done[1], A.done[2], {
       lang: L,
       eyebrow: A.eyebrow,
-      html: `<a class="btn" href="${esc(trackingUrl)}">${esc(PG[L].common.openTracker)}</a>`,
+      html: `<div class="notice-box"><p>${esc(noticeText)}</p></div><a class="btn" href="${esc(trackingUrl)}">${esc(PG[L].common.openTracker)}</a>`,
       footerUrl: trackingUrl,
       footerLabel: PG[L].common.openTracker,
     }),
@@ -4071,18 +4072,6 @@ async function handleProject(request, env, url) {
 
     if (op === "onboarding") {
       if (!proj.paid) return redirectTo(projectPageUrl);
-      if (String(form?.get("confirm_action") || "") !== "yes") {
-        return htmlResponse(
-          page(T.confirmRequiredTitle || "confirmación obligatoria", T.confirmRequiredHeading || "marca la casilla de confirmación", T.confirmRequired, {
-            lang: L,
-            eyebrow: T.obEyebrow,
-            html: `<a class="btn" href="${esc(projectPageUrl)}">${esc(PG[L].common.openTracker)}</a>`,
-            footerUrl: projectPageUrl,
-            footerLabel: PG[L].common.openTracker,
-          }),
-          400
-        );
-      }
 
       // Bloque 1 — Materiales del negocio:
       const domain = cleanInput(form?.get("domain") ?? "", 200);
@@ -4321,7 +4310,18 @@ async function handleProject(request, env, url) {
         ).catch((e) => console.error("materials email failed:", e?.message));
       }
 
-      return redirectTo(buildUrl("/proyecto", { token, ob: "1" }));
+      const noticeText = T.actionRegisteredNotice || "aviso: esta acción ya ha quedado registrada en el sistema y nuestro equipo ha recibido la notificación para continuar con el trabajo.";
+      const succ = T.obSuccess || ["¡enviado correctamente!", "materiales registrados con éxito", "hemos recibido tus materiales y referencias correctamente y nuestro equipo los revisará para incorporarlos al proyecto."];
+      return htmlResponse(
+        page(succ[0], succ[1], succ[2], {
+          lang: L,
+          eyebrow: T.obEyebrow,
+          html: `<div class="notice-box"><p>${esc(noticeText)}</p></div><a class="btn" href="${esc(projectPageUrl)}">${esc(PG[L].common.openTracker)}</a>`,
+          footerUrl: projectPageUrl,
+          footerLabel: PG[L].common.openTracker,
+        }),
+        200
+      );
     }
 
     return redirectTo(projectPageUrl);
@@ -4469,56 +4469,64 @@ async function handleProject(request, env, url) {
       </div>`
     : "";
 
-  const addFormHtml = !allDone
-    ? `<div class="box accent">
-        <span class="eyebrow">${esc(T.obEyebrow)}</span>
-        <h2>${esc(T.obAddTitle)}</h2>
-        <p class="lead" style="margin-bottom:1.15rem;font-size:.85rem;">${esc(T.obAddIntro)}</p>
-        <form method="POST" enctype="multipart/form-data" style="text-align:left;">
-          <input type="hidden" name="op" value="onboarding">
+  let addFormHtml = "";
+  if (!allDone) {
+    const formFields = `
+      <form method="POST" enctype="multipart/form-data" style="text-align:left;">
+        <input type="hidden" name="op" value="onboarding">
 
-          <div class="section-subheading">${esc(T.blockAMaterials)}</div>
+        <div class="section-subheading">${esc(T.blockAMaterials)}</div>
 
-          <label for="domain">${esc(T.obDomain)}</label>
-          <input id="domain" name="domain" type="text" maxlength="200" placeholder="${esc(T.obDomainPh)}">
+        <label for="domain">${esc(T.obDomain)}</label>
+        <input id="domain" name="domain" type="text" maxlength="200" placeholder="${esc(T.obDomainPh)}">
 
-          <label for="socials">${esc(T.obSocials)}</label>
-          <input id="socials" name="socials" type="text" maxlength="250" placeholder="${esc(T.obSocialsPh)}">
+        <label for="socials">${esc(T.obSocials)}</label>
+        <input id="socials" name="socials" type="text" maxlength="250" placeholder="${esc(T.obSocialsPh)}">
 
-          <label for="materials_url">${esc(T.obMaterialsUrl)}</label>
-          <input id="materials_url" name="materials_url" type="url" maxlength="500" placeholder="${esc(T.obMaterialsUrlPh)}">
+        <label for="materials_url">${esc(T.obMaterialsUrl)}</label>
+        <input id="materials_url" name="materials_url" type="url" maxlength="500" placeholder="${esc(T.obMaterialsUrlPh)}">
 
-          <label for="materials_file">${esc(T.obMaterialsFile)}</label>
-          <input id="materials_file" name="materials_file" type="file">
-          <span class="file-note">${esc(T.obMaterialsFileNote)}</span>
+        <label for="materials_file">${esc(T.obMaterialsFile)}</label>
+        <input id="materials_file" name="materials_file" type="file">
+        <span class="file-note">${esc(T.obMaterialsFileNote)}</span>
 
-          <label for="materials_notes">${esc(T.obMaterialsNotes)}</label>
-          <textarea id="materials_notes" name="materials_notes" rows="3" maxlength="1000" placeholder="${esc(T.obMaterialsNotesPh)}"></textarea>
+        <label for="materials_notes">${esc(T.obMaterialsNotes)}</label>
+        <textarea id="materials_notes" name="materials_notes" rows="3" maxlength="1000" placeholder="${esc(T.obMaterialsNotesPh)}"></textarea>
 
-          <div class="section-subheading">${esc(T.blockBRefs)}</div>
+        <div class="section-subheading">${esc(T.blockBRefs)}</div>
 
-          <label for="reference_url">${esc(T.obRefUrl)}</label>
-          <input id="reference_url" name="reference_url" type="url" maxlength="500" placeholder="${esc(T.obRefUrlPh)}">
+        <label for="reference_url">${esc(T.obRefUrl)}</label>
+        <input id="reference_url" name="reference_url" type="url" maxlength="500" placeholder="${esc(T.obRefUrlPh)}">
 
-          <label for="reference_file">${esc(T.obRefFile)}</label>
-          <input id="reference_file" name="reference_file" type="file">
-          <span class="file-note">${esc(T.obMaterialsFileNote)}</span>
+        <label for="reference_file">${esc(T.obRefFile)}</label>
+        <input id="reference_file" name="reference_file" type="file">
+        <span class="file-note">${esc(T.obMaterialsFileNote)}</span>
 
-          <label for="reference_notes">${esc(T.obRefNotes)}</label>
-          <textarea id="reference_notes" name="reference_notes" rows="3" maxlength="1000" placeholder="${esc(T.obRefNotesPh)}"></textarea>
+        <label for="reference_notes">${esc(T.obRefNotes)}</label>
+        <textarea id="reference_notes" name="reference_notes" rows="3" maxlength="1000" placeholder="${esc(T.obRefNotesPh)}"></textarea>
 
-          <div class="confirm-box">
-            <label class="confirm-label">
-              <input type="checkbox" name="confirm_action" value="yes" required>
-              <span>${esc(T.confirmOnboarding)}</span>
-            </label>
+        <button type="submit">${esc(T.obSubmit)}</button>
+      </form>`;
+
+    if (materialsList.length > 0) {
+      addFormHtml = `
+        <details class="add-materials-slider">
+          <summary class="slider-summary">${esc(T.obAccordionTitle)}</summary>
+          <div class="slider-body">
+            <div class="slider-warning"><p>${esc(T.obDelayWarning)}</p></div>
+            ${formFields}
           </div>
-          <button type="submit">${esc(T.obSubmit)}</button>
-        </form>
-      </div>`
-    : "";
-
-  const onboardingHtml = `${materialsBox}${referencesBox}${addFormHtml}`;
+        </details>`;
+    } else {
+      addFormHtml = `
+        <div class="box accent">
+          <span class="eyebrow">${esc(T.obEyebrow)}</span>
+          <h2>${esc(T.obAddTitle)}</h2>
+          <p class="lead" style="margin-bottom:1.15rem;font-size:.85rem;">${esc(T.obAddIntro)}</p>
+          ${formFields}
+        </div>`;
+    }
+  }
 
   const phaseCards = await Promise.all(
     (proj.phases || []).map(async (ph) => {
@@ -4578,9 +4586,11 @@ async function handleProject(request, env, url) {
   const fullHtml = `
     ${bannerHtml}
     ${headerHtml}
-    ${onboardingHtml}
     <h3>${esc(T.state)}</h3>
-    <div class="timeline">${phaseCards.join("")}</div>`;
+    <div class="timeline">${phaseCards.join("")}</div>
+    ${materialsBox}
+    ${referencesBox}
+    ${addFormHtml}`;
 
   return htmlResponse(
     page(`${T.title} — ${proj.brand}`, T.heading, "", {
@@ -5166,7 +5176,7 @@ async function inspectProjectDeadlines(env, keyName, nowMs) {
   const nowIso = new Date(nowMs).toISOString();
   let changed = false;
 
-  // 1. Cláusula 3.3 — Recordatorio a los 15 días y aviso de aprobación tácita a los 20 días
+  // 1. Cláusula 3.3 — Recordatorio amistoso a los 15 días si la fase sigue en espera de validación (el proyecto avanza al ritmo del cliente)
   if (Array.isArray(proj.phases)) {
     for (const ph of proj.phases) {
       if (ph.status !== "review" || !ph.reviewSentAt) continue;
@@ -5174,7 +5184,7 @@ async function inspectProjectDeadlines(env, keyName, nowMs) {
       if (Number.isNaN(sentMs)) continue;
       const daysElapsed = (nowMs - sentMs) / DAY_MS;
 
-      if (daysElapsed >= TACIT_REMINDER_DAYS && daysElapsed < TACIT_APPROVAL_DAYS && !ph.reminderSentAt) {
+      if (daysElapsed >= CLIENT_PAUSE_REMINDER_DAYS && !ph.reminderSentAt) {
         const t = EM[lang].tacitReminder;
         const phName = phaseTitle(ph, lang);
         const appUrl = await approvePhaseUrl(env, projectToken, ph.step);
@@ -5196,44 +5206,12 @@ async function inspectProjectDeadlines(env, keyName, nowMs) {
                 note: t.note,
               }),
             },
-            `tacit-15d-${projectToken}-${ph.step}-${ph.reviewSentAt.slice(0, 10)}`
+            `pause-15d-${projectToken}-${ph.step}-${ph.reviewSentAt.slice(0, 10)}`
           );
           ph.reminderSentAt = nowIso;
           changed = true;
         } catch (e) {
-          console.error("tacit 15d reminder failed:", e?.message);
-        }
-      }
-
-      if (daysElapsed >= TACIT_APPROVAL_DAYS && !ph.tacitAlertSentAt) {
-        const phNameEs = phaseTitle(ph, "es");
-        const manageUrl = await advancePhaseUrl(env, projectToken, ph.step);
-        try {
-          await resendSend(
-            env,
-            {
-              to: ["hola@rebrandyourbrand.es"],
-              reply_to: proj.clientEmail,
-              subject: `plazo de 20 días cumplido (aprobación tácita) — ${proj.brand}`,
-              ...renderEmail("es", {
-                paras: [
-                  `han transcurrido al menos 20 días naturales desde el envío a revisión de ${bold(phNameEs)} en ${bold(proj.brand)}.`,
-                  lines(
-                    `— cliente: ${bold(proj.clientEmail)}`,
-                    `— enviada a revisión: ${bold(fmtDate(ph.reviewSentAt, "es"))}`,
-                    `— fase: ${bold(`paso ${ph.step} — ${phNameEs}`)}`
-                  ),
-                  "si el cliente no ha pedido cambios por correo, puedes cerrar la fase aplicando la cláusula 3.3 desde el botón inferior.",
-                ],
-                cta: { label: "abrir panel y avanzar fase", url: manageUrl },
-              }),
-            },
-            `tacit-20d-${projectToken}-${ph.step}-${ph.reviewSentAt.slice(0, 10)}`
-          );
-          ph.tacitAlertSentAt = nowIso;
-          changed = true;
-        } catch (e) {
-          console.error("tacit 20d studio alert failed:", e?.message);
+          console.error("pause 15d reminder failed:", e?.message);
         }
       }
     }

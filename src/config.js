@@ -30,9 +30,9 @@ const PENDING_VERIFY_TTL_SECONDS = 60 * 60 * 24;
 
 const SESSION_TTL_SECONDS = 60 * 60 * 2; // Turnstile se resuelve una vez y vale para toda la conversación
 
-const TACIT_REMINDER_DAYS = 15;
+const CLIENT_PAUSE_REMINDER_DAYS = 15;
 
-const TACIT_APPROVAL_DAYS = 20;
+const TACIT_REMINDER_DAYS = 15; // retrocompatibilidad
 
 const RENEWAL_NOTICE_DAYS = 30;
 
