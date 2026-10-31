@@ -608,6 +608,12 @@ textarea { resize: vertical; }
   .btn-ghost{background:transparent;color:rgb(var(--color-text))}
   .btn-ghost:hover{background:rgb(var(--color-brand)/.1);transform:translateY(-2px)}
   @media(max-width:39.99rem){.cta-row .btn{width:100%}}
+  /* Tipografía hero de alta gama (inspiración Neutomni) */
+  .hero-title{font-size:2.85rem;line-height:0.98;letter-spacing:-.035em;max-width:54rem}
+  @media(min-width:40rem){.hero-title{font-size:3.75rem}}
+  @media(min-width:48rem){.hero-title{font-size:4.85rem;line-height:0.96;letter-spacing:-.04em}}
+  @media(min-width:64rem){.hero-title{font-size:5.5rem}}
+  .hero-eyebrow{font:600 11px/1.2 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;letter-spacing:.16em;text-transform:uppercase}
   #top p[data-i18n="hero-desc"]{max-width:36rem}
   .terms-summary{color:rgb(var(--color-muted));font-size:.9rem;line-height:1.6;margin-bottom:1.5rem;max-width:40rem}
   .hero-authority-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem;margin-top:2.5rem;max-width:54rem}
@@ -618,16 +624,40 @@ textarea { resize: vertical; }
   .authority-title{display:block;font-size:.86rem;font-weight:600;color:rgb(var(--color-text));line-height:1.2;text-transform:lowercase}
   .authority-desc{display:block;font-size:.76rem;color:rgb(var(--color-muted));line-height:1.3;margin-top:.2rem}
 
-  /* Logotipo principal (header y footer) */
+  /* Barra flotante estilo dock (inspiración Decimals) */
+  .header-dock{position:fixed;top:1rem;left:50%;transform:translateX(-50%);width:min(calc(100% - 2.5rem),1160px);z-index:50;border-radius:9999px;border:1px solid rgb(var(--color-line));background:rgb(var(--color-bg)/.85);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);box-shadow:0 10px 30px -10px rgba(0,0,0,.08),0 1px 3px rgba(0,0,0,.04);transition:top 350ms cubic-bezier(.16,1,.3,1),box-shadow 350ms cubic-bezier(.16,1,.3,1),background-color 300ms ease,border-color 300ms ease}
+  html.light .header-dock{box-shadow:0 10px 30px -10px rgba(0,0,0,.06),0 1px 3px rgba(0,0,0,.04)}
+  .header-dock.is-scrolled{top:.75rem;box-shadow:0 14px 36px -10px rgba(0,0,0,.12),0 2px 6px rgba(0,0,0,.06)}
+  .header-dock-inner{height:3.5rem;padding:0 1.25rem;display:flex;align-items:center;justify-content:space-between;transition:height 350ms cubic-bezier(.16,1,.3,1),padding 350ms cubic-bezier(.16,1,.3,1)}
+  .header-dock.is-scrolled .header-dock-inner{height:3rem;padding:0 1rem}
+  @media(max-width:47.99rem){
+    .header-dock{top:.75rem;width:calc(100% - 1.25rem)}
+    .header-dock.is-scrolled{top:.5rem}
+    .header-dock-inner{height:3.25rem;padding:0 .875rem}
+    .header-dock.is-scrolled .header-dock-inner{height:2.875rem;padding:0 .75rem}
+  }
+
+  /* Logo morphing on scroll */
+  .logo-morph{text-decoration:none;outline:none}
+  .logo-glyph{box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+  html.light .logo-glyph{box-shadow:inset 0 1px 0 rgba(255,255,255,.8)}
+  .logo-wordmark{display:inline-block;max-width:140px;opacity:1;transform:translateX(0);overflow:hidden;white-space:nowrap;vertical-align:middle;transition:max-width 380ms cubic-bezier(.16,1,.3,1),opacity 280ms cubic-bezier(.16,1,.3,1),transform 340ms cubic-bezier(.16,1,.3,1)}
+  .header-dock.is-scrolled .logo-wordmark{max-width:0;opacity:0;transform:translateX(-6px);pointer-events:none}
+  @media(prefers-reduced-motion:reduce){
+    .header-dock,.header-dock-inner,.logo-wordmark{transition:none !important}
+  }
+
+  /* Menú móvil flotante */
+  .header-dock #mobile-nav{position:absolute;top:calc(100% + .5rem);left:0;right:0;border-radius:1.25rem;border:1px solid rgb(var(--color-line));background:rgb(var(--color-panel)/.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 20px 40px -15px rgba(0,0,0,.25)}
+
+  /* Logotipo del pie de página */
   .brand-logo{display:block;width:auto;fill:currentColor;color:rgb(var(--color-text));transition:color 300ms var(--ease-editorial),opacity 220ms var(--ease-editorial)}
-  .brand-logo-header{height:1.9rem}
-  @media(min-width:48rem){.brand-logo-header{height:2.15rem}}
   .brand-logo-footer{height:2.5rem}
   @media(min-width:48rem){.brand-logo-footer{height:2.85rem}}
   a:hover .brand-logo{opacity:.86}
 
   /* Selector deslizante de idioma */
-  .lang-trigger{display:inline-flex;align-items:center;gap:.42rem;height:2.5rem;padding:0 .72rem 0 .68rem;border-radius:9999px;border:1px solid rgb(var(--color-line));
+  .lang-trigger{display:inline-flex;align-items:center;gap:.42rem;height:2.25rem;padding:0 .72rem 0 .68rem;border-radius:9999px;border:1px solid rgb(var(--color-line));
     background:linear-gradient(145deg,rgb(var(--color-panel)/.72),rgb(var(--color-panel)/.36));color:rgb(var(--color-text));box-shadow:inset 0 1px 0 rgb(255 255 255/.05)}
   .lang-trigger:hover,.lang-trigger[aria-expanded="true"]{border-color:rgb(var(--color-brand)/.6);background:rgb(var(--color-brand)/.1);box-shadow:0 0 0 4px rgb(var(--color-brand)/.07)}
   .lang-globe{width:15px;height:15px;flex-shrink:0;color:rgb(var(--color-brand-text,var(--color-brand)))}
@@ -677,23 +707,27 @@ textarea { resize: vertical; }
     <symbol id="rybb-mark" viewBox="0 0 726 261"><path fill-rule="evenodd" d="M258.2 2.5L262.5 2.1L288 2.5L288.5 70.5L293.9 64.4L298.9 60.4L305.2 57.7L313.5 56.4L322.2 57.4L327.4 59.1L333.5 63L339 69.5L341.5 74L344 80.5L346.7 91.7L347.6 97.7L348.7 126.5L348.8 168.5L347.9 195.5L346.7 206.3L344.5 215L341.5 222L338.1 227.6L334.3 231.9L329.7 235.2L323.4 237.9L316.5 238.9L306.9 238.5L301.4 237.1L295.7 233.8L290.6 228.9L286.5 222.9L283.5 236.8L258.1 236.5ZM696 2.5L696.5 2.1L722.7 2.5L723 236.5L715.5 236.9L699 236.5L698.2 234.4L697.4 226.2L696.5 224.1L692.8 229.3L687.8 234.3L682.7 237.2L677.3 238.7L668.5 239L662.6 237.9L656.7 234.8L652.4 231.2L648.9 226.6L646.3 221.2L642.3 207.3L640.3 180.5L640.1 164.5L640.2 118.5L641.3 99.5L642.3 90.6L644.3 81.7L645.6 77.1L648.7 70.2L653 64.4L658.5 60L664.1 57.6L671.6 56.4L679.2 57.4L684.2 59.3L690 63.5L695.5 69.9L695.9 68.5ZM234.2 88.5L140.5 88.8L138.5 88.9L137.9 89.5L139.3 99.2L141.7 105.8L144.6 110.9L151.2 117.3L160.1 121.4L167.6 122.7L172.5 122.8L180.4 121.9L184.3 120.8L189.7 118.2L193.1 115.6L196.4 111.9L199.5 106.3L233.5 110.5L233.7 112.3L230.7 120.2L227.5 126L222.2 132.7L212.8 141.3L207.8 144.3L201.6 147.1L189.4 150.8L182.5 151.9L170.5 152.7L159.5 151.9L152.7 150.7L140.4 147.1L129.8 141.7L121.5 135L116.6 129.9L113.1 125.4L107.3 115.2L103.5 105L101.2 95.4L100.5 89.1L100.1 73.5L101.4 60.8L103.8 51.4L106.7 44.2L113.2 32.7L121.2 23.7L127.2 18.7L132.1 15.6L139.5 11.9L146.1 9.6L156.6 7.2L169.5 6.3L185.2 8.4L196.5 12L207.5 18L211.4 21L217 26.4L224.3 36.2L227.8 42.7L230.4 49.2L233.5 62L234.8 77.5ZM88.5 8.8L89.2 9.5L88.8 18.5L87.7 34.5L86.5 43L79.4 41.2L73.5 40.8L66.6 41.2L61.1 42.6L57 44.5L51.8 48.3L48.5 52L45.6 57.1L43.2 65.6L42.7 73.5L42.5 149.5L41.5 150.1L21.5 150.1L4.5 150.1L3.5 149.5L3.5 9.4L4.5 8.9L36.5 8.9L39.5 8.9L40.2 9.5L40.2 29.5L40.7 32.5L41.5 33L45.5 24L49.1 18.6L54.2 13.7L60.3 9.9L67.8 7.4L74.5 6.7L82.4 7.2ZM138.5 63.9L193.5 64.2L197.8 63.5L195.5 53L192.8 47.7L189.1 43.4L185.3 40.2L180 37.5L174.5 36L168.5 35.4L161.6 36.2L156.2 37.7L151.7 40.1L147.8 43.3L144.5 47.1L141.5 52L139.1 58.6ZM520.8 236.5L497.5 236.9L494.8 236.5L492.5 224.4L486.7 231.2L483.5 234L479.2 236.7L475.5 238L469.5 239L461.6 238.7L456.2 237.3L450.3 234.2L447.1 231.4L444 227.6L441.3 223.2L438.4 216.1L435.4 201.2L434.4 182.5L435.1 165.5L436.3 157.7L439 148.5L441.7 143.2L444.4 139.9L450.1 134.6L456.6 131.1L490.7 119.5L490.8 103.5L489.6 91.8L486.8 84.7L484.8 82.7L482.3 81.2L477.6 80.4L473.7 81.1L471.1 82.5L468.2 85.7L466.6 89.2L465.1 95.5L464.5 109.5L463.5 110.3L437.5 109.7L437.2 100.5L438.2 89.5L441.4 77.9L444.1 72.6L447.5 68L451.6 64.1L456.5 61L464.5 58L475.8 56.5L480 56.5L491.5 58L499.6 60.9L503.9 63.5L509 68.5L512.4 73.1L516.4 83.1L518.9 98.5L519.3 113.5L519.3 215.5ZM621.5 236.6L594.5 236.9L594.1 236.5L593.8 111.5L593 96.5L591.8 89.7L589.5 85L586.2 82.2L581.5 81.2L578.3 81.8L575.6 83.1L573 85.5L571.4 87.9L569 94.5L567.3 108.6L566.9 236.5L541.5 236.9L539.7 236.5L539.4 91.5L538.6 59.5L539.5 58.9L564.5 59.2L565.7 71.5L566.5 72.4L572.2 64.7L577.8 60.3L584.8 57.3L593.4 56.4L602.3 58.2L608.8 61.7L611.9 64.7L614.4 68.1L617.9 75.6L620.8 86.6L621.8 100.5ZM426.8 57.5L426.5 86.8L425.5 87.2L418.5 86.7L413.5 87L410.4 87.8L406.3 89.9L403.1 92.6L400.6 96.1L397.5 105L396.3 122.5L396 236.5L395.5 236.9L389.5 236.9L368 236.5L367.8 88.5L366.9 59.5L367.5 58.9L392.5 59L393.5 59.5L394.5 74L394.7 75.5L395.5 75.6L400.9 66.4L403.8 63.3L408.4 59.9L411.7 58.2L416.5 57L422.5 56.8ZM301.8 81.4L297.5 83L294 86.4L291.9 90.4L290.1 96.5L289.1 104.5L288.5 125.7L288.4 167.5L289.2 192.5L291 203.5L293 208.5L295.6 211.9L299.4 214.2L303.5 214.8L308.4 213.9L312.4 210.9L315.2 205.6L316.6 198.3L317.9 179.5L317.9 122.5L316.8 101.5L314.6 89.9L312.6 85.9L310.1 83.4L305.9 81.6ZM679.7 81.3L675.6 83.1L672.5 87L670.9 91.5L669.3 101.7L668.5 127.6L668.5 170.5L669.2 192.5L671.4 207.2L673 210.6L675.2 213.3L677.8 214.7L681.5 215.2L686 214.5L689.1 211.8L691.7 207.2L693.7 200.4L694.8 190.5L695.7 172.5L695.8 128.5L694.8 104.5L692.7 91.8L690.7 86.8L688 83.5L684.1 81.5ZM488.7 143.2L475.6 148.1L471.3 150.8L467 155.5L464.5 162.1L463.9 169.5L463.8 184.5L464.1 196.5L464.9 202.5L466.5 208L468.1 211.4L470.7 213.9L473.6 215L479.4 215L484 212.5L487.2 208.7L489.8 201.4L490.8 186.5L490.9 143.5L490.5 142.9ZM89 171.5L95.5 171.2L101.5 171.9L107.4 174.1L111.1 176.4L114.9 179.7L119.4 186.1L122.7 195.8L123.2 202.5L123 209.5L119.7 220.2L116.7 225.2L113.4 228.9L108.7 232.2L102.3 234.8L95.3 235.5L88.5 235.1L84.4 234.1L79 231.5L74.6 227.9L71 223.6L68.5 219L66.3 212.3L65.6 204.5L66 196.5L67.4 190.8L69.7 185.3L73.1 180.6L78.3 175.8L82.8 173.4ZM235.8 172.5L235 186.5L234.5 187.5L228.5 186.6L224.1 187.6L220.4 189.9L217.5 194L216.2 201.5L216.2 233.5L215.7 234.5L200.5 234.5L200 231.5L200 172.5L200.5 172.1L214.5 172L215.3 172.5L215.6 180.5L216.5 181.2L220.1 175.6L224.8 172.3L230.5 171.2L233.9 171.6ZM2.5 172.3L18.5 172L19.4 172.5L31.2 213.3L32.5 216.4L44.9 172.5L45.5 172.1L60.5 172.1L61.5 172.4L41.8 232.3L38.4 241.9L35.2 248.7L30.2 254.6L24.2 257.7L14.5 258.1L10.8 257.7L7.8 256.5L10.5 244.3L16.5 244.9L20 243.6L22.5 240.1L23.6 237.1L23.7 234.6ZM133.5 172.5L134.5 172L148.5 172L149.3 172.5L149.5 206.3L150.1 213.4L151.1 216.3L153.4 219L156 220.4L159.5 221L163.1 220.5L166.9 218.4L169.1 215.6L170.4 211.9L170.8 206.5L170.9 172.5L171.5 172.1L186.5 172.3L186.5 234.1L172.5 234.3L171.5 225.8L165 232.5L161 234.4L156.5 235.1L149.6 234.9L145.8 233.7L142 231.5L138 227.5L135.8 223.7L134.6 219.9L133.5 212.9ZM93.8 184.5L88.7 186.1L86.5 188L84.4 190.9L82.3 197.6L81.9 204.5L83 212.5L85.6 217.9L89.4 221.1L94.5 222.2L97.4 221.8L100.2 220.7L103.7 217.2L106.1 211.5L106.9 202.5L105.9 194.6L103.4 189.1L99.7 185.8Z"></path></symbol>
   </svg>
 
-  <header class="fixed top-0 inset-x-0 z-40 border-b border-line bg-ink/85 backdrop-blur-md">
-    <div class="max-w-6xl mx-auto px-6 md:px-10 h-16 flex items-center justify-between">
-      <a href="#top" data-section-target="top" aria-label="rebrandyourbrand" class="flex items-center gap-3 text-paper">
-        <svg class="brand-logo brand-logo-header" viewBox="0 0 726 261" width="96" height="34" aria-hidden="true"><use href="#rybb-mark"></use></svg>
-        <span class="inline-block w-px h-5 bg-line" aria-hidden="true"></span>
+  <header id="site-header" class="header-dock">
+    <div class="header-dock-inner">
+      <a href="#top" data-section-target="top" aria-label="rebrandyourbrand" class="logo-morph flex items-center gap-2.5 text-paper group">
+        <span class="logo-glyph flex items-center justify-center w-8 h-8 rounded-lg bg-panel border border-line shrink-0 group-hover:border-brand/60 group-hover:scale-105 transition-all duration-300">
+          <svg viewBox="0 0 100 100" class="w-4 h-4" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" d="M83.8 52.6L56.3 52.7L55.7 52.8L55.5 52.9L55.9 55.8L56.6 57.7L57.5 59.2L59.4 61.1L62 62.3L64.3 62.7L65.7 62.7L68 62.5L69.1 62.1L70.7 61.4L71.7 60.6L72.7 59.5L73.6 57.9L83.6 59.1L83.7 59.6L82.8 62L81.8 63.7L80.3 65.6L77.5 68.2L76.1 69.1L74.2 69.9L70.6 70.9L68.6 71.3L65.1 71.5L61.9 71.3L59.9 70.9L56.2 69.9L53.1 68.3L50.7 66.3L49.2 64.8L48.2 63.5L46.5 60.5L45.4 57.5L44.7 54.7L44.5 52.8L44.4 48.2L44.8 44.5L45.5 41.7L46.3 39.6L48.3 36.2L50.6 33.6L52.4 32.1L53.8 31.2L56 30.1L57.9 29.4L61 28.8L64.8 28.5L69.4 29.1L72.7 30.2L76 31.9L77.1 32.8L78.8 34.4L80.9 37.3L81.9 39.2L82.7 41.1L83.6 44.8L84 49.4ZM41 29.2L41.2 29.4L41.1 32.1L40.8 36.8L40.4 39.3L38.3 38.7L36.6 38.6L34.5 38.7L32.9 39.2L31.7 39.7L30.2 40.8L29.2 41.9L28.4 43.4L27.7 45.9L27.5 48.2L27.5 70.6L27.2 70.7L21.3 70.7L16.3 70.7L16 70.6L16 29.4L16.3 29.2L25.7 29.2L26.6 29.2L26.8 29.4L26.8 35.3L26.9 36.2L27.2 36.3L28.3 33.7L29.4 32.1L30.9 30.6L32.7 29.5L34.9 28.8L36.9 28.6L39.2 28.7ZM55.7 45.4L71.9 45.5L73.1 45.3L72.4 42.2L71.7 40.7L70.6 39.4L69.4 38.5L67.9 37.7L66.3 37.2L64.5 37L62.5 37.3L60.9 37.7L59.6 38.4L58.4 39.4L57.5 40.5L56.6 41.9L55.9 43.9Z"/>
+          </svg>
+        </span>
+        <span class="logo-wordmark font-display font-semibold tracking-tight text-[15px] md:text-[16px] lowercase select-none">brandyourbrand</span>
       </a>
 
-      <nav class="hidden md:flex items-center gap-5 lg:gap-8 ml-auto text-sm text-muted">
-        <a href="#planes" data-section-target="planes" class="lang-trans lowercase hover:text-paper" data-i18n="nav-planes">servicios</a>
-        <a href="#sobre-nosotros" data-section-target="sobre-nosotros" class="lang-trans lowercase hover:text-paper" data-i18n="nav-about">sobre nosotros</a>
-        <a hidden href="#testimonios" data-section-target="testimonios" class="lang-trans lowercase hover:text-paper" data-i18n="nav-testimonials">testimonios</a>
-        <a href="#terminos" data-section-target="terminos" class="lang-trans lowercase hover:text-paper" data-i18n="nav-terms">términos</a>
+      <nav class="hidden md:flex items-center gap-6 lg:gap-8 ml-auto text-sm text-muted">
+        <a href="#planes" data-section-target="planes" class="lang-trans lowercase hover:text-paper text-[13px] font-medium tracking-wide" data-i18n="nav-planes">servicios</a>
+        <a href="#sobre-nosotros" data-section-target="sobre-nosotros" class="lang-trans lowercase hover:text-paper text-[13px] font-medium tracking-wide" data-i18n="nav-about">sobre nosotros</a>
+        <a hidden href="#testimonios" data-section-target="testimonios" class="lang-trans lowercase hover:text-paper text-[13px] font-medium tracking-wide" data-i18n="nav-testimonials">testimonios</a>
+        <a href="#terminos" data-section-target="terminos" class="lang-trans lowercase hover:text-paper text-[13px] font-medium tracking-wide" data-i18n="nav-terms">términos</a>
       </nav>
 
-      <span class="hidden md:inline-block w-px h-5 bg-line mx-5" aria-hidden="true"></span>
+      <span class="hidden md:inline-block w-px h-4 bg-line mx-4" aria-hidden="true"></span>
 
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2.5">
         <div class="relative">
           <button id="lang-toggle" type="button" aria-label="Cambiar idioma" aria-haspopup="menu" aria-expanded="false" aria-controls="lang-dropdown"
               class="lang-trigger cursor-pointer">
@@ -727,7 +761,7 @@ textarea { resize: vertical; }
         </div>
 
         <button id="theme-toggle" type="button" aria-label="Cambiar a modo claro"
-              class="relative w-10 h-10 rounded-full border border-line flex items-center justify-center text-paper hover:border-brand/60 hover:scale-105">
+              class="relative w-9 h-9 rounded-full border border-line flex items-center justify-center text-paper hover:border-brand/60 hover:scale-105">
           <svg class="theme-icon icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
                style="position:absolute;top:50%;left:50%;width:18px;height:18px;margin:-9px 0 0 -9px;opacity:0;transform:rotate(-90deg) scale(0.5);transition:opacity 500ms cubic-bezier(.4,0,.2,1),transform 500ms cubic-bezier(.4,0,.2,1);">
@@ -741,7 +775,7 @@ textarea { resize: vertical; }
         </button>
 
         <button id="mobile-menu-toggle" type="button" aria-label="Abrir menú de navegación" aria-expanded="false" aria-controls="mobile-nav"
-              class="md:hidden relative w-10 h-10 rounded-full border border-line flex items-center justify-center text-paper hover:border-brand/60">
+              class="md:hidden relative w-9 h-9 rounded-full border border-line flex items-center justify-center text-paper hover:border-brand/60">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;" aria-hidden="true">
             <line x1="3" y1="12" x2="21" y2="12"></line>
             <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -751,7 +785,7 @@ textarea { resize: vertical; }
       </div>
     </div>
 
-    <div id="mobile-nav" class="md:hidden hidden border-t border-line bg-panel/95 backdrop-blur-md px-6 py-4 flex flex-col gap-3 text-sm">
+    <div id="mobile-nav" class="md:hidden hidden px-6 py-4 flex flex-col gap-3 text-sm">
       <a href="#planes" data-section-target="planes" class="lang-trans lowercase text-muted hover:text-paper py-1" data-i18n="nav-planes">servicios</a>
       <a href="#sobre-nosotros" data-section-target="sobre-nosotros" class="lang-trans lowercase text-muted hover:text-paper py-1" data-i18n="nav-about">sobre nosotros</a>
       <a hidden href="#testimonios" data-section-target="testimonios" class="lang-trans lowercase text-muted hover:text-paper py-1" data-i18n="nav-testimonials">testimonios</a>
@@ -762,8 +796,11 @@ textarea { resize: vertical; }
   <main id="main-content">
     <section id="top" class="relative pt-40 pb-28 md:pt-52 md:pb-36 px-6 md:px-10 border-b border-line overflow-hidden z-10">
       <div class="max-w-6xl mx-auto relative z-10">
-        <p class="hero-fade lang-trans delay-0 lowercase text-xs tracking-wide text-muted mb-6" data-i18n="hero-tag">rebranding y web para negocios que merecen más</p>
-        <h1 class="hero-fade lang-trans delay-150 lowercase font-display text-[2.6rem] leading-[1.08] sm:text-6xl md:text-7xl max-w-3xl" data-i18n="hero-title">tu negocio es mejor de lo que parece.</h1>
+        <div class="hero-fade delay-0 mb-6 flex items-center gap-2">
+          <span class="inline-block w-2 h-2 rounded-full bg-ai shrink-0" aria-hidden="true"></span>
+          <p class="hero-eyebrow lang-trans text-muted" data-i18n="hero-tag">rebranding y web para negocios que merecen más</p>
+        </div>
+        <h1 class="hero-title hero-fade lang-trans delay-150 lowercase font-display" data-i18n="hero-title">tu negocio es mejor de lo que parece.</h1>
         <p class="hero-fade lang-trans delay-300 mt-8 max-w-md text-muted text-base md:text-lg leading-relaxed" data-i18n="hero-desc">Si tu imagen no está a la altura de lo que haces, los clientes eligen a otro antes de conocerte. Te la rediseñamos a precio cerrado y sin cuotas mensuales.</p>
         <div class="cta-row hero-fade delay-300">
           <a href="#planes" data-section-target="planes" class="btn btn-primary lang-trans" data-i18n="cta-plans">ver servicios y precios</a>
@@ -2526,6 +2563,18 @@ textarea { resize: vertical; }
       }
     }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
     document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+
+    const headerEl = $('site-header');
+    let isScrolled = false;
+    function updateHeaderScroll() {
+      const scrolled = window.scrollY > 40;
+      if (scrolled !== isScrolled) {
+        isScrolled = scrolled;
+        headerEl?.classList.toggle('is-scrolled', isScrolled);
+      }
+    }
+    window.addEventListener('scroll', updateHeaderScroll, { passive: true });
+    updateHeaderScroll();
 
     updateTheme();
     applyTranslations();
