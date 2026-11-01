@@ -603,6 +603,7 @@ const EM = {
       replySubject: (br) => `nueva respuesta de gael y bernat — ${br}`,
       replyIntro: (br) => `gael y bernat han respondido a tu consulta en el proyecto ${br}:`,
       viewPortal: "ver respuesta en el panel de seguimiento",
+      autoTranslatedNotice: "traducido automáticamente del original en español",
     },
   },
   ca: {
@@ -727,6 +728,7 @@ const EM = {
       replySubject: (br) => `nova resposta d'en gael i en bernat — ${br}`,
       replyIntro: (br) => `en gael i en bernat han respost a la teva consulta al projecte ${br}:`,
       viewPortal: "veure resposta al panell de seguiment",
+      autoTranslatedNotice: "traduït automàticament de l'original en espanyol",
     },
   },
   eu: {
@@ -851,6 +853,7 @@ const EM = {
       replySubject: (br) => `gael eta bernaten erantzun berria — ${br}`,
       replyIntro: (br) => `gaelek eta bernatek zure kontsultari erantzun diote ${br} proiektuan:`,
       viewPortal: "ikusi erantzuna jarraipen-panelean",
+      autoTranslatedNotice: "gaztelaniazko jatorrizkotik automatikoki itzulita",
     },
   },
   en: {
@@ -975,6 +978,7 @@ const EM = {
       replySubject: (br) => `new reply from gael and bernat — ${br}`,
       replyIntro: (br) => `gael and bernat have replied to your question in project ${br}:`,
       viewPortal: "view reply in tracking portal",
+      autoTranslatedNotice: "automatically translated from the original in spanish",
     },
   },
 };
@@ -1190,6 +1194,8 @@ const PG = {
       chatBrandi: "brandi (ia)",
       chatNoMessages: "aún no hay mensajes con el equipo. escribe abajo para iniciar la conversación.",
       chatErr: "error de conexión. no se ha podido enviar el mensaje. inténtalo de nuevo.",
+      chatTransIndicator: "traducido automáticamente, haz clic para ver el mensaje original",
+      chatViewTrans: "ver traducción automática",
     },
   },
   ca: {
@@ -1366,6 +1372,8 @@ const PG = {
       chatBrandi: "brandi (ia)",
       chatNoMessages: "encara no hi ha missatges amb l'equip. escriu a sota per iniciar la conversa.",
       chatErr: "error de connexió. no s'ha pogut enviar el missatge. torna-ho a provar.",
+      chatTransIndicator: "traduït automàticament, fes clic per veure el missatge original",
+      chatViewTrans: "mostra la traducció automàtica",
     },
   },
   eu: {
@@ -1542,6 +1550,8 @@ const PG = {
       chatBrandi: "brandi (ia)",
       chatNoMessages: "oraindik ez dago mezurik lan-taldearekin. idatzi behean elkarrizketa hasteko.",
       chatErr: "konexio-errorea. ezin izan da mezua bidali. saiatu berriro.",
+      chatTransIndicator: "automatikoki itzulita, egin klik jatorrizko mezua ikusteko",
+      chatViewTrans: "ikusi itzulpen automatikoa",
     },
   },
   en: {
@@ -1718,6 +1728,8 @@ const PG = {
       chatBrandi: "brandi (ai)",
       chatNoMessages: "no messages with the team yet. write below to start the conversation.",
       chatErr: "connection error. could not send message. please try again.",
+      chatTransIndicator: "automatically translated, click to view the original message",
+      chatViewTrans: "view automatic translation",
     },
   },
 };
@@ -2424,6 +2436,73 @@ async function askGroqProject(env, lang, proj, chatMessages, retries = 1) {
       }
       await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
     }
+  }
+}
+
+const LANG_FULL_NAMES = {
+  es: "Spanish",
+  ca: "Catalan",
+  en: "English",
+  eu: "Basque",
+};
+
+async function translateMessageText(env, text, fromLang, toLang) {
+  if (!text || typeof text !== "string") return "";
+  const raw = text.trim();
+  if (!raw) return "";
+  const src = pickLang(fromLang);
+  const tgt = pickLang(toLang);
+  if (src === tgt) return raw;
+  if (!env || !env.GROQ_API_KEY) return raw;
+
+  const targetName = LANG_FULL_NAMES[tgt] || "Spanish";
+  const sourceName = LANG_FULL_NAMES[src] || "Spanish";
+
+  try {
+    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${env.GROQ_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: GROQ_MODEL,
+        messages: [
+          {
+            role: "system",
+            content: `You are a professional studio translator for rebrandyourbrand. Translate the input message accurately from ${sourceName} into natural, human ${targetName}. Maintain the exact meaning and friendly tone. Keep everything in lowercase. Return ONLY strict JSON in the format: {"translated": "your translation here"}. Do not include any explanations, notes, or additional fields.`,
+          },
+          {
+            role: "user",
+            content: raw.slice(0, 2500),
+          },
+        ],
+        max_tokens: 1000,
+        temperature: 0.2,
+        response_format: { type: "json_object" },
+      }),
+      signal: AbortSignal.timeout(6000),
+    });
+
+    if (!res.ok) {
+      console.warn(`Groq translate HTTP ${res.status}`);
+      return raw;
+    }
+
+    const data = await res.json().catch(() => null);
+    const parsed = parseModelJson(data?.choices?.[0]?.message?.content);
+    let translated = typeof parsed?.translated === "string" ? parsed.translated.trim() : "";
+    if (!translated) return raw;
+
+    translated = translated
+      .replace(/[\u00b7\u2022]/g, " — ")
+      .replace(new RegExp("\\x26", "g"), tgt === "ca" ? " i " : tgt === "en" ? " and " : tgt === "eu" ? " eta " : " y ")
+      .replace(/(^|[.!?¿¡]\s*|\n\s*)([A-ZÁÉÍÓÚÀÈÒÇÑ])(?![A-ZÁÉÍÓÚÀÈÒÇÑ])/g, (_, p, c) => p + c.toLowerCase());
+
+    return translated || raw;
+  } catch (err) {
+    console.warn("translateMessageText error:", err?.message);
+    return raw;
   }
 }
 
@@ -3996,6 +4075,37 @@ button.secondary:active,.btn.secondary:active,button.no:active{
 .chat-msg-author{font-weight:600;text-transform:lowercase}
 .chat-msg-date{font-size:.68rem;opacity:.8}
 .chat-msg-text{white-space:pre-wrap}
+.chat-trans-wrap{
+  margin-top:.45rem;
+  padding-top:.35rem;
+  border-top:1px dashed rgba(140,163,196,.35);
+}
+.chat-trans-toggle{
+  background:none;
+  border:none;
+  padding:0;
+  margin:0;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  gap:.35rem;
+  font-family:inherit;
+  font-size:.72rem;
+  color:#3D5A85;
+  text-decoration:underline;
+  text-transform:lowercase;
+  line-height:1.35;
+  opacity:.88;
+  transition:opacity .15s ease;
+}
+.chat-trans-toggle:hover{
+  opacity:1;
+}
+.chat-trans-toggle svg{
+  flex-shrink:0;
+  width:12px;
+  height:12px;
+}
 .chat-input-wrap{
   display:flex;
   align-items:flex-end;
@@ -5715,12 +5825,22 @@ async function handleProject(request, env, url) {
 
       const chatKey = `project_chat:${token}`;
       const chatList = (await env.LEADS_KV.get(chatKey, { type: "json" })) || [];
+      let translatedToEs = null;
+      if (L !== "es" && env.GROQ_API_KEY) {
+        try {
+          translatedToEs = await translateMessageText(env, msgText, L, "es");
+        } catch (e) {
+          console.warn("translateMessageText to es failed:", e?.message);
+        }
+      }
+
       const msgId = randomHex(8);
       const newMsg = {
         id: msgId,
         sender: "client",
         text: msgText,
         date: new Date().toISOString(),
+        ...(translatedToEs && translatedToEs !== msgText ? { translations: { es: translatedToEs } } : {}),
       };
       chatList.push(newMsg);
       const cappedHistory = chatList.slice(-100);
@@ -5728,6 +5848,9 @@ async function handleProject(request, env, url) {
 
       if (env.RESEND_API_KEY) {
         const studioUrl = await studioChatUrl(env, token);
+        const quoteForStudio = translatedToEs && translatedToEs !== msgText
+          ? `${translatedToEs}\n\n(original en ${L}: ${msgText})`
+          : msgText;
         try {
           await resendSend(
             env,
@@ -5739,7 +5862,7 @@ async function handleProject(request, env, url) {
                 paras: [
                   `el cliente de ${bold(proj.brand)} (${proj.clientEmail}) ha escrito un nuevo mensaje en el chat directo del proyecto:`,
                 ],
-                quote: msgText,
+                quote: quoteForStudio,
                 cta: { label: "responder al cliente", url: studioUrl },
                 secondaryLink: { label: "ver panel del proyecto", url: projectPageUrl },
               }),
@@ -6571,19 +6694,54 @@ async function handleProject(request, env, url) {
   const chatKey = `project_chat:${token}`;
   const humanChatHistory = (await env.LEADS_KV.get(chatKey, { type: "json" })) || [];
 
+  if (L !== "es" && humanChatHistory.length && env.GROQ_API_KEY) {
+    let missingTrans = false;
+    for (const m of humanChatHistory) {
+      if (m && m.sender === "studio" && m.text && (!m.translations || !m.translations[L])) {
+        missingTrans = true;
+        break;
+      }
+    }
+    if (missingTrans) {
+      await Promise.all(
+        humanChatHistory.map(async (m) => {
+          if (m && m.sender === "studio" && m.text && (!m.translations || !m.translations[L])) {
+            const tr = await translateMessageText(env, m.text, "es", L);
+            if (tr && tr !== m.text) {
+              m.translations = m.translations || {};
+              m.translations[L] = tr;
+            }
+          }
+        })
+      );
+      await env.LEADS_KV.put(chatKey, JSON.stringify(humanChatHistory.slice(-100))).catch(() => {});
+    }
+  }
+
   const humanMessagesHtml = humanChatHistory.length
     ? humanChatHistory
         .map((m) => {
           const isClient = m.sender === "client";
           const author = isClient ? T.chatYou : T.chatStudio;
           const cls = isClient ? "is-client" : "is-studio";
+          const hasTrans = !isClient && L !== "es" && m.translations && m.translations[L] && m.translations[L] !== m.text;
+          const displayText = hasTrans ? m.translations[L] : m.text;
+          const toggleHtml = hasTrans
+            ? `<div class="chat-trans-wrap">
+                <button type="button" class="chat-trans-toggle" data-orig="${esc(m.text)}" data-trans="${esc(m.translations[L])}" data-showing="trans">
+                  <svg class="chat-trans-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>
+                  <span class="chat-trans-label">${esc(T.chatTransIndicator)}</span>
+                </button>
+              </div>`
+            : "";
           return `<div class="chat-msg-row ${cls}">
             <div class="chat-msg-bubble">
               <div class="chat-msg-head">
                 <span class="chat-msg-author">${esc(author)}</span>
                 <span class="chat-msg-date">${esc(fmtDate(m.date, L))}</span>
               </div>
-              <div class="chat-msg-text">${esc(m.text)}</div>
+              <div class="chat-msg-text">${esc(displayText)}</div>
+              ${toggleHtml}
             </div>
           </div>`;
         })
@@ -6836,6 +6994,28 @@ async function handleProject(request, env, url) {
             });
           });
         }
+
+        document.addEventListener("click", function(e){
+          var btn = e.target.closest(".chat-trans-toggle");
+          if (!btn) return;
+          var bubble = btn.closest(".chat-msg-bubble");
+          if (!bubble) return;
+          var textEl = bubble.querySelector(".chat-msg-text");
+          var labelEl = btn.querySelector(".chat-trans-label");
+          if (!textEl) return;
+          var orig = btn.getAttribute("data-orig") || "";
+          var trans = btn.getAttribute("data-trans") || "";
+          var showing = btn.getAttribute("data-showing") || "trans";
+          if (showing === "trans") {
+            textEl.textContent = orig;
+            btn.setAttribute("data-showing", "orig");
+            if (labelEl) labelEl.textContent = ${JSON.stringify(T.chatViewTrans)};
+          } else {
+            textEl.textContent = trans;
+            btn.setAttribute("data-showing", "trans");
+            if (labelEl) labelEl.textContent = ${JSON.stringify(T.chatTransIndicator)};
+          }
+        });
       })();
     </script>
   `;
@@ -6905,18 +7085,35 @@ async function handleStudioChat(request, env, url) {
       );
     }
 
+    const lang = pickLang(proj.lang);
+    let translatedToClient = null;
+    if (lang !== "es" && env.GROQ_API_KEY) {
+      try {
+        translatedToClient = await translateMessageText(env, replyText, "es", lang);
+      } catch (e) {
+        console.warn("translateMessageText to client failed:", e?.message);
+      }
+    }
+
     const msgId = randomHex(8);
     const newMsg = {
       id: msgId,
       sender: "studio",
       text: replyText,
       date: new Date().toISOString(),
+      ...(translatedToClient && translatedToClient !== replyText ? { translations: { [lang]: translatedToClient } } : {}),
     };
     chatHistory.push(newMsg);
-    await env.LEADS_KV.put(chatKey, JSON.stringify(chatHistory));
+    await env.LEADS_KV.put(chatKey, JSON.stringify(chatHistory.slice(-100)));
 
-    const lang = pickLang(proj.lang);
     const emChat = EM[lang].chat;
+    const clientQuote = translatedToClient && translatedToClient !== replyText
+      ? translatedToClient
+      : replyText;
+    const clientNote = translatedToClient && translatedToClient !== replyText
+      ? `${emChat.autoTranslatedNotice}. ${emChat.confirmSoon}`
+      : emChat.confirmSoon;
+
     try {
       await resendSend(
         env,
@@ -6929,9 +7126,9 @@ async function handleStudioChat(request, env, url) {
               emChat.hello,
               emChat.replyIntro(bold(proj.brand)),
             ],
-            quote: replyText,
+            quote: clientQuote,
             cta: { label: emChat.viewPortal, url: projectPageUrl + "#chat-human" },
-            note: emChat.confirmSoon,
+            note: clientNote,
           }),
         },
         `chat-reply-${p}-${msgId}`
@@ -6939,7 +7136,6 @@ async function handleStudioChat(request, env, url) {
     } catch (e) {
       console.error("error sending studio chat reply email:", e?.message);
     }
-
     return redirectTo(buildUrl("/responder-chat", { p, t, sent: "1" }));
   }
 
@@ -6947,25 +7143,59 @@ async function handleStudioChat(request, env, url) {
     ? `<div class="banner-ok" style="margin-bottom:1.25rem;"><p>respuesta enviada con éxito a ${esc(proj.clientEmail)}. el cliente ha recibido la notificación por correo y el mensaje se ha guardado en su panel.</p></div>`
     : "";
 
+  if (proj.lang !== "es" && chatHistory.length && env.GROQ_API_KEY) {
+    let missingTrans = false;
+    for (const m of chatHistory) {
+      if (m && m.sender === "client" && m.text && (!m.translations || !m.translations.es)) {
+        missingTrans = true;
+        break;
+      }
+    }
+    if (missingTrans) {
+      await Promise.all(
+        chatHistory.map(async (m) => {
+          if (m && m.sender === "client" && m.text && (!m.translations || !m.translations.es)) {
+            const tr = await translateMessageText(env, m.text, proj.lang, "es");
+            if (tr && tr !== m.text) {
+              m.translations = m.translations || {};
+              m.translations.es = tr;
+            }
+          }
+        })
+      );
+      await env.LEADS_KV.put(chatKey, JSON.stringify(chatHistory.slice(-100))).catch(() => {});
+    }
+  }
+
   const historyHtml = chatHistory.length
     ? chatHistory
         .map((m) => {
           const isStudio = m.sender === "studio";
           const author = isStudio ? "estudio (gael y bernat)" : `cliente (${proj.brand})`;
           const cls = isStudio ? "is-studio" : "is-client";
+          const hasTrans = !isStudio && proj.lang !== "es" && m.translations && m.translations.es && m.translations.es !== m.text;
+          const displayText = hasTrans ? m.translations.es : m.text;
+          const toggleHtml = hasTrans
+            ? `<div class="chat-trans-wrap">
+                <button type="button" class="chat-trans-toggle" data-orig="${esc(m.text)}" data-trans="${esc(m.translations.es)}" data-showing="trans">
+                  <svg class="chat-trans-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>
+                  <span class="chat-trans-label">traducido automáticamente, haz clic para ver el mensaje original</span>
+                </button>
+              </div>`
+            : "";
           return `<div class="chat-msg-row ${cls}" style="margin-bottom:.75rem;">
             <div class="chat-msg-bubble">
               <div class="chat-msg-head">
                 <span class="chat-msg-author">${esc(author)}</span>
                 <span class="chat-msg-date">${esc(fmtDate(m.date, "es"))}</span>
               </div>
-              <div class="chat-msg-text">${esc(m.text)}</div>
+              <div class="chat-msg-text">${esc(displayText)}</div>
+              ${toggleHtml}
             </div>
           </div>`;
         })
         .join("")
     : `<div class="chat-empty">no hay mensajes en el historial todavía.</div>`;
-
   const html = `
     ${sentNotice}
     <div class="box" style="margin-bottom:1.5rem;">
@@ -6985,6 +7215,31 @@ async function handleStudioChat(request, env, url) {
       <textarea id="reply-input" name="reply" rows="4" placeholder="escribe tu respuesta para el cliente..." required></textarea>
       <button type="submit">enviar respuesta al cliente</button>
     </form>
+    <script>
+      (function(){
+        document.addEventListener("click", function(e){
+          var btn = e.target.closest(".chat-trans-toggle");
+          if (!btn) return;
+          var bubble = btn.closest(".chat-msg-bubble");
+          if (!bubble) return;
+          var textEl = bubble.querySelector(".chat-msg-text");
+          var labelEl = btn.querySelector(".chat-trans-label");
+          if (!textEl) return;
+          var orig = btn.getAttribute("data-orig") || "";
+          var trans = btn.getAttribute("data-trans") || "";
+          var showing = btn.getAttribute("data-showing") || "trans";
+          if (showing === "trans") {
+            textEl.textContent = orig;
+            btn.setAttribute("data-showing", "orig");
+            if (labelEl) labelEl.textContent = "ver traducción automática";
+          } else {
+            textEl.textContent = trans;
+            btn.setAttribute("data-showing", "trans");
+            if (labelEl) labelEl.textContent = "traducido automáticamente, haz clic para ver el mensaje original";
+          }
+        });
+      })();
+    </script>
   `;
 
   return htmlResponse(

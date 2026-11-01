@@ -1601,12 +1601,22 @@ async function handleProject(request, env, url) {
 
       const chatKey = `project_chat:${token}`;
       const chatList = (await env.LEADS_KV.get(chatKey, { type: "json" })) || [];
+      let translatedToEs = null;
+      if (L !== "es" && env.GROQ_API_KEY) {
+        try {
+          translatedToEs = await translateMessageText(env, msgText, L, "es");
+        } catch (e) {
+          console.warn("translateMessageText to es failed:", e?.message);
+        }
+      }
+
       const msgId = randomHex(8);
       const newMsg = {
         id: msgId,
         sender: "client",
         text: msgText,
         date: new Date().toISOString(),
+        ...(translatedToEs && translatedToEs !== msgText ? { translations: { es: translatedToEs } } : {}),
       };
       chatList.push(newMsg);
       const cappedHistory = chatList.slice(-100);
@@ -1614,6 +1624,9 @@ async function handleProject(request, env, url) {
 
       if (env.RESEND_API_KEY) {
         const studioUrl = await studioChatUrl(env, token);
+        const quoteForStudio = translatedToEs && translatedToEs !== msgText
+          ? `${translatedToEs}\n\n(original en ${L}: ${msgText})`
+          : msgText;
         try {
           await resendSend(
             env,
@@ -1625,7 +1638,7 @@ async function handleProject(request, env, url) {
                 paras: [
                   `el cliente de ${bold(proj.brand)} (${proj.clientEmail}) ha escrito un nuevo mensaje en el chat directo del proyecto:`,
                 ],
-                quote: msgText,
+                quote: quoteForStudio,
                 cta: { label: "responder al cliente", url: studioUrl },
                 secondaryLink: { label: "ver panel del proyecto", url: projectPageUrl },
               }),
@@ -2457,19 +2470,54 @@ async function handleProject(request, env, url) {
   const chatKey = `project_chat:${token}`;
   const humanChatHistory = (await env.LEADS_KV.get(chatKey, { type: "json" })) || [];
 
+  if (L !== "es" && humanChatHistory.length && env.GROQ_API_KEY) {
+    let missingTrans = false;
+    for (const m of humanChatHistory) {
+      if (m && m.sender === "studio" && m.text && (!m.translations || !m.translations[L])) {
+        missingTrans = true;
+        break;
+      }
+    }
+    if (missingTrans) {
+      await Promise.all(
+        humanChatHistory.map(async (m) => {
+          if (m && m.sender === "studio" && m.text && (!m.translations || !m.translations[L])) {
+            const tr = await translateMessageText(env, m.text, "es", L);
+            if (tr && tr !== m.text) {
+              m.translations = m.translations || {};
+              m.translations[L] = tr;
+            }
+          }
+        })
+      );
+      await env.LEADS_KV.put(chatKey, JSON.stringify(humanChatHistory.slice(-100))).catch(() => {});
+    }
+  }
+
   const humanMessagesHtml = humanChatHistory.length
     ? humanChatHistory
         .map((m) => {
           const isClient = m.sender === "client";
           const author = isClient ? T.chatYou : T.chatStudio;
           const cls = isClient ? "is-client" : "is-studio";
+          const hasTrans = !isClient && L !== "es" && m.translations && m.translations[L] && m.translations[L] !== m.text;
+          const displayText = hasTrans ? m.translations[L] : m.text;
+          const toggleHtml = hasTrans
+            ? `<div class="chat-trans-wrap">
+                <button type="button" class="chat-trans-toggle" data-orig="${esc(m.text)}" data-trans="${esc(m.translations[L])}" data-showing="trans">
+                  <svg class="chat-trans-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>
+                  <span class="chat-trans-label">${esc(T.chatTransIndicator)}</span>
+                </button>
+              </div>`
+            : "";
           return `<div class="chat-msg-row ${cls}">
             <div class="chat-msg-bubble">
               <div class="chat-msg-head">
                 <span class="chat-msg-author">${esc(author)}</span>
                 <span class="chat-msg-date">${esc(fmtDate(m.date, L))}</span>
               </div>
-              <div class="chat-msg-text">${esc(m.text)}</div>
+              <div class="chat-msg-text">${esc(displayText)}</div>
+              ${toggleHtml}
             </div>
           </div>`;
         })
@@ -2722,6 +2770,28 @@ async function handleProject(request, env, url) {
             });
           });
         }
+
+        document.addEventListener("click", function(e){
+          var btn = e.target.closest(".chat-trans-toggle");
+          if (!btn) return;
+          var bubble = btn.closest(".chat-msg-bubble");
+          if (!bubble) return;
+          var textEl = bubble.querySelector(".chat-msg-text");
+          var labelEl = btn.querySelector(".chat-trans-label");
+          if (!textEl) return;
+          var orig = btn.getAttribute("data-orig") || "";
+          var trans = btn.getAttribute("data-trans") || "";
+          var showing = btn.getAttribute("data-showing") || "trans";
+          if (showing === "trans") {
+            textEl.textContent = orig;
+            btn.setAttribute("data-showing", "orig");
+            if (labelEl) labelEl.textContent = ${JSON.stringify(T.chatViewTrans)};
+          } else {
+            textEl.textContent = trans;
+            btn.setAttribute("data-showing", "trans");
+            if (labelEl) labelEl.textContent = ${JSON.stringify(T.chatTransIndicator)};
+          }
+        });
       })();
     </script>
   `;
@@ -2791,18 +2861,35 @@ async function handleStudioChat(request, env, url) {
       );
     }
 
+    const lang = pickLang(proj.lang);
+    let translatedToClient = null;
+    if (lang !== "es" && env.GROQ_API_KEY) {
+      try {
+        translatedToClient = await translateMessageText(env, replyText, "es", lang);
+      } catch (e) {
+        console.warn("translateMessageText to client failed:", e?.message);
+      }
+    }
+
     const msgId = randomHex(8);
     const newMsg = {
       id: msgId,
       sender: "studio",
       text: replyText,
       date: new Date().toISOString(),
+      ...(translatedToClient && translatedToClient !== replyText ? { translations: { [lang]: translatedToClient } } : {}),
     };
     chatHistory.push(newMsg);
-    await env.LEADS_KV.put(chatKey, JSON.stringify(chatHistory));
+    await env.LEADS_KV.put(chatKey, JSON.stringify(chatHistory.slice(-100)));
 
-    const lang = pickLang(proj.lang);
     const emChat = EM[lang].chat;
+    const clientQuote = translatedToClient && translatedToClient !== replyText
+      ? translatedToClient
+      : replyText;
+    const clientNote = translatedToClient && translatedToClient !== replyText
+      ? `${emChat.autoTranslatedNotice}. ${emChat.confirmSoon}`
+      : emChat.confirmSoon;
+
     try {
       await resendSend(
         env,
@@ -2815,9 +2902,9 @@ async function handleStudioChat(request, env, url) {
               emChat.hello,
               emChat.replyIntro(bold(proj.brand)),
             ],
-            quote: replyText,
+            quote: clientQuote,
             cta: { label: emChat.viewPortal, url: projectPageUrl + "#chat-human" },
-            note: emChat.confirmSoon,
+            note: clientNote,
           }),
         },
         `chat-reply-${p}-${msgId}`
@@ -2825,7 +2912,6 @@ async function handleStudioChat(request, env, url) {
     } catch (e) {
       console.error("error sending studio chat reply email:", e?.message);
     }
-
     return redirectTo(buildUrl("/responder-chat", { p, t, sent: "1" }));
   }
 
@@ -2833,25 +2919,59 @@ async function handleStudioChat(request, env, url) {
     ? `<div class="banner-ok" style="margin-bottom:1.25rem;"><p>respuesta enviada con éxito a ${esc(proj.clientEmail)}. el cliente ha recibido la notificación por correo y el mensaje se ha guardado en su panel.</p></div>`
     : "";
 
+  if (proj.lang !== "es" && chatHistory.length && env.GROQ_API_KEY) {
+    let missingTrans = false;
+    for (const m of chatHistory) {
+      if (m && m.sender === "client" && m.text && (!m.translations || !m.translations.es)) {
+        missingTrans = true;
+        break;
+      }
+    }
+    if (missingTrans) {
+      await Promise.all(
+        chatHistory.map(async (m) => {
+          if (m && m.sender === "client" && m.text && (!m.translations || !m.translations.es)) {
+            const tr = await translateMessageText(env, m.text, proj.lang, "es");
+            if (tr && tr !== m.text) {
+              m.translations = m.translations || {};
+              m.translations.es = tr;
+            }
+          }
+        })
+      );
+      await env.LEADS_KV.put(chatKey, JSON.stringify(chatHistory.slice(-100))).catch(() => {});
+    }
+  }
+
   const historyHtml = chatHistory.length
     ? chatHistory
         .map((m) => {
           const isStudio = m.sender === "studio";
           const author = isStudio ? "estudio (gael y bernat)" : `cliente (${proj.brand})`;
           const cls = isStudio ? "is-studio" : "is-client";
+          const hasTrans = !isStudio && proj.lang !== "es" && m.translations && m.translations.es && m.translations.es !== m.text;
+          const displayText = hasTrans ? m.translations.es : m.text;
+          const toggleHtml = hasTrans
+            ? `<div class="chat-trans-wrap">
+                <button type="button" class="chat-trans-toggle" data-orig="${esc(m.text)}" data-trans="${esc(m.translations.es)}" data-showing="trans">
+                  <svg class="chat-trans-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>
+                  <span class="chat-trans-label">traducido automáticamente, haz clic para ver el mensaje original</span>
+                </button>
+              </div>`
+            : "";
           return `<div class="chat-msg-row ${cls}" style="margin-bottom:.75rem;">
             <div class="chat-msg-bubble">
               <div class="chat-msg-head">
                 <span class="chat-msg-author">${esc(author)}</span>
                 <span class="chat-msg-date">${esc(fmtDate(m.date, "es"))}</span>
               </div>
-              <div class="chat-msg-text">${esc(m.text)}</div>
+              <div class="chat-msg-text">${esc(displayText)}</div>
+              ${toggleHtml}
             </div>
           </div>`;
         })
         .join("")
     : `<div class="chat-empty">no hay mensajes en el historial todavía.</div>`;
-
   const html = `
     ${sentNotice}
     <div class="box" style="margin-bottom:1.5rem;">
@@ -2871,6 +2991,31 @@ async function handleStudioChat(request, env, url) {
       <textarea id="reply-input" name="reply" rows="4" placeholder="escribe tu respuesta para el cliente..." required></textarea>
       <button type="submit">enviar respuesta al cliente</button>
     </form>
+    <script>
+      (function(){
+        document.addEventListener("click", function(e){
+          var btn = e.target.closest(".chat-trans-toggle");
+          if (!btn) return;
+          var bubble = btn.closest(".chat-msg-bubble");
+          if (!bubble) return;
+          var textEl = bubble.querySelector(".chat-msg-text");
+          var labelEl = btn.querySelector(".chat-trans-label");
+          if (!textEl) return;
+          var orig = btn.getAttribute("data-orig") || "";
+          var trans = btn.getAttribute("data-trans") || "";
+          var showing = btn.getAttribute("data-showing") || "trans";
+          if (showing === "trans") {
+            textEl.textContent = orig;
+            btn.setAttribute("data-showing", "orig");
+            if (labelEl) labelEl.textContent = "ver traducción automática";
+          } else {
+            textEl.textContent = trans;
+            btn.setAttribute("data-showing", "trans");
+            if (labelEl) labelEl.textContent = "traducido automáticamente, haz clic para ver el mensaje original";
+          }
+        });
+      })();
+    </script>
   `;
 
   return htmlResponse(

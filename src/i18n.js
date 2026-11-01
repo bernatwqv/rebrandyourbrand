@@ -250,6 +250,7 @@ const EM = {
       replySubject: (br) => `nueva respuesta de gael y bernat — ${br}`,
       replyIntro: (br) => `gael y bernat han respondido a tu consulta en el proyecto ${br}:`,
       viewPortal: "ver respuesta en el panel de seguimiento",
+      autoTranslatedNotice: "traducido automáticamente del original en español",
     },
   },
   ca: {
@@ -374,6 +375,7 @@ const EM = {
       replySubject: (br) => `nova resposta d'en gael i en bernat — ${br}`,
       replyIntro: (br) => `en gael i en bernat han respost a la teva consulta al projecte ${br}:`,
       viewPortal: "veure resposta al panell de seguiment",
+      autoTranslatedNotice: "traduït automàticament de l'original en espanyol",
     },
   },
   eu: {
@@ -498,6 +500,7 @@ const EM = {
       replySubject: (br) => `gael eta bernaten erantzun berria — ${br}`,
       replyIntro: (br) => `gaelek eta bernatek zure kontsultari erantzun diote ${br} proiektuan:`,
       viewPortal: "ikusi erantzuna jarraipen-panelean",
+      autoTranslatedNotice: "gaztelaniazko jatorrizkotik automatikoki itzulita",
     },
   },
   en: {
@@ -622,6 +625,7 @@ const EM = {
       replySubject: (br) => `new reply from gael and bernat — ${br}`,
       replyIntro: (br) => `gael and bernat have replied to your question in project ${br}:`,
       viewPortal: "view reply in tracking portal",
+      autoTranslatedNotice: "automatically translated from the original in spanish",
     },
   },
 };
@@ -837,6 +841,8 @@ const PG = {
       chatBrandi: "brandi (ia)",
       chatNoMessages: "aún no hay mensajes con el equipo. escribe abajo para iniciar la conversación.",
       chatErr: "error de conexión. no se ha podido enviar el mensaje. inténtalo de nuevo.",
+      chatTransIndicator: "traducido automáticamente, haz clic para ver el mensaje original",
+      chatViewTrans: "ver traducción automática",
     },
   },
   ca: {
@@ -1013,6 +1019,8 @@ const PG = {
       chatBrandi: "brandi (ia)",
       chatNoMessages: "encara no hi ha missatges amb l'equip. escriu a sota per iniciar la conversa.",
       chatErr: "error de connexió. no s'ha pogut enviar el missatge. torna-ho a provar.",
+      chatTransIndicator: "traduït automàticament, fes clic per veure el missatge original",
+      chatViewTrans: "mostra la traducció automàtica",
     },
   },
   eu: {
@@ -1189,6 +1197,8 @@ const PG = {
       chatBrandi: "brandi (ia)",
       chatNoMessages: "oraindik ez dago mezurik lan-taldearekin. idatzi behean elkarrizketa hasteko.",
       chatErr: "konexio-errorea. ezin izan da mezua bidali. saiatu berriro.",
+      chatTransIndicator: "automatikoki itzulita, egin klik jatorrizko mezua ikusteko",
+      chatViewTrans: "ikusi itzulpen automatikoa",
     },
   },
   en: {
@@ -1365,6 +1375,8 @@ const PG = {
       chatBrandi: "brandi (ai)",
       chatNoMessages: "no messages with the team yet. write below to start the conversation.",
       chatErr: "connection error. could not send message. please try again.",
+      chatTransIndicator: "automatically translated, click to view the original message",
+      chatViewTrans: "view automatic translation",
     },
   },
 };

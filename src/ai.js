@@ -314,3 +314,71 @@ async function askGroqProject(env, lang, proj, chatMessages, retries = 1) {
     }
   }
 }
+
+const LANG_FULL_NAMES = {
+  es: "Spanish",
+  ca: "Catalan",
+  en: "English",
+  eu: "Basque",
+};
+
+async function translateMessageText(env, text, fromLang, toLang) {
+  if (!text || typeof text !== "string") return "";
+  const raw = text.trim();
+  if (!raw) return "";
+  const src = pickLang(fromLang);
+  const tgt = pickLang(toLang);
+  if (src === tgt) return raw;
+  if (!env || !env.GROQ_API_KEY) return raw;
+
+  const targetName = LANG_FULL_NAMES[tgt] || "Spanish";
+  const sourceName = LANG_FULL_NAMES[src] || "Spanish";
+
+  try {
+    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${env.GROQ_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: GROQ_MODEL,
+        messages: [
+          {
+            role: "system",
+            content: `You are a professional studio translator for rebrandyourbrand. Translate the input message accurately from ${sourceName} into natural, human ${targetName}. Maintain the exact meaning and friendly tone. Keep everything in lowercase. Return ONLY strict JSON in the format: {"translated": "your translation here"}. Do not include any explanations, notes, or additional fields.`,
+          },
+          {
+            role: "user",
+            content: raw.slice(0, 2500),
+          },
+        ],
+        max_tokens: 1000,
+        temperature: 0.2,
+        response_format: { type: "json_object" },
+      }),
+      signal: AbortSignal.timeout(6000),
+    });
+
+    if (!res.ok) {
+      console.warn(`Groq translate HTTP ${res.status}`);
+      return raw;
+    }
+
+    const data = await res.json().catch(() => null);
+    const parsed = parseModelJson(data?.choices?.[0]?.message?.content);
+    let translated = typeof parsed?.translated === "string" ? parsed.translated.trim() : "";
+    if (!translated) return raw;
+
+    translated = translated
+      .replace(/[\u00b7\u2022]/g, " — ")
+      .replace(new RegExp("\\x26", "g"), tgt === "ca" ? " i " : tgt === "en" ? " and " : tgt === "eu" ? " eta " : " y ")
+      .replace(/(^|[.!?¿¡]\s*|\n\s*)([A-ZÁÉÍÓÚÀÈÒÇÑ])(?![A-ZÁÉÍÓÚÀÈÒÇÑ])/g, (_, p, c) => p + c.toLowerCase());
+
+    return translated || raw;
+  } catch (err) {
+    console.warn("translateMessageText error:", err?.message);
+    return raw;
+  }
+}
+
