@@ -556,21 +556,23 @@ button.secondary:active,.btn.secondary:active,button.no:active{
   color:#9C9BA3;
   border:1px solid rgba(255,255,255,.15);
   border-radius:8px;
-  padding:.4rem .75rem;
-  font:500 .76rem/1.2 inherit;
+  width:28px;
+  height:28px;
+  padding:0;
   text-decoration:none;
-  text-transform:lowercase;
   cursor:pointer;
-  transition:color .2s var(--ease-editorial),border-color .2s var(--ease-editorial),transform .2s var(--ease-editorial);
+  transition:color .2s var(--ease-editorial),border-color .2s var(--ease-editorial),transform .2s var(--ease-editorial),background .2s var(--ease-editorial);
   will-change:transform;
+  flex-shrink:0;
 }
 .btn-dismiss:hover{
   color:#F5F2EA;
+  background:rgba(255,255,255,.08);
   border-color:rgba(255,255,255,.35);
-  transform:translateY(-1px);
+  transform:scale(1.05);
 }
 .btn-dismiss:active{
-  transform:scale(0.96);
+  transform:scale(0.94);
 }
 .foot{
   margin-top:1.25rem;

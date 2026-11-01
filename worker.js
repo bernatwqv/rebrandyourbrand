@@ -1155,7 +1155,7 @@ const PG = {
       obSentTitle: "materiales iniciales enviados",
       obUndoBanner: "materiales añadidos correctamente",
       obUndoBtn: "deshacer",
-      obDismissBtn: "aceptar",
+      obDismissBtn: "cerrar aviso",
       obUndoneBanner: "acción deshecha: el último envío de materiales ha sido cancelado con éxito.",
       extraWorkEyebrow: "trabajo extraordinario",
       extraWorkTitle: "cambios o mejoras posteriores (100 € por ronda)",
@@ -1329,7 +1329,7 @@ const PG = {
       obSentTitle: "materials inicials enviats",
       obUndoBanner: "materials afegits correctament",
       obUndoBtn: "desfer",
-      obDismissBtn: "d'acord",
+      obDismissBtn: "tancar avís",
       obUndoneBanner: "acció desfeta: l'últim enviament de materials s'ha descartat amb èxit.",
       extraWorkEyebrow: "treball extraordinari",
       extraWorkTitle: "canvis o millores posteriors (100 € per ronda)",
@@ -1503,7 +1503,7 @@ const PG = {
       obSentTitle: "bidalitako hasierako materialak",
       obUndoBanner: "materialak behar bezala gehitu dira",
       obUndoBtn: "desegin",
-      obDismissBtn: "ados",
+      obDismissBtn: "itxi jakinarazpena",
       obUndoneBanner: "ekintza desegin da: azken material-bidalketa bertan behera utzi da.",
       extraWorkEyebrow: "ezohiko lana",
       extraWorkTitle: "ondorengo aldaketak edo hobekuntzak (100 € txandako)",
@@ -1677,7 +1677,7 @@ const PG = {
       obSentTitle: "submitted kickoff materials",
       obUndoBanner: "materials added successfully",
       obUndoBtn: "undo",
-      obDismissBtn: "dismiss",
+      obDismissBtn: "close notice",
       obUndoneBanner: "action undone: the latest submission was successfully discarded.",
       extraWorkEyebrow: "extraordinary work",
       extraWorkTitle: "subsequent adjustments or enhancements (€100 per round)",
@@ -3785,21 +3785,23 @@ button.secondary:active,.btn.secondary:active,button.no:active{
   color:#9C9BA3;
   border:1px solid rgba(255,255,255,.15);
   border-radius:8px;
-  padding:.4rem .75rem;
-  font:500 .76rem/1.2 inherit;
+  width:28px;
+  height:28px;
+  padding:0;
   text-decoration:none;
-  text-transform:lowercase;
   cursor:pointer;
-  transition:color .2s var(--ease-editorial),border-color .2s var(--ease-editorial),transform .2s var(--ease-editorial);
+  transition:color .2s var(--ease-editorial),border-color .2s var(--ease-editorial),transform .2s var(--ease-editorial),background .2s var(--ease-editorial);
   will-change:transform;
+  flex-shrink:0;
 }
 .btn-dismiss:hover{
   color:#F5F2EA;
+  background:rgba(255,255,255,.08);
   border-color:rgba(255,255,255,.35);
-  transform:translateY(-1px);
+  transform:scale(1.05);
 }
 .btn-dismiss:active{
-  transform:scale(0.96);
+  transform:scale(0.94);
 }
 .foot{
   margin-top:1.25rem;
@@ -6170,7 +6172,12 @@ async function handleProject(request, env, url) {
               <input type="hidden" name="op" value="undo_onboarding">
               <button type="submit" class="btn-undo">${esc(T.obUndoBtn)}</button>
             </form>
-            <a class="btn-dismiss" id="undo-dismiss-btn" href="${esc(projectPageUrl)}">${esc(T.obDismissBtn)}</a>
+            <a class="btn-dismiss" id="undo-dismiss-btn" href="${esc(projectPageUrl)}" aria-label="${esc(T.obDismissBtn)}">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </a>
           </div>
         </div>
       </div>
