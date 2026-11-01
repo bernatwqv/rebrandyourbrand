@@ -23,6 +23,7 @@ async function startVerification(env, { lang, messages, plan, clientEmail, brand
     throw new HttpError(429, "email_cooldown", { "Retry-After": String(EMAIL_COOLDOWN_SECONDS) });
   }
   if (!plan) throw new HttpError(400, "plan_required");
+  if (!brand || typeof brand !== "string" || !brand.trim()) throw new HttpError(400, "brand_required");
 
   const l = pickLang(lang);
   const verifyToken = randomHex(32);

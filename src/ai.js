@@ -2,11 +2,12 @@
 
 function normalizeServices(input) {
   if (!Array.isArray(input)) return null;
-  const ids = SERVICE_IDS.filter((id) => input.includes(id));
+  let ids = SERVICE_IDS.filter((id) => input.includes(id));
   if (!ids.length) return null;
   if (ids.includes("logo") && !ids.includes("paleta")) {
     ids.push("paleta");
   }
+  ids = SERVICE_IDS.filter((id) => ids.includes(id));
   return { ids, total: calcPlanTotal(ids) };
 }
 
@@ -54,17 +55,44 @@ function findEmail(chatMessages) {
 
 const DOMAIN_FIND = /\b(?:https?:\/\/)?(?:www\.)?([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.[a-z]{2,}(?:\.[a-z]{2,})?)\b/i;
 
+const IGNORED_EMAIL_DOMAINS = new Set([
+  "gmail.com",
+  "googlemail.com",
+  "hotmail.com",
+  "outlook.com",
+  "live.com",
+  "yahoo.com",
+  "icloud.com",
+  "proton.me",
+  "protonmail.com",
+  "gmx.com",
+  "msn.com",
+]);
+
+function cleanDomainCandidate(raw) {
+  if (!raw || typeof raw !== "string") return "";
+  const withoutEmails = raw.replace(/\S+@\S+\.\S+/g, " ");
+  const m = withoutEmails.match(DOMAIN_FIND);
+  if (!m) return "";
+  const d = m[1].toLowerCase();
+  if (IGNORED_EMAIL_DOMAINS.has(d)) return "";
+  return d;
+}
+
 function findDomain(chatMessages, fallback = "") {
   if (fallback && typeof fallback === "string") {
-    const trimmed = fallback.trim();
-    const m = trimmed.match(DOMAIN_FIND);
-    if (m) return m[1].toLowerCase();
-    if (trimmed.length > 0) return trimmed.toLowerCase();
+    const d = cleanDomainCandidate(fallback);
+    if (d) return d;
+    const trimmed = fallback.trim().toLowerCase();
+    if (trimmed && !trimmed.includes("@") && !IGNORED_EMAIL_DOMAINS.has(trimmed)) {
+      return trimmed;
+    }
   }
-  for (let i = chatMessages.length - 1; i >= 0; i--) {
-    if (chatMessages[i].role !== "user") continue;
-    const m = chatMessages[i].text.match(DOMAIN_FIND);
-    if (m) return m[1].toLowerCase();
+  const msgs = Array.isArray(chatMessages) ? chatMessages : [];
+  for (let i = msgs.length - 1; i >= 0; i--) {
+    if (msgs[i].role !== "user" || typeof msgs[i].text !== "string") continue;
+    const d = cleanDomainCandidate(msgs[i].text);
+    if (d) return d;
   }
   return "";
 }

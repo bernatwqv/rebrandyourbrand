@@ -102,11 +102,7 @@ async function handleVerify(request, env, ctx, url) {
 
 function checkAllServicesApproved(proj) {
   if (!proj || !Array.isArray(proj.phases) || proj.phases.length === 0) return false;
-  const servicePhases = proj.phases.filter((ph) => ph.key !== "delivery");
-  if (servicePhases.length === 0) {
-    return proj.phases.every((ph) => ph.status === "done");
-  }
-  return servicePhases.every((ph) => ph.status === "done");
+  return proj.phases.every((ph) => ph.status === "done");
 }
 
 async function finalizeProjectClosure(
@@ -192,7 +188,7 @@ async function finalizeProjectClosure(
           ...renderEmail(lang, {
             paras: [
               tc.hello,
-              tc.intro(bold(proj.brand)),
+              tc.intro(proj.brand),
               tc.body,
               effectiveDelivUrl
                 ? `${tc.deliverable}: <a href="${esc(effectiveDelivUrl)}" target="_blank" style="color:#3D5A85;font-weight:600;">${esc(effectiveDelivFilename || effectiveDelivUrl)}</a>`
@@ -264,7 +260,9 @@ async function finalizeProjectClosure(
   }
 
   if (changed) {
-    await env.LEADS_KV.put(`project:${projectToken}`, JSON.stringify(proj));
+    await env.LEADS_KV.put(`project:${projectToken}`, JSON.stringify(proj), {
+      metadata: { status: proj.status || "done" },
+    });
   }
 
   return { ok: true, finished: true };
@@ -309,25 +307,34 @@ async function completeProjectPhase(
   if (note) advancedPhase.note = note;
 
   // Comprobar si se ha alcanzado el final del último servicio contratado o de todas las fases
-  const allServicesApproved = checkAllServicesApproved(proj);
   let nextPhase = null;
   let nextStep = 0;
   let finished = false;
 
-  if (allServicesApproved || targetIdx + 1 >= proj.phases.length) {
+  const isLastPhase = targetIdx + 1 >= proj.phases.length;
+  if (isLastPhase && advancedPhase.key === "delivery") {
     finished = true;
     await finalizeProjectClosure(env, proj, projectToken, {
       deliverableUrl: deliverableUrl || advancedPhase.deliverableUrl || "",
       deliverableFilename: deliverableFilename || advancedPhase.deliverableFilename || "",
       note: note || advancedPhase.note || "",
     });
-  } else {
+  } else if (!isLastPhase) {
     nextPhase = proj.phases[targetIdx + 1];
     nextPhase.status = "active";
     nextPhase.date = now;
     nextStep = nextPhase.step;
     proj.currentPhase = nextStep;
-    await env.LEADS_KV.put(`project:${projectToken}`, JSON.stringify(proj));
+    await env.LEADS_KV.put(`project:${projectToken}`, JSON.stringify(proj), {
+      metadata: { status: proj.status || "active" },
+    });
+    if (nextPhase.key === "delivery" && approvedBy === "client") {
+      await alertAdmin(
+        env,
+        `todas las fases creativas aprobadas — ${proj.brand}`,
+        `el cliente ha aprobado la última fase creativa. el proyecto pasa a la fase de entrega final ("delivery"), pendiente del despliegue y entrega de archivos finales por parte del estudio.\n\ncliente: ${proj.clientEmail}\nproyecto: ${proj.brand}`
+      ).catch(() => {});
+    }
   }
 
   const lang = pickLang(proj.lang);
@@ -847,7 +854,9 @@ async function handlePhaseAdvance(request, env, url) {
         `proposal-${projectToken}-${step}-${Date.now()}`
       );
 
-      await env.LEADS_KV.put(`project:${projectToken}`, JSON.stringify(proj));
+      await env.LEADS_KV.put(`project:${projectToken}`, JSON.stringify(proj), {
+        metadata: { status: proj.status || "active" },
+      });
     } catch (e) {
       console.error("proposal email failed:", e?.message);
       return htmlResponse(
@@ -930,10 +939,6 @@ async function handlePhaseApprove(request, env, url) {
 
   const ph = (proj.phases || []).find((x) => x.step === step);
   if (!ph || !proj.paid) return msgPage(L, "invalid", 400);
-
-  if (checkAllServicesApproved(proj) && (!proj.finishedAt || !proj.reviewInvited || proj.status !== "done")) {
-    await finalizeProjectClosure(env, proj, p);
-  }
 
   if (ph.status === "done" || Number(proj.currentPhase) !== step) {
     const isCompleted = proj.status === "done" || checkAllServicesApproved(proj);
@@ -1113,7 +1118,9 @@ async function handlePhaseApprove(request, env, url) {
     delete ph.reminderSentAt;
     delete ph.tacitAlertSentAt;
     delete proj.abandonWarningSentAt;
-    await env.LEADS_KV.put(`project:${p}`, JSON.stringify(proj));
+    await env.LEADS_KV.put(`project:${p}`, JSON.stringify(proj), {
+      metadata: { status: proj.status || "active" },
+    });
 
     const noticeText = PG[L].tr?.actionRegisteredNotice || "aviso: esta acción ya ha quedado registrada en el sistema y nuestro equipo ha recibido la notificación para continuar con el trabajo.";
     return htmlResponse(
@@ -1234,6 +1241,38 @@ async function handleCancelRenewal(request, env, url) {
   );
 }
 
+// ── REDIRECCIÓN PERSISTENTE DE RENOVACIÓN (/renovar) ──
+async function handleRenewalRedirect(request, env, url) {
+  let L = langFromRequest(request);
+  const p = url.searchParams.get("p");
+  const t = url.searchParams.get("t");
+  if (!p || !/^[a-f0-9]{64}$/.test(p) || !t || !/^[a-f0-9]{64}$/.test(t)) {
+    return msgPage(L, "invalid", 400);
+  }
+  const key = await getKey(env);
+  if (!(await verifyRaw(key, `renew|${p}`, t))) {
+    return msgPage(L, "invalid", 400);
+  }
+  if (!env.LEADS_KV) return msgPage(L, "config", 500);
+  const raw = await env.LEADS_KV.get(`project:${p}`);
+  if (!raw) return msgPage(L, "trackMissing", 404);
+  const proj = JSON.parse(raw);
+  L = pickLang(proj.lang);
+  if (!proj.paid || !Array.isArray(proj.services) || !proj.services.includes("web")) {
+    return msgPage(L, "invalid", 400);
+  }
+  const rawRenewal =
+    env.WEB_RENEWAL_EUR !== undefined && String(env.WEB_RENEWAL_EUR).trim() !== ""
+      ? Number(env.WEB_RENEWAL_EUR)
+      : WEB_RENEWAL_EUR;
+  const renewalEur = Number.isFinite(rawRenewal) && rawRenewal >= 0 ? rawRenewal : WEB_RENEWAL_EUR;
+  const checkoutUrl = await createRenewalCheckout(env, proj, renewalEur);
+  if (!checkoutUrl) {
+    return paymentRetryPage(L);
+  }
+  return redirectTo(checkoutUrl);
+}
+
 // ── DESCARGA DIRECTA DE ENTREGABLES (/file) ──
 async function handleFileDownload(request, env, url) {
   if (request.method !== "GET" && request.method !== "HEAD") {
@@ -1294,17 +1333,42 @@ async function handleFileDownload(request, env, url) {
   const size = metadata?.size || value.byteLength;
   const encodedName = encodeURIComponent(safeName);
 
+  const SAFE_INLINE_TYPES = new Set([
+    "image/png",
+    "image/jpeg",
+    "image/webp",
+    "image/gif",
+    "application/pdf",
+  ]);
+  const dispositionType = SAFE_INLINE_TYPES.has(contentType.toLowerCase()) ? "inline" : "attachment";
+
   return new Response(value, {
     status: 200,
     headers: {
       "Content-Type": contentType,
-      "Content-Disposition": `inline; filename="${safeName.replace(/["\r\n\\]/g, "_")}"; filename*=UTF-8''${encodedName}`,
+      "Content-Disposition": `${dispositionType}; filename="${safeName.replace(/["\r\n\\]/g, "_")}"; filename*=UTF-8''${encodedName}`,
       "Content-Length": String(size),
       "Cache-Control": "private, max-age=86400",
+      "Content-Security-Policy": "sandbox",
       "X-Content-Type-Options": "nosniff",
       "Referrer-Policy": "no-referrer",
     },
   });
+}
+
+async function checkProjectChatRateLimit(env, token, ip) {
+  if (env.CHAT_LIMITER) {
+    const { success } = await env.CHAT_LIMITER.limit({ key: `pc:${token.slice(0, 16)}:${ipKey(ip)}` });
+    if (!success) return false;
+  }
+  if (env.LEADS_KV) {
+    const rlKey = `rl:pchat:${token}:${ipKey(ip)}`;
+    const current = await env.LEADS_KV.get(rlKey);
+    const count = current ? parseInt(current, 10) : 0;
+    if (count >= 12) return false;
+    await env.LEADS_KV.put(rlKey, String(count + 1), { expirationTtl: 600 });
+  }
+  return true;
 }
 
 // ── SEGUIMIENTO DEL PROYECTO, RESCATE DE PAGO Y ONBOARDING (/proyecto) ──
@@ -1336,6 +1400,11 @@ async function handleProject(request, env, url) {
     const op = String(bodyJson?.op || form?.get("op") || (!proj.paid ? "pay" : ""));
 
     if (op === "brandi_chat") {
+      const okRate = await checkProjectChatRateLimit(env, token, ip);
+      if (!okRate) {
+        if (bodyJson) return jsonResponse({ error: "rate_limited" }, 429);
+        return redirectTo(projectPageUrl + "#chat");
+      }
       const msgText = cleanInput(bodyJson?.message || form?.get("message") || "", 1000);
       if (!msgText) {
         if (bodyJson) return jsonResponse({ error: "empty_message" }, 400);
@@ -1344,8 +1413,9 @@ async function handleProject(request, env, url) {
       const rawHistory = Array.isArray(bodyJson?.history) ? bodyJson.history : [];
       const history = rawHistory
         .filter((m) => m && (m.role === "user" || m.role === "assistant") && typeof m.text === "string")
-        .slice(-6);
-      history.push({ role: "user", text: msgText });
+        .slice(-12)
+        .map((m) => ({ role: m.role, text: m.text.trim().slice(0, 600) }));
+      history.push({ role: "user", text: msgText.slice(0, 600) });
 
       const reply = await askGroqProject(env, L, proj, history);
       if (bodyJson) {
@@ -1355,10 +1425,15 @@ async function handleProject(request, env, url) {
     }
 
     if (op === "human_chat") {
+      const okRate = await checkProjectChatRateLimit(env, token, ip);
+      if (!okRate) {
+        if (bodyJson) return jsonResponse({ error: "rate_limited" }, 429);
+        return redirectTo(projectPageUrl + "#chat-human");
+      }
       const msgText = cleanInput(bodyJson?.message || form?.get("message") || "", 2000);
       if (!msgText) {
         if (bodyJson) return jsonResponse({ error: "empty_message" }, 400);
-        return redirectTo(projectPageUrl + "#chat");
+        return redirectTo(projectPageUrl + "#chat-human");
       }
 
       const chatKey = `project_chat:${token}`;
@@ -1371,7 +1446,8 @@ async function handleProject(request, env, url) {
         date: new Date().toISOString(),
       };
       chatList.push(newMsg);
-      await env.LEADS_KV.put(chatKey, JSON.stringify(chatList));
+      const cappedHistory = chatList.slice(-100);
+      await env.LEADS_KV.put(chatKey, JSON.stringify(cappedHistory));
 
       if (env.RESEND_API_KEY) {
         const studioUrl = await studioChatUrl(env, token);
@@ -1663,7 +1739,9 @@ async function handleProject(request, env, url) {
         delete proj.abandonWarningSentAt;
       }
 
-      await env.LEADS_KV.put(`project:${token}`, JSON.stringify(proj));
+      await env.LEADS_KV.put(`project:${token}`, JSON.stringify(proj), {
+        metadata: { status: proj.status || "active" },
+      });
 
       if (env.RESEND_API_KEY) {
         const manageUrl = await advancePhaseUrl(env, token, proj.currentPhase || 1);
@@ -1731,7 +1809,9 @@ async function handleProject(request, env, url) {
           delete proj.onboarding;
         }
         proj.lastAdded = null;
-        await env.LEADS_KV.put(`project:${token}`, JSON.stringify(proj));
+        await env.LEADS_KV.put(`project:${token}`, JSON.stringify(proj), {
+          metadata: { status: proj.status || "active" },
+        });
 
         if (env.RESEND_API_KEY) {
           await resendSend(
@@ -1763,7 +1843,9 @@ async function handleProject(request, env, url) {
     return new Response("method not allowed", { status: 405, headers: { Allow: "GET, HEAD, POST" } });
   }
 
-  if (!proj.paid || !proj.emailsSent || !proj.receiptUrl) {
+  const receiptCheckedAt = Number(proj.receiptCheckedAt) || 0;
+  const shouldCheckReceipt = !proj.receiptUrl && (!receiptCheckedAt || (Date.now() - receiptCheckedAt > 10 * 60 * 1000));
+  if (!proj.paid || !proj.emailsSent || shouldCheckReceipt) {
     const sid = url.searchParams.get("session_id") || proj.stripeSessionId;
     if (sid && /^cs_[A-Za-z0-9_]+$/.test(sid) && env.STRIPE_SECRET_KEY) {
       const session = await fetchStripeSession(env, sid);
@@ -1773,6 +1855,12 @@ async function handleProject(request, env, url) {
         );
         const fresh = await env.LEADS_KV.get(`project:${token}`);
         if (fresh) proj = JSON.parse(fresh);
+      }
+      if (!proj.receiptUrl) {
+        proj.receiptCheckedAt = Date.now();
+        await env.LEADS_KV.put(`project:${token}`, JSON.stringify(proj), {
+          metadata: { status: proj.status || "active" },
+        });
       }
     }
   }
@@ -1862,10 +1950,6 @@ async function handleProject(request, env, url) {
         })();
       </script>`
       : "";
-
-  if (checkAllServicesApproved(proj) && (!proj.finishedAt || !proj.reviewInvited || proj.status !== "done")) {
-    await finalizeProjectClosure(env, proj, token);
-  }
 
   const allDone = Array.isArray(proj.phases) && proj.phases.every((ph) => ph.status === "done");
 
@@ -2250,6 +2334,9 @@ async function handleProject(request, env, url) {
           return row;
         }
 
+        var youLabel = ${JSON.stringify(T.chatYou)};
+        var brandiLabel = ${JSON.stringify(T.chatBrandi)};
+
         if (brandiForm) {
           brandiForm.addEventListener("submit", function(e){
             var text = (brandiInput.value || "").trim();
@@ -2257,7 +2344,7 @@ async function handleProject(request, env, url) {
             if (!window.fetch) return;
             e.preventDefault();
 
-            var userRow = createMsgRow("${esc(T.chatYou)}", text, "is-client");
+            var userRow = createMsgRow(youLabel, text, "is-client");
             brandiList.appendChild(userRow);
             brandiInput.value = "";
             brandiList.scrollTop = brandiList.scrollHeight;
@@ -2283,20 +2370,27 @@ async function handleProject(request, env, url) {
               headers: { "Content-Type": "application/json", "Accept": "application/json" },
               body: JSON.stringify({ op: "brandi_chat", message: text, history: brandiHistory })
             })
-            .then(function(r){ return r.json(); })
+            .then(function(r){
+              if (!r.ok) throw new Error("status " + r.status);
+              return r.json();
+            })
             .then(function(res){
               if (typingRow && typingRow.parentNode) typingRow.parentNode.removeChild(typingRow);
               var replyText = res && res.reply ? res.reply : "no se ha podido procesar la respuesta.";
               brandiHistory.push({ role: "assistant", text: replyText });
 
-              var aiRow = createMsgRow("${esc(T.chatBrandi)}", replyText, "is-ai");
+              var aiRow = createMsgRow(brandiLabel, replyText, "is-ai");
               brandiList.appendChild(aiRow);
               brandiList.scrollTop = brandiList.scrollHeight;
             })
-            .catch(function(){
+            .catch(function(err){
               if (typingRow && typingRow.parentNode) typingRow.parentNode.removeChild(typingRow);
-              var errRow = createMsgRow("${esc(T.chatBrandi)}", "error de conexi\\u00f3n. int\\u00e9ntalo de nuevo.", "is-ai");
+              if (userRow && userRow.parentNode) userRow.parentNode.removeChild(userRow);
+              brandiHistory.pop();
+              brandiInput.value = text;
+              var errRow = createMsgRow(brandiLabel, "error de conexion. intentalo de nuevo.", "is-ai");
               brandiList.appendChild(errRow);
+              brandiList.scrollTop = brandiList.scrollHeight;
             });
           });
         }
@@ -2312,7 +2406,7 @@ async function handleProject(request, env, url) {
             if (emptyMsg) emptyMsg.style.display = "none";
 
             var nowStr = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-            var userRow = createMsgRow("${esc(T.chatYou)}", text, "is-client", nowStr);
+            var userRow = createMsgRow(youLabel, text, "is-client", nowStr);
             humanList.appendChild(userRow);
             humanInput.value = "";
             humanList.scrollTop = humanList.scrollHeight;
@@ -2322,9 +2416,20 @@ async function handleProject(request, env, url) {
               headers: { "Content-Type": "application/json", "Accept": "application/json" },
               body: JSON.stringify({ op: "human_chat", message: text })
             })
-            .then(function(r){ return r.json(); })
+            .then(function(r){
+              if (!r.ok) throw new Error("status " + r.status);
+              return r.json();
+            })
             .catch(function(err){
               console.error("human chat error:", err);
+              if (userRow && userRow.parentNode) userRow.parentNode.removeChild(userRow);
+              humanInput.value = text;
+              var errMsg = document.createElement("div");
+              errMsg.className = "chat-intro-banner human-banner";
+              errMsg.style.borderColor = "#E8A33D";
+              errMsg.innerHTML = "<p style='color:#E8A33D;'>error de conexion. intentalo de nuevo.</p>";
+              humanList.appendChild(errMsg);
+              humanList.scrollTop = humanList.scrollHeight;
             });
           });
         }
@@ -2600,7 +2705,9 @@ async function handleReview(request, env, url) {
   }
 
   proj.reviewSubmitted = true;
-  await env.LEADS_KV.put(`project:${p}`, JSON.stringify(proj));
+  await env.LEADS_KV.put(`project:${p}`, JSON.stringify(proj), {
+    metadata: { status: proj.status || "active" },
+  });
   return msgPage(L, "rvThanks", 200, {
     footerUrl: trackingUrl,
     footerLabel: PG[L].common.openTracker,

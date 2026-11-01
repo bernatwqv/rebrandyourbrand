@@ -44,6 +44,8 @@ const approvePhaseToken = (key, projectToken, step) => signRaw(key, `approve|${p
 
 const cancelRenewalToken = (key, projectToken, dueIso) => signRaw(key, `crenew|${projectToken}|${dueIso}`);
 
+const renewalActionToken = (key, projectToken) => signRaw(key, `renew|${projectToken}`);
+
 const fileDownloadToken = (key, projectToken, step, fileId) => signRaw(key, `file|${projectToken}|${step}|${fileId}`);
 
 const adminChatToken = (key, projectToken) => signRaw(key, `adminchat|${projectToken}`);
@@ -70,6 +72,12 @@ async function cancelRenewalUrl(env, projectToken, dueIso) {
   const key = await getKey(env);
   const t = await cancelRenewalToken(key, projectToken, dueIso);
   return buildUrl("/cancel-renewal", { p: projectToken, due: dueIso, t });
+}
+
+async function renewalActionUrl(env, projectToken) {
+  const key = await getKey(env);
+  const t = await renewalActionToken(key, projectToken);
+  return buildUrl("/renovar", { p: projectToken, t });
 }
 
 async function fileDownloadUrl(env, projectToken, step, fileId) {

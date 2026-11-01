@@ -147,7 +147,7 @@ const AGREE_RE = /(?<![\p{L}\p{N}])(?:confirmo|confirm|vale|adelante|procedemos|
 const DENY_RE = /^\s*(?:no|nope|ez|ezeztatu|cancel\w*)(?![\p{L}\p{N}])/iu;
 
 // Precios oficiales que Brandi puede mencionar: 100 (paleta suelta, cuota anual o ronda extra), 400 (logo o web), 500 (paleta y web) y 800 (pack completo)
-const ALLOWED_EUR = new Set([100, 400, 500, 800]);
+const ALLOWED_EUR = new Set([0, 100, 400, 500, 800, 900]);
 
 const CATALOG = [
   `   - ${SERVICES.logo.names.es}: 400 € — ${SERVICES.logo.includes.es}.`,

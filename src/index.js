@@ -1,4 +1,4 @@
-const HTML_CLIENT_PATHS = new Set(["/verify", "/valorar", "/approve-phase", "/cancel-renewal"]);
+const HTML_CLIENT_PATHS = new Set(["/verify", "/valorar", "/approve-phase", "/cancel-renewal", "/renovar"]);
 
 const HTML_ADMIN_PATHS = new Set(["/testimonial", "/testimonial-delete", "/advance-phase", "/responder-chat"]);
 
@@ -27,6 +27,7 @@ export default {
         if (url.pathname === "/responder-chat") return await handleStudioChat(request, env, url);
         if (url.pathname === "/approve-phase") return await handlePhaseApprove(request, env, url);
         if (url.pathname === "/cancel-renewal") return await handleCancelRenewal(request, env, url);
+        if (url.pathname === "/renovar") return await handleRenewalRedirect(request, env, url);
         if (url.pathname === "/valorar") return await handleReview(request, env, url);
       } catch (e) {
         console.error("html route failed:", e?.message);

@@ -92,6 +92,12 @@ async function handleChatPost(request, env, body, o) {
 
     const lang = LANG_ORDER.includes(body.lang) ? body.lang : "es";
     const key = await getKey(env);
+    const rawAllMessages = Array.isArray(body.messages)
+      ? body.messages.filter((m) => m && typeof m.text === "string")
+      : [];
+    const fullEmail = findEmail(rawAllMessages);
+    const fullDomain = findDomain(rawAllMessages);
+
     const chatMessages = await normalizeMessages(key, body.messages);
     if (!chatMessages.length || chatMessages.at(-1).role !== "user") {
       throw new HttpError(400, "invalid_messages");
@@ -101,9 +107,9 @@ async function handleChatPost(request, env, body, o) {
 
     if (!(await verifySession(key, body.session, ip))) throw new HttpError(403, "session_invalid");
 
-    const email = findEmail(chatMessages);
+    const email = findEmail(chatMessages) || fullEmail;
     const brand0 = cleanBrand(body.brand);
-    const domain0 = cleanInput(body.domain, 200) || findDomain(chatMessages);
+    const domain0 = cleanInput(body.domain, 200) || findDomain(chatMessages) || fullDomain;
     const confirmSigIn = typeof body.confirmSig === "string" ? body.confirmSig : "";
     const isShown = async (p, b, d) =>
       !!(email && b && p && (!p.ids.includes("web") || d)) &&
@@ -112,6 +118,7 @@ async function handleChatPost(request, env, body, o) {
     const confirmAndSend = async (plan, brand, domain) => {
       if (!env.RESEND_API_KEY) throw new HttpError(500, "misconfigured");
       if (!plan) throw new HttpError(400, "plan_required");
+      if (!brand) throw new HttpError(400, "brand_required");
       if (!(await isShown(plan, brand, domain))) throw new HttpError(400, "invalid_confirmation");
 
       if (env.VERIFY_LIMITER) {

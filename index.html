@@ -22,7 +22,7 @@
         var l = String(langs[i] || '').toLowerCase().split('-')[0];
         if (l === 'es') return;
         if (l === 'ca' || l === 'eu' || l === 'en') {
-          try { localStorage.setItem('rybb-lang', l); } catch (e) {}
+          window.__rybb_auto_lang = l;
           return;
         }
       }
@@ -43,9 +43,9 @@
 <meta name="google-site-verification" content="YGC3173v8crkOSc3_K39sejUfe4hYPDlsOqbpdTAYXw" />
 <link rel="canonical" href="https://rebrandyourbrand.es/">
 <link rel="alternate" hreflang="es" href="https://rebrandyourbrand.es/">
-<link rel="alternate" hreflang="ca" href="https://rebrandyourbrand.es/ca/">
-<link rel="alternate" hreflang="eu" href="https://rebrandyourbrand.es/eu/">
-<link rel="alternate" hreflang="en" href="https://rebrandyourbrand.es/en/">
+<link rel="alternate" hreflang="ca" href="https://rebrandyourbrand.es/?lang=ca">
+<link rel="alternate" hreflang="eu" href="https://rebrandyourbrand.es/?lang=eu">
+<link rel="alternate" hreflang="en" href="https://rebrandyourbrand.es/?lang=en">
 <link rel="alternate" hreflang="x-default" href="https://rebrandyourbrand.es/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="rebrandyourbrand.es">
@@ -954,7 +954,7 @@ textarea { resize: vertical; }
         </div>
 
         <div class="reveal mb-12 quote-glass w-full">
-          <p class="lang-trans lowercase text-xs md:text-sm text-paper/85 tracking-wide leading-relaxed" data-i18n="plans-quote">nos ahorramos el .99 en trucos de marketing para ofrecerte una calidad innegociable.</p>
+          <p class="lang-trans lowercase text-xs md:text-sm text-paper/90 tracking-wide leading-relaxed" data-i18n="plans-quote">nos ahorramos el .99 en trucos de marketing para ofrecerte una calidad innegociable.</p>
         </div>
 
         <div id="services-builder" class="lang-trans w-full max-w-5xl mx-auto"></div>
@@ -1776,11 +1776,20 @@ textarea { resize: vertical; }
     };
     const reverseSlugMap = {};
     for (const [lang, map] of Object.entries(slugMap)) {
-      for (const [id, slug] of Object.entries(map)) if (slug) reverseSlugMap[slug] = { lang, id };
+      for (const [id, slug] of Object.entries(map)) if (slug && !reverseSlugMap[slug]) reverseSlugMap[slug] = { lang, id };
     }
 
     const initialHash = location.hash.slice(1);
-    let currentLang = reverseSlugMap[initialHash]?.lang || (() => { try { const l = localStorage.getItem('rybb-lang'); return translations[l] ? l : 'es'; } catch (e) { return 'es'; } })();
+    const searchLang = new URLSearchParams(location.search).get('lang');
+    const preferredLang = (translations[searchLang] ? searchLang : null) || (() => { try { const l = localStorage.getItem('rybb-lang'); return translations[l] ? l : null; } catch (e) { return null; } })() || window.__rybb_auto_lang || 'es';
+    let currentLang = preferredLang;
+    if (initialHash) {
+      if (slugMap[preferredLang] && Object.values(slugMap[preferredLang]).includes(initialHash)) {
+        currentLang = preferredLang;
+      } else if (reverseSlugMap[initialHash]?.lang) {
+        currentLang = reverseSlugMap[initialHash].lang;
+      }
+    }
     const initialSectionId = reverseSlugMap[initialHash]?.id || null;
     let currentSectionId = 'top';
 

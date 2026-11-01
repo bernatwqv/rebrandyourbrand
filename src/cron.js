@@ -18,7 +18,7 @@ async function inspectProjectDeadlines(env, keyName, nowMs) {
   let changed = false;
 
   // 0. Cierre automático y rescate si todos los servicios contratados están aprobados
-  if (checkAllServicesApproved(proj) && (!proj.finishedAt || !proj.reviewInvited || proj.status !== "done")) {
+  if (Array.isArray(proj.phases) && proj.phases.length > 0 && proj.phases.every((ph) => ph.status === "done") && (!proj.finishedAt || !proj.reviewInvited || proj.status !== "done")) {
     await finalizeProjectClosure(env, proj, projectToken);
     changed = true;
   }
@@ -65,7 +65,7 @@ async function inspectProjectDeadlines(env, keyName, nowMs) {
   }
 
   // 2. Cláusula 3.2 — Preaviso a los 30 días y rescisión por abandono a los 37 días sin actividad
-  if (proj.status === "active") {
+  if (proj.status === "active" || proj.status === "in_progress") {
     const hasMaterials =
       (Array.isArray(proj.materialsList) && proj.materialsList.length > 0) ||
       Boolean(proj.onboarding && (proj.onboarding.materials || proj.onboarding.submittedAt || proj.onboarding.receivedAt));
@@ -92,7 +92,7 @@ async function inspectProjectDeadlines(env, keyName, nowMs) {
                   reply_to: "hola@rebrandyourbrand.es",
                   subject: tWarn.subject(proj.brand),
                   ...renderEmail(lang, {
-                    paras: [tWarn.hello, tWarn.intro(bold(proj.brand)), tWarn.body],
+                    paras: [tWarn.hello, tWarn.intro(proj.brand), tWarn.body],
                     cta: { label: tWarn.cta, url: trackingUrl },
                     note: tWarn.note,
                   }),
@@ -120,7 +120,7 @@ async function inspectProjectDeadlines(env, keyName, nowMs) {
                       reply_to: "hola@rebrandyourbrand.es",
                       subject: tAb.subject(proj.brand),
                       ...renderEmail(lang, {
-                        paras: [tAb.hello, tAb.intro(bold(proj.brand)), tAb.body],
+                        paras: [tAb.hello, tAb.intro(proj.brand), tAb.body],
                         cta: { label: tAb.cta, url: trackingUrl },
                         note: tAb.note,
                       }),
@@ -185,7 +185,7 @@ async function inspectProjectDeadlines(env, keyName, nowMs) {
         const renewalEur = Number.isFinite(rawRenewal) && rawRenewal >= 0 ? rawRenewal : WEB_RENEWAL_EUR;
 
         if (renewalEur > 0 && env.STRIPE_SECRET_KEY) {
-          const payUrl = await createRenewalCheckout(env, proj, renewalEur);
+          const payUrl = await renewalActionUrl(env, projectToken);
           if (payUrl) {
             const tr = EM[lang].renewal;
             const dueStr = fmtDate(proj.nextRenewalAt, lang);
@@ -294,7 +294,9 @@ async function inspectProjectDeadlines(env, keyName, nowMs) {
   }
 
   if (changed) {
-    await env.LEADS_KV.put(keyName, JSON.stringify(proj));
+    await env.LEADS_KV.put(keyName, JSON.stringify(proj), {
+      metadata: { status: proj.status || "active" },
+    });
   }
 }
 
@@ -308,7 +310,11 @@ async function handleScheduled(controller, env, ctx) {
   let cursor;
   do {
     const list = await env.LEADS_KV.list({ prefix: "project:", cursor });
+    const INACTIVE_CRON_STATUSES = new Set(["abandoned", "cancelled"]);
     for (const item of list.keys) {
+      if (item.metadata?.status && INACTIVE_CRON_STATUSES.has(item.metadata.status)) {
+        continue;
+      }
       await inspectProjectDeadlines(env, item.name, nowMs).catch((e) =>
         console.error("cron project check failed:", item.name, e?.message)
       );

@@ -56,6 +56,7 @@ async function createProjectRecord(env, { clientEmail, brand, plan, lang, messag
     clientEmail,
     domain: cleanDomain,
     lang: pickLang(lang),
+    status: "active",
     services: plan.ids,
     totalEur: plan.total,
     messages: cleanMsgs,
@@ -70,6 +71,7 @@ async function createProjectRecord(env, { clientEmail, brand, plan, lang, messag
   };
   await env.LEADS_KV.put(projectKey, JSON.stringify(projectData), {
     expirationTtl: PENDING_PROJECT_TTL_SECONDS,
+    metadata: { status: "active" },
   });
   return projectData;
 }
@@ -160,6 +162,7 @@ async function ensureStripeCheckout(env, proj) {
     client_reference_id: proj.token,
     billing_address_collection: "required",
     "tax_id_collection[enabled]": "true",
+    "invoice_creation[enabled]": "true",
     customer_creation: "always",
     success_url: successUrl,
     cancel_url: projectUrl,
@@ -213,6 +216,7 @@ async function ensureStripeCheckout(env, proj) {
     proj.checkoutUrl = session.url;
     await env.LEADS_KV.put(`project:${proj.token}`, JSON.stringify(proj), {
       expirationTtl: PENDING_PROJECT_TTL_SECONDS,
+      metadata: { status: proj.status || "active" },
     });
     return { paid: false, url: session.url };
   } catch (e) {
@@ -245,6 +249,7 @@ async function createRenewalCheckout(env, proj, renewalEur) {
     client_reference_id: proj.token,
     billing_address_collection: "required",
     "tax_id_collection[enabled]": "true",
+    "invoice_creation[enabled]": "true",
     customer_creation: "always",
     success_url: projectUrl,
     cancel_url: projectUrl,
@@ -296,6 +301,7 @@ async function createExtraRevisionCheckout(env, proj, step, returnUrl, cancelUrl
     client_reference_id: proj.token,
     billing_address_collection: "required",
     "tax_id_collection[enabled]": "true",
+    "invoice_creation[enabled]": "true",
     customer_creation: "always",
     success_url: returnUrl,
     cancel_url: cancelUrl,
@@ -333,8 +339,8 @@ async function unlockExtraRevision(env, proj, step, sessionId, sessionData = nul
   const ph = (proj.phases || []).find((p) => Number(p.step) === Number(step));
   if (!ph) return false;
 
-  const paidSessions = Array.isArray(ph.paidRevisionSessions) ? ph.paidRevisionSessions : [];
-  if (paidSessions.includes(sessionId)) {
+  const usedSessions = Array.isArray(proj.usedRevisionSessions) ? proj.usedRevisionSessions : [];
+  if (usedSessions.includes(sessionId)) {
     return true;
   }
 
@@ -348,10 +354,20 @@ async function unlockExtraRevision(env, proj, step, sessionId, sessionData = nul
   if (session.metadata?.type !== "extra_revision") {
     return false;
   }
+  if (session.metadata?.projectToken !== proj.token) {
+    return false;
+  }
+  if (String(session.metadata?.step) !== String(step)) {
+    return false;
+  }
 
   const baseMax = ph.maxRevisions || MAX_PHASE_REVISIONS;
   ph.maxRevisions = baseMax + 1;
-  ph.paidRevisionSessions = [...paidSessions, sessionId];
+  const paidSessions = Array.isArray(ph.paidRevisionSessions) ? ph.paidRevisionSessions : [];
+  if (!paidSessions.includes(sessionId)) {
+    ph.paidRevisionSessions = [...paidSessions, sessionId];
+  }
+  proj.usedRevisionSessions = [...usedSessions, sessionId];
 
   // Asegurar coherencia de estados: no bloquear ni desincronizar la fase ni el proyecto
   if (proj.status !== "done") {
@@ -361,16 +377,9 @@ async function unlockExtraRevision(env, proj, step, sessionId, sessionData = nul
     ph.status = "review";
   }
 
-  await env.LEADS_KV.put(`project:${proj.token}`, JSON.stringify(proj));
-
-  // Si todas las fases de servicio ya estuviesen aprobadas, asegurar la secuencia de cierre
-  if (typeof checkAllServicesApproved === "function" && checkAllServicesApproved(proj)) {
-    if (typeof finalizeProjectClosure === "function") {
-      await finalizeProjectClosure(env, proj, proj.token).catch((e) =>
-        console.error("finalizeProjectClosure on unlockExtraRevision failed:", e?.message)
-      );
-    }
-  }
+  await env.LEADS_KV.put(`project:${proj.token}`, JSON.stringify(proj), {
+    metadata: { status: proj.status || "active" },
+  });
 
   if (env.RESEND_API_KEY) {
     const manageUrl = await advancePhaseUrl(env, proj.token, ph.step);
@@ -481,7 +490,11 @@ async function processPaidSession(env, session, { fromWebhook = false } = {}) {
     proj.nextRenewalAt = addOneYearIso(proj.nextRenewalAt || proj.finishedAt);
     proj.renewalCanceled = false;
     proj.renewalRemindedFor = "";
-    await env.LEADS_KV.put(key, JSON.stringify(proj));
+    proj.renewalOverdueAlertSentAt = null;
+    proj.renewalReminderSentAt = null;
+    await env.LEADS_KV.put(key, JSON.stringify(proj), {
+      metadata: { status: proj.status || "active" },
+    });
     await alertAdmin(
       env,
       `renovación anual abonada — ${proj.brand}`,
@@ -534,7 +547,7 @@ async function processPaidSession(env, session, { fromWebhook = false } = {}) {
   }
 
   if (proj.emailsSent) {
-    if (dirty) await env.LEADS_KV.put(key, JSON.stringify(proj));
+    if (dirty) await env.LEADS_KV.put(key, JSON.stringify(proj), { metadata: { status: proj.status || "active" } });
     return;
   }
 
@@ -584,7 +597,7 @@ async function processPaidSession(env, session, { fromWebhook = false } = {}) {
               ...renderEmail(lang, {
                 paras: [
                   inf.hello,
-                  inf.intro(bold(proj.brand)),
+                  inf.intro(proj.brand),
                   lines(
                     inf.coveredTitle,
                     inf.itemDomain,
@@ -647,7 +660,7 @@ async function processPaidSession(env, session, { fromWebhook = false } = {}) {
     dirty = true;
   } finally {
     // Una única escritura consolidada en KV sin expirationTtl (el proyecto pagado queda permanente)
-    if (dirty) await env.LEADS_KV.put(key, JSON.stringify(proj));
+    if (dirty) await env.LEADS_KV.put(key, JSON.stringify(proj), { metadata: { status: proj.status || "active" } });
   }
 }
 

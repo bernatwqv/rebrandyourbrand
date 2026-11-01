@@ -154,7 +154,7 @@ const AGREE_RE = /(?<![\p{L}\p{N}])(?:confirmo|confirm|vale|adelante|procedemos|
 const DENY_RE = /^\s*(?:no|nope|ez|ezeztatu|cancel\w*)(?![\p{L}\p{N}])/iu;
 
 // Precios oficiales que Brandi puede mencionar: 100 (paleta suelta, cuota anual o ronda extra), 400 (logo o web), 500 (paleta y web) y 800 (pack completo)
-const ALLOWED_EUR = new Set([100, 400, 500, 800]);
+const ALLOWED_EUR = new Set([0, 100, 400, 500, 800, 900]);
 
 const CATALOG = [
   `   - ${SERVICES.logo.names.es}: 400 € — ${SERVICES.logo.includes.es}.`,
@@ -304,7 +304,7 @@ const SECURITY_HEADERS = {
   "Referrer-Policy": "no-referrer",
 };
 
-const PAGE_CSP = "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; form-action 'self' https://checkout.stripe.com; base-uri 'none'; frame-ancestors 'none'";
+const PAGE_CSP = "default-src 'none'; connect-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; form-action 'self' https://checkout.stripe.com; base-uri 'none'; frame-ancestors 'none'";
 
 const HTML_HEADERS = {
   "Content-Type": "text/html; charset=utf-8",
@@ -1722,6 +1722,8 @@ const approvePhaseToken = (key, projectToken, step) => signRaw(key, `approve|${p
 
 const cancelRenewalToken = (key, projectToken, dueIso) => signRaw(key, `crenew|${projectToken}|${dueIso}`);
 
+const renewalActionToken = (key, projectToken) => signRaw(key, `renew|${projectToken}`);
+
 const fileDownloadToken = (key, projectToken, step, fileId) => signRaw(key, `file|${projectToken}|${step}|${fileId}`);
 
 const adminChatToken = (key, projectToken) => signRaw(key, `adminchat|${projectToken}`);
@@ -1748,6 +1750,12 @@ async function cancelRenewalUrl(env, projectToken, dueIso) {
   const key = await getKey(env);
   const t = await cancelRenewalToken(key, projectToken, dueIso);
   return buildUrl("/cancel-renewal", { p: projectToken, due: dueIso, t });
+}
+
+async function renewalActionUrl(env, projectToken) {
+  const key = await getKey(env);
+  const t = await renewalActionToken(key, projectToken);
+  return buildUrl("/renovar", { p: projectToken, t });
 }
 
 async function fileDownloadUrl(env, projectToken, step, fileId) {
@@ -1947,6 +1955,7 @@ async function startVerification(env, { lang, messages, plan, clientEmail, brand
     throw new HttpError(429, "email_cooldown", { "Retry-After": String(EMAIL_COOLDOWN_SECONDS) });
   }
   if (!plan) throw new HttpError(400, "plan_required");
+  if (!brand || typeof brand !== "string" || !brand.trim()) throw new HttpError(400, "brand_required");
 
   const l = pickLang(lang);
   const verifyToken = randomHex(32);
@@ -2035,11 +2044,12 @@ async function deliverVerifiedLead(env, ctx, { lang, messages, clientEmail, bran
 
 function normalizeServices(input) {
   if (!Array.isArray(input)) return null;
-  const ids = SERVICE_IDS.filter((id) => input.includes(id));
+  let ids = SERVICE_IDS.filter((id) => input.includes(id));
   if (!ids.length) return null;
   if (ids.includes("logo") && !ids.includes("paleta")) {
     ids.push("paleta");
   }
+  ids = SERVICE_IDS.filter((id) => ids.includes(id));
   return { ids, total: calcPlanTotal(ids) };
 }
 
@@ -2087,17 +2097,44 @@ function findEmail(chatMessages) {
 
 const DOMAIN_FIND = /\b(?:https?:\/\/)?(?:www\.)?([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.[a-z]{2,}(?:\.[a-z]{2,})?)\b/i;
 
+const IGNORED_EMAIL_DOMAINS = new Set([
+  "gmail.com",
+  "googlemail.com",
+  "hotmail.com",
+  "outlook.com",
+  "live.com",
+  "yahoo.com",
+  "icloud.com",
+  "proton.me",
+  "protonmail.com",
+  "gmx.com",
+  "msn.com",
+]);
+
+function cleanDomainCandidate(raw) {
+  if (!raw || typeof raw !== "string") return "";
+  const withoutEmails = raw.replace(/\S+@\S+\.\S+/g, " ");
+  const m = withoutEmails.match(DOMAIN_FIND);
+  if (!m) return "";
+  const d = m[1].toLowerCase();
+  if (IGNORED_EMAIL_DOMAINS.has(d)) return "";
+  return d;
+}
+
 function findDomain(chatMessages, fallback = "") {
   if (fallback && typeof fallback === "string") {
-    const trimmed = fallback.trim();
-    const m = trimmed.match(DOMAIN_FIND);
-    if (m) return m[1].toLowerCase();
-    if (trimmed.length > 0) return trimmed.toLowerCase();
+    const d = cleanDomainCandidate(fallback);
+    if (d) return d;
+    const trimmed = fallback.trim().toLowerCase();
+    if (trimmed && !trimmed.includes("@") && !IGNORED_EMAIL_DOMAINS.has(trimmed)) {
+      return trimmed;
+    }
   }
-  for (let i = chatMessages.length - 1; i >= 0; i--) {
-    if (chatMessages[i].role !== "user") continue;
-    const m = chatMessages[i].text.match(DOMAIN_FIND);
-    if (m) return m[1].toLowerCase();
+  const msgs = Array.isArray(chatMessages) ? chatMessages : [];
+  for (let i = msgs.length - 1; i >= 0; i--) {
+    if (msgs[i].role !== "user" || typeof msgs[i].text !== "string") continue;
+    const d = cleanDomainCandidate(msgs[i].text);
+    if (d) return d;
   }
   return "";
 }
@@ -2369,6 +2406,7 @@ async function createProjectRecord(env, { clientEmail, brand, plan, lang, messag
     clientEmail,
     domain: cleanDomain,
     lang: pickLang(lang),
+    status: "active",
     services: plan.ids,
     totalEur: plan.total,
     messages: cleanMsgs,
@@ -2383,6 +2421,7 @@ async function createProjectRecord(env, { clientEmail, brand, plan, lang, messag
   };
   await env.LEADS_KV.put(projectKey, JSON.stringify(projectData), {
     expirationTtl: PENDING_PROJECT_TTL_SECONDS,
+    metadata: { status: "active" },
   });
   return projectData;
 }
@@ -2473,6 +2512,7 @@ async function ensureStripeCheckout(env, proj) {
     client_reference_id: proj.token,
     billing_address_collection: "required",
     "tax_id_collection[enabled]": "true",
+    "invoice_creation[enabled]": "true",
     customer_creation: "always",
     success_url: successUrl,
     cancel_url: projectUrl,
@@ -2526,6 +2566,7 @@ async function ensureStripeCheckout(env, proj) {
     proj.checkoutUrl = session.url;
     await env.LEADS_KV.put(`project:${proj.token}`, JSON.stringify(proj), {
       expirationTtl: PENDING_PROJECT_TTL_SECONDS,
+      metadata: { status: proj.status || "active" },
     });
     return { paid: false, url: session.url };
   } catch (e) {
@@ -2558,6 +2599,7 @@ async function createRenewalCheckout(env, proj, renewalEur) {
     client_reference_id: proj.token,
     billing_address_collection: "required",
     "tax_id_collection[enabled]": "true",
+    "invoice_creation[enabled]": "true",
     customer_creation: "always",
     success_url: projectUrl,
     cancel_url: projectUrl,
@@ -2609,6 +2651,7 @@ async function createExtraRevisionCheckout(env, proj, step, returnUrl, cancelUrl
     client_reference_id: proj.token,
     billing_address_collection: "required",
     "tax_id_collection[enabled]": "true",
+    "invoice_creation[enabled]": "true",
     customer_creation: "always",
     success_url: returnUrl,
     cancel_url: cancelUrl,
@@ -2646,8 +2689,8 @@ async function unlockExtraRevision(env, proj, step, sessionId, sessionData = nul
   const ph = (proj.phases || []).find((p) => Number(p.step) === Number(step));
   if (!ph) return false;
 
-  const paidSessions = Array.isArray(ph.paidRevisionSessions) ? ph.paidRevisionSessions : [];
-  if (paidSessions.includes(sessionId)) {
+  const usedSessions = Array.isArray(proj.usedRevisionSessions) ? proj.usedRevisionSessions : [];
+  if (usedSessions.includes(sessionId)) {
     return true;
   }
 
@@ -2661,10 +2704,20 @@ async function unlockExtraRevision(env, proj, step, sessionId, sessionData = nul
   if (session.metadata?.type !== "extra_revision") {
     return false;
   }
+  if (session.metadata?.projectToken !== proj.token) {
+    return false;
+  }
+  if (String(session.metadata?.step) !== String(step)) {
+    return false;
+  }
 
   const baseMax = ph.maxRevisions || MAX_PHASE_REVISIONS;
   ph.maxRevisions = baseMax + 1;
-  ph.paidRevisionSessions = [...paidSessions, sessionId];
+  const paidSessions = Array.isArray(ph.paidRevisionSessions) ? ph.paidRevisionSessions : [];
+  if (!paidSessions.includes(sessionId)) {
+    ph.paidRevisionSessions = [...paidSessions, sessionId];
+  }
+  proj.usedRevisionSessions = [...usedSessions, sessionId];
 
   // Asegurar coherencia de estados: no bloquear ni desincronizar la fase ni el proyecto
   if (proj.status !== "done") {
@@ -2674,16 +2727,9 @@ async function unlockExtraRevision(env, proj, step, sessionId, sessionData = nul
     ph.status = "review";
   }
 
-  await env.LEADS_KV.put(`project:${proj.token}`, JSON.stringify(proj));
-
-  // Si todas las fases de servicio ya estuviesen aprobadas, asegurar la secuencia de cierre
-  if (typeof checkAllServicesApproved === "function" && checkAllServicesApproved(proj)) {
-    if (typeof finalizeProjectClosure === "function") {
-      await finalizeProjectClosure(env, proj, proj.token).catch((e) =>
-        console.error("finalizeProjectClosure on unlockExtraRevision failed:", e?.message)
-      );
-    }
-  }
+  await env.LEADS_KV.put(`project:${proj.token}`, JSON.stringify(proj), {
+    metadata: { status: proj.status || "active" },
+  });
 
   if (env.RESEND_API_KEY) {
     const manageUrl = await advancePhaseUrl(env, proj.token, ph.step);
@@ -2794,7 +2840,11 @@ async function processPaidSession(env, session, { fromWebhook = false } = {}) {
     proj.nextRenewalAt = addOneYearIso(proj.nextRenewalAt || proj.finishedAt);
     proj.renewalCanceled = false;
     proj.renewalRemindedFor = "";
-    await env.LEADS_KV.put(key, JSON.stringify(proj));
+    proj.renewalOverdueAlertSentAt = null;
+    proj.renewalReminderSentAt = null;
+    await env.LEADS_KV.put(key, JSON.stringify(proj), {
+      metadata: { status: proj.status || "active" },
+    });
     await alertAdmin(
       env,
       `renovación anual abonada — ${proj.brand}`,
@@ -2847,7 +2897,7 @@ async function processPaidSession(env, session, { fromWebhook = false } = {}) {
   }
 
   if (proj.emailsSent) {
-    if (dirty) await env.LEADS_KV.put(key, JSON.stringify(proj));
+    if (dirty) await env.LEADS_KV.put(key, JSON.stringify(proj), { metadata: { status: proj.status || "active" } });
     return;
   }
 
@@ -2897,7 +2947,7 @@ async function processPaidSession(env, session, { fromWebhook = false } = {}) {
               ...renderEmail(lang, {
                 paras: [
                   inf.hello,
-                  inf.intro(bold(proj.brand)),
+                  inf.intro(proj.brand),
                   lines(
                     inf.coveredTitle,
                     inf.itemDomain,
@@ -2960,7 +3010,7 @@ async function processPaidSession(env, session, { fromWebhook = false } = {}) {
     dirty = true;
   } finally {
     // Una única escritura consolidada en KV sin expirationTtl (el proyecto pagado queda permanente)
-    if (dirty) await env.LEADS_KV.put(key, JSON.stringify(proj));
+    if (dirty) await env.LEADS_KV.put(key, JSON.stringify(proj), { metadata: { status: proj.status || "active" } });
   }
 }
 
@@ -3985,11 +4035,7 @@ async function handleVerify(request, env, ctx, url) {
 
 function checkAllServicesApproved(proj) {
   if (!proj || !Array.isArray(proj.phases) || proj.phases.length === 0) return false;
-  const servicePhases = proj.phases.filter((ph) => ph.key !== "delivery");
-  if (servicePhases.length === 0) {
-    return proj.phases.every((ph) => ph.status === "done");
-  }
-  return servicePhases.every((ph) => ph.status === "done");
+  return proj.phases.every((ph) => ph.status === "done");
 }
 
 async function finalizeProjectClosure(
@@ -4075,7 +4121,7 @@ async function finalizeProjectClosure(
           ...renderEmail(lang, {
             paras: [
               tc.hello,
-              tc.intro(bold(proj.brand)),
+              tc.intro(proj.brand),
               tc.body,
               effectiveDelivUrl
                 ? `${tc.deliverable}: <a href="${esc(effectiveDelivUrl)}" target="_blank" style="color:#3D5A85;font-weight:600;">${esc(effectiveDelivFilename || effectiveDelivUrl)}</a>`
@@ -4147,7 +4193,9 @@ async function finalizeProjectClosure(
   }
 
   if (changed) {
-    await env.LEADS_KV.put(`project:${projectToken}`, JSON.stringify(proj));
+    await env.LEADS_KV.put(`project:${projectToken}`, JSON.stringify(proj), {
+      metadata: { status: proj.status || "done" },
+    });
   }
 
   return { ok: true, finished: true };
@@ -4192,25 +4240,34 @@ async function completeProjectPhase(
   if (note) advancedPhase.note = note;
 
   // Comprobar si se ha alcanzado el final del último servicio contratado o de todas las fases
-  const allServicesApproved = checkAllServicesApproved(proj);
   let nextPhase = null;
   let nextStep = 0;
   let finished = false;
 
-  if (allServicesApproved || targetIdx + 1 >= proj.phases.length) {
+  const isLastPhase = targetIdx + 1 >= proj.phases.length;
+  if (isLastPhase && advancedPhase.key === "delivery") {
     finished = true;
     await finalizeProjectClosure(env, proj, projectToken, {
       deliverableUrl: deliverableUrl || advancedPhase.deliverableUrl || "",
       deliverableFilename: deliverableFilename || advancedPhase.deliverableFilename || "",
       note: note || advancedPhase.note || "",
     });
-  } else {
+  } else if (!isLastPhase) {
     nextPhase = proj.phases[targetIdx + 1];
     nextPhase.status = "active";
     nextPhase.date = now;
     nextStep = nextPhase.step;
     proj.currentPhase = nextStep;
-    await env.LEADS_KV.put(`project:${projectToken}`, JSON.stringify(proj));
+    await env.LEADS_KV.put(`project:${projectToken}`, JSON.stringify(proj), {
+      metadata: { status: proj.status || "active" },
+    });
+    if (nextPhase.key === "delivery" && approvedBy === "client") {
+      await alertAdmin(
+        env,
+        `todas las fases creativas aprobadas — ${proj.brand}`,
+        `el cliente ha aprobado la última fase creativa. el proyecto pasa a la fase de entrega final ("delivery"), pendiente del despliegue y entrega de archivos finales por parte del estudio.\n\ncliente: ${proj.clientEmail}\nproyecto: ${proj.brand}`
+      ).catch(() => {});
+    }
   }
 
   const lang = pickLang(proj.lang);
@@ -4730,7 +4787,9 @@ async function handlePhaseAdvance(request, env, url) {
         `proposal-${projectToken}-${step}-${Date.now()}`
       );
 
-      await env.LEADS_KV.put(`project:${projectToken}`, JSON.stringify(proj));
+      await env.LEADS_KV.put(`project:${projectToken}`, JSON.stringify(proj), {
+        metadata: { status: proj.status || "active" },
+      });
     } catch (e) {
       console.error("proposal email failed:", e?.message);
       return htmlResponse(
@@ -4813,10 +4872,6 @@ async function handlePhaseApprove(request, env, url) {
 
   const ph = (proj.phases || []).find((x) => x.step === step);
   if (!ph || !proj.paid) return msgPage(L, "invalid", 400);
-
-  if (checkAllServicesApproved(proj) && (!proj.finishedAt || !proj.reviewInvited || proj.status !== "done")) {
-    await finalizeProjectClosure(env, proj, p);
-  }
 
   if (ph.status === "done" || Number(proj.currentPhase) !== step) {
     const isCompleted = proj.status === "done" || checkAllServicesApproved(proj);
@@ -4996,7 +5051,9 @@ async function handlePhaseApprove(request, env, url) {
     delete ph.reminderSentAt;
     delete ph.tacitAlertSentAt;
     delete proj.abandonWarningSentAt;
-    await env.LEADS_KV.put(`project:${p}`, JSON.stringify(proj));
+    await env.LEADS_KV.put(`project:${p}`, JSON.stringify(proj), {
+      metadata: { status: proj.status || "active" },
+    });
 
     const noticeText = PG[L].tr?.actionRegisteredNotice || "aviso: esta acción ya ha quedado registrada en el sistema y nuestro equipo ha recibido la notificación para continuar con el trabajo.";
     return htmlResponse(
@@ -5117,6 +5174,38 @@ async function handleCancelRenewal(request, env, url) {
   );
 }
 
+// ── REDIRECCIÓN PERSISTENTE DE RENOVACIÓN (/renovar) ──
+async function handleRenewalRedirect(request, env, url) {
+  let L = langFromRequest(request);
+  const p = url.searchParams.get("p");
+  const t = url.searchParams.get("t");
+  if (!p || !/^[a-f0-9]{64}$/.test(p) || !t || !/^[a-f0-9]{64}$/.test(t)) {
+    return msgPage(L, "invalid", 400);
+  }
+  const key = await getKey(env);
+  if (!(await verifyRaw(key, `renew|${p}`, t))) {
+    return msgPage(L, "invalid", 400);
+  }
+  if (!env.LEADS_KV) return msgPage(L, "config", 500);
+  const raw = await env.LEADS_KV.get(`project:${p}`);
+  if (!raw) return msgPage(L, "trackMissing", 404);
+  const proj = JSON.parse(raw);
+  L = pickLang(proj.lang);
+  if (!proj.paid || !Array.isArray(proj.services) || !proj.services.includes("web")) {
+    return msgPage(L, "invalid", 400);
+  }
+  const rawRenewal =
+    env.WEB_RENEWAL_EUR !== undefined && String(env.WEB_RENEWAL_EUR).trim() !== ""
+      ? Number(env.WEB_RENEWAL_EUR)
+      : WEB_RENEWAL_EUR;
+  const renewalEur = Number.isFinite(rawRenewal) && rawRenewal >= 0 ? rawRenewal : WEB_RENEWAL_EUR;
+  const checkoutUrl = await createRenewalCheckout(env, proj, renewalEur);
+  if (!checkoutUrl) {
+    return paymentRetryPage(L);
+  }
+  return redirectTo(checkoutUrl);
+}
+
 // ── DESCARGA DIRECTA DE ENTREGABLES (/file) ──
 async function handleFileDownload(request, env, url) {
   if (request.method !== "GET" && request.method !== "HEAD") {
@@ -5177,17 +5266,42 @@ async function handleFileDownload(request, env, url) {
   const size = metadata?.size || value.byteLength;
   const encodedName = encodeURIComponent(safeName);
 
+  const SAFE_INLINE_TYPES = new Set([
+    "image/png",
+    "image/jpeg",
+    "image/webp",
+    "image/gif",
+    "application/pdf",
+  ]);
+  const dispositionType = SAFE_INLINE_TYPES.has(contentType.toLowerCase()) ? "inline" : "attachment";
+
   return new Response(value, {
     status: 200,
     headers: {
       "Content-Type": contentType,
-      "Content-Disposition": `inline; filename="${safeName.replace(/["\r\n\\]/g, "_")}"; filename*=UTF-8''${encodedName}`,
+      "Content-Disposition": `${dispositionType}; filename="${safeName.replace(/["\r\n\\]/g, "_")}"; filename*=UTF-8''${encodedName}`,
       "Content-Length": String(size),
       "Cache-Control": "private, max-age=86400",
+      "Content-Security-Policy": "sandbox",
       "X-Content-Type-Options": "nosniff",
       "Referrer-Policy": "no-referrer",
     },
   });
+}
+
+async function checkProjectChatRateLimit(env, token, ip) {
+  if (env.CHAT_LIMITER) {
+    const { success } = await env.CHAT_LIMITER.limit({ key: `pc:${token.slice(0, 16)}:${ipKey(ip)}` });
+    if (!success) return false;
+  }
+  if (env.LEADS_KV) {
+    const rlKey = `rl:pchat:${token}:${ipKey(ip)}`;
+    const current = await env.LEADS_KV.get(rlKey);
+    const count = current ? parseInt(current, 10) : 0;
+    if (count >= 12) return false;
+    await env.LEADS_KV.put(rlKey, String(count + 1), { expirationTtl: 600 });
+  }
+  return true;
 }
 
 // ── SEGUIMIENTO DEL PROYECTO, RESCATE DE PAGO Y ONBOARDING (/proyecto) ──
@@ -5219,6 +5333,11 @@ async function handleProject(request, env, url) {
     const op = String(bodyJson?.op || form?.get("op") || (!proj.paid ? "pay" : ""));
 
     if (op === "brandi_chat") {
+      const okRate = await checkProjectChatRateLimit(env, token, ip);
+      if (!okRate) {
+        if (bodyJson) return jsonResponse({ error: "rate_limited" }, 429);
+        return redirectTo(projectPageUrl + "#chat");
+      }
       const msgText = cleanInput(bodyJson?.message || form?.get("message") || "", 1000);
       if (!msgText) {
         if (bodyJson) return jsonResponse({ error: "empty_message" }, 400);
@@ -5227,8 +5346,9 @@ async function handleProject(request, env, url) {
       const rawHistory = Array.isArray(bodyJson?.history) ? bodyJson.history : [];
       const history = rawHistory
         .filter((m) => m && (m.role === "user" || m.role === "assistant") && typeof m.text === "string")
-        .slice(-6);
-      history.push({ role: "user", text: msgText });
+        .slice(-12)
+        .map((m) => ({ role: m.role, text: m.text.trim().slice(0, 600) }));
+      history.push({ role: "user", text: msgText.slice(0, 600) });
 
       const reply = await askGroqProject(env, L, proj, history);
       if (bodyJson) {
@@ -5238,10 +5358,15 @@ async function handleProject(request, env, url) {
     }
 
     if (op === "human_chat") {
+      const okRate = await checkProjectChatRateLimit(env, token, ip);
+      if (!okRate) {
+        if (bodyJson) return jsonResponse({ error: "rate_limited" }, 429);
+        return redirectTo(projectPageUrl + "#chat-human");
+      }
       const msgText = cleanInput(bodyJson?.message || form?.get("message") || "", 2000);
       if (!msgText) {
         if (bodyJson) return jsonResponse({ error: "empty_message" }, 400);
-        return redirectTo(projectPageUrl + "#chat");
+        return redirectTo(projectPageUrl + "#chat-human");
       }
 
       const chatKey = `project_chat:${token}`;
@@ -5254,7 +5379,8 @@ async function handleProject(request, env, url) {
         date: new Date().toISOString(),
       };
       chatList.push(newMsg);
-      await env.LEADS_KV.put(chatKey, JSON.stringify(chatList));
+      const cappedHistory = chatList.slice(-100);
+      await env.LEADS_KV.put(chatKey, JSON.stringify(cappedHistory));
 
       if (env.RESEND_API_KEY) {
         const studioUrl = await studioChatUrl(env, token);
@@ -5546,7 +5672,9 @@ async function handleProject(request, env, url) {
         delete proj.abandonWarningSentAt;
       }
 
-      await env.LEADS_KV.put(`project:${token}`, JSON.stringify(proj));
+      await env.LEADS_KV.put(`project:${token}`, JSON.stringify(proj), {
+        metadata: { status: proj.status || "active" },
+      });
 
       if (env.RESEND_API_KEY) {
         const manageUrl = await advancePhaseUrl(env, token, proj.currentPhase || 1);
@@ -5614,7 +5742,9 @@ async function handleProject(request, env, url) {
           delete proj.onboarding;
         }
         proj.lastAdded = null;
-        await env.LEADS_KV.put(`project:${token}`, JSON.stringify(proj));
+        await env.LEADS_KV.put(`project:${token}`, JSON.stringify(proj), {
+          metadata: { status: proj.status || "active" },
+        });
 
         if (env.RESEND_API_KEY) {
           await resendSend(
@@ -5646,7 +5776,9 @@ async function handleProject(request, env, url) {
     return new Response("method not allowed", { status: 405, headers: { Allow: "GET, HEAD, POST" } });
   }
 
-  if (!proj.paid || !proj.emailsSent || !proj.receiptUrl) {
+  const receiptCheckedAt = Number(proj.receiptCheckedAt) || 0;
+  const shouldCheckReceipt = !proj.receiptUrl && (!receiptCheckedAt || (Date.now() - receiptCheckedAt > 10 * 60 * 1000));
+  if (!proj.paid || !proj.emailsSent || shouldCheckReceipt) {
     const sid = url.searchParams.get("session_id") || proj.stripeSessionId;
     if (sid && /^cs_[A-Za-z0-9_]+$/.test(sid) && env.STRIPE_SECRET_KEY) {
       const session = await fetchStripeSession(env, sid);
@@ -5656,6 +5788,12 @@ async function handleProject(request, env, url) {
         );
         const fresh = await env.LEADS_KV.get(`project:${token}`);
         if (fresh) proj = JSON.parse(fresh);
+      }
+      if (!proj.receiptUrl) {
+        proj.receiptCheckedAt = Date.now();
+        await env.LEADS_KV.put(`project:${token}`, JSON.stringify(proj), {
+          metadata: { status: proj.status || "active" },
+        });
       }
     }
   }
@@ -5745,10 +5883,6 @@ async function handleProject(request, env, url) {
         })();
       </script>`
       : "";
-
-  if (checkAllServicesApproved(proj) && (!proj.finishedAt || !proj.reviewInvited || proj.status !== "done")) {
-    await finalizeProjectClosure(env, proj, token);
-  }
 
   const allDone = Array.isArray(proj.phases) && proj.phases.every((ph) => ph.status === "done");
 
@@ -6133,6 +6267,9 @@ async function handleProject(request, env, url) {
           return row;
         }
 
+        var youLabel = ${JSON.stringify(T.chatYou)};
+        var brandiLabel = ${JSON.stringify(T.chatBrandi)};
+
         if (brandiForm) {
           brandiForm.addEventListener("submit", function(e){
             var text = (brandiInput.value || "").trim();
@@ -6140,7 +6277,7 @@ async function handleProject(request, env, url) {
             if (!window.fetch) return;
             e.preventDefault();
 
-            var userRow = createMsgRow("${esc(T.chatYou)}", text, "is-client");
+            var userRow = createMsgRow(youLabel, text, "is-client");
             brandiList.appendChild(userRow);
             brandiInput.value = "";
             brandiList.scrollTop = brandiList.scrollHeight;
@@ -6166,20 +6303,27 @@ async function handleProject(request, env, url) {
               headers: { "Content-Type": "application/json", "Accept": "application/json" },
               body: JSON.stringify({ op: "brandi_chat", message: text, history: brandiHistory })
             })
-            .then(function(r){ return r.json(); })
+            .then(function(r){
+              if (!r.ok) throw new Error("status " + r.status);
+              return r.json();
+            })
             .then(function(res){
               if (typingRow && typingRow.parentNode) typingRow.parentNode.removeChild(typingRow);
               var replyText = res && res.reply ? res.reply : "no se ha podido procesar la respuesta.";
               brandiHistory.push({ role: "assistant", text: replyText });
 
-              var aiRow = createMsgRow("${esc(T.chatBrandi)}", replyText, "is-ai");
+              var aiRow = createMsgRow(brandiLabel, replyText, "is-ai");
               brandiList.appendChild(aiRow);
               brandiList.scrollTop = brandiList.scrollHeight;
             })
-            .catch(function(){
+            .catch(function(err){
               if (typingRow && typingRow.parentNode) typingRow.parentNode.removeChild(typingRow);
-              var errRow = createMsgRow("${esc(T.chatBrandi)}", "error de conexi\\u00f3n. int\\u00e9ntalo de nuevo.", "is-ai");
+              if (userRow && userRow.parentNode) userRow.parentNode.removeChild(userRow);
+              brandiHistory.pop();
+              brandiInput.value = text;
+              var errRow = createMsgRow(brandiLabel, "error de conexion. intentalo de nuevo.", "is-ai");
               brandiList.appendChild(errRow);
+              brandiList.scrollTop = brandiList.scrollHeight;
             });
           });
         }
@@ -6195,7 +6339,7 @@ async function handleProject(request, env, url) {
             if (emptyMsg) emptyMsg.style.display = "none";
 
             var nowStr = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-            var userRow = createMsgRow("${esc(T.chatYou)}", text, "is-client", nowStr);
+            var userRow = createMsgRow(youLabel, text, "is-client", nowStr);
             humanList.appendChild(userRow);
             humanInput.value = "";
             humanList.scrollTop = humanList.scrollHeight;
@@ -6205,9 +6349,20 @@ async function handleProject(request, env, url) {
               headers: { "Content-Type": "application/json", "Accept": "application/json" },
               body: JSON.stringify({ op: "human_chat", message: text })
             })
-            .then(function(r){ return r.json(); })
+            .then(function(r){
+              if (!r.ok) throw new Error("status " + r.status);
+              return r.json();
+            })
             .catch(function(err){
               console.error("human chat error:", err);
+              if (userRow && userRow.parentNode) userRow.parentNode.removeChild(userRow);
+              humanInput.value = text;
+              var errMsg = document.createElement("div");
+              errMsg.className = "chat-intro-banner human-banner";
+              errMsg.style.borderColor = "#E8A33D";
+              errMsg.innerHTML = "<p style='color:#E8A33D;'>error de conexion. intentalo de nuevo.</p>";
+              humanList.appendChild(errMsg);
+              humanList.scrollTop = humanList.scrollHeight;
             });
           });
         }
@@ -6483,7 +6638,9 @@ async function handleReview(request, env, url) {
   }
 
   proj.reviewSubmitted = true;
-  await env.LEADS_KV.put(`project:${p}`, JSON.stringify(proj));
+  await env.LEADS_KV.put(`project:${p}`, JSON.stringify(proj), {
+    metadata: { status: proj.status || "active" },
+  });
   return msgPage(L, "rvThanks", 200, {
     footerUrl: trackingUrl,
     footerLabel: PG[L].common.openTracker,
@@ -6793,6 +6950,12 @@ async function handleChatPost(request, env, body, o) {
 
     const lang = LANG_ORDER.includes(body.lang) ? body.lang : "es";
     const key = await getKey(env);
+    const rawAllMessages = Array.isArray(body.messages)
+      ? body.messages.filter((m) => m && typeof m.text === "string")
+      : [];
+    const fullEmail = findEmail(rawAllMessages);
+    const fullDomain = findDomain(rawAllMessages);
+
     const chatMessages = await normalizeMessages(key, body.messages);
     if (!chatMessages.length || chatMessages.at(-1).role !== "user") {
       throw new HttpError(400, "invalid_messages");
@@ -6802,9 +6965,9 @@ async function handleChatPost(request, env, body, o) {
 
     if (!(await verifySession(key, body.session, ip))) throw new HttpError(403, "session_invalid");
 
-    const email = findEmail(chatMessages);
+    const email = findEmail(chatMessages) || fullEmail;
     const brand0 = cleanBrand(body.brand);
-    const domain0 = cleanInput(body.domain, 200) || findDomain(chatMessages);
+    const domain0 = cleanInput(body.domain, 200) || findDomain(chatMessages) || fullDomain;
     const confirmSigIn = typeof body.confirmSig === "string" ? body.confirmSig : "";
     const isShown = async (p, b, d) =>
       !!(email && b && p && (!p.ids.includes("web") || d)) &&
@@ -6813,6 +6976,7 @@ async function handleChatPost(request, env, body, o) {
     const confirmAndSend = async (plan, brand, domain) => {
       if (!env.RESEND_API_KEY) throw new HttpError(500, "misconfigured");
       if (!plan) throw new HttpError(400, "plan_required");
+      if (!brand) throw new HttpError(400, "brand_required");
       if (!(await isShown(plan, brand, domain))) throw new HttpError(400, "invalid_confirmation");
 
       if (env.VERIFY_LIMITER) {
@@ -6961,7 +7125,7 @@ async function inspectProjectDeadlines(env, keyName, nowMs) {
   let changed = false;
 
   // 0. Cierre automático y rescate si todos los servicios contratados están aprobados
-  if (checkAllServicesApproved(proj) && (!proj.finishedAt || !proj.reviewInvited || proj.status !== "done")) {
+  if (Array.isArray(proj.phases) && proj.phases.length > 0 && proj.phases.every((ph) => ph.status === "done") && (!proj.finishedAt || !proj.reviewInvited || proj.status !== "done")) {
     await finalizeProjectClosure(env, proj, projectToken);
     changed = true;
   }
@@ -7008,7 +7172,7 @@ async function inspectProjectDeadlines(env, keyName, nowMs) {
   }
 
   // 2. Cláusula 3.2 — Preaviso a los 30 días y rescisión por abandono a los 37 días sin actividad
-  if (proj.status === "active") {
+  if (proj.status === "active" || proj.status === "in_progress") {
     const hasMaterials =
       (Array.isArray(proj.materialsList) && proj.materialsList.length > 0) ||
       Boolean(proj.onboarding && (proj.onboarding.materials || proj.onboarding.submittedAt || proj.onboarding.receivedAt));
@@ -7035,7 +7199,7 @@ async function inspectProjectDeadlines(env, keyName, nowMs) {
                   reply_to: "hola@rebrandyourbrand.es",
                   subject: tWarn.subject(proj.brand),
                   ...renderEmail(lang, {
-                    paras: [tWarn.hello, tWarn.intro(bold(proj.brand)), tWarn.body],
+                    paras: [tWarn.hello, tWarn.intro(proj.brand), tWarn.body],
                     cta: { label: tWarn.cta, url: trackingUrl },
                     note: tWarn.note,
                   }),
@@ -7063,7 +7227,7 @@ async function inspectProjectDeadlines(env, keyName, nowMs) {
                       reply_to: "hola@rebrandyourbrand.es",
                       subject: tAb.subject(proj.brand),
                       ...renderEmail(lang, {
-                        paras: [tAb.hello, tAb.intro(bold(proj.brand)), tAb.body],
+                        paras: [tAb.hello, tAb.intro(proj.brand), tAb.body],
                         cta: { label: tAb.cta, url: trackingUrl },
                         note: tAb.note,
                       }),
@@ -7128,7 +7292,7 @@ async function inspectProjectDeadlines(env, keyName, nowMs) {
         const renewalEur = Number.isFinite(rawRenewal) && rawRenewal >= 0 ? rawRenewal : WEB_RENEWAL_EUR;
 
         if (renewalEur > 0 && env.STRIPE_SECRET_KEY) {
-          const payUrl = await createRenewalCheckout(env, proj, renewalEur);
+          const payUrl = await renewalActionUrl(env, projectToken);
           if (payUrl) {
             const tr = EM[lang].renewal;
             const dueStr = fmtDate(proj.nextRenewalAt, lang);
@@ -7237,7 +7401,9 @@ async function inspectProjectDeadlines(env, keyName, nowMs) {
   }
 
   if (changed) {
-    await env.LEADS_KV.put(keyName, JSON.stringify(proj));
+    await env.LEADS_KV.put(keyName, JSON.stringify(proj), {
+      metadata: { status: proj.status || "active" },
+    });
   }
 }
 
@@ -7251,7 +7417,11 @@ async function handleScheduled(controller, env, ctx) {
   let cursor;
   do {
     const list = await env.LEADS_KV.list({ prefix: "project:", cursor });
+    const INACTIVE_CRON_STATUSES = new Set(["abandoned", "cancelled"]);
     for (const item of list.keys) {
+      if (item.metadata?.status && INACTIVE_CRON_STATUSES.has(item.metadata.status)) {
+        continue;
+      }
       await inspectProjectDeadlines(env, item.name, nowMs).catch((e) =>
         console.error("cron project check failed:", item.name, e?.message)
       );
@@ -7262,7 +7432,7 @@ async function handleScheduled(controller, env, ctx) {
 
 // ══ index.js — Punto de entrada del Worker: enrutado de peticiones HTTP y eventos programados. ══
 
-const HTML_CLIENT_PATHS = new Set(["/verify", "/valorar", "/approve-phase", "/cancel-renewal"]);
+const HTML_CLIENT_PATHS = new Set(["/verify", "/valorar", "/approve-phase", "/cancel-renewal", "/renovar"]);
 
 const HTML_ADMIN_PATHS = new Set(["/testimonial", "/testimonial-delete", "/advance-phase", "/responder-chat"]);
 
@@ -7291,6 +7461,7 @@ export default {
         if (url.pathname === "/responder-chat") return await handleStudioChat(request, env, url);
         if (url.pathname === "/approve-phase") return await handlePhaseApprove(request, env, url);
         if (url.pathname === "/cancel-renewal") return await handleCancelRenewal(request, env, url);
+        if (url.pathname === "/renovar") return await handleRenewalRedirect(request, env, url);
         if (url.pathname === "/valorar") return await handleReview(request, env, url);
       } catch (e) {
         console.error("html route failed:", e?.message);

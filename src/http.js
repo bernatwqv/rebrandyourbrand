@@ -4,7 +4,7 @@ const SECURITY_HEADERS = {
   "Referrer-Policy": "no-referrer",
 };
 
-const PAGE_CSP = "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; form-action 'self' https://checkout.stripe.com; base-uri 'none'; frame-ancestors 'none'";
+const PAGE_CSP = "default-src 'none'; connect-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; form-action 'self' https://checkout.stripe.com; base-uri 'none'; frame-ancestors 'none'";
 
 const HTML_HEADERS = {
   "Content-Type": "text/html; charset=utf-8",
