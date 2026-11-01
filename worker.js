@@ -4872,9 +4872,9 @@ const studioChatToggleScript = `
     document.addEventListener("click", function(e){
       var btn = e.target.closest(".chat-trans-toggle");
       if (!btn) return;
-      var bubble = btn.closest(".chat-msg-bubble");
-      if (!bubble) return;
-      var textEl = bubble.querySelector(".chat-msg-text");
+      var container = btn.closest(".chat-msg-bubble") || btn.closest(".trans-scope") || btn.closest(".phase-note");
+      if (!container) return;
+      var textEl = container.querySelector(".chat-msg-text, .trans-target-text");
       var labelEl = btn.querySelector(".chat-trans-label");
       if (!textEl) return;
       var orig = btn.getAttribute("data-orig") || "";
@@ -5069,6 +5069,54 @@ async function handlePhaseAdvance(request, env, ctx, url) {
     }
     const referencesList = Array.isArray(proj.referencesList) ? [...proj.referencesList] : [];
 
+    let hasNewTranslations = false;
+    if (proj.lang !== "es" && env.GROQ_API_KEY) {
+      for (const m of materialsList) {
+        if (m && m.notes && (!m.translations || !m.translations.es)) {
+          try {
+            const trans = await translateMessageText(env, m.notes, proj.lang, "es");
+            if (trans && trans !== m.notes) {
+              m.translations = { ...(m.translations || {}), es: trans };
+              hasNewTranslations = true;
+            }
+          } catch (e) {
+            console.warn("translate materialsList note failed:", e?.message);
+          }
+        }
+      }
+      for (const r of referencesList) {
+        if (r && r.notes && (!r.translations || !r.translations.es)) {
+          try {
+            const trans = await translateMessageText(env, r.notes, proj.lang, "es");
+            if (trans && trans !== r.notes) {
+              r.translations = { ...(r.translations || {}), es: trans };
+              hasNewTranslations = true;
+            }
+          } catch (e) {
+            console.warn("translate referencesList note failed:", e?.message);
+          }
+        }
+      }
+      if (Array.isArray(currentPhaseObj.revisions)) {
+        for (const rv of currentPhaseObj.revisions) {
+          if (rv && rv.text && (!rv.translations || !rv.translations.es)) {
+            try {
+              const trans = await translateMessageText(env, rv.text, proj.lang, "es");
+              if (trans && trans !== rv.text) {
+                rv.translations = { ...(rv.translations || {}), es: trans };
+                hasNewTranslations = true;
+              }
+            } catch (e) {
+              console.warn("translate revision text failed:", e?.message);
+            }
+          }
+        }
+      }
+    }
+    if (hasNewTranslations) {
+      await saveProject(env, projectToken, proj);
+    }
+
     const matItemsHtml = await Promise.all(
       materialsList.map(async (m, i) => {
         const dateStr = m.createdAt ? fmtDate(m.createdAt, "es") : "";
@@ -5076,6 +5124,16 @@ async function handlePhaseAdvance(request, env, ctx, url) {
         let fileLink = "";
         if (m.fileId) fileLink = await fileDownloadUrl(env, projectToken, "mat", m.fileId);
         else if (m.fileUrl) fileLink = m.fileUrl;
+        const hasMatTrans = proj.lang !== "es" && m.translations && m.translations.es && m.translations.es !== m.notes;
+        const displayMatText = hasMatTrans ? m.translations.es : m.notes;
+        const matToggleHtml = hasMatTrans
+          ? `<div class="chat-trans-wrap">
+              <button type="button" class="chat-trans-toggle" data-orig="${esc(m.notes)}" data-trans="${esc(m.translations.es)}" data-showing="trans">
+                <svg class="chat-trans-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>
+                <span class="chat-trans-label">traducido automáticamente, haz clic para ver el mensaje original</span>
+              </button>
+            </div>`
+          : "";
         return `
           <div class="history-item">
             <div class="history-head">
@@ -5088,7 +5146,7 @@ async function handlePhaseAdvance(request, env, ctx, url) {
               ${urlLink ? `<div class="kv-row"><span>enlace externo</span><span class="kv-val" style="word-break:break-all;"><a href="${esc(urlLink)}" target="_blank" rel="noopener noreferrer" style="color:#3D5A85;text-decoration:underline;">${esc(urlLink)}</a></span></div>` : ""}
               ${fileLink ? `<div class="kv-row"><span>archivo directo</span><span class="kv-val"><a class="pill-link" href="${esc(fileLink)}" target="_blank" rel="noopener noreferrer">${esc(m.filename || "descargar material")}</a></span></div>` : ""}
             </div>
-            ${m.notes ? `<div class="phase-note" style="margin-top:.55rem;">${esc(m.notes)}</div>` : ""}
+            ${m.notes ? `<div class="phase-note trans-scope" style="margin-top:.55rem;"><div class="trans-target-text">${esc(displayMatText)}</div>${matToggleHtml}</div>` : ""}
           </div>`;
       })
     );
@@ -5100,6 +5158,16 @@ async function handlePhaseAdvance(request, env, ctx, url) {
         let fileLink = "";
         if (r.fileId) fileLink = await fileDownloadUrl(env, projectToken, "ref", r.fileId);
         else if (r.fileUrl) fileLink = r.fileUrl;
+        const hasRefTrans = proj.lang !== "es" && r.translations && r.translations.es && r.translations.es !== r.notes;
+        const displayRefText = hasRefTrans ? r.translations.es : r.notes;
+        const refToggleHtml = hasRefTrans
+          ? `<div class="chat-trans-wrap">
+              <button type="button" class="chat-trans-toggle" data-orig="${esc(r.notes)}" data-trans="${esc(r.translations.es)}" data-showing="trans">
+                <svg class="chat-trans-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>
+                <span class="chat-trans-label">traducido automáticamente, haz clic para ver el mensaje original</span>
+              </button>
+            </div>`
+          : "";
         return `
           <div class="history-item">
             <div class="history-head">
@@ -5110,7 +5178,7 @@ async function handlePhaseAdvance(request, env, ctx, url) {
               ${urlLink ? `<div class="kv-row"><span>enlace web</span><span class="kv-val" style="word-break:break-all;"><a href="${esc(urlLink)}" target="_blank" rel="noopener noreferrer" style="color:#3D5A85;text-decoration:underline;">${esc(urlLink)}</a></span></div>` : ""}
               ${fileLink ? `<div class="kv-row"><span>captura / archivo</span><span class="kv-val"><a class="pill-link" href="${esc(fileLink)}" target="_blank" rel="noopener noreferrer">${esc(r.filename || "descargar referencia")}</a></span></div>` : ""}
             </div>
-            ${r.notes ? `<div class="phase-note" style="margin-top:.55rem;">${esc(r.notes)}</div>` : ""}
+            ${r.notes ? `<div class="phase-note trans-scope" style="margin-top:.55rem;"><div class="trans-target-text">${esc(displayRefText)}</div>${refToggleHtml}</div>` : ""}
           </div>`;
       })
     );
@@ -5135,10 +5203,22 @@ async function handlePhaseAdvance(request, env, ctx, url) {
             <span class="eyebrow">historial de ajustes solicitados por el cliente</span>
             ${currentPhaseObj.revisions
               .map(
-                (rv) => `<div style="margin-bottom:.75rem;">
-                  <span style="display:block;font-size:.75rem;font-weight:600;color:#825008;margin-bottom:.25rem;">ronda ${Number(rv.round) || 1} de ${revsMax}${rv.requestedAt ? ` — ${esc(fmtDate(rv.requestedAt, "es"))}` : ""}</span>
-                  <div class="phase-note" style="margin-top:0;">${esc(rv.text || "")}</div>
-                </div>`
+                (rv) => {
+                  const hasRevTrans = proj.lang !== "es" && rv.translations && rv.translations.es && rv.translations.es !== rv.text;
+                  const displayRevText = hasRevTrans ? rv.translations.es : rv.text;
+                  const revToggleHtml = hasRevTrans
+                    ? `<div class="chat-trans-wrap">
+                        <button type="button" class="chat-trans-toggle" data-orig="${esc(rv.text)}" data-trans="${esc(rv.translations.es)}" data-showing="trans">
+                          <svg class="chat-trans-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>
+                          <span class="chat-trans-label">traducido automáticamente, haz clic para ver el mensaje original</span>
+                        </button>
+                      </div>`
+                    : "";
+                  return `<div style="margin-bottom:.75rem;">
+                    <span style="display:block;font-size:.75rem;font-weight:600;color:#825008;margin-bottom:.25rem;">ronda ${Number(rv.round) || 1} de ${revsMax}${rv.requestedAt ? ` — ${esc(fmtDate(rv.requestedAt, "es"))}` : ""}</span>
+                    <div class="phase-note trans-scope" style="margin-top:0;"><div class="trans-target-text">${esc(displayRevText)}</div>${revToggleHtml}</div>
+                  </div>`;
+                }
               )
               .join("")}
           </div>`
@@ -5629,6 +5709,15 @@ async function handlePhaseApprove(request, env, ctx, url) {
       return renderReviewScreen(A.revEmpty, 400);
     }
 
+    let feedbackEs = null;
+    if (L !== "es" && env.GROQ_API_KEY) {
+      try {
+        feedbackEs = await translateMessageText(env, feedback, L, "es");
+      } catch (e) {
+        console.warn("translate feedback to es failed:", e?.message);
+      }
+    }
+
     const now = new Date().toISOString();
     const round = nextRound;
     const phaseTitleEs = phaseTitle(ph, "es");
@@ -5637,7 +5726,12 @@ async function handlePhaseApprove(request, env, ctx, url) {
     // 1. Consolidar inmediatamente el estado en KV
     ph.revisionsUsed = round;
     if (!Array.isArray(ph.revisions)) ph.revisions = [];
-    ph.revisions.push({ round, text: feedback, requestedAt: now });
+    ph.revisions.push({
+      round,
+      text: feedback,
+      ...(feedbackEs && feedbackEs !== feedback ? { translations: { es: feedbackEs } } : {}),
+      requestedAt: now,
+    });
     ph.status = "active";
     ph.lastRevisionAt = now;
     delete ph.reminderSentAt;
@@ -5666,7 +5760,7 @@ async function handlePhaseApprove(request, env, ctx, url) {
                 ),
                 "cambios solicitados por el cliente:",
               ],
-              quote: feedback,
+              quote: feedbackEs && feedbackEs !== feedback ? `${feedbackEs}\n\n(original en ${L}: ${feedback})` : feedback,
               cta: { label: "abrir panel de la fase para subir nueva versión", url: manageUrl },
               secondaryLink: { label: "ver seguimiento público del cliente", url: trackingUrl },
               note:
@@ -6009,7 +6103,13 @@ async function flushPendingMaterialsNotice(env, token, proj) {
     if (matItem.fileId) fileLink = await fileDownloadUrl(env, token, "mat", matItem.fileId);
     else if (matItem.fileUrl) fileLink = matItem.fileUrl;
     if (fileLink) addedLines.push(`— archivo directo: <a href="${esc(fileLink)}" target="_blank" style="color:#3D5A85;font-weight:600;">${esc(matItem.filename || "descargar archivo")}</a>`);
-    if (matItem.notes) addedLines.push(`— notas: ${esc(matItem.notes)}`);
+    if (matItem.notes) {
+      const hasMatTrans = matItem.translations?.es && matItem.translations.es !== matItem.notes;
+      const matNoteLine = hasMatTrans
+        ? `— notas: ${esc(matItem.translations.es)} <span style="font-size:12px;color:#58575E;">(original en ${esc(proj.lang)}: ${esc(matItem.notes)})</span>`
+        : `— notas: ${esc(matItem.notes)}`;
+      addedLines.push(matNoteLine);
+    }
   }
 
   if (refItem) {
@@ -6020,7 +6120,13 @@ async function flushPendingMaterialsNotice(env, token, proj) {
     if (refItem.fileId) refFileLink = await fileDownloadUrl(env, token, "ref", refItem.fileId);
     else if (refItem.fileUrl) refFileLink = refItem.fileUrl;
     if (refFileLink) addedLines.push(`— captura o imagen: <a href="${esc(refFileLink)}" target="_blank" style="color:#3D5A85;font-weight:600;">${esc(refItem.filename || "descargar referencia")}</a>`);
-    if (refItem.notes) addedLines.push(`— qué le gusta: ${esc(refItem.notes)}`);
+    if (refItem.notes) {
+      const hasRefTrans = refItem.translations?.es && refItem.translations.es !== refItem.notes;
+      const refNoteLine = hasRefTrans
+        ? `— qué le gusta: ${esc(refItem.translations.es)} <span style="font-size:12px;color:#58575E;">(original en ${esc(proj.lang)}: ${esc(refItem.notes)})</span>`
+        : `— qué le gusta: ${esc(refItem.notes)}`;
+      addedLines.push(refNoteLine);
+    }
   }
 
   const subjectType = matItem && refItem
@@ -6318,6 +6424,14 @@ async function handleProject(request, env, ctx, url) {
         );
       }
       const materialsNotes = cleanNote(form?.get("materials_notes") ?? form?.get("materials") ?? "", 1000);
+      let matNotesEs = null;
+      if (materialsNotes && L !== "es" && env.GROQ_API_KEY) {
+        try {
+          matNotesEs = await translateMessageText(env, materialsNotes, L, "es");
+        } catch (e) {
+          console.warn("translate materials notes to es failed:", e?.message);
+        }
+      }
 
       let materialsFileDownloadUrl = "";
       let materialsFilename = "";
@@ -6374,6 +6488,14 @@ async function handleProject(request, env, ctx, url) {
         );
       }
       const referenceNotes = cleanNote(form?.get("reference_notes") ?? "", 1000);
+      let refNotesEs = null;
+      if (referenceNotes && L !== "es" && env.GROQ_API_KEY) {
+        try {
+          refNotesEs = await translateMessageText(env, referenceNotes, L, "es");
+        } catch (e) {
+          console.warn("translate reference notes to es failed:", e?.message);
+        }
+      }
 
       let referenceFileDownloadUrl = "";
       let referenceFilename = "";
@@ -6467,6 +6589,7 @@ async function handleProject(request, env, ctx, url) {
           socials,
           url: materialsUrl,
           notes: materialsNotes,
+          ...(matNotesEs && matNotesEs !== materialsNotes ? { translations: { es: matNotesEs } } : {}),
           fileUrl: materialsFileDownloadUrl,
           filename: materialsFilename,
           fileId: materialsFileId,
@@ -6489,6 +6612,7 @@ async function handleProject(request, env, ctx, url) {
           createdAt: nowIso,
           url: referenceUrl,
           notes: referenceNotes,
+          ...(refNotesEs && refNotesEs !== referenceNotes ? { translations: { es: refNotesEs } } : {}),
           fileUrl: referenceFileDownloadUrl,
           filename: referenceFilename,
           fileId: referenceFileId,
