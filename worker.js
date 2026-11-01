@@ -1816,7 +1816,10 @@ const signMsg = (key, text) => signRaw(key, `msg|${text}`);
 
 const verifyMsg = (key, text, sig) => verifyRaw(key, `msg|${text}`, sig);
 
-const confirmPayload = (email, brand, plan, domain = "") => `confirm|${email}|${brand}|${plan.ids.join(",")}|${domain || ""}`;
+// Ventana de 1 h: la firma de confirmacion caduca (se acepta la actual y la anterior)
+const confirmWindow = (ms = Date.now()) => Math.floor(ms / 3600000);
+const confirmPayload = (email, brand, plan, domain = "", win = confirmWindow()) =>
+  JSON.stringify(["confirm", email, brand, plan.ids.join(","), domain || "", win]);
 
 // Tokens deterministas firmados por HMAC (sin depender de claves temporales en KV)
 const getActionToken = (key, projectToken, step) => signRaw(key, `action|${projectToken}|${step}`);
@@ -2034,6 +2037,11 @@ async function resendSend(env, payload, idempotencyKey, headersExtra = null) {
 
       if (res.ok) {
         return await res.json().catch(() => ({}));
+      }
+
+      if (res.status === 409) {
+        // Peticion idempotente concurrente (webhook y success_url): ya se esta enviando
+        return { ok: true, idempotentDuplicate: true };
       }
 
       const errText = await res.text().catch(() => "");
@@ -2383,6 +2391,31 @@ FORMATO DE SALIDA (JSON estricto, sin texto fuera del JSON):
 REMINDER: the "reply" field must be in ${langName}.`;
 }
 
+// Llamada unica a Groq (modelo de razonamiento): presupuesto de tokens holgado y un reintento si se corta por longitud
+async function groqComplete(env, body, timeoutMs) {
+  const call = (maxTokens) =>
+    fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${env.GROQ_API_KEY}` },
+      body: JSON.stringify({
+        ...body,
+        model: GROQ_MODEL,
+        max_completion_tokens: maxTokens,
+        reasoning_effort: "low",
+        include_reasoning: false,
+      }),
+      signal: AbortSignal.timeout(timeoutMs),
+    });
+  let res = await call(1500);
+  if (!res.ok) return { res, data: null };
+  let data = await res.json().catch(() => null);
+  if (data?.choices?.[0]?.finish_reason === "length") {
+    res = await call(2500);
+    data = res.ok ? await res.json().catch(() => null) : null;
+  }
+  return { res, data };
+}
+
 function parseModelJson(content) {
   if (typeof content !== "string") throw new Error("empty_content");
   try {
@@ -2399,21 +2432,18 @@ function parseModelJson(content) {
 async function askGroq(env, lang, ctx, chatMessages, retries = 1) {
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
-      const groq = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${env.GROQ_API_KEY}` },
-        body: JSON.stringify({
-          model: GROQ_MODEL,
+      const { res: groq, data } = await groqComplete(
+        env,
+        {
           messages: [
             { role: "system", content: buildSystemInstruction(lang, ctx) },
             ...chatMessages.map((m) => ({ role: m.role, content: m.text })),
           ],
-          max_tokens: 600,
           temperature: 0.4,
           response_format: { type: "json_object" },
-        }),
-        signal: AbortSignal.timeout(8000),
-      });
+        },
+        8000
+      );
 
       if (groq.status === 429 || groq.status >= 500) {
         if (attempt < retries) {
@@ -2424,7 +2454,6 @@ async function askGroq(env, lang, ctx, chatMessages, retries = 1) {
       }
       if (!groq.ok) throw new HttpError(502, "upstream_error");
 
-      const data = await groq.json().catch(() => null);
       const out = parseModelJson(data?.choices?.[0]?.message?.content);
       if (out && typeof out.reply === "string") {
         out.reply = out.reply
@@ -2492,23 +2521,19 @@ REMINDER: write your answer in ${langName}.`;
 async function askGroqProject(env, lang, proj, chatMessages, retries = 1) {
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
-      const groq = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${env.GROQ_API_KEY}` },
-        body: JSON.stringify({
-          model: GROQ_MODEL,
+      const { res: groq, data } = await groqComplete(
+        env,
+        {
           messages: [
             { role: "system", content: buildProjectSystemInstruction(lang, proj) },
             ...chatMessages.map((m) => ({ role: m.role, content: m.text })),
           ],
-          max_tokens: 450,
           temperature: 0.4,
-        }),
-        signal: AbortSignal.timeout(8000),
-      });
+        },
+        8000
+      );
 
       if (!groq.ok) throw new Error(`Groq HTTP ${groq.status}`);
-      const data = await groq.json().catch(() => null);
       const text = data?.choices?.[0]?.message?.content?.trim();
       if (!text) throw new Error("empty_reply");
 
@@ -2516,6 +2541,7 @@ async function askGroqProject(env, lang, proj, chatMessages, retries = 1) {
         .replace(/[\u00b7\u2022]/g, " — ")
         .replace(new RegExp("\\x26", "g"), lang === "ca" ? " i " : lang === "en" ? " and " : lang === "eu" ? " eta " : " y ")
         .replace(/(^|[.!?¿¡]\s*|\n\s*)([A-ZÁÉÍÓÚÀÈÒÇÑ])(?![A-ZÁÉÍÓÚÀÈÒÇÑ])/g, (_, p, c) => p + c.toLowerCase());
+      if (hasUnknownPrice(clean) || hasUnknownPercent(clean)) throw new Error("unknown_price");
       return clean;
     } catch (e) {
       if (attempt === retries) {
@@ -2554,14 +2580,9 @@ async function translateMessageText(env, text, fromLang, toLang) {
   const sourceName = LANG_FULL_NAMES[src] || "Spanish";
 
   try {
-    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${env.GROQ_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: GROQ_MODEL,
+    const { res, data } = await groqComplete(
+      env,
+      {
         messages: [
           {
             role: "system",
@@ -2572,19 +2593,17 @@ async function translateMessageText(env, text, fromLang, toLang) {
             content: raw.slice(0, 2500),
           },
         ],
-        max_tokens: 450,
         temperature: 0.1,
         response_format: { type: "json_object" },
-      }),
-      signal: AbortSignal.timeout(4500),
-    });
+      },
+      7000
+    );
 
     if (!res.ok) {
       console.warn(`Groq translate HTTP ${res.status}`);
       return raw;
     }
 
-    const data = await res.json().catch(() => null);
     const parsed = parseModelJson(data?.choices?.[0]?.message?.content);
     let translated = typeof parsed?.translated === "string" ? parsed.translated.trim() : "";
     if (!translated) return raw;
@@ -2629,6 +2648,22 @@ const isStripeReceiptUrl = (u) =>
 
 const stripeLocaleFor = (lang) => (pickLang(lang) === "en" ? "en" : "es");
 
+// KV limita a 1 escritura/s por clave: reintenta con backoff ante 429
+async function kvPutWithRetry(env, key, val, opts, tries = 4) {
+  for (let i = 0; i < tries; i++) {
+    try {
+      return await env.LEADS_KV.put(key, val, opts);
+    } catch (e) {
+      const msg = String(e?.message || e);
+      if (i < tries - 1 && /429|rate limit|too many/i.test(msg)) {
+        await new Promise((r) => setTimeout(r, 1100 * (i + 1)));
+        continue;
+      }
+      throw e;
+    }
+  }
+}
+
 async function saveProject(env, token, proj, extraOpts = {}) {
   if (!env?.LEADS_KV || !token || !proj) return;
   const hasWeb = Boolean(
@@ -2646,9 +2681,10 @@ async function saveProject(env, token, proj, extraOpts = {}) {
     delete finalOpts.expirationTtl;
   }
 
-  await env.LEADS_KV.put(`project:${token}`, JSON.stringify(proj), {
+  await kvPutWithRetry(env, `project:${token}`, JSON.stringify(proj), {
     metadata: {
       status: proj.status || "active",
+      paid: Boolean(proj.paid),
       hasWeb,
       renewalNextDue: Number.isNaN(nextDueMs) ? 0 : nextDueMs,
     },
@@ -2656,9 +2692,9 @@ async function saveProject(env, token, proj, extraOpts = {}) {
   });
 }
 
-async function createProjectRecord(env, { clientEmail, brand, plan, lang, messages, domain }) {
+async function createProjectRecord(env, { clientEmail, brand, plan, lang, messages, domain, persist = true, token = "" }) {
   const safeBrand = brand || "proyecto";
-  const projectToken = randomHex(32);
+  const projectToken = /^[a-f0-9]{64}$/.test(String(token || "")) ? token : randomHex(32);
   const projectKey = `project:${projectToken}`;
   const cleanMsgs = (Array.isArray(messages) ? messages : [])
     .filter((m) => m && (m.role === "user" || m.role === "assistant") && typeof m.text === "string")
@@ -2686,9 +2722,11 @@ async function createProjectRecord(env, { clientEmail, brand, plan, lang, messag
     materialsList: [],
     referencesList: [],
   };
-  await saveProject(env, projectToken, projectData, {
-    expirationTtl: PENDING_PROJECT_TTL_SECONDS,
-  });
+  if (persist) {
+    await saveProject(env, projectToken, projectData, {
+      expirationTtl: PENDING_PROJECT_TTL_SECONDS,
+    });
+  }
   return projectData;
 }
 
@@ -2743,7 +2781,7 @@ function extractBillingFromSession(session) {
 }
 
 // Reutiliza la sesión activa de Stripe o genera una nueva si caducó (>24h) o no existe aún
-async function ensureStripeCheckout(env, proj) {
+async function ensureStripeCheckout(env, proj, { skipSave = false } = {}) {
   if (!env.STRIPE_SECRET_KEY || !proj || !Array.isArray(proj.services) || !proj.services.length) {
     return null;
   }
@@ -2831,9 +2869,11 @@ async function ensureStripeCheckout(env, proj) {
 
     proj.stripeSessionId = session.id;
     proj.checkoutUrl = session.url;
-    await saveProject(env, proj.token, proj, {
-      expirationTtl: PENDING_PROJECT_TTL_SECONDS,
-    });
+    if (!skipSave) {
+      await saveProject(env, proj.token, proj, {
+        expirationTtl: PENDING_PROJECT_TTL_SECONDS,
+      }).catch((e) => console.error("ensureStripeCheckout save failed:", e?.message));
+    }
     return { paid: false, url: session.url };
   } catch (e) {
     console.error("Stripe Checkout Error:", e?.message);
@@ -2996,7 +3036,9 @@ async function unlockExtraRevision(env, proj, step, sessionId, sessionData = nul
 
   if (isPostDelivery) {
     proj.usedRevisionSessions = [...usedSessions, sessionId];
-    const notes = (session?.metadata?.notes && session.metadata.notes.trim()) ? session.metadata.notes.trim() : (proj.pendingExtraWork?.notes || "");
+    const meta = (session.metadata?.notes || "").trim();
+    const full = proj.pendingExtraWork?.notes || "";
+    const notes = full.startsWith(meta) ? full : (meta || full);
     proj.extraWork = Array.isArray(proj.extraWork) ? proj.extraWork : [];
     if (!proj.extraWork.some((w) => w.sessionId === sessionId)) {
       proj.extraWork.push({
@@ -3033,7 +3075,7 @@ async function unlockExtraRevision(env, proj, step, sessionId, sessionData = nul
               `el cliente de ${bold(proj.brand)} ha contratado y abonado una ronda de cambios extraordinarios post-entrega (100 €).`,
               lines(
                 `— cliente: ${bold(proj.clientEmail)}`,
-                `— fecha: ${bold(fmtDate(Date.now(), "es"))}`,
+                `— fecha: ${bold(fmtDate(new Date().toISOString(), "es"))}`,
                 `— id sesión stripe: ${bold(sessionId)}`
               ),
               bold("indicaciones del cliente:"),
@@ -3176,7 +3218,9 @@ async function processPaidSession(env, session, { fromWebhook = false } = {}, ct
 
   // Caso especial: renovación anual de infraestructura web (cláusula 3.1)
   if (session.metadata?.kind === "web_renewal") {
-    if (proj.lastRenewalSessionId === session.id) return;
+    const renewalIds = Array.isArray(proj.renewalSessionIds) ? proj.renewalSessionIds : [];
+    if (proj.lastRenewalSessionId === session.id || renewalIds.includes(session.id)) return;
+    proj.renewalSessionIds = [...renewalIds, session.id].slice(-20);
     proj.lastRenewalSessionId = session.id;
     proj.lastRenewalPaidAt = new Date().toISOString();
     const nextIso = addOneYearIso(proj.nextRenewalAt || proj.finishedAt);
@@ -4358,6 +4402,7 @@ async function handleVerify(request, env, ctx, url) {
     const rawProj = await env.LEADS_KV.get(`project:${data.projectToken}`);
     if (rawProj) proj = JSON.parse(rawProj);
   }
+  let isNewProject = false;
   if (!proj) {
     proj = await createProjectRecord(env, {
       clientEmail: data.clientEmail,
@@ -4366,9 +4411,19 @@ async function handleVerify(request, env, ctx, url) {
       lang: L,
       messages: data.messages,
       domain: data.domain,
+      persist: false,
+      token: data.projectToken,
     });
-    data.projectToken = proj.token;
+    isNewProject = true;
+    if (data.projectToken !== proj.token) {
+      // Persistir el token ya: un doble POST reutiliza el mismo proyecto en vez de duplicarlo
+      data.projectToken = proj.token;
+      await env.LEADS_KV.put(key, JSON.stringify(data), { expirationTtl: PENDING_VERIFY_TTL_SECONDS }).catch((e) =>
+        console.error("pending token persist failed:", e?.message)
+      );
+    }
   }
+  const prevStripeSession = proj.stripeSessionId;
 
   const projectPageUrl = buildUrl("/proyecto", { token: proj.token });
 
@@ -4396,13 +4451,19 @@ async function handleVerify(request, env, ctx, url) {
       );
 
   const checkoutPromise = env.STRIPE_SECRET_KEY
-    ? ensureStripeCheckout(env, proj).catch((e) => {
+    ? ensureStripeCheckout(env, proj, { skipSave: true }).catch((e) => {
         console.error("checkout failed:", e?.message);
         return null;
       })
     : Promise.resolve(null);
 
   const [delivered, checkout] = await Promise.all([leadPromise, checkoutPromise]);
+
+  if (!checkout?.paid && (isNewProject || proj.stripeSessionId !== prevStripeSession)) {
+    await saveProject(env, proj.token, proj, { expirationTtl: PENDING_PROJECT_TTL_SECONDS }).catch((e) =>
+      console.error("verify project save failed:", e?.message)
+    );
+  }
 
   data.leadDelivered = delivered;
   if (checkout?.url && isStripeUrl(checkout.url)) data.checkoutUrl = checkout.url;
@@ -4431,6 +4492,7 @@ async function finalizeProjectClosure(
   { deliverableUrl = "", deliverableFilename = "", note = "" } = {}
 ) {
   if (!proj || !projectToken) return { ok: false, reason: "invalid_args" };
+  if (proj.status === "abandoned") return { ok: false, reason: "abandoned" };
 
   const now = new Date().toISOString();
   let changed = false;
@@ -4623,6 +4685,8 @@ async function completeProjectPhase(
   const advancedPhase = proj.phases[targetIdx];
   advancedPhase.status = "done";
   advancedPhase.date = now;
+  proj.abandonWarningSentAt = null;
+  proj.inactivityReminderSentAt = null;
   advancedPhase.approvedBy = approvedBy;
   if (approvedBy === "client") advancedPhase.approvedAt = now;
   if (deliverableUrl) advancedPhase.deliverableUrl = deliverableUrl;
@@ -5069,54 +5133,6 @@ async function handlePhaseAdvance(request, env, ctx, url) {
     }
     const referencesList = Array.isArray(proj.referencesList) ? [...proj.referencesList] : [];
 
-    let hasNewTranslations = false;
-    if (proj.lang !== "es" && env.GROQ_API_KEY) {
-      for (const m of materialsList) {
-        if (m && m.notes && (!m.translations || !m.translations.es)) {
-          try {
-            const trans = await translateMessageText(env, m.notes, proj.lang, "es");
-            if (trans && trans !== m.notes) {
-              m.translations = { ...(m.translations || {}), es: trans };
-              hasNewTranslations = true;
-            }
-          } catch (e) {
-            console.warn("translate materialsList note failed:", e?.message);
-          }
-        }
-      }
-      for (const r of referencesList) {
-        if (r && r.notes && (!r.translations || !r.translations.es)) {
-          try {
-            const trans = await translateMessageText(env, r.notes, proj.lang, "es");
-            if (trans && trans !== r.notes) {
-              r.translations = { ...(r.translations || {}), es: trans };
-              hasNewTranslations = true;
-            }
-          } catch (e) {
-            console.warn("translate referencesList note failed:", e?.message);
-          }
-        }
-      }
-      if (Array.isArray(currentPhaseObj.revisions)) {
-        for (const rv of currentPhaseObj.revisions) {
-          if (rv && rv.text && (!rv.translations || !rv.translations.es)) {
-            try {
-              const trans = await translateMessageText(env, rv.text, proj.lang, "es");
-              if (trans && trans !== rv.text) {
-                rv.translations = { ...(rv.translations || {}), es: trans };
-                hasNewTranslations = true;
-              }
-            } catch (e) {
-              console.warn("translate revision text failed:", e?.message);
-            }
-          }
-        }
-      }
-    }
-    if (hasNewTranslations) {
-      await saveProject(env, projectToken, proj);
-    }
-
     const matItemsHtml = await Promise.all(
       materialsList.map(async (m, i) => {
         const dateStr = m.createdAt ? fmtDate(m.createdAt, "es") : "";
@@ -5413,6 +5429,8 @@ async function handlePhaseAdvance(request, env, ctx, url) {
   if (decision === "review") {
     const now = new Date().toISOString();
     proj.lastClientActivityAt = Date.now();
+    proj.abandonWarningSentAt = null;
+    proj.inactivityReminderSentAt = null;
     currentPhaseObj.status = "review";
     currentPhaseObj.reviewSentAt = now;
     currentPhaseObj.deliverableUrl = effectiveDeliverableUrl;
@@ -5541,6 +5559,7 @@ async function handlePhaseApprove(request, env, ctx, url) {
 
   const ph = (proj.phases || []).find((x) => x.step === step);
   if (!ph || !proj.paid) return msgPage(L, "invalid", 400);
+  if (proj.status === "abandoned") return msgPage(L, "invalid", 400);
 
   if (ph.status === "done" || Number(proj.currentPhase) !== step) {
     const isCompleted = proj.status === "done" || checkAllServicesApproved(proj);
@@ -5690,6 +5709,7 @@ async function handlePhaseApprove(request, env, ctx, url) {
   const decision = String(form?.get("decision") || "approve");
 
   if (decision === "buy_revision") {
+    if (used < maxRevs) return renderReviewScreen("", 400);
     const qJoin = String.fromCharCode(38);
     const returnUrl = `${WORKER_URL}/approve-phase?p=${p}${qJoin}step=${step}${qJoin}t=${t}${qJoin}rev_session_id={CHECKOUT_SESSION_ID}`;
     const cancelUrl = `${WORKER_URL}/approve-phase?p=${p}${qJoin}step=${step}${qJoin}t=${t}`;
@@ -5950,6 +5970,11 @@ async function handleRenewalRedirect(request, env, ctx, url) {
   }
 
   const now = Date.now();
+  if (proj.renewalCancelled || proj.renewalCanceled || proj.renewalPaid) return msgPage(L, "invalid", 400);
+  const renewalDueMs = new Date(proj.nextRenewalAt || proj.renewalNextDue || 0).getTime();
+  if (Number.isFinite(renewalDueMs) && renewalDueMs > 0 && renewalDueMs - now > 45 * DAY_MS) {
+    return msgPage(L, "invalid", 400);
+  }
   if (
     proj.renewalCheckoutUrl &&
     proj.renewalCheckoutCreatedAt &&
@@ -6051,7 +6076,7 @@ async function handleFileDownload(request, env, url) {
       "Content-Disposition": `${dispositionType}; filename="${safeName.replace(/["\r\n\\]/g, "_")}"; filename*=UTF-8''${encodedName}`,
       "Content-Length": String(size),
       "Cache-Control": "private, max-age=86400",
-      "Content-Security-Policy": "sandbox",
+      ...(contentType.toLowerCase().startsWith("application/pdf") ? {} : { "Content-Security-Policy": "sandbox" }),
       "X-Content-Type-Options": "nosniff",
       "Referrer-Policy": "no-referrer",
     },
@@ -6073,8 +6098,33 @@ async function checkProjectChatRateLimit(env, token, ip) {
   return true;
 }
 
+// Traduce al espanol, fuera del hilo critico, las notas aportadas por el cliente y las fusiona en KV
+async function translateProjectNotes(env, token, fromLang, matId, refId) {
+  try {
+    const raw = await env.LEADS_KV.get(`project:${token}`);
+    if (!raw) return;
+    const p0 = JSON.parse(raw);
+    const find = (list, id) => (id && Array.isArray(list) ? list.find((x) => x && x.id === id) : null);
+    const mat0 = find(p0.materialsList, matId);
+    const ref0 = find(p0.referencesList, refId);
+    const matEs = mat0?.notes ? await translateMessageText(env, mat0.notes, fromLang, "es") : "";
+    const refEs = ref0?.notes ? await translateMessageText(env, ref0.notes, fromLang, "es") : "";
+    const rawNow = await env.LEADS_KV.get(`project:${token}`);
+    if (!rawNow) return;
+    const proj = JSON.parse(rawNow);
+    let dirty = false;
+    const mat = find(proj.materialsList, matId);
+    const ref = find(proj.referencesList, refId);
+    if (mat && matEs && matEs !== mat.notes) { mat.translations = { ...(mat.translations || {}), es: matEs }; dirty = true; }
+    if (ref && refEs && refEs !== ref.notes) { ref.translations = { ...(ref.translations || {}), es: refEs }; dirty = true; }
+    if (dirty) await saveProject(env, token, proj);
+  } catch (e) {
+    console.warn("translateProjectNotes failed:", e?.message);
+  }
+}
+
 // Envío diferido de notificación de materiales cuando finaliza el timer o se pulsa la X
-async function flushPendingMaterialsNotice(env, token, proj) {
+async function flushPendingMaterialsNotice(env, token, proj, skipSave = false) {
   if (!proj || !proj.pendingMaterialsNotice) return;
   const notice = proj.pendingMaterialsNotice;
   delete proj.pendingMaterialsNotice;
@@ -6084,7 +6134,7 @@ async function flushPendingMaterialsNotice(env, token, proj) {
   const matItem = Array.isArray(proj.materialsList) ? proj.materialsList.find((m) => m && m.id === notice.matId) : null;
   const refItem = Array.isArray(proj.referencesList) ? proj.referencesList.find((r) => r && r.id === notice.refId) : null;
 
-  await saveProject(env, token, proj);
+  if (!skipSave) await saveProject(env, token, proj);
 
   if (!env.RESEND_API_KEY || (!matItem && !refItem)) {
     return;
@@ -6172,7 +6222,8 @@ async function handleProject(request, env, ctx, url) {
 
   let proj = JSON.parse(raw);
   if (proj.pendingMaterialsNotice && Date.now() - (Number(proj.pendingMaterialsNotice.timestamp) || 0) >= 60000) {
-    await flushPendingMaterialsNotice(env, token, proj);
+    await flushPendingMaterialsNotice(env, token, proj, true);
+    await saveProject(env, token, proj);
   }
   L = pickLang(proj.lang);
   const T = PG[L].tr;
@@ -6424,14 +6475,6 @@ async function handleProject(request, env, ctx, url) {
         );
       }
       const materialsNotes = cleanNote(form?.get("materials_notes") ?? form?.get("materials") ?? "", 1000);
-      let matNotesEs = null;
-      if (materialsNotes && L !== "es" && env.GROQ_API_KEY) {
-        try {
-          matNotesEs = await translateMessageText(env, materialsNotes, L, "es");
-        } catch (e) {
-          console.warn("translate materials notes to es failed:", e?.message);
-        }
-      }
 
       let materialsFileDownloadUrl = "";
       let materialsFilename = "";
@@ -6488,14 +6531,6 @@ async function handleProject(request, env, ctx, url) {
         );
       }
       const referenceNotes = cleanNote(form?.get("reference_notes") ?? "", 1000);
-      let refNotesEs = null;
-      if (referenceNotes && L !== "es" && env.GROQ_API_KEY) {
-        try {
-          refNotesEs = await translateMessageText(env, referenceNotes, L, "es");
-        } catch (e) {
-          console.warn("translate reference notes to es failed:", e?.message);
-        }
-      }
 
       let referenceFileDownloadUrl = "";
       let referenceFilename = "";
@@ -6589,7 +6624,6 @@ async function handleProject(request, env, ctx, url) {
           socials,
           url: materialsUrl,
           notes: materialsNotes,
-          ...(matNotesEs && matNotesEs !== materialsNotes ? { translations: { es: matNotesEs } } : {}),
           fileUrl: materialsFileDownloadUrl,
           filename: materialsFilename,
           fileId: materialsFileId,
@@ -6612,7 +6646,6 @@ async function handleProject(request, env, ctx, url) {
           createdAt: nowIso,
           url: referenceUrl,
           notes: referenceNotes,
-          ...(refNotesEs && refNotesEs !== referenceNotes ? { translations: { es: refNotesEs } } : {}),
           fileUrl: referenceFileDownloadUrl,
           filename: referenceFilename,
           fileId: referenceFileId,
@@ -6640,13 +6673,19 @@ async function handleProject(request, env, ctx, url) {
 
       await saveProject(env, token, proj);
 
+      if (L !== "es" && env.GROQ_API_KEY && (createdMatItem?.notes || createdRefItem?.notes)) {
+        const bgTranslate = translateProjectNotes(env, token, L, createdMatItem?.id, createdRefItem?.id);
+        if (ctx?.waitUntil) ctx.waitUntil(bgTranslate);
+        else await bgTranslate;
+      }
+
       // Envío diferido: no se envía el correo al estudio hasta que expire el timer (60s) o el cliente pulse la X
       return redirectTo(buildUrl("/proyecto", { token, undo: "1" }));
     }
 
     if (op === "confirm_materials") {
       if (proj.pendingMaterialsNotice) {
-        await flushPendingMaterialsNotice(env, token, proj);
+        await flushPendingMaterialsNotice(env, token, proj, true);
       }
       proj.lastAdded = null;
       await saveProject(env, token, proj);
@@ -6659,6 +6698,9 @@ async function handleProject(request, env, ctx, url) {
 
     if (op === "undo_onboarding") {
       if (!proj.paid) return redirectTo(projectPageUrl);
+      if (!proj.pendingMaterialsNotice || Date.now() - (Number(proj.pendingMaterialsNotice.timestamp) || 0) >= 60000) {
+        return redirectTo(projectPageUrl);
+      }
       if (proj.lastAdded) {
         const { matId, matFileId, refId, refFileId } = proj.lastAdded;
         const undoneMat = Array.isArray(proj.materialsList) ? proj.materialsList.find((m) => m.id === matId) : null;
@@ -7352,7 +7394,7 @@ async function handleProject(request, env, ctx, url) {
             fetch(window.location.href, {
               method: "POST",
               headers: { "Content-Type": "application/json", "Accept": "application/json" },
-              body: JSON.stringify({ op: "brandi_chat", message: text, history: brandiHistory })
+              body: JSON.stringify({ op: "brandi_chat", message: text, history: brandiHistory.slice(0, -1) })
             })
             .then(function(r){
               if (!r.ok) throw new Error("status " + r.status);
@@ -7861,7 +7903,8 @@ async function handleEmailForm(request, env, originOk, o) {
       const { success } = await env.CHAT_LIMITER.limit({ key: `e:${ipKey(ip)}` });
       if (!success) throw new HttpError(429, "rate_limited", { "Retry-After": "60" });
     }
-    if (env.VERIFY_LIMITER) {
+    if (typeof env.VERIFY_LIMITER?.limit !== "function") throw new HttpError(500, "misconfigured");
+    {
       const { success: okV } = await env.VERIFY_LIMITER.limit({ key: `v:${ipKey(ip)}` });
       if (!okV) throw new HttpError(429, "rate_limited", { "Retry-After": "60" });
     }
@@ -8037,7 +8080,8 @@ async function handleChatPost(request, env, body, o, ctx) {
     const confirmSigIn = typeof body.confirmSig === "string" ? body.confirmSig : "";
     const isShown = async (p, b, d) =>
       !!(email && b && p && (!p.ids.includes("web") || d)) &&
-      (await verifyRaw(key, confirmPayload(email, b, p, d), confirmSigIn));
+      ((await verifyRaw(key, confirmPayload(email, b, p, d), confirmSigIn)) ||
+        (await verifyRaw(key, confirmPayload(email, b, p, d, confirmWindow() - 1), confirmSigIn)));
 
     const confirmAndSend = async (plan, brand, domain) => {
       if (!env.RESEND_API_KEY) throw new HttpError(500, "misconfigured");
@@ -8045,7 +8089,8 @@ async function handleChatPost(request, env, body, o, ctx) {
       if (!brand) throw new HttpError(400, "brand_required");
       if (!(await isShown(plan, brand, domain))) throw new HttpError(400, "invalid_confirmation");
 
-      if (env.VERIFY_LIMITER) {
+      if (typeof env.VERIFY_LIMITER?.limit !== "function") throw new HttpError(500, "misconfigured");
+      {
         const { success: okV } = await env.VERIFY_LIMITER.limit({ key: `v:${ipKey(ip)}` });
         if (!okV) throw new HttpError(429, "rate_limited", { "Retry-After": "60" });
       }
@@ -8192,7 +8237,7 @@ async function inspectProjectDeadlines(env, keyName, nowMs) {
 
   // Envío diferido de materiales si expiró el tiempo de 60s sin deshacer
   if (proj.pendingMaterialsNotice && nowMs - (Number(proj.pendingMaterialsNotice.timestamp) || 0) >= 60000) {
-    await flushPendingMaterialsNotice(env, projectToken, proj);
+    await flushPendingMaterialsNotice(env, projectToken, proj, true);
     changed = true;
   }
 
@@ -8304,8 +8349,6 @@ async function inspectProjectDeadlines(env, keyName, nowMs) {
             if (!Number.isNaN(warnMs)) {
               const daysSinceWarn = (nowMs - warnMs) / DAY_MS;
               if (daysSinceWarn >= ABANDON_GRACE_DAYS) {
-                proj.status = "abandoned";
-                proj.abandonedAt = nowIso;
                 const tAb = EM[lang].abandoned;
                 try {
                   await resendSend(
@@ -8345,6 +8388,8 @@ async function inspectProjectDeadlines(env, keyName, nowMs) {
                     },
                     `abandon-admin-${projectToken}-${nowIso.slice(0, 10)}`
                   );
+                  proj.status = "abandoned";
+                  proj.abandonedAt = nowIso;
                   changed = true;
                 } catch (e) {
                   console.error("abandon termination email failed:", e?.message);
@@ -8527,6 +8572,10 @@ async function handleScheduled(controller, env, ctx) {
       const meta = item.metadata || {};
       const status = meta.status;
 
+      if (meta.paid === false) {
+        continue;
+      }
+
       if (status && INACTIVE_CRON_STATUSES.has(status)) {
         continue;
       }
@@ -8556,15 +8605,13 @@ async function handleScheduled(controller, env, ctx) {
       break;
     } else {
       cursor = list.cursor;
-      // Guardar el cursor únicamente cuando la página actual se ha consumido en su totalidad
-      if (cursor) {
-        await env.LEADS_KV.put("cron:project_cursor", cursor, { expirationTtl: 86400 }).catch(() => {});
-      }
     }
   } while (cursor && getsCount < maxGets);
 
   if (completedFullList) {
     await env.LEADS_KV.delete("cron:project_cursor").catch(() => {});
+  } else if (cursor) {
+    await env.LEADS_KV.put("cron:project_cursor", cursor, { expirationTtl: 7 * 86400 }).catch(() => {});
   }
 }
 

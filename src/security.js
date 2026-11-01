@@ -35,7 +35,10 @@ const signMsg = (key, text) => signRaw(key, `msg|${text}`);
 
 const verifyMsg = (key, text, sig) => verifyRaw(key, `msg|${text}`, sig);
 
-const confirmPayload = (email, brand, plan, domain = "") => `confirm|${email}|${brand}|${plan.ids.join(",")}|${domain || ""}`;
+// Ventana de 1 h: la firma de confirmacion caduca (se acepta la actual y la anterior)
+const confirmWindow = (ms = Date.now()) => Math.floor(ms / 3600000);
+const confirmPayload = (email, brand, plan, domain = "", win = confirmWindow()) =>
+  JSON.stringify(["confirm", email, brand, plan.ids.join(","), domain || "", win]);
 
 // Tokens deterministas firmados por HMAC (sin depender de claves temporales en KV)
 const getActionToken = (key, projectToken, step) => signRaw(key, `action|${projectToken}|${step}`);

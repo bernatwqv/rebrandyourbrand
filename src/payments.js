@@ -24,6 +24,22 @@ const isStripeReceiptUrl = (u) =>
 
 const stripeLocaleFor = (lang) => (pickLang(lang) === "en" ? "en" : "es");
 
+// KV limita a 1 escritura/s por clave: reintenta con backoff ante 429
+async function kvPutWithRetry(env, key, val, opts, tries = 4) {
+  for (let i = 0; i < tries; i++) {
+    try {
+      return await env.LEADS_KV.put(key, val, opts);
+    } catch (e) {
+      const msg = String(e?.message || e);
+      if (i < tries - 1 && /429|rate limit|too many/i.test(msg)) {
+        await new Promise((r) => setTimeout(r, 1100 * (i + 1)));
+        continue;
+      }
+      throw e;
+    }
+  }
+}
+
 async function saveProject(env, token, proj, extraOpts = {}) {
   if (!env?.LEADS_KV || !token || !proj) return;
   const hasWeb = Boolean(
@@ -41,9 +57,10 @@ async function saveProject(env, token, proj, extraOpts = {}) {
     delete finalOpts.expirationTtl;
   }
 
-  await env.LEADS_KV.put(`project:${token}`, JSON.stringify(proj), {
+  await kvPutWithRetry(env, `project:${token}`, JSON.stringify(proj), {
     metadata: {
       status: proj.status || "active",
+      paid: Boolean(proj.paid),
       hasWeb,
       renewalNextDue: Number.isNaN(nextDueMs) ? 0 : nextDueMs,
     },
@@ -51,9 +68,9 @@ async function saveProject(env, token, proj, extraOpts = {}) {
   });
 }
 
-async function createProjectRecord(env, { clientEmail, brand, plan, lang, messages, domain }) {
+async function createProjectRecord(env, { clientEmail, brand, plan, lang, messages, domain, persist = true, token = "" }) {
   const safeBrand = brand || "proyecto";
-  const projectToken = randomHex(32);
+  const projectToken = /^[a-f0-9]{64}$/.test(String(token || "")) ? token : randomHex(32);
   const projectKey = `project:${projectToken}`;
   const cleanMsgs = (Array.isArray(messages) ? messages : [])
     .filter((m) => m && (m.role === "user" || m.role === "assistant") && typeof m.text === "string")
@@ -81,9 +98,11 @@ async function createProjectRecord(env, { clientEmail, brand, plan, lang, messag
     materialsList: [],
     referencesList: [],
   };
-  await saveProject(env, projectToken, projectData, {
-    expirationTtl: PENDING_PROJECT_TTL_SECONDS,
-  });
+  if (persist) {
+    await saveProject(env, projectToken, projectData, {
+      expirationTtl: PENDING_PROJECT_TTL_SECONDS,
+    });
+  }
   return projectData;
 }
 
@@ -138,7 +157,7 @@ function extractBillingFromSession(session) {
 }
 
 // Reutiliza la sesión activa de Stripe o genera una nueva si caducó (>24h) o no existe aún
-async function ensureStripeCheckout(env, proj) {
+async function ensureStripeCheckout(env, proj, { skipSave = false } = {}) {
   if (!env.STRIPE_SECRET_KEY || !proj || !Array.isArray(proj.services) || !proj.services.length) {
     return null;
   }
@@ -226,9 +245,11 @@ async function ensureStripeCheckout(env, proj) {
 
     proj.stripeSessionId = session.id;
     proj.checkoutUrl = session.url;
-    await saveProject(env, proj.token, proj, {
-      expirationTtl: PENDING_PROJECT_TTL_SECONDS,
-    });
+    if (!skipSave) {
+      await saveProject(env, proj.token, proj, {
+        expirationTtl: PENDING_PROJECT_TTL_SECONDS,
+      }).catch((e) => console.error("ensureStripeCheckout save failed:", e?.message));
+    }
     return { paid: false, url: session.url };
   } catch (e) {
     console.error("Stripe Checkout Error:", e?.message);
@@ -391,7 +412,9 @@ async function unlockExtraRevision(env, proj, step, sessionId, sessionData = nul
 
   if (isPostDelivery) {
     proj.usedRevisionSessions = [...usedSessions, sessionId];
-    const notes = (session?.metadata?.notes && session.metadata.notes.trim()) ? session.metadata.notes.trim() : (proj.pendingExtraWork?.notes || "");
+    const meta = (session.metadata?.notes || "").trim();
+    const full = proj.pendingExtraWork?.notes || "";
+    const notes = full.startsWith(meta) ? full : (meta || full);
     proj.extraWork = Array.isArray(proj.extraWork) ? proj.extraWork : [];
     if (!proj.extraWork.some((w) => w.sessionId === sessionId)) {
       proj.extraWork.push({
@@ -428,7 +451,7 @@ async function unlockExtraRevision(env, proj, step, sessionId, sessionData = nul
               `el cliente de ${bold(proj.brand)} ha contratado y abonado una ronda de cambios extraordinarios post-entrega (100 €).`,
               lines(
                 `— cliente: ${bold(proj.clientEmail)}`,
-                `— fecha: ${bold(fmtDate(Date.now(), "es"))}`,
+                `— fecha: ${bold(fmtDate(new Date().toISOString(), "es"))}`,
                 `— id sesión stripe: ${bold(sessionId)}`
               ),
               bold("indicaciones del cliente:"),
@@ -571,7 +594,9 @@ async function processPaidSession(env, session, { fromWebhook = false } = {}, ct
 
   // Caso especial: renovación anual de infraestructura web (cláusula 3.1)
   if (session.metadata?.kind === "web_renewal") {
-    if (proj.lastRenewalSessionId === session.id) return;
+    const renewalIds = Array.isArray(proj.renewalSessionIds) ? proj.renewalSessionIds : [];
+    if (proj.lastRenewalSessionId === session.id || renewalIds.includes(session.id)) return;
+    proj.renewalSessionIds = [...renewalIds, session.id].slice(-20);
     proj.lastRenewalSessionId = session.id;
     proj.lastRenewalPaidAt = new Date().toISOString();
     const nextIso = addOneYearIso(proj.nextRenewalAt || proj.finishedAt);

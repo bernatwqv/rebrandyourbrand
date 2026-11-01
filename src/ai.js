@@ -170,6 +170,31 @@ FORMATO DE SALIDA (JSON estricto, sin texto fuera del JSON):
 REMINDER: the "reply" field must be in ${langName}.`;
 }
 
+// Llamada unica a Groq (modelo de razonamiento): presupuesto de tokens holgado y un reintento si se corta por longitud
+async function groqComplete(env, body, timeoutMs) {
+  const call = (maxTokens) =>
+    fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${env.GROQ_API_KEY}` },
+      body: JSON.stringify({
+        ...body,
+        model: GROQ_MODEL,
+        max_completion_tokens: maxTokens,
+        reasoning_effort: "low",
+        include_reasoning: false,
+      }),
+      signal: AbortSignal.timeout(timeoutMs),
+    });
+  let res = await call(1500);
+  if (!res.ok) return { res, data: null };
+  let data = await res.json().catch(() => null);
+  if (data?.choices?.[0]?.finish_reason === "length") {
+    res = await call(2500);
+    data = res.ok ? await res.json().catch(() => null) : null;
+  }
+  return { res, data };
+}
+
 function parseModelJson(content) {
   if (typeof content !== "string") throw new Error("empty_content");
   try {
@@ -186,21 +211,18 @@ function parseModelJson(content) {
 async function askGroq(env, lang, ctx, chatMessages, retries = 1) {
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
-      const groq = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${env.GROQ_API_KEY}` },
-        body: JSON.stringify({
-          model: GROQ_MODEL,
+      const { res: groq, data } = await groqComplete(
+        env,
+        {
           messages: [
             { role: "system", content: buildSystemInstruction(lang, ctx) },
             ...chatMessages.map((m) => ({ role: m.role, content: m.text })),
           ],
-          max_tokens: 600,
           temperature: 0.4,
           response_format: { type: "json_object" },
-        }),
-        signal: AbortSignal.timeout(8000),
-      });
+        },
+        8000
+      );
 
       if (groq.status === 429 || groq.status >= 500) {
         if (attempt < retries) {
@@ -211,7 +233,6 @@ async function askGroq(env, lang, ctx, chatMessages, retries = 1) {
       }
       if (!groq.ok) throw new HttpError(502, "upstream_error");
 
-      const data = await groq.json().catch(() => null);
       const out = parseModelJson(data?.choices?.[0]?.message?.content);
       if (out && typeof out.reply === "string") {
         out.reply = out.reply
@@ -279,23 +300,19 @@ REMINDER: write your answer in ${langName}.`;
 async function askGroqProject(env, lang, proj, chatMessages, retries = 1) {
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
-      const groq = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${env.GROQ_API_KEY}` },
-        body: JSON.stringify({
-          model: GROQ_MODEL,
+      const { res: groq, data } = await groqComplete(
+        env,
+        {
           messages: [
             { role: "system", content: buildProjectSystemInstruction(lang, proj) },
             ...chatMessages.map((m) => ({ role: m.role, content: m.text })),
           ],
-          max_tokens: 450,
           temperature: 0.4,
-        }),
-        signal: AbortSignal.timeout(8000),
-      });
+        },
+        8000
+      );
 
       if (!groq.ok) throw new Error(`Groq HTTP ${groq.status}`);
-      const data = await groq.json().catch(() => null);
       const text = data?.choices?.[0]?.message?.content?.trim();
       if (!text) throw new Error("empty_reply");
 
@@ -303,6 +320,7 @@ async function askGroqProject(env, lang, proj, chatMessages, retries = 1) {
         .replace(/[\u00b7\u2022]/g, " — ")
         .replace(new RegExp("\\x26", "g"), lang === "ca" ? " i " : lang === "en" ? " and " : lang === "eu" ? " eta " : " y ")
         .replace(/(^|[.!?¿¡]\s*|\n\s*)([A-ZÁÉÍÓÚÀÈÒÇÑ])(?![A-ZÁÉÍÓÚÀÈÒÇÑ])/g, (_, p, c) => p + c.toLowerCase());
+      if (hasUnknownPrice(clean) || hasUnknownPercent(clean)) throw new Error("unknown_price");
       return clean;
     } catch (e) {
       if (attempt === retries) {
@@ -341,14 +359,9 @@ async function translateMessageText(env, text, fromLang, toLang) {
   const sourceName = LANG_FULL_NAMES[src] || "Spanish";
 
   try {
-    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${env.GROQ_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: GROQ_MODEL,
+    const { res, data } = await groqComplete(
+      env,
+      {
         messages: [
           {
             role: "system",
@@ -359,19 +372,17 @@ async function translateMessageText(env, text, fromLang, toLang) {
             content: raw.slice(0, 2500),
           },
         ],
-        max_tokens: 450,
         temperature: 0.1,
         response_format: { type: "json_object" },
-      }),
-      signal: AbortSignal.timeout(4500),
-    });
+      },
+      7000
+    );
 
     if (!res.ok) {
       console.warn(`Groq translate HTTP ${res.status}`);
       return raw;
     }
 
-    const data = await res.json().catch(() => null);
     const parsed = parseModelJson(data?.choices?.[0]?.message?.content);
     let translated = typeof parsed?.translated === "string" ? parsed.translated.trim() : "";
     if (!translated) return raw;

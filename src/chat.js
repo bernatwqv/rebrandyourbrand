@@ -139,7 +139,8 @@ async function handleChatPost(request, env, body, o, ctx) {
     const confirmSigIn = typeof body.confirmSig === "string" ? body.confirmSig : "";
     const isShown = async (p, b, d) =>
       !!(email && b && p && (!p.ids.includes("web") || d)) &&
-      (await verifyRaw(key, confirmPayload(email, b, p, d), confirmSigIn));
+      ((await verifyRaw(key, confirmPayload(email, b, p, d), confirmSigIn)) ||
+        (await verifyRaw(key, confirmPayload(email, b, p, d, confirmWindow() - 1), confirmSigIn)));
 
     const confirmAndSend = async (plan, brand, domain) => {
       if (!env.RESEND_API_KEY) throw new HttpError(500, "misconfigured");
@@ -147,7 +148,8 @@ async function handleChatPost(request, env, body, o, ctx) {
       if (!brand) throw new HttpError(400, "brand_required");
       if (!(await isShown(plan, brand, domain))) throw new HttpError(400, "invalid_confirmation");
 
-      if (env.VERIFY_LIMITER) {
+      if (typeof env.VERIFY_LIMITER?.limit !== "function") throw new HttpError(500, "misconfigured");
+      {
         const { success: okV } = await env.VERIFY_LIMITER.limit({ key: `v:${ipKey(ip)}` });
         if (!okV) throw new HttpError(429, "rate_limited", { "Retry-After": "60" });
       }

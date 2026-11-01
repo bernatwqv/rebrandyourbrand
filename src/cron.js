@@ -19,7 +19,7 @@ async function inspectProjectDeadlines(env, keyName, nowMs) {
 
   // Envío diferido de materiales si expiró el tiempo de 60s sin deshacer
   if (proj.pendingMaterialsNotice && nowMs - (Number(proj.pendingMaterialsNotice.timestamp) || 0) >= 60000) {
-    await flushPendingMaterialsNotice(env, projectToken, proj);
+    await flushPendingMaterialsNotice(env, projectToken, proj, true);
     changed = true;
   }
 
@@ -131,8 +131,6 @@ async function inspectProjectDeadlines(env, keyName, nowMs) {
             if (!Number.isNaN(warnMs)) {
               const daysSinceWarn = (nowMs - warnMs) / DAY_MS;
               if (daysSinceWarn >= ABANDON_GRACE_DAYS) {
-                proj.status = "abandoned";
-                proj.abandonedAt = nowIso;
                 const tAb = EM[lang].abandoned;
                 try {
                   await resendSend(
@@ -172,6 +170,8 @@ async function inspectProjectDeadlines(env, keyName, nowMs) {
                     },
                     `abandon-admin-${projectToken}-${nowIso.slice(0, 10)}`
                   );
+                  proj.status = "abandoned";
+                  proj.abandonedAt = nowIso;
                   changed = true;
                 } catch (e) {
                   console.error("abandon termination email failed:", e?.message);
@@ -354,6 +354,10 @@ async function handleScheduled(controller, env, ctx) {
       const meta = item.metadata || {};
       const status = meta.status;
 
+      if (meta.paid === false) {
+        continue;
+      }
+
       if (status && INACTIVE_CRON_STATUSES.has(status)) {
         continue;
       }
@@ -383,14 +387,12 @@ async function handleScheduled(controller, env, ctx) {
       break;
     } else {
       cursor = list.cursor;
-      // Guardar el cursor únicamente cuando la página actual se ha consumido en su totalidad
-      if (cursor) {
-        await env.LEADS_KV.put("cron:project_cursor", cursor, { expirationTtl: 86400 }).catch(() => {});
-      }
     }
   } while (cursor && getsCount < maxGets);
 
   if (completedFullList) {
     await env.LEADS_KV.delete("cron:project_cursor").catch(() => {});
+  } else if (cursor) {
+    await env.LEADS_KV.put("cron:project_cursor", cursor, { expirationTtl: 7 * 86400 }).catch(() => {});
   }
 }

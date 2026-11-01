@@ -96,6 +96,11 @@ async function resendSend(env, payload, idempotencyKey, headersExtra = null) {
         return await res.json().catch(() => ({}));
       }
 
+      if (res.status === 409) {
+        // Peticion idempotente concurrente (webhook y success_url): ya se esta enviando
+        return { ok: true, idempotentDuplicate: true };
+      }
+
       const errText = await res.text().catch(() => "");
       const status = res.status;
 
