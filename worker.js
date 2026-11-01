@@ -4128,12 +4128,11 @@ button.secondary:active,.btn.secondary:active,button.no:active{
 .chat-msg-date{font-size:.68rem;opacity:.8}
 .chat-msg-text{white-space:pre-wrap}
 .chat-trans-wrap{
-  margin-top:.45rem;
-  padding-top:.35rem;
-  border-top:1px dashed rgba(140,163,196,.35);
+  margin-top:.35rem;
+  background:transparent;
 }
 .chat-trans-toggle{
-  background:none;
+  background:transparent;
   border:none;
   padding:0;
   margin:0;
@@ -4143,20 +4142,21 @@ button.secondary:active,.btn.secondary:active,button.no:active{
   gap:.35rem;
   font-family:inherit;
   font-size:.72rem;
-  color:#3D5A85;
-  text-decoration:underline;
+  color:inherit;
+  opacity:.75;
   text-transform:lowercase;
   line-height:1.35;
-  opacity:.88;
   transition:opacity .15s ease;
 }
 .chat-trans-toggle:hover{
   opacity:1;
+  text-decoration:underline;
 }
 .chat-trans-toggle svg{
   flex-shrink:0;
   width:12px;
   height:12px;
+  opacity:.85;
 }
 .chat-input-wrap{
   display:flex;
