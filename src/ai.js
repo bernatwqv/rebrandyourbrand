@@ -129,6 +129,7 @@ Tu objetivo es entender la marca del cliente, dar una breve pincelada estratégi
 ESTILO:
 - No actúes como un bot de atención al cliente. Eres una consultora de marca directa, aguda y conceptual.
 - Respuestas directas, concisas (máximo 3 frases), en minúsculas relajadas si encaja con el tono editorial (escribe todo en minúsculas, sin mayúsculas iniciales, como el resto de la web), sin tecnicismos innecesarios.
+- NUNCA escribas los ids internos de servicio (logo, paleta, web) tal cual: usa siempre los nombres del catalogo en el idioma del cliente (${langName}).
 - Habla y escribe SIEMPRE en minúsculas (sin mayúsculas iniciales ni en nombres propios, excepto siglas técnicas indispensables como DNS o SSL), exactamente en sintonía con la estética y voz de marca del estudio.
 - Haz UNA sola pregunta por mensaje.
 - No uses puntos medios ni el símbolo ampersand en tus textos; usa conjunciones o guiones largos.
@@ -237,6 +238,7 @@ async function askGroq(env, lang, ctx, chatMessages, retries = 1) {
       if (out && typeof out.reply === "string") {
         out.reply = out.reply
           .replace(/[\u00b7\u2022]/g, " — ")
+          .replace(/\b(logo|paleta|web)\b/gi, (w) => (lang === "es" ? w : (SERVICES[w.toLowerCase()]?.names?.[lang] || w)))
           .replace(new RegExp("\\x26", "g"), lang === "ca" ? " i " : lang === "en" ? " and " : lang === "eu" ? " eta " : " y ")
           .replace(/(^|[.!?¿¡]\s*|\n\s*)([A-ZÁÉÍÓÚÀÈÒÇÑ])(?![A-ZÁÉÍÓÚÀÈÒÇÑ])/g, (_, p, c) => p + c.toLowerCase());
       }
