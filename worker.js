@@ -5560,6 +5560,7 @@ async function handleProject(request, env, url) {
   const T = PG[L].tr;
   const projectPageUrl = buildUrl("/proyecto", { token });
   const allDone = proj.status === "done" || (Array.isArray(proj.phases) && proj.phases.length > 0 && proj.phases.every((ph) => ph.status === "done"));
+  const hasWeb = Array.isArray(proj.services) && proj.services.includes("web");
 
   if (request.method === "POST") {
     let bodyJson = null;
@@ -5736,8 +5737,7 @@ async function handleProject(request, env, url) {
       if (!proj.paid) return redirectTo(projectPageUrl);
 
       // Bloque 1 — Materiales del negocio:
-      const domain = cleanInput(form?.get("domain") ?? "", 200);
-      const hasWeb = Array.isArray(proj.services) && proj.services.includes("web");
+      const domain = hasWeb ? cleanInput(form?.get("domain") ?? "", 200) : "";
       const hasDomainAlready = Boolean(proj.onboarding?.domain || (Array.isArray(proj.materialsList) && proj.materialsList.some((m) => m.domain)));
       if (hasWeb && !hasDomainAlready && !domain) {
         return htmlResponse(
@@ -6210,7 +6210,7 @@ async function handleProject(request, env, url) {
             ${dateStr ? `<span style="font-size:.74rem;color:#58575E;">${esc(dateStr)}</span>` : ""}
           </div>
           <div class="kv" style="font-size:.82rem;">
-            ${m.domain ? `<div class="kv-row"><span>${esc(T.obLblDomain)}</span><span class="kv-val">${esc(m.domain)}</span></div>` : ""}
+            ${hasWeb && m.domain ? `<div class="kv-row"><span>${esc(T.obLblDomain)}</span><span class="kv-val">${esc(m.domain)}</span></div>` : ""}
             ${m.socials ? `<div class="kv-row"><span>${esc(T.obLblSocials)}</span><span class="kv-val">${esc(m.socials)}</span></div>` : ""}
             ${urlLink ? `<div class="kv-row"><span>${esc(T.obMaterialsUrl)}</span><span class="kv-val" style="word-break:break-all;"><a href="${esc(urlLink)}" target="_blank" rel="noopener noreferrer" style="color:#3D5A85;text-decoration:underline;">${esc(urlLink)}</a></span></div>` : ""}
             ${fileLink ? `<div class="kv-row"><span>${esc(T.obMaterialsFile)}</span><span class="kv-val"><a class="pill-link" href="${esc(fileLink)}" target="_blank" rel="noopener noreferrer">${esc(m.filename || T.obFileDownload)}</a></span></div>` : ""}
@@ -6269,9 +6269,9 @@ async function handleProject(request, env, url) {
         <input type="hidden" name="op" value="onboarding">
 
         <div class="section-subheading">${esc(T.blockAMaterials)}</div>
-
+        ${hasWeb ? `
         <label for="domain">${esc(T.obDomain)}${domainRequired ? ` <span style="color:#cf172f;font-weight:600;">(${esc(T.obDomainRequired)})</span>` : ""}</label>
-        <input id="domain" name="domain" type="text" maxlength="200" placeholder="${esc(T.obDomainPh)}" ${domainRequired ? "required" : ""}>
+        <input id="domain" name="domain" type="text" maxlength="200" placeholder="${esc(T.obDomainPh)}" ${domainRequired ? "required" : ""}>` : ""}
 
         <label for="socials">${esc(T.obSocials)}</label>
         <input id="socials" name="socials" type="text" maxlength="250" placeholder="${esc(T.obSocialsPh)}">
