@@ -90,7 +90,10 @@ fnBlocks.forEach((fn) => {
     }
   }
 });
-console.log("worker.js auditoría defensiva de ámbitos y firmas (saveProject, ip, allDone, KV): OK");
+if (workerSrc.includes("!env.CHAT_LIMITER")) {
+  throw new Error("CHAT_LIMITER no debe tratarse como binding obligatorio en env.");
+}
+console.log("worker.js auditoría defensiva de ámbitos y firmas (saveProject, ip, allDone, KV, limiters): OK");
 
 // 4. Auditoría estricta de llamadas a resendSend (asunto obligatorio y sin quote en la raíz del payload)
 const fnResend = [...workerSrc.matchAll(/\bresendSend\s*\(\s*env\s*,\s*\{/g)];

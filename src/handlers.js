@@ -3328,7 +3328,7 @@ async function handleEmailForm(request, env, originOk, o) {
   if (request.method !== "POST") {
     return jsonResponse({ error: "method_not_allowed" }, 405, o, { Allow: "POST, OPTIONS" });
   }
-  if (!env.LEADS_KV || !env.RESEND_API_KEY || !env.CHAT_LIMITER || !env.TURNSTILE_SECRET_KEY) {
+  if (!env.LEADS_KV || !env.RESEND_API_KEY || !env.TURNSTILE_SECRET_KEY) {
     return jsonResponse({ error: "misconfigured" }, 500, o);
   }
 

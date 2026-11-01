@@ -7604,7 +7604,7 @@ async function handleEmailForm(request, env, originOk, o) {
   if (request.method !== "POST") {
     return jsonResponse({ error: "method_not_allowed" }, 405, o, { Allow: "POST, OPTIONS" });
   }
-  if (!env.LEADS_KV || !env.RESEND_API_KEY || !env.CHAT_LIMITER || !env.TURNSTILE_SECRET_KEY) {
+  if (!env.LEADS_KV || !env.RESEND_API_KEY || !env.TURNSTILE_SECRET_KEY) {
     return jsonResponse({ error: "misconfigured" }, 500, o);
   }
 
@@ -7671,6 +7671,9 @@ async function handlePendingAction(env, body, ip, o) {
   if (env.CHAT_LIMITER) {
     const { success } = await env.CHAT_LIMITER.limit({ key: `p:${ipKey(ip)}` });
     if (!success) throw new HttpError(429, "rate_limited", { "Retry-After": "60" });
+  } else {
+    const ok = await checkRateLimit(env, `p:${ipKey(ip)}`, 15, 60);
+    if (!ok) throw new HttpError(429, "rate_limited", { "Retry-After": "60" });
   }
 
   const vt = await parseResume(await getKey(env), body.resume);
@@ -7742,15 +7745,20 @@ async function handleChatPost(request, env, body, o, ctx) {
   try {
     const ip = request.headers.get("CF-Connecting-IP") ?? "";
 
-    if (!env.LEADS_KV || !env.CHAT_LIMITER) {
+    if (!env.LEADS_KV) {
       throw new HttpError(500, "misconfigured");
     }
 
     // ── SESIÓN DE CHAT: Turnstile una sola vez al empezar la conversación ──
     if (body.action === "session") {
       if (!env.TURNSTILE_SECRET_KEY) throw new HttpError(500, "misconfigured");
-      const { success } = await env.CHAT_LIMITER.limit({ key: `s:${ipKey(ip)}` });
-      if (!success) throw new HttpError(429, "rate_limited", { "Retry-After": "60" });
+      if (env.CHAT_LIMITER) {
+        const { success } = await env.CHAT_LIMITER.limit({ key: `s:${ipKey(ip)}` });
+        if (!success) throw new HttpError(429, "rate_limited", { "Retry-After": "60" });
+      } else {
+        const ok = await checkRateLimit(env, `s:${ipKey(ip)}`, 20, 60);
+        if (!ok) throw new HttpError(429, "rate_limited", { "Retry-After": "60" });
+      }
       await verifyTurnstile(env, body.token, ip, "brandi-chat");
       return jsonResponse({ session: await makeSession(await getKey(env), ip) }, 200, o);
     }
@@ -7762,8 +7770,13 @@ async function handleChatPost(request, env, body, o, ctx) {
     if (!env.GROQ_API_KEY || !env.TURNSTILE_SECRET_KEY) {
       throw new HttpError(500, "misconfigured");
     }
-    const { success } = await env.CHAT_LIMITER.limit({ key: ipKey(ip) });
-    if (!success) throw new HttpError(429, "rate_limited", { "Retry-After": "60" });
+    if (env.CHAT_LIMITER) {
+      const { success } = await env.CHAT_LIMITER.limit({ key: ipKey(ip) });
+      if (!success) throw new HttpError(429, "rate_limited", { "Retry-After": "60" });
+    } else {
+      const ok = await checkRateLimit(env, `c:${ipKey(ip)}`, 30, 60);
+      if (!ok) throw new HttpError(429, "rate_limited", { "Retry-After": "60" });
+    }
 
     const lang = LANG_ORDER.includes(body.lang) ? body.lang : "es";
     const key = await getKey(env);
