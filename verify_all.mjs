@@ -46,3 +46,40 @@ if (typeof mod.default?.fetch !== "function" || typeof mod.default?.scheduled !=
   throw new Error("worker.js no exporta los manejadores fetch() y scheduled().");
 }
 console.log("worker.js importación ESM (fetch + scheduled): OK");
+
+// 3. Auditoría de código defensivo estricto (ámbitos y firmas de helpers)
+const saveMatches = [...workerSrc.matchAll(/saveProject\s*\(([^)]+)\)/g)];
+if (saveMatches.length === 0) {
+  throw new Error("No se detectaron llamadas a saveProject.");
+}
+saveMatches.forEach((m) => {
+  const args = m[1].split(",").map((s) => s.trim());
+  if (args.length < 3) {
+    throw new Error(`Firma incorrecta en saveProject (< 3 argumentos): ${m[0]}`);
+  }
+  if (args[1].includes("project:")) {
+    throw new Error(`saveProject no debe recibir el prefijo "project:" en el token: ${m[0]}`);
+  }
+});
+
+const rawPuts = [...workerSrc.matchAll(/\.put\s*\(\s*[`"']project:/g)];
+if (rawPuts.length > 1) {
+  throw new Error("Detectada escritura directa a LEADS_KV con prefijo project: fuera de saveProject.");
+}
+
+const fnBlocks = [...workerSrc.matchAll(/async\s+function\s+([A-Za-z0-9_$]+)\s*\(([^)]*)\)\s*\{([\s\S]*?)(?=\nasync\s+function|\nfunction|\nconst\s+[A-Za-z0-9_$]+\s*=|\nexport\s+default|$)/g)];
+fnBlocks.forEach((fn) => {
+  const name = fn[1];
+  const params = fn[2].split(",").map((s) => s.trim());
+  const body = fn[3];
+
+  if (body.includes("checkProjectChatRateLimit(") || body.includes("checkRateLimit(")) {
+    const usesIp = /\bip\b/.test(body);
+    const hasParamIp = params.includes("ip");
+    const declaresIp = /\b(?:const|let|var)\s+ip\b/.test(body);
+    if (usesIp && !hasParamIp && !declaresIp) {
+      throw new Error(`Ámbito roto: la función ${name} utiliza 'ip' sin declararla ni recibirla por parámetro.`);
+    }
+  }
+});
+console.log("worker.js auditoría defensiva de ámbitos y firmas (saveProject, ip, KV): OK");
