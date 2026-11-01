@@ -825,6 +825,7 @@ const PG = {
       chatStudio: "gael y bernat",
       chatBrandi: "brandi (ia)",
       chatNoMessages: "aún no hay mensajes con el equipo. escribe abajo para iniciar la conversación.",
+      chatErr: "error de conexión. no se ha podido enviar el mensaje. inténtalo de nuevo.",
     },
   },
   ca: {
@@ -989,6 +990,7 @@ const PG = {
       chatStudio: "gael i bernat",
       chatBrandi: "brandi (ia)",
       chatNoMessages: "encara no hi ha missatges amb l'equip. escriu a sota per iniciar la conversa.",
+      chatErr: "error de connexió. no s'ha pogut enviar el missatge. torna-ho a provar.",
     },
   },
   eu: {
@@ -1153,6 +1155,7 @@ const PG = {
       chatStudio: "gael eta bernat",
       chatBrandi: "brandi (ia)",
       chatNoMessages: "oraindik ez dago mezurik lan-taldearekin. idatzi behean elkarrizketa hasteko.",
+      chatErr: "konexio-errorea. ezin izan da mezua bidali. saiatu berriro.",
     },
   },
   en: {
@@ -1317,6 +1320,7 @@ const PG = {
       chatStudio: "gael and bernat",
       chatBrandi: "brandi (ai)",
       chatNoMessages: "no messages with the team yet. write below to start the conversation.",
+      chatErr: "connection error. could not send message. please try again.",
     },
   },
 };

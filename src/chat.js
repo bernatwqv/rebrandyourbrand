@@ -93,7 +93,10 @@ async function handleChatPost(request, env, body, o) {
     const lang = LANG_ORDER.includes(body.lang) ? body.lang : "es";
     const key = await getKey(env);
     const rawAllMessages = Array.isArray(body.messages)
-      ? body.messages.filter((m) => m && typeof m.text === "string")
+      ? body.messages
+          .slice(-60)
+          .filter((m) => m && m.role === "user" && typeof m.text === "string")
+          .map((m) => ({ role: "user", text: m.text.slice(0, 500) }))
       : [];
     const fullEmail = findEmail(rawAllMessages);
     const fullDomain = findDomain(rawAllMessages);

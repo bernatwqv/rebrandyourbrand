@@ -69,13 +69,14 @@ async function inspectProjectDeadlines(env, keyName, nowMs) {
     const hasMaterials =
       (Array.isArray(proj.materialsList) && proj.materialsList.length > 0) ||
       Boolean(proj.onboarding && (proj.onboarding.materials || proj.onboarding.submittedAt || proj.onboarding.receivedAt));
-    const waitingMaterials = !hasMaterials;
     const reviewPhase = Array.isArray(proj.phases)
       ? proj.phases.find((ph) => ph.status === "review" && ph.reviewSentAt)
       : null;
+    const waitingMaterials = Boolean(proj.onboardingPending || (!hasMaterials && !proj.materialsReceivedAt));
     const waitingReview = Boolean(reviewPhase);
+    const waitingForClient = waitingMaterials || waitingReview;
 
-    if (waitingMaterials || waitingReview) {
+    if (waitingForClient) {
       const inactiveStart = waitingMaterials ? (proj.paidAt || proj.createdAt) : reviewPhase.reviewSentAt;
       const inactiveMs = new Date(inactiveStart).getTime();
       if (!Number.isNaN(inactiveMs)) {
@@ -184,37 +185,43 @@ async function inspectProjectDeadlines(env, keyName, nowMs) {
             : WEB_RENEWAL_EUR;
         const renewalEur = Number.isFinite(rawRenewal) && rawRenewal >= 0 ? rawRenewal : WEB_RENEWAL_EUR;
 
-        if (renewalEur > 0 && env.STRIPE_SECRET_KEY) {
-          const payUrl = await renewalActionUrl(env, projectToken);
-          if (payUrl) {
-            const tr = EM[lang].renewal;
-            const dueStr = fmtDate(proj.nextRenewalAt, lang);
-            try {
-              await resendSend(
-                env,
-                {
-                  to: [proj.clientEmail],
-                  reply_to: "hola@rebrandyourbrand.es",
-                  subject: tr.subject(proj.brand),
-                  ...renderEmail(lang, {
-                    paras: [tr.hello, tr.intro(bold(proj.brand), bold(dueStr)), tr.body(bold(eur(renewalEur, lang)))],
-                    cta: { label: tr.ctaPay, url: payUrl },
-                    secondaryLink: { label: tr.cancelLine, url: cancelUrl },
-                    note: tr.note,
-                  }),
-                },
-                `renewal-client-${projectToken}-${proj.nextRenewalAt.slice(0, 10)}`
-              );
-              await alertAdmin(
-                env,
-                `preaviso automático de renovación enviado — ${proj.brand}`,
-                `cliente: ${proj.clientEmail}\nvencimiento: ${fmtDate(proj.nextRenewalAt, "es")}\nimporte: ${renewalEur} €`
-              );
-              proj.renewalRemindedFor = proj.nextRenewalAt;
-              changed = true;
-            } catch (e) {
-              console.error("renewal client email failed:", e?.message);
-            }
+        const canPay = Boolean(
+          renewalEur > 0 &&
+          env.STRIPE_SECRET_KEY &&
+          (env.CHAT_SIGNING_SECRET || env.APP_SECRET_TOKEN)
+        );
+        const payUrl = canPay ? await renewalActionUrl(env, projectToken) : "";
+
+        if (payUrl) {
+          const tr = EM[lang].renewal;
+          const dueStr = fmtDate(proj.nextRenewalAt, lang);
+          try {
+            await resendSend(
+              env,
+              {
+                to: [proj.clientEmail],
+                reply_to: "hola@rebrandyourbrand.es",
+                subject: tr.subject(proj.brand),
+                ...renderEmail(lang, {
+                  paras: [tr.hello, tr.intro(bold(proj.brand), bold(dueStr)), tr.body(bold(eur(renewalEur, lang)))],
+                  cta: { label: tr.ctaPay, url: payUrl },
+                  secondaryLink: { label: tr.cancelLine, url: cancelUrl },
+                  note: tr.note,
+                }),
+              },
+              `renewal-client-${projectToken}-${proj.nextRenewalAt.slice(0, 10)}`
+            );
+            await alertAdmin(
+              env,
+              `preaviso automático de renovación enviado — ${proj.brand}`,
+              `cliente: ${proj.clientEmail}\nvencimiento: ${fmtDate(proj.nextRenewalAt, "es")}\nimporte: ${renewalEur} €`
+            );
+            proj.renewalPaid = false;
+            proj.renewalRemindedFor = proj.nextRenewalAt;
+            proj.renewalReminderSentAt = nowIso;
+            changed = true;
+          } catch (e) {
+            console.error("renewal client email failed:", e?.message);
           }
         } else {
           try {
@@ -239,7 +246,9 @@ async function inspectProjectDeadlines(env, keyName, nowMs) {
               },
               `renewal-admin-${projectToken}-${proj.nextRenewalAt.slice(0, 10)}`
             );
+            proj.renewalPaid = false;
             proj.renewalRemindedFor = proj.nextRenewalAt;
+            proj.renewalReminderSentAt = nowIso;
             changed = true;
           } catch (e) {
             console.error("renewal admin reminder failed:", e?.message);
@@ -294,9 +303,7 @@ async function inspectProjectDeadlines(env, keyName, nowMs) {
   }
 
   if (changed) {
-    await env.LEADS_KV.put(keyName, JSON.stringify(proj), {
-      metadata: { status: proj.status || "active" },
-    });
+    await saveProject(env, projectToken, proj);
   }
 }
 
@@ -307,18 +314,46 @@ async function handleScheduled(controller, env, ctx) {
   }
 
   const nowMs = controller?.scheduledTime ? Number(controller.scheduledTime) : Date.now();
+  const maxGets = 35;
+  let getsCount = 0;
   let cursor;
+
   do {
     const list = await env.LEADS_KV.list({ prefix: "project:", cursor });
     const INACTIVE_CRON_STATUSES = new Set(["abandoned", "cancelled"]);
+
     for (const item of list.keys) {
-      if (item.metadata?.status && INACTIVE_CRON_STATUSES.has(item.metadata.status)) {
+      if (getsCount >= maxGets) {
+        console.warn("cron subrequests budget reached (35 gets), stopping batch");
+        return;
+      }
+
+      const meta = item.metadata || {};
+      const status = meta.status;
+
+      if (status && INACTIVE_CRON_STATUSES.has(status)) {
         continue;
       }
+
+      if (status === "completed" || status === "done") {
+        if (!meta.hasWeb) {
+          continue;
+        }
+        const nextDue = Number(meta.renewalNextDue) || 0;
+        if (nextDue > 0) {
+          const daysUntil = (nextDue - nowMs) / DAY_MS;
+          // Si faltan más de 31 días para renovar, no hace falta leer el proyecto de KV hoy
+          if (daysUntil > 31) {
+            continue;
+          }
+        }
+      }
+
+      getsCount++;
       await inspectProjectDeadlines(env, item.name, nowMs).catch((e) =>
         console.error("cron project check failed:", item.name, e?.message)
       );
     }
     cursor = list.list_complete ? undefined : list.cursor;
-  } while (cursor);
+  } while (cursor && getsCount < maxGets);
 }

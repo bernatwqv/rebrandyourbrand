@@ -146,7 +146,7 @@ const AGREE_RE = /(?<![\p{L}\p{N}])(?:confirmo|confirm|vale|adelante|procedemos|
 
 const DENY_RE = /^\s*(?:no|nope|ez|ezeztatu|cancel\w*)(?![\p{L}\p{N}])/iu;
 
-// Precios oficiales que Brandi puede mencionar: 100 (paleta suelta, cuota anual o ronda extra), 400 (logo o web), 500 (paleta y web) y 800 (pack completo)
+// Precios oficiales permitidos que Brandi puede mencionar: {0, 100, 400, 500, 800, 900} (0 paleta de regalo con logo, 100 paleta suelta/cuota anual/ronda extra, 400 logo o web, 500 paleta y web, 800 pack completo, 900 con ronda extra)
 const ALLOWED_EUR = new Set([0, 100, 400, 500, 800, 900]);
 
 const CATALOG = [

@@ -53,6 +53,9 @@
 <meta property="og:description" content="Rebranding y web para negocios: elige solo lo que necesitas, a precio cerrado, pago único y sin cuotas mensuales.">
 <meta property="og:url" content="https://rebrandyourbrand.es/">
 <meta property="og:locale" content="es_ES">
+<meta property="og:locale:alternate" content="ca_ES">
+<meta property="og:locale:alternate" content="eu_ES">
+<meta property="og:locale:alternate" content="en_US">
 <meta property="og:image" content="https://rebrandyourbrand.es/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -1999,7 +2002,7 @@ textarea { resize: vertical; }
       }
     }
 
-    const ERR = { rate_limited: 'err-rate', email_cooldown: 'err-cooldown', captcha_failed: 'err-turnstile', captcha_unavailable: 'err-turnstile', upstream_busy: 'err-busy', upstream_error: 'err-busy', email_error: 'err-busy', payload_too_large: 'err-busy', invalid_confirmation: 'err-busy', invalid_messages: 'err-busy', plan_required: 'err-plan', session_invalid: 'err-turnstile', missing_fields: 'err-busy', misconfigured: 'err-busy', internal_error: 'err-busy', invalid_resume: 'err-busy', expired: 'err-expired', resend_limit: 'err-resend-limit' };
+    const ERR = { rate_limited: 'err-rate', email_cooldown: 'err-cooldown', captcha_failed: 'err-turnstile', captcha_unavailable: 'err-turnstile', upstream_busy: 'err-busy', upstream_error: 'err-busy', email_error: 'err-busy', payload_too_large: 'err-busy', invalid_confirmation: 'err-busy', invalid_messages: 'err-busy', plan_required: 'err-plan', brand_required: 'err-busy', session_invalid: 'err-turnstile', missing_fields: 'err-busy', misconfigured: 'err-busy', internal_error: 'err-busy', invalid_resume: 'err-busy', expired: 'err-expired', resend_limit: 'err-resend-limit' };
 
     // ── SELECTOR DE SERVICIOS ──
     const selected = new Set();
@@ -2125,6 +2128,8 @@ textarea { resize: vertical; }
       document.documentElement.lang = currentLang;
       document.title = { es: 'rebrandyourbrand — Rebranding y web para negocios', ca: 'rebrandyourbrand — Rebranding i web per a negocis', eu: 'rebrandyourbrand — Negozioentzako rebranding-a eta webgunea', en: 'rebrandyourbrand — Rebranding and web for businesses' }[currentLang];
       langToggle.setAttribute('aria-label', t['lang-aria']);
+      const ogLocaleMeta = document.querySelector('meta[property="og:locale"]');
+      if (ogLocaleMeta) ogLocaleMeta.setAttribute('content', { es: 'es_ES', ca: 'ca_ES', eu: 'eu_ES', en: 'en_US' }[currentLang] || 'es_ES');
       document.querySelectorAll('[data-i18n]').forEach((el) => {
         if (el.classList.contains('toggle-text') || el.classList.contains('toggle-text-legal')) return;
         const v = t[el.dataset.i18n];

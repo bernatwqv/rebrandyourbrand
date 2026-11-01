@@ -260,9 +260,7 @@ async function finalizeProjectClosure(
   }
 
   if (changed) {
-    await env.LEADS_KV.put(`project:${projectToken}`, JSON.stringify(proj), {
-      metadata: { status: proj.status || "done" },
-    });
+    await saveProject(env, projectToken, proj);
   }
 
   return { ok: true, finished: true };
@@ -325,9 +323,7 @@ async function completeProjectPhase(
     nextPhase.date = now;
     nextStep = nextPhase.step;
     proj.currentPhase = nextStep;
-    await env.LEADS_KV.put(`project:${projectToken}`, JSON.stringify(proj), {
-      metadata: { status: proj.status || "active" },
-    });
+    await saveProject(env, projectToken, proj);
     if (nextPhase.key === "delivery" && approvedBy === "client") {
       await alertAdmin(
         env,
@@ -854,9 +850,7 @@ async function handlePhaseAdvance(request, env, url) {
         `proposal-${projectToken}-${step}-${Date.now()}`
       );
 
-      await env.LEADS_KV.put(`project:${projectToken}`, JSON.stringify(proj), {
-        metadata: { status: proj.status || "active" },
-      });
+      await saveProject(env, projectToken, proj);
     } catch (e) {
       console.error("proposal email failed:", e?.message);
       return htmlResponse(
@@ -1047,6 +1041,10 @@ async function handlePhaseApprove(request, env, url) {
     return new Response("method not allowed", { status: 405, headers: { Allow: "GET, HEAD, POST" } });
   }
 
+  if (ph.status !== "review") {
+    return redirectTo(trackingUrl);
+  }
+
   const form = await request.formData().catch(() => null);
   const decision = String(form?.get("decision") || "approve");
 
@@ -1118,9 +1116,7 @@ async function handlePhaseApprove(request, env, url) {
     delete ph.reminderSentAt;
     delete ph.tacitAlertSentAt;
     delete proj.abandonWarningSentAt;
-    await env.LEADS_KV.put(`project:${p}`, JSON.stringify(proj), {
-      metadata: { status: proj.status || "active" },
-    });
+    await saveProject(env, p, proj);
 
     const noticeText = PG[L].tr?.actionRegisteredNotice || "aviso: esta acción ya ha quedado registrada en el sistema y nuestro equipo ha recibido la notificación para continuar con el trabajo.";
     return htmlResponse(
@@ -1222,7 +1218,7 @@ async function handleCancelRenewal(request, env, url) {
 
   proj.renewalCanceled = true;
   proj.renewalCanceledAt = new Date().toISOString();
-  await env.LEADS_KV.put(`project:${p}`, JSON.stringify(proj));
+  await saveProject(env, p, proj);
   await alertAdmin(
     env,
     `baja de renovación anual confirmada — ${proj.brand}`,
@@ -1373,6 +1369,7 @@ async function checkProjectChatRateLimit(env, token, ip) {
 
 // ── SEGUIMIENTO DEL PROYECTO, RESCATE DE PAGO Y ONBOARDING (/proyecto) ──
 async function handleProject(request, env, url) {
+  const ip = request.headers.get("CF-Connecting-IP") ?? "";
   let L = langFromRequest(request);
   const token = url.searchParams.get("token");
   if (!token || !/^[a-f0-9]{64}$/.test(token)) {
@@ -1739,9 +1736,7 @@ async function handleProject(request, env, url) {
         delete proj.abandonWarningSentAt;
       }
 
-      await env.LEADS_KV.put(`project:${token}`, JSON.stringify(proj), {
-        metadata: { status: proj.status || "active" },
-      });
+      await saveProject(env, token, proj);
 
       if (env.RESEND_API_KEY) {
         const manageUrl = await advancePhaseUrl(env, token, proj.currentPhase || 1);
@@ -1809,9 +1804,7 @@ async function handleProject(request, env, url) {
           delete proj.onboarding;
         }
         proj.lastAdded = null;
-        await env.LEADS_KV.put(`project:${token}`, JSON.stringify(proj), {
-          metadata: { status: proj.status || "active" },
-        });
+        await saveProject(env, token, proj);
 
         if (env.RESEND_API_KEY) {
           await resendSend(
@@ -1858,9 +1851,7 @@ async function handleProject(request, env, url) {
       }
       if (!proj.receiptUrl) {
         proj.receiptCheckedAt = Date.now();
-        await env.LEADS_KV.put(`project:${token}`, JSON.stringify(proj), {
-          metadata: { status: proj.status || "active" },
-        });
+        await saveProject(env, token, proj);
       }
     }
   }
@@ -2336,6 +2327,7 @@ async function handleProject(request, env, url) {
 
         var youLabel = ${JSON.stringify(T.chatYou)};
         var brandiLabel = ${JSON.stringify(T.chatBrandi)};
+        var chatErrMsg = ${JSON.stringify(T.chatErr)};
 
         if (brandiForm) {
           brandiForm.addEventListener("submit", function(e){
@@ -2388,7 +2380,7 @@ async function handleProject(request, env, url) {
               if (userRow && userRow.parentNode) userRow.parentNode.removeChild(userRow);
               brandiHistory.pop();
               brandiInput.value = text;
-              var errRow = createMsgRow(brandiLabel, "error de conexion. intentalo de nuevo.", "is-ai");
+              var errRow = createMsgRow(brandiLabel, chatErrMsg, "is-ai");
               brandiList.appendChild(errRow);
               brandiList.scrollTop = brandiList.scrollHeight;
             });
@@ -2427,7 +2419,10 @@ async function handleProject(request, env, url) {
               var errMsg = document.createElement("div");
               errMsg.className = "chat-intro-banner human-banner";
               errMsg.style.borderColor = "#E8A33D";
-              errMsg.innerHTML = "<p style='color:#E8A33D;'>error de conexion. intentalo de nuevo.</p>";
+              var pErr = document.createElement("p");
+              pErr.style.color = "#E8A33D";
+              pErr.textContent = chatErrMsg;
+              errMsg.appendChild(pErr);
               humanList.appendChild(errMsg);
               humanList.scrollTop = humanList.scrollHeight;
             });
@@ -2705,9 +2700,7 @@ async function handleReview(request, env, url) {
   }
 
   proj.reviewSubmitted = true;
-  await env.LEADS_KV.put(`project:${p}`, JSON.stringify(proj), {
-    metadata: { status: proj.status || "active" },
-  });
+  await saveProject(env, p, proj);
   return msgPage(L, "rvThanks", 200, {
     footerUrl: trackingUrl,
     footerLabel: PG[L].common.openTracker,

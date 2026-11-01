@@ -153,7 +153,7 @@ const AGREE_RE = /(?<![\p{L}\p{N}])(?:confirmo|confirm|vale|adelante|procedemos|
 
 const DENY_RE = /^\s*(?:no|nope|ez|ezeztatu|cancel\w*)(?![\p{L}\p{N}])/iu;
 
-// Precios oficiales que Brandi puede mencionar: 100 (paleta suelta, cuota anual o ronda extra), 400 (logo o web), 500 (paleta y web) y 800 (pack completo)
+// Precios oficiales permitidos que Brandi puede mencionar: {0, 100, 400, 500, 800, 900} (0 paleta de regalo con logo, 100 paleta suelta/cuota anual/ronda extra, 400 logo o web, 500 paleta y web, 800 pack completo, 900 con ronda extra)
 const ALLOWED_EUR = new Set([0, 100, 400, 500, 800, 900]);
 
 const CATALOG = [
@@ -1178,6 +1178,7 @@ const PG = {
       chatStudio: "gael y bernat",
       chatBrandi: "brandi (ia)",
       chatNoMessages: "aún no hay mensajes con el equipo. escribe abajo para iniciar la conversación.",
+      chatErr: "error de conexión. no se ha podido enviar el mensaje. inténtalo de nuevo.",
     },
   },
   ca: {
@@ -1342,6 +1343,7 @@ const PG = {
       chatStudio: "gael i bernat",
       chatBrandi: "brandi (ia)",
       chatNoMessages: "encara no hi ha missatges amb l'equip. escriu a sota per iniciar la conversa.",
+      chatErr: "error de connexió. no s'ha pogut enviar el missatge. torna-ho a provar.",
     },
   },
   eu: {
@@ -1506,6 +1508,7 @@ const PG = {
       chatStudio: "gael eta bernat",
       chatBrandi: "brandi (ia)",
       chatNoMessages: "oraindik ez dago mezurik lan-taldearekin. idatzi behean elkarrizketa hasteko.",
+      chatErr: "konexio-errorea. ezin izan da mezua bidali. saiatu berriro.",
     },
   },
   en: {
@@ -1670,6 +1673,7 @@ const PG = {
       chatStudio: "gael and bernat",
       chatBrandi: "brandi (ai)",
       chatNoMessages: "no messages with the team yet. write below to start the conversation.",
+      chatErr: "connection error. could not send message. please try again.",
     },
   },
 };
@@ -2374,6 +2378,27 @@ const isStripeReceiptUrl = (u) =>
 
 const stripeLocaleFor = (lang) => (pickLang(lang) === "en" ? "en" : "es");
 
+async function saveProject(env, token, proj, extraOpts = {}) {
+  if (!env?.LEADS_KV || !token || !proj) return;
+  const hasWeb = Boolean(
+    (proj.includesWeb || (Array.isArray(proj.services) && proj.services.includes("web"))) &&
+    !proj.renewalCanceled &&
+    !proj.renewalCancelled
+  );
+  const nextDueMs = proj.renewalNextDue
+    ? Number(proj.renewalNextDue)
+    : (proj.nextRenewalAt ? new Date(proj.nextRenewalAt).getTime() : 0);
+
+  await env.LEADS_KV.put(`project:${token}`, JSON.stringify(proj), {
+    metadata: {
+      status: proj.status || "active",
+      hasWeb,
+      renewalNextDue: Number.isNaN(nextDueMs) ? 0 : nextDueMs,
+    },
+    ...extraOpts,
+  });
+}
+
 async function createProjectRecord(env, { clientEmail, brand, plan, lang, messages, domain }) {
   const safeBrand = brand || "proyecto";
   const projectToken = randomHex(32);
@@ -2419,9 +2444,8 @@ async function createProjectRecord(env, { clientEmail, brand, plan, lang, messag
     referencesList: [],
     ...(cleanDomain ? { onboarding: { domain: cleanDomain, socials: "", materials: "", submittedAt: nowIso } } : {}),
   };
-  await env.LEADS_KV.put(projectKey, JSON.stringify(projectData), {
+  await saveProject(env, projectToken, projectData, {
     expirationTtl: PENDING_PROJECT_TTL_SECONDS,
-    metadata: { status: "active" },
   });
   return projectData;
 }
@@ -2564,9 +2588,8 @@ async function ensureStripeCheckout(env, proj) {
 
     proj.stripeSessionId = session.id;
     proj.checkoutUrl = session.url;
-    await env.LEADS_KV.put(`project:${proj.token}`, JSON.stringify(proj), {
+    await saveProject(env, proj.token, proj, {
       expirationTtl: PENDING_PROJECT_TTL_SECONDS,
-      metadata: { status: proj.status || "active" },
     });
     return { paid: false, url: session.url };
   } catch (e) {
@@ -2723,13 +2746,11 @@ async function unlockExtraRevision(env, proj, step, sessionId, sessionData = nul
   if (proj.status !== "done") {
     proj.status = "in_progress";
   }
-  if (ph.status !== "done") {
+  if (ph.status !== "done" && ph.deliverableUrl) {
     ph.status = "review";
   }
 
-  await env.LEADS_KV.put(`project:${proj.token}`, JSON.stringify(proj), {
-    metadata: { status: proj.status || "active" },
-  });
+  await saveProject(env, proj.token, proj);
 
   if (env.RESEND_API_KEY) {
     const manageUrl = await advancePhaseUrl(env, proj.token, ph.step);
@@ -2837,14 +2858,15 @@ async function processPaidSession(env, session, { fromWebhook = false } = {}) {
     if (proj.lastRenewalSessionId === session.id) return;
     proj.lastRenewalSessionId = session.id;
     proj.lastRenewalPaidAt = new Date().toISOString();
-    proj.nextRenewalAt = addOneYearIso(proj.nextRenewalAt || proj.finishedAt);
+    const nextIso = addOneYearIso(proj.nextRenewalAt || proj.finishedAt);
+    proj.nextRenewalAt = nextIso;
+    proj.renewalPaid = true;
+    proj.renewalNextDue = new Date(nextIso).getTime();
     proj.renewalCanceled = false;
     proj.renewalRemindedFor = "";
     proj.renewalOverdueAlertSentAt = null;
     proj.renewalReminderSentAt = null;
-    await env.LEADS_KV.put(key, JSON.stringify(proj), {
-      metadata: { status: proj.status || "active" },
-    });
+    await saveProject(env, token, proj);
     await alertAdmin(
       env,
       `renovación anual abonada — ${proj.brand}`,
@@ -2897,7 +2919,7 @@ async function processPaidSession(env, session, { fromWebhook = false } = {}) {
   }
 
   if (proj.emailsSent) {
-    if (dirty) await env.LEADS_KV.put(key, JSON.stringify(proj), { metadata: { status: proj.status || "active" } });
+    if (dirty) await saveProject(env, token, proj);
     return;
   }
 
@@ -3010,7 +3032,7 @@ async function processPaidSession(env, session, { fromWebhook = false } = {}) {
     dirty = true;
   } finally {
     // Una única escritura consolidada en KV sin expirationTtl (el proyecto pagado queda permanente)
-    if (dirty) await env.LEADS_KV.put(key, JSON.stringify(proj), { metadata: { status: proj.status || "active" } });
+    if (dirty) await saveProject(env, token, proj);
   }
 }
 
@@ -4193,9 +4215,7 @@ async function finalizeProjectClosure(
   }
 
   if (changed) {
-    await env.LEADS_KV.put(`project:${projectToken}`, JSON.stringify(proj), {
-      metadata: { status: proj.status || "done" },
-    });
+    await saveProject(env, projectToken, proj);
   }
 
   return { ok: true, finished: true };
@@ -4258,9 +4278,7 @@ async function completeProjectPhase(
     nextPhase.date = now;
     nextStep = nextPhase.step;
     proj.currentPhase = nextStep;
-    await env.LEADS_KV.put(`project:${projectToken}`, JSON.stringify(proj), {
-      metadata: { status: proj.status || "active" },
-    });
+    await saveProject(env, projectToken, proj);
     if (nextPhase.key === "delivery" && approvedBy === "client") {
       await alertAdmin(
         env,
@@ -4787,9 +4805,7 @@ async function handlePhaseAdvance(request, env, url) {
         `proposal-${projectToken}-${step}-${Date.now()}`
       );
 
-      await env.LEADS_KV.put(`project:${projectToken}`, JSON.stringify(proj), {
-        metadata: { status: proj.status || "active" },
-      });
+      await saveProject(env, projectToken, proj);
     } catch (e) {
       console.error("proposal email failed:", e?.message);
       return htmlResponse(
@@ -4980,6 +4996,10 @@ async function handlePhaseApprove(request, env, url) {
     return new Response("method not allowed", { status: 405, headers: { Allow: "GET, HEAD, POST" } });
   }
 
+  if (ph.status !== "review") {
+    return redirectTo(trackingUrl);
+  }
+
   const form = await request.formData().catch(() => null);
   const decision = String(form?.get("decision") || "approve");
 
@@ -5051,9 +5071,7 @@ async function handlePhaseApprove(request, env, url) {
     delete ph.reminderSentAt;
     delete ph.tacitAlertSentAt;
     delete proj.abandonWarningSentAt;
-    await env.LEADS_KV.put(`project:${p}`, JSON.stringify(proj), {
-      metadata: { status: proj.status || "active" },
-    });
+    await saveProject(env, p, proj);
 
     const noticeText = PG[L].tr?.actionRegisteredNotice || "aviso: esta acción ya ha quedado registrada en el sistema y nuestro equipo ha recibido la notificación para continuar con el trabajo.";
     return htmlResponse(
@@ -5155,7 +5173,7 @@ async function handleCancelRenewal(request, env, url) {
 
   proj.renewalCanceled = true;
   proj.renewalCanceledAt = new Date().toISOString();
-  await env.LEADS_KV.put(`project:${p}`, JSON.stringify(proj));
+  await saveProject(env, p, proj);
   await alertAdmin(
     env,
     `baja de renovación anual confirmada — ${proj.brand}`,
@@ -5306,6 +5324,7 @@ async function checkProjectChatRateLimit(env, token, ip) {
 
 // ── SEGUIMIENTO DEL PROYECTO, RESCATE DE PAGO Y ONBOARDING (/proyecto) ──
 async function handleProject(request, env, url) {
+  const ip = request.headers.get("CF-Connecting-IP") ?? "";
   let L = langFromRequest(request);
   const token = url.searchParams.get("token");
   if (!token || !/^[a-f0-9]{64}$/.test(token)) {
@@ -5672,9 +5691,7 @@ async function handleProject(request, env, url) {
         delete proj.abandonWarningSentAt;
       }
 
-      await env.LEADS_KV.put(`project:${token}`, JSON.stringify(proj), {
-        metadata: { status: proj.status || "active" },
-      });
+      await saveProject(env, token, proj);
 
       if (env.RESEND_API_KEY) {
         const manageUrl = await advancePhaseUrl(env, token, proj.currentPhase || 1);
@@ -5742,9 +5759,7 @@ async function handleProject(request, env, url) {
           delete proj.onboarding;
         }
         proj.lastAdded = null;
-        await env.LEADS_KV.put(`project:${token}`, JSON.stringify(proj), {
-          metadata: { status: proj.status || "active" },
-        });
+        await saveProject(env, token, proj);
 
         if (env.RESEND_API_KEY) {
           await resendSend(
@@ -5791,9 +5806,7 @@ async function handleProject(request, env, url) {
       }
       if (!proj.receiptUrl) {
         proj.receiptCheckedAt = Date.now();
-        await env.LEADS_KV.put(`project:${token}`, JSON.stringify(proj), {
-          metadata: { status: proj.status || "active" },
-        });
+        await saveProject(env, token, proj);
       }
     }
   }
@@ -6269,6 +6282,7 @@ async function handleProject(request, env, url) {
 
         var youLabel = ${JSON.stringify(T.chatYou)};
         var brandiLabel = ${JSON.stringify(T.chatBrandi)};
+        var chatErrMsg = ${JSON.stringify(T.chatErr)};
 
         if (brandiForm) {
           brandiForm.addEventListener("submit", function(e){
@@ -6321,7 +6335,7 @@ async function handleProject(request, env, url) {
               if (userRow && userRow.parentNode) userRow.parentNode.removeChild(userRow);
               brandiHistory.pop();
               brandiInput.value = text;
-              var errRow = createMsgRow(brandiLabel, "error de conexion. intentalo de nuevo.", "is-ai");
+              var errRow = createMsgRow(brandiLabel, chatErrMsg, "is-ai");
               brandiList.appendChild(errRow);
               brandiList.scrollTop = brandiList.scrollHeight;
             });
@@ -6360,7 +6374,10 @@ async function handleProject(request, env, url) {
               var errMsg = document.createElement("div");
               errMsg.className = "chat-intro-banner human-banner";
               errMsg.style.borderColor = "#E8A33D";
-              errMsg.innerHTML = "<p style='color:#E8A33D;'>error de conexion. intentalo de nuevo.</p>";
+              var pErr = document.createElement("p");
+              pErr.style.color = "#E8A33D";
+              pErr.textContent = chatErrMsg;
+              errMsg.appendChild(pErr);
               humanList.appendChild(errMsg);
               humanList.scrollTop = humanList.scrollHeight;
             });
@@ -6638,9 +6655,7 @@ async function handleReview(request, env, url) {
   }
 
   proj.reviewSubmitted = true;
-  await env.LEADS_KV.put(`project:${p}`, JSON.stringify(proj), {
-    metadata: { status: proj.status || "active" },
-  });
+  await saveProject(env, p, proj);
   return msgPage(L, "rvThanks", 200, {
     footerUrl: trackingUrl,
     footerLabel: PG[L].common.openTracker,
@@ -6951,7 +6966,10 @@ async function handleChatPost(request, env, body, o) {
     const lang = LANG_ORDER.includes(body.lang) ? body.lang : "es";
     const key = await getKey(env);
     const rawAllMessages = Array.isArray(body.messages)
-      ? body.messages.filter((m) => m && typeof m.text === "string")
+      ? body.messages
+          .slice(-60)
+          .filter((m) => m && m.role === "user" && typeof m.text === "string")
+          .map((m) => ({ role: "user", text: m.text.slice(0, 500) }))
       : [];
     const fullEmail = findEmail(rawAllMessages);
     const fullDomain = findDomain(rawAllMessages);
@@ -7176,13 +7194,14 @@ async function inspectProjectDeadlines(env, keyName, nowMs) {
     const hasMaterials =
       (Array.isArray(proj.materialsList) && proj.materialsList.length > 0) ||
       Boolean(proj.onboarding && (proj.onboarding.materials || proj.onboarding.submittedAt || proj.onboarding.receivedAt));
-    const waitingMaterials = !hasMaterials;
     const reviewPhase = Array.isArray(proj.phases)
       ? proj.phases.find((ph) => ph.status === "review" && ph.reviewSentAt)
       : null;
+    const waitingMaterials = Boolean(proj.onboardingPending || (!hasMaterials && !proj.materialsReceivedAt));
     const waitingReview = Boolean(reviewPhase);
+    const waitingForClient = waitingMaterials || waitingReview;
 
-    if (waitingMaterials || waitingReview) {
+    if (waitingForClient) {
       const inactiveStart = waitingMaterials ? (proj.paidAt || proj.createdAt) : reviewPhase.reviewSentAt;
       const inactiveMs = new Date(inactiveStart).getTime();
       if (!Number.isNaN(inactiveMs)) {
@@ -7291,37 +7310,43 @@ async function inspectProjectDeadlines(env, keyName, nowMs) {
             : WEB_RENEWAL_EUR;
         const renewalEur = Number.isFinite(rawRenewal) && rawRenewal >= 0 ? rawRenewal : WEB_RENEWAL_EUR;
 
-        if (renewalEur > 0 && env.STRIPE_SECRET_KEY) {
-          const payUrl = await renewalActionUrl(env, projectToken);
-          if (payUrl) {
-            const tr = EM[lang].renewal;
-            const dueStr = fmtDate(proj.nextRenewalAt, lang);
-            try {
-              await resendSend(
-                env,
-                {
-                  to: [proj.clientEmail],
-                  reply_to: "hola@rebrandyourbrand.es",
-                  subject: tr.subject(proj.brand),
-                  ...renderEmail(lang, {
-                    paras: [tr.hello, tr.intro(bold(proj.brand), bold(dueStr)), tr.body(bold(eur(renewalEur, lang)))],
-                    cta: { label: tr.ctaPay, url: payUrl },
-                    secondaryLink: { label: tr.cancelLine, url: cancelUrl },
-                    note: tr.note,
-                  }),
-                },
-                `renewal-client-${projectToken}-${proj.nextRenewalAt.slice(0, 10)}`
-              );
-              await alertAdmin(
-                env,
-                `preaviso automático de renovación enviado — ${proj.brand}`,
-                `cliente: ${proj.clientEmail}\nvencimiento: ${fmtDate(proj.nextRenewalAt, "es")}\nimporte: ${renewalEur} €`
-              );
-              proj.renewalRemindedFor = proj.nextRenewalAt;
-              changed = true;
-            } catch (e) {
-              console.error("renewal client email failed:", e?.message);
-            }
+        const canPay = Boolean(
+          renewalEur > 0 &&
+          env.STRIPE_SECRET_KEY &&
+          (env.CHAT_SIGNING_SECRET || env.APP_SECRET_TOKEN)
+        );
+        const payUrl = canPay ? await renewalActionUrl(env, projectToken) : "";
+
+        if (payUrl) {
+          const tr = EM[lang].renewal;
+          const dueStr = fmtDate(proj.nextRenewalAt, lang);
+          try {
+            await resendSend(
+              env,
+              {
+                to: [proj.clientEmail],
+                reply_to: "hola@rebrandyourbrand.es",
+                subject: tr.subject(proj.brand),
+                ...renderEmail(lang, {
+                  paras: [tr.hello, tr.intro(bold(proj.brand), bold(dueStr)), tr.body(bold(eur(renewalEur, lang)))],
+                  cta: { label: tr.ctaPay, url: payUrl },
+                  secondaryLink: { label: tr.cancelLine, url: cancelUrl },
+                  note: tr.note,
+                }),
+              },
+              `renewal-client-${projectToken}-${proj.nextRenewalAt.slice(0, 10)}`
+            );
+            await alertAdmin(
+              env,
+              `preaviso automático de renovación enviado — ${proj.brand}`,
+              `cliente: ${proj.clientEmail}\nvencimiento: ${fmtDate(proj.nextRenewalAt, "es")}\nimporte: ${renewalEur} €`
+            );
+            proj.renewalPaid = false;
+            proj.renewalRemindedFor = proj.nextRenewalAt;
+            proj.renewalReminderSentAt = nowIso;
+            changed = true;
+          } catch (e) {
+            console.error("renewal client email failed:", e?.message);
           }
         } else {
           try {
@@ -7346,7 +7371,9 @@ async function inspectProjectDeadlines(env, keyName, nowMs) {
               },
               `renewal-admin-${projectToken}-${proj.nextRenewalAt.slice(0, 10)}`
             );
+            proj.renewalPaid = false;
             proj.renewalRemindedFor = proj.nextRenewalAt;
+            proj.renewalReminderSentAt = nowIso;
             changed = true;
           } catch (e) {
             console.error("renewal admin reminder failed:", e?.message);
@@ -7401,9 +7428,7 @@ async function inspectProjectDeadlines(env, keyName, nowMs) {
   }
 
   if (changed) {
-    await env.LEADS_KV.put(keyName, JSON.stringify(proj), {
-      metadata: { status: proj.status || "active" },
-    });
+    await saveProject(env, projectToken, proj);
   }
 }
 
@@ -7414,20 +7439,48 @@ async function handleScheduled(controller, env, ctx) {
   }
 
   const nowMs = controller?.scheduledTime ? Number(controller.scheduledTime) : Date.now();
+  const maxGets = 35;
+  let getsCount = 0;
   let cursor;
+
   do {
     const list = await env.LEADS_KV.list({ prefix: "project:", cursor });
     const INACTIVE_CRON_STATUSES = new Set(["abandoned", "cancelled"]);
+
     for (const item of list.keys) {
-      if (item.metadata?.status && INACTIVE_CRON_STATUSES.has(item.metadata.status)) {
+      if (getsCount >= maxGets) {
+        console.warn("cron subrequests budget reached (35 gets), stopping batch");
+        return;
+      }
+
+      const meta = item.metadata || {};
+      const status = meta.status;
+
+      if (status && INACTIVE_CRON_STATUSES.has(status)) {
         continue;
       }
+
+      if (status === "completed" || status === "done") {
+        if (!meta.hasWeb) {
+          continue;
+        }
+        const nextDue = Number(meta.renewalNextDue) || 0;
+        if (nextDue > 0) {
+          const daysUntil = (nextDue - nowMs) / DAY_MS;
+          // Si faltan más de 31 días para renovar, no hace falta leer el proyecto de KV hoy
+          if (daysUntil > 31) {
+            continue;
+          }
+        }
+      }
+
+      getsCount++;
       await inspectProjectDeadlines(env, item.name, nowMs).catch((e) =>
         console.error("cron project check failed:", item.name, e?.message)
       );
     }
     cursor = list.list_complete ? undefined : list.cursor;
-  } while (cursor);
+  } while (cursor && getsCount < maxGets);
 }
 
 // ══ index.js — Punto de entrada del Worker: enrutado de peticiones HTTP y eventos programados. ══

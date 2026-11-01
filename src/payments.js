@@ -24,6 +24,27 @@ const isStripeReceiptUrl = (u) =>
 
 const stripeLocaleFor = (lang) => (pickLang(lang) === "en" ? "en" : "es");
 
+async function saveProject(env, token, proj, extraOpts = {}) {
+  if (!env?.LEADS_KV || !token || !proj) return;
+  const hasWeb = Boolean(
+    (proj.includesWeb || (Array.isArray(proj.services) && proj.services.includes("web"))) &&
+    !proj.renewalCanceled &&
+    !proj.renewalCancelled
+  );
+  const nextDueMs = proj.renewalNextDue
+    ? Number(proj.renewalNextDue)
+    : (proj.nextRenewalAt ? new Date(proj.nextRenewalAt).getTime() : 0);
+
+  await env.LEADS_KV.put(`project:${token}`, JSON.stringify(proj), {
+    metadata: {
+      status: proj.status || "active",
+      hasWeb,
+      renewalNextDue: Number.isNaN(nextDueMs) ? 0 : nextDueMs,
+    },
+    ...extraOpts,
+  });
+}
+
 async function createProjectRecord(env, { clientEmail, brand, plan, lang, messages, domain }) {
   const safeBrand = brand || "proyecto";
   const projectToken = randomHex(32);
@@ -69,9 +90,8 @@ async function createProjectRecord(env, { clientEmail, brand, plan, lang, messag
     referencesList: [],
     ...(cleanDomain ? { onboarding: { domain: cleanDomain, socials: "", materials: "", submittedAt: nowIso } } : {}),
   };
-  await env.LEADS_KV.put(projectKey, JSON.stringify(projectData), {
+  await saveProject(env, projectToken, projectData, {
     expirationTtl: PENDING_PROJECT_TTL_SECONDS,
-    metadata: { status: "active" },
   });
   return projectData;
 }
@@ -214,9 +234,8 @@ async function ensureStripeCheckout(env, proj) {
 
     proj.stripeSessionId = session.id;
     proj.checkoutUrl = session.url;
-    await env.LEADS_KV.put(`project:${proj.token}`, JSON.stringify(proj), {
+    await saveProject(env, proj.token, proj, {
       expirationTtl: PENDING_PROJECT_TTL_SECONDS,
-      metadata: { status: proj.status || "active" },
     });
     return { paid: false, url: session.url };
   } catch (e) {
@@ -373,13 +392,11 @@ async function unlockExtraRevision(env, proj, step, sessionId, sessionData = nul
   if (proj.status !== "done") {
     proj.status = "in_progress";
   }
-  if (ph.status !== "done") {
+  if (ph.status !== "done" && ph.deliverableUrl) {
     ph.status = "review";
   }
 
-  await env.LEADS_KV.put(`project:${proj.token}`, JSON.stringify(proj), {
-    metadata: { status: proj.status || "active" },
-  });
+  await saveProject(env, proj.token, proj);
 
   if (env.RESEND_API_KEY) {
     const manageUrl = await advancePhaseUrl(env, proj.token, ph.step);
@@ -487,14 +504,15 @@ async function processPaidSession(env, session, { fromWebhook = false } = {}) {
     if (proj.lastRenewalSessionId === session.id) return;
     proj.lastRenewalSessionId = session.id;
     proj.lastRenewalPaidAt = new Date().toISOString();
-    proj.nextRenewalAt = addOneYearIso(proj.nextRenewalAt || proj.finishedAt);
+    const nextIso = addOneYearIso(proj.nextRenewalAt || proj.finishedAt);
+    proj.nextRenewalAt = nextIso;
+    proj.renewalPaid = true;
+    proj.renewalNextDue = new Date(nextIso).getTime();
     proj.renewalCanceled = false;
     proj.renewalRemindedFor = "";
     proj.renewalOverdueAlertSentAt = null;
     proj.renewalReminderSentAt = null;
-    await env.LEADS_KV.put(key, JSON.stringify(proj), {
-      metadata: { status: proj.status || "active" },
-    });
+    await saveProject(env, token, proj);
     await alertAdmin(
       env,
       `renovación anual abonada — ${proj.brand}`,
@@ -547,7 +565,7 @@ async function processPaidSession(env, session, { fromWebhook = false } = {}) {
   }
 
   if (proj.emailsSent) {
-    if (dirty) await env.LEADS_KV.put(key, JSON.stringify(proj), { metadata: { status: proj.status || "active" } });
+    if (dirty) await saveProject(env, token, proj);
     return;
   }
 
@@ -660,7 +678,7 @@ async function processPaidSession(env, session, { fromWebhook = false } = {}) {
     dirty = true;
   } finally {
     // Una única escritura consolidada en KV sin expirationTtl (el proyecto pagado queda permanente)
-    if (dirty) await env.LEADS_KV.put(key, JSON.stringify(proj), { metadata: { status: proj.status || "active" } });
+    if (dirty) await saveProject(env, token, proj);
   }
 }
 
