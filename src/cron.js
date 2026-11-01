@@ -17,6 +17,12 @@ async function inspectProjectDeadlines(env, keyName, nowMs) {
   const nowIso = new Date(nowMs).toISOString();
   let changed = false;
 
+  // Envío diferido de materiales si expiró el tiempo de 60s sin deshacer
+  if (proj.pendingMaterialsNotice && nowMs - (Number(proj.pendingMaterialsNotice.timestamp) || 0) >= 60000) {
+    await flushPendingMaterialsNotice(env, projectToken, proj);
+    changed = true;
+  }
+
   // 0. Cierre automático y rescate si todos los servicios contratados están aprobados
   if (Array.isArray(proj.phases) && proj.phases.length > 0 && proj.phases.every((ph) => ph.status === "done") && (!proj.finishedAt || !proj.reviewInvited || proj.status !== "done")) {
     await finalizeProjectClosure(env, proj, projectToken);

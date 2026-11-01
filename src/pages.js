@@ -565,6 +565,10 @@ button.secondary:active,.btn.secondary:active,button.no:active{
   width:28px;
   height:28px;
   padding:0;
+  font:inherit;
+  outline:none;
+  -webkit-appearance:none;
+  appearance:none;
   text-decoration:none;
   cursor:pointer;
   transition:color .2s var(--ease-editorial),border-color .2s var(--ease-editorial),transform .2s var(--ease-editorial),background .2s var(--ease-editorial);

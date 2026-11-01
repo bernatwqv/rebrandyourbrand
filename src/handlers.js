@@ -1449,6 +1449,72 @@ async function checkProjectChatRateLimit(env, token, ip) {
   return true;
 }
 
+// Envío diferido de notificación de materiales cuando finaliza el timer o se pulsa la X
+async function flushPendingMaterialsNotice(env, token, proj) {
+  if (!proj || !proj.pendingMaterialsNotice) return;
+  const notice = proj.pendingMaterialsNotice;
+  delete proj.pendingMaterialsNotice;
+
+  const matItem = Array.isArray(proj.materialsList) ? proj.materialsList.find((m) => m && m.id === notice.matId) : null;
+  const refItem = Array.isArray(proj.referencesList) ? proj.referencesList.find((r) => r && r.id === notice.refId) : null;
+
+  await saveProject(env, token, proj);
+
+  if (!env.RESEND_API_KEY || (!matItem && !refItem)) {
+    return;
+  }
+
+  const projectPageUrl = buildUrl("/proyecto", { token });
+  const manageUrl = await advancePhaseUrl(env, token, proj.currentPhase || 1);
+  const addedLines = [];
+
+  if (matItem) {
+    addedLines.push(bold("materiales del negocio aportados:"));
+    if (matItem.domain) addedLines.push(`— dominio: ${bold(matItem.domain)}`);
+    if (matItem.socials) addedLines.push(`— web / redes: ${bold(matItem.socials)}`);
+    if (matItem.url) addedLines.push(`— enlace externo: <a href="${esc(matItem.url)}" target="_blank" style="color:#3D5A85;font-weight:600;">${esc(matItem.url)}</a>`);
+    let fileLink = "";
+    if (matItem.fileId) fileLink = await fileDownloadUrl(env, token, "mat", matItem.fileId);
+    else if (matItem.fileUrl) fileLink = matItem.fileUrl;
+    if (fileLink) addedLines.push(`— archivo directo: <a href="${esc(fileLink)}" target="_blank" style="color:#3D5A85;font-weight:600;">${esc(matItem.filename || "descargar archivo")}</a>`);
+    if (matItem.notes) addedLines.push(`— notas: ${esc(matItem.notes)}`);
+  }
+
+  if (refItem) {
+    if (addedLines.length) addedLines.push("");
+    addedLines.push(bold("referencias visuales e inspiración:"));
+    if (refItem.url) addedLines.push(`— enlace de referencia: <a href="${esc(refItem.url)}" target="_blank" style="color:#3D5A85;font-weight:600;">${esc(refItem.url)}</a>`);
+    let refFileLink = "";
+    if (refItem.fileId) refFileLink = await fileDownloadUrl(env, token, "ref", refItem.fileId);
+    else if (refItem.fileUrl) refFileLink = refItem.fileUrl;
+    if (refFileLink) addedLines.push(`— captura o imagen: <a href="${esc(refFileLink)}" target="_blank" style="color:#3D5A85;font-weight:600;">${esc(refItem.filename || "descargar referencia")}</a>`);
+    if (refItem.notes) addedLines.push(`— qué le gusta: ${esc(refItem.notes)}`);
+  }
+
+  const subjectType = matItem && refItem
+    ? "nuevos materiales y referencias recibidos"
+    : (refItem ? "nuevas referencias visuales recibidas" : "nuevos materiales recibidos");
+
+  await resendSend(
+    env,
+    {
+      to: ["hola@rebrandyourbrand.es"],
+      reply_to: proj.clientEmail,
+      subject: `${subjectType} — ${proj.brand}`,
+      ...renderEmail("es", {
+        paras: [
+          `el cliente ha aportado nueva información para ${bold(proj.brand)}.`,
+          `— cliente: ${bold(proj.clientEmail)}`,
+          ...addedLines,
+        ],
+        cta: { label: "abrir gestión de la fase actual", url: manageUrl },
+        secondaryLink: { label: "ver seguimiento del cliente", url: projectPageUrl },
+      }),
+    },
+    `materials-${token}-${notice.timestamp}`
+  ).catch((e) => console.error("materials email failed:", e?.message));
+}
+
 // ── SEGUIMIENTO DEL PROYECTO, RESCATE DE PAGO Y ONBOARDING (/proyecto) ──
 async function handleProject(request, env, url) {
   const ip = request.headers.get("CF-Connecting-IP") ?? "";
@@ -1463,6 +1529,9 @@ async function handleProject(request, env, url) {
   if (!raw) return msgPage(L, "trackMissing", 404);
 
   let proj = JSON.parse(raw);
+  if (proj.pendingMaterialsNotice && Date.now() - (Number(proj.pendingMaterialsNotice.timestamp) || 0) >= 60000) {
+    await flushPendingMaterialsNotice(env, token, proj);
+  }
   L = pickLang(proj.lang);
   const T = PG[L].tr;
   const projectPageUrl = buildUrl("/proyecto", { token });
@@ -1878,6 +1947,11 @@ async function handleProject(request, env, url) {
         refFileId: createdRefItem?.fileId || null,
         timestamp: Date.now(),
       };
+      proj.pendingMaterialsNotice = {
+        matId: createdMatItem?.id || null,
+        refId: createdRefItem?.id || null,
+        timestamp: Date.now(),
+      };
       delete proj.draft;
       if (hasMaterial || hasReference) {
         delete proj.abandonWarningSentAt;
@@ -1885,50 +1959,21 @@ async function handleProject(request, env, url) {
 
       await saveProject(env, token, proj);
 
-      if (env.RESEND_API_KEY) {
-        const manageUrl = await advancePhaseUrl(env, token, proj.currentPhase || 1);
-        const addedLines = [];
-        if (hasMaterial) {
-          addedLines.push(bold("materiales del negocio aportados:"));
-          if (domain) addedLines.push(`— dominio: ${bold(domain)}`);
-          if (socials) addedLines.push(`— web / redes: ${bold(socials)}`);
-          if (materialsUrl) addedLines.push(`— enlace externo: <a href="${esc(materialsUrl)}" target="_blank" style="color:#3D5A85;font-weight:600;">${esc(materialsUrl)}</a>`);
-          if (materialsFileDownloadUrl) addedLines.push(`— archivo directo: <a href="${esc(materialsFileDownloadUrl)}" target="_blank" style="color:#3D5A85;font-weight:600;">${esc(materialsFilename || "descargar archivo")}</a>`);
-          if (materialsNotes) addedLines.push(`— notas: ${esc(materialsNotes)}`);
-        }
-        if (hasReference) {
-          if (addedLines.length) addedLines.push("");
-          addedLines.push(bold("referencias visuales e inspiración:"));
-          if (referenceUrl) addedLines.push(`— enlace de referencia: <a href="${esc(referenceUrl)}" target="_blank" style="color:#3D5A85;font-weight:600;">${esc(referenceUrl)}</a>`);
-          if (referenceFileDownloadUrl) addedLines.push(`— captura o imagen: <a href="${esc(referenceFileDownloadUrl)}" target="_blank" style="color:#3D5A85;font-weight:600;">${esc(referenceFilename || "descargar referencia")}</a>`);
-          if (referenceNotes) addedLines.push(`— qué le gusta: ${esc(referenceNotes)}`);
-        }
-
-        const subjectType = hasMaterial && hasReference
-          ? "nuevos materiales y referencias recibidos"
-          : (hasReference ? "nuevas referencias visuales recibidas" : "nuevos materiales recibidos");
-
-        await resendSend(
-          env,
-          {
-            to: ["hola@rebrandyourbrand.es"],
-            reply_to: proj.clientEmail,
-            subject: `${subjectType} — ${proj.brand}`,
-            ...renderEmail("es", {
-              paras: [
-                `el cliente ha aportado nueva información para ${bold(proj.brand)}.`,
-                `— cliente: ${bold(proj.clientEmail)}`,
-                ...addedLines,
-              ],
-              cta: { label: "abrir gestión de la fase actual", url: manageUrl },
-              secondaryLink: { label: "ver seguimiento del cliente", url: projectPageUrl },
-            }),
-          },
-          `materials-${token}-${Date.now()}`
-        ).catch((e) => console.error("materials email failed:", e?.message));
-      }
-
+      // Envío diferido: no se envía el correo al estudio hasta que expire el timer (60s) o el cliente pulse la X
       return redirectTo(buildUrl("/proyecto", { token, undo: "1" }));
+    }
+
+    if (op === "confirm_materials") {
+      if (proj.pendingMaterialsNotice) {
+        await flushPendingMaterialsNotice(env, token, proj);
+      }
+      proj.lastAdded = null;
+      await saveProject(env, token, proj);
+      const isJson = request.headers.get("Accept")?.includes("application/json") || request.headers.get("X-Requested-With");
+      if (isJson) {
+        return jsonResponse({ ok: true }, 200);
+      }
+      return redirectTo(projectPageUrl);
     }
 
     if (op === "undo_onboarding") {
@@ -1965,28 +2010,11 @@ async function handleProject(request, env, url) {
         if (proj.onboarding && (!Array.isArray(proj.materialsList) || proj.materialsList.length === 0)) {
           delete proj.onboarding;
         }
+        delete proj.pendingMaterialsNotice;
         proj.lastAdded = null;
         await saveProject(env, token, proj);
 
-        if (env.RESEND_API_KEY) {
-          await resendSend(
-            env,
-            {
-              to: ["hola@rebrandyourbrand.es"],
-              reply_to: proj.clientEmail,
-              subject: `envío de materiales cancelado por el cliente — ${proj.brand}`,
-              ...renderEmail("es", {
-                paras: [
-                  `el cliente de ${bold(proj.brand)} ha deshecho y cancelado su último envío de materiales o referencias.`,
-                  `— cliente: ${bold(proj.clientEmail)}`,
-                  "el registro correspondiente ha sido eliminado del historial del proyecto.",
-                ],
-                secondaryLink: { label: "ver seguimiento del cliente", url: projectPageUrl },
-              }),
-            },
-            `undo-mat-${token}-${Date.now()}`
-          ).catch((e) => console.error("undo notification email failed:", e?.message));
-        }
+        // Sin correo de cancelación: el estudio no fue notificado previamente, eliminando correos inútiles
       }
       return redirectTo(buildUrl("/proyecto", { token, undone: "1" }));
     }
@@ -2081,12 +2109,15 @@ async function handleProject(request, env, url) {
       ? `
       <div class="undo-bar-wrap" id="undo-bar">
         <div class="undo-bar-content">
-          <a class="btn-dismiss" id="undo-dismiss-btn" href="${esc(projectPageUrl)}" aria-label="${esc(T.obDismissBtn)}">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </a>
+          <form method="POST" id="undo-dismiss-form" style="margin:0;padding:0;display:inline;">
+            <input type="hidden" name="op" value="confirm_materials">
+            <button type="submit" class="btn-dismiss" id="undo-dismiss-btn" aria-label="${esc(T.obDismissBtn)}">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </form>
           <div class="undo-bar-text">
             <svg class="undo-ring" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
               <circle class="undo-ring-bg" cx="12" cy="12" r="9" fill="none" stroke-width="2.5"></circle>
@@ -2109,18 +2140,32 @@ async function handleProject(request, env, url) {
           if (bar.parentElement !== document.body) {
             document.body.appendChild(bar);
           }
-          var dismiss = function(e){
+          var confirmed = false;
+          var confirmAndDismiss = function(e){
             if (e && e.preventDefault) e.preventDefault();
+            if (confirmed) return;
+            confirmed = true;
+            try {
+              fetch("${esc(projectPageUrl)}", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded", "X-Requested-With": "XMLHttpRequest" },
+                body: "op=confirm_materials"
+              }).catch(function(){});
+            } catch(err){}
             bar.classList.add("is-dismissed");
             setTimeout(function(){
               if (bar && bar.parentNode) bar.parentNode.removeChild(bar);
             }, 360);
           };
+
           var btn = document.getElementById("undo-dismiss-btn");
-          if (btn) btn.addEventListener("click", dismiss);
+          if (btn) btn.addEventListener("click", confirmAndDismiss);
           window.addEventListener("keydown", function(e){
-            if (e.key === "Escape" || e.keyCode === 27) dismiss();
+            if (e.key === "Escape" || e.keyCode === 27) confirmAndDismiss();
           });
+          setTimeout(function(){
+            confirmAndDismiss();
+          }, 60000);
         })();
       </script>`
       : "";
