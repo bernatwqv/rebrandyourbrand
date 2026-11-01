@@ -73,7 +73,7 @@ const CHANGE_INTENT_RE =
 
 const SERVICE_MENTION_RE = /\b(?:logo\w*|palet\w*|color\w*|kolore\w*|web\w*)\b/iu;
 
-async function handleChatPost(request, env, body, o) {
+async function handleChatPost(request, env, body, o, ctx) {
   try {
     const ip = request.headers.get("CF-Connecting-IP") ?? "";
 

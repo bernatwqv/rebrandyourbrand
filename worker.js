@@ -1959,18 +1959,53 @@ function renderEmail(lang, { paras = [], cta = null, secondaryLink = null, note 
   return { html, text };
 }
 
-// Resend con soporte de Idempotency-Key
-async function resendSend(env, payload, idempotencyKey) {
-  const headers = { "Content-Type": "application/json", Authorization: `Bearer ${env.RESEND_API_KEY}` };
+// Resend con soporte de Idempotency-Key, reintento con backoff en 429/5xx y lectura diagnóstica de errores
+async function resendSend(env, payload, idempotencyKey, headersExtra = null) {
+  const headers = {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${env.RESEND_API_KEY}`,
+  };
   if (idempotencyKey) headers["Idempotency-Key"] = idempotencyKey;
 
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers,
-    body: JSON.stringify({ from: "rebrandyourbrand <hola@rebrandyourbrand.es>", ...payload }),
-    signal: AbortSignal.timeout(8000),
-  });
-  if (!res.ok) throw new Error(`Resend error: ${res.status}`);
+  const body = {
+    from: "rebrandyourbrand <hola@rebrandyourbrand.es>",
+    ...payload,
+  };
+  if (headersExtra && typeof headersExtra === "object") {
+    body.headers = { ...(body.headers || {}), ...headersExtra };
+  }
+
+  for (let attempt = 0; attempt <= 1; attempt++) {
+    try {
+      const res = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers,
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(attempt === 0 ? 6000 : 8000),
+      });
+
+      if (res.ok) {
+        return await res.json().catch(() => ({}));
+      }
+
+      const errText = await res.text().catch(() => "");
+      const status = res.status;
+
+      if ((status === 429 || status >= 500) && attempt === 0 && idempotencyKey) {
+        await new Promise((r) => setTimeout(r, 1200));
+        continue;
+      }
+
+      console.error(`Resend error ${status}: ${errText.slice(0, 300)}`);
+      throw new Error(`Resend error: ${status}`);
+    } catch (err) {
+      if (attempt === 0 && idempotencyKey && !err.message?.includes("Resend error: 4")) {
+        await new Promise((r) => setTimeout(r, 1200));
+        continue;
+      }
+      throw err;
+    }
+  }
 }
 
 // Aviso interno con el mismo diseño. El asunto y el texto empiezan siempre en minúscula.
@@ -2079,7 +2114,7 @@ async function deliverVerifiedLead(env, ctx, { lang, messages, clientEmail, bran
   const planLine = plan ? `${svcLabel(plan.ids, "es")} — ${plan.total} €` : "";
   const projectPageUrl = projectToken ? buildUrl("/proyecto", { token: projectToken }) : SITE_URL;
 
-  await resendSend(
+  const leadPromise = resendSend(
     env,
     {
       to: ["hola@rebrandyourbrand.es"],
@@ -2101,7 +2136,7 @@ async function deliverVerifiedLead(env, ctx, { lang, messages, clientEmail, bran
       }),
     },
     `lead-${projectToken || clientEmail}`
-  );
+  ).catch((e) => console.error("lead email to studio failed:", e?.message));
 
   const t = EM[l].ack;
   const ack = resendSend(
@@ -2117,7 +2152,13 @@ async function deliverVerifiedLead(env, ctx, { lang, messages, clientEmail, bran
     },
     `ack-${projectToken || clientEmail}`
   ).catch((e) => console.error("ack email failed:", e?.message));
-  if (ctx?.waitUntil) ctx.waitUntil(ack);
+
+  const allEmails = Promise.all([leadPromise, ack]);
+  if (ctx?.waitUntil) {
+    ctx.waitUntil(allEmails);
+  } else {
+    await allEmails;
+  }
 }
 
 // ══ ai.js — Brandi (Groq): prompt, llamada al modelo, validación de respuestas y servicios elegidos. ══
@@ -2315,12 +2356,11 @@ async function askGroq(env, lang, ctx, chatMessages, retries = 1) {
             { role: "system", content: buildSystemInstruction(lang, ctx) },
             ...chatMessages.map((m) => ({ role: m.role, content: m.text })),
           ],
-          max_tokens: MAX_OUTPUT_TOKENS,
+          max_tokens: 600,
           temperature: 0.4,
-          reasoning_effort: "low",
           response_format: { type: "json_object" },
         }),
-        signal: AbortSignal.timeout(10000),
+        signal: AbortSignal.timeout(8000),
       });
 
       if (groq.status === 429 || groq.status >= 500) {
@@ -2407,9 +2447,8 @@ async function askGroqProject(env, lang, proj, chatMessages, retries = 1) {
           ],
           max_tokens: 450,
           temperature: 0.4,
-          reasoning_effort: "low",
         }),
-        signal: AbortSignal.timeout(10000),
+        signal: AbortSignal.timeout(8000),
       });
 
       if (!groq.ok) throw new Error(`Groq HTTP ${groq.status}`);
@@ -2427,12 +2466,12 @@ async function askGroqProject(env, lang, proj, chatMessages, retries = 1) {
         console.error("askGroqProject failed:", e?.message);
         const l = pickLang(lang);
         return l === "ca"
-          ? "No he pogut processar la consulta ara mateix. Pots escriure directament a en Gael i en Bernat a la pestanya de l'equip."
+          ? "no he pogut processar la consulta ara mateix. pots escriure directament a en gael i en bernat a la pestanya de l'equip."
           : l === "en"
-          ? "I could not process your query right now. You can write directly to Gael and Bernat in the team tab."
+          ? "i could not process your query right now. you can write directly to gael and bernat in the team tab."
           : l === "eu"
-          ? "Ezin izan dut kontsulta prozesatu oraintxe bertan. Gael eta bernati idatzi diezaiekezu zuzenean lan-taldearen fitxan."
-          : "No he podido procesar la consulta ahora mismo. Puedes escribir directamente a Gael y Bernat en la pestaña del equipo.";
+          ? "ezin izan dut kontsulta prozesatu oraintxe bertan. gael eta bernati idatzi diezaiekezu zuzenean lan-taldearen fitxan."
+          : "no he podido procesar la consulta ahora mismo. puedes escribir directamente a gael y bernat en la pestaña del equipo.";
       }
       await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
     }
@@ -2477,11 +2516,11 @@ async function translateMessageText(env, text, fromLang, toLang) {
             content: raw.slice(0, 2500),
           },
         ],
-        max_tokens: 1000,
-        temperature: 0.2,
+        max_tokens: 450,
+        temperature: 0.1,
         response_format: { type: "json_object" },
       }),
-      signal: AbortSignal.timeout(6000),
+      signal: AbortSignal.timeout(4500),
     });
 
     if (!res.ok) {
@@ -3047,7 +3086,7 @@ function addOneYearIso(iso) {
   return d.toISOString();
 }
 
-async function processPaidSession(env, session, { fromWebhook = false } = {}) {
+async function processPaidSession(env, session, { fromWebhook = false } = {}, ctx = null) {
   if (!session || session.mode !== "payment" || session.payment_status !== "paid") return;
 
   const token = session.metadata?.project_token || session.client_reference_id;
@@ -3265,7 +3304,7 @@ async function processPaidSession(env, session, { fromWebhook = false } = {}) {
 }
 
 // Devuelve 500 en error de webhook (incluida consistencia eventual de KV) para que Stripe reintente
-async function handleStripeWebhook(request, env) {
+async function handleStripeWebhook(request, env, ctx = null) {
   const missingEnv = ["LEADS_KV", "RESEND_API_KEY", "STRIPE_WEBHOOK_SECRET"].filter((k) => !env[k]);
   if (missingEnv.length) {
     console.error("stripe webhook misconfigured, falta en el Worker:", missingEnv.join(", "));
@@ -3303,7 +3342,7 @@ async function handleStripeWebhook(request, env) {
   }
 
   try {
-    await processPaidSession(env, event.data?.object, { fromWebhook: true });
+    await processPaidSession(env, event.data?.object, { fromWebhook: true }, ctx);
     await env.LEADS_KV.put(eventKey, "1", { expirationTtl: STRIPE_EVENT_TTL_SECONDS });
   } catch (e) {
     console.error("stripe webhook processing failed:", e?.message);
@@ -4648,7 +4687,6 @@ async function completeProjectPhase(
         "fallo al enviar correos de avance de fase",
         `proyecto: ${proj.brand}\nerror: ${e?.message}\nenlace de gestión: ${retryAdvanceUrl}`
       );
-      return { ok: false, reason: "email_failed" };
     }
   }
 
@@ -4666,7 +4704,11 @@ async function completeProjectPhase(
 }
 
 // ── GESTIÓN INTERNA DE FASES Y ENTREGABLES (/advance-phase) ──
-async function handlePhaseAdvance(request, env, url) {
+async function handlePhaseAdvance(request, env, ctx, url) {
+  if (ctx instanceof URL || (ctx && typeof ctx.searchParams === "object")) {
+    url = ctx;
+    ctx = null;
+  }
   if (!env.LEADS_KV || !env.RESEND_API_KEY) {
     return htmlResponse(page("error", "error de configuración", "falta configuración en el servidor."), 500);
   }
@@ -5145,7 +5187,11 @@ async function handlePhaseAdvance(request, env, url) {
 }
 
 // ── REVISIÓN, SOLICITUD DE AJUSTES Y APROBACIÓN ESCRITA POR EL CLIENTE (/approve-phase) ──
-async function handlePhaseApprove(request, env, url) {
+async function handlePhaseApprove(request, env, ctx, url) {
+  if (ctx instanceof URL || (ctx && typeof ctx.searchParams === "object")) {
+    url = ctx;
+    ctx = null;
+  }
   let L = langFromRequest(request);
   const p = url.searchParams.get("p");
   const step = parseInt(url.searchParams.get("step") || "", 10);
@@ -5351,41 +5397,7 @@ async function handlePhaseApprove(request, env, url) {
     const phaseTitleEs = phaseTitle(ph, "es");
     const manageUrl = await advancePhaseUrl(env, p, step);
 
-    try {
-      await resendSend(
-        env,
-        {
-          to: ["hola@rebrandyourbrand.es"],
-          reply_to: proj.clientEmail,
-          subject: `ajustes solicitados (ronda ${round} de ${maxRevs}) — "${phaseTitleEs}" — ${proj.brand}`,
-          ...renderEmail("es", {
-            paras: [
-              "el cliente ha solicitado ajustes directamente desde la página de revisión de fase.",
-              lines(
-                `— proyecto: ${bold(proj.brand)}`,
-                `— cliente: ${bold(proj.clientEmail)}`,
-                `— fase: ${bold(`paso ${ph.step} — ${phaseTitleEs}`)}`,
-                `— ronda consumida: ${bold(`ronda ${round} de ${maxRevs}`)}`,
-                `— fecha (iso): ${bold(now)}`
-              ),
-              "cambios solicitados por el cliente:",
-            ],
-            quote: feedback,
-            cta: { label: "abrir panel de la fase para subir nueva versión", url: manageUrl },
-            secondaryLink: { label: "ver seguimiento público del cliente", url: trackingUrl },
-            note:
-              round >= maxRevs
-                ? "esta ha sido la última ronda incluida en esta fase. el cliente puede desbloquear rondas adicionales directamente por 100 € (cláusula 1.2)."
-                : "cuando tengas lista la propuesta ajustada, vuelve a enviarla a revisión desde el panel de la fase.",
-          }),
-        },
-        `revise-admin-${p}-${step}-r${round}`
-      );
-    } catch (e) {
-      console.error("revision request email failed:", e?.message);
-      return errorPage(L);
-    }
-
+    // 1. Consolidar inmediatamente el estado en KV
     ph.revisionsUsed = round;
     if (!Array.isArray(ph.revisions)) ph.revisions = [];
     ph.revisions.push({ round, text: feedback, requestedAt: now });
@@ -5395,6 +5407,55 @@ async function handlePhaseApprove(request, env, url) {
     delete ph.tacitAlertSentAt;
     delete proj.abandonWarningSentAt;
     await saveProject(env, p, proj);
+
+    // 2. Enviar notificación al estudio de forma resiliente
+    const emailNotice = async () => {
+      try {
+        await resendSend(
+          env,
+          {
+            to: ["hola@rebrandyourbrand.es"],
+            reply_to: proj.clientEmail,
+            subject: `ajustes solicitados (ronda ${round} de ${maxRevs}) — "${phaseTitleEs}" — ${proj.brand}`,
+            ...renderEmail("es", {
+              paras: [
+                "el cliente ha solicitado ajustes directamente desde la página de revisión de fase.",
+                lines(
+                  `— proyecto: ${bold(proj.brand)}`,
+                  `— cliente: ${bold(proj.clientEmail)}`,
+                  `— fase: ${bold(`paso ${ph.step} — ${phaseTitleEs}`)}`,
+                  `— ronda consumida: ${bold(`ronda ${round} de ${maxRevs}`)}`,
+                  `— fecha (iso): ${bold(now)}`
+                ),
+                "cambios solicitados por el cliente:",
+              ],
+              quote: feedback,
+              cta: { label: "abrir panel de la fase para subir nueva versión", url: manageUrl },
+              secondaryLink: { label: "ver seguimiento público del cliente", url: trackingUrl },
+              note:
+                round >= maxRevs
+                  ? "esta ha sido la última ronda incluida en esta fase. el cliente puede desbloquear rondas adicionales directamente por 100 € (cláusula 1.2)."
+                  : "cuando tengas lista la propuesta ajustada, vuelve a enviarla a revisión desde el panel de la fase.",
+            }),
+          },
+          `revise-admin-${p}-${step}-r${round}`
+        );
+      } catch (e) {
+        console.error("revision request email failed:", e?.message);
+        await alertAdmin(
+          env,
+          `fallo al notificar solicitud de ajustes (${proj.brand})`,
+          `proyecto: ${proj.brand}\nerror: ${e?.message}\nenlace de gestión: ${manageUrl}`,
+          ctx
+        );
+      }
+    };
+
+    if (ctx?.waitUntil) {
+      ctx.waitUntil(emailNotice());
+    } else {
+      await emailNotice();
+    }
 
     const noticeText = PG[L].tr?.actionRegisteredNotice || "aviso: esta acción ya ha quedado registrada en el sistema y nuestro equipo ha recibido la notificación para continuar con el trabajo.";
     return htmlResponse(
@@ -5441,7 +5502,11 @@ async function handlePhaseApprove(request, env, url) {
 }
 
 // ── BAJA EN UN CLIC DE LA RENOVACIÓN ANUAL (/cancel-renewal) ──
-async function handleCancelRenewal(request, env, url) {
+async function handleCancelRenewal(request, env, ctx, url) {
+  if (ctx instanceof URL || (ctx && typeof ctx.searchParams === "object")) {
+    url = ctx;
+    ctx = null;
+  }
   let L = langFromRequest(request);
   const p = url.searchParams.get("p");
   const due = url.searchParams.get("due") || "";
@@ -5529,7 +5594,11 @@ async function handleCancelRenewal(request, env, url) {
 }
 
 // ── REDIRECCIÓN PERSISTENTE DE RENOVACIÓN (/renovar) ──
-async function handleRenewalRedirect(request, env, url) {
+async function handleRenewalRedirect(request, env, ctx, url) {
+  if (ctx instanceof URL || (ctx && typeof ctx.searchParams === "object")) {
+    url = ctx;
+    ctx = null;
+  }
   let L = langFromRequest(request);
   const p = url.searchParams.get("p");
   const t = url.searchParams.get("t");
@@ -5740,7 +5809,11 @@ async function flushPendingMaterialsNotice(env, token, proj) {
 }
 
 // ── SEGUIMIENTO DEL PROYECTO, RESCATE DE PAGO Y ONBOARDING (/proyecto) ──
-async function handleProject(request, env, url) {
+async function handleProject(request, env, ctx, url) {
+  if (ctx instanceof URL || (ctx && typeof ctx.searchParams === "object")) {
+    url = ctx;
+    ctx = null;
+  }
   const ip = request.headers.get("CF-Connecting-IP") ?? "";
   let L = langFromRequest(request);
   const token = url.searchParams.get("token");
@@ -5851,53 +5924,61 @@ async function handleProject(request, env, url) {
         const quoteForStudio = translatedToEs && translatedToEs !== msgText
           ? `${translatedToEs}\n\n(original en ${L}: ${msgText})`
           : msgText;
-        try {
-          await resendSend(
-            env,
-            {
-              to: ["hola@rebrandyourbrand.es"],
-              reply_to: proj.clientEmail,
-              subject: `nuevo mensaje de ${proj.brand} en el chat del proyecto`,
-              ...renderEmail("es", {
-                paras: [
-                  `el cliente de ${bold(proj.brand)} (${proj.clientEmail}) ha escrito un nuevo mensaje en el chat directo del proyecto:`,
-                ],
-                quote: quoteForStudio,
-                cta: { label: "responder al cliente", url: studioUrl },
-                secondaryLink: { label: "ver panel del proyecto", url: projectPageUrl },
-              }),
-            },
-            `chat-studio-alert-${token}-${msgId}`
-          );
-        } catch (e) {
-          console.error("chat studio alert failed:", e?.message);
-        }
 
-        const emChat = EM[L].chat;
-        try {
-          await resendSend(
-            env,
-            {
-              to: [proj.clientEmail],
-              reply_to: "hola@rebrandyourbrand.es",
-              subject: emChat.confirmSubject(proj.brand),
-              ...renderEmail(L, {
-                paras: [
-                  emChat.hello,
-                  emChat.confirmReceived(bold(proj.brand)),
-                  emChat.confirmSoon,
-                ],
-                quote: msgText,
-                cta: { label: emChat.viewPortal, url: projectPageUrl + "#chat" },
-              }),
-            },
-            `chat-client-confirm-${token}-${msgId}`
-          );
-        } catch (e) {
-          console.error("chat client confirm failed:", e?.message);
+        const emailTask = async () => {
+          try {
+            await resendSend(
+              env,
+              {
+                to: ["hola@rebrandyourbrand.es"],
+                reply_to: proj.clientEmail,
+                  quote: quoteForStudio,
+                ...renderEmail("es", {
+                  paras: [
+                    `el cliente de ${bold(proj.brand)} (${proj.clientEmail}) ha escrito un nuevo mensaje en el chat directo del proyecto:`,
+                  ],
+                  quote: quoteForStudio,
+                  cta: { label: "responder al cliente", url: studioUrl },
+                  secondaryLink: { label: "ver panel del proyecto", url: projectPageUrl },
+                }),
+              },
+              `chat-studio-alert-${token}-${msgId}`
+            );
+          } catch (e) {
+            console.error("chat studio alert failed:", e?.message);
+          }
+
+          const emChat = EM[L].chat;
+          try {
+            await resendSend(
+              env,
+              {
+                to: [proj.clientEmail],
+                reply_to: "hola@rebrandyourbrand.es",
+                subject: emChat.confirmSubject(proj.brand),
+                ...renderEmail(L, {
+                  paras: [
+                    emChat.hello,
+                    emChat.confirmReceived(bold(proj.brand)),
+                    emChat.confirmSoon,
+                  ],
+                  quote: msgText,
+                  cta: { label: emChat.viewPortal, url: projectPageUrl + "#chat" },
+                }),
+              },
+              `chat-client-confirm-${token}-${msgId}`
+            );
+          } catch (e) {
+            console.error("chat client confirm failed:", e?.message);
+          }
+        };
+
+        if (ctx?.waitUntil) {
+          ctx.waitUntil(emailTask());
+        } else {
+          await emailTask();
         }
       }
-
       if (bodyJson) {
         return jsonResponse({ ok: true, message: newMsg }, 200);
       }
@@ -6695,29 +6776,25 @@ async function handleProject(request, env, url) {
   const humanChatHistory = (await env.LEADS_KV.get(chatKey, { type: "json" })) || [];
 
   if (L !== "es" && humanChatHistory.length && env.GROQ_API_KEY) {
-    let missingTrans = false;
-    for (const m of humanChatHistory) {
-      if (m && m.sender === "studio" && m.text && (!m.translations || !m.translations[L])) {
-        missingTrans = true;
-        break;
-      }
-    }
-    if (missingTrans) {
+    const pendingStudio = humanChatHistory
+      .filter((m) => m && m.sender === "studio" && m.text && (!m.translations || !m.translations[L]))
+      .slice(-2);
+
+    if (pendingStudio.length > 0) {
+      let anyUpdated = false;
       await Promise.all(
-        humanChatHistory.map(async (m) => {
-          if (m && m.sender === "studio" && m.text && (!m.translations || !m.translations[L])) {
-            const tr = await translateMessageText(env, m.text, "es", L);
-            if (tr && tr !== m.text) {
-              m.translations = m.translations || {};
-              m.translations[L] = tr;
-            }
-          }
+        pendingStudio.map(async (m) => {
+          const tr = await translateMessageText(env, m.text, "es", L);
+          m.translations = m.translations || {};
+          m.translations[L] = tr || m.text;
+          anyUpdated = true;
         })
       );
-      await env.LEADS_KV.put(chatKey, JSON.stringify(humanChatHistory.slice(-100))).catch(() => {});
+      if (anyUpdated) {
+        await env.LEADS_KV.put(chatKey, JSON.stringify(humanChatHistory.slice(-100))).catch(() => {});
+      }
     }
   }
-
   const humanMessagesHtml = humanChatHistory.length
     ? humanChatHistory
         .map((m) => {
@@ -7045,7 +7122,11 @@ async function handleProject(request, env, url) {
 }
 
 // ── GESTIÓN Y RESPUESTA DE CHAT DEL ESTUDIO (/responder-chat) ──
-async function handleStudioChat(request, env, url) {
+async function handleStudioChat(request, env, ctx, url) {
+  if (ctx instanceof URL || (ctx && typeof ctx.searchParams === "object")) {
+    url = ctx;
+    ctx = null;
+  }
   if (!env.LEADS_KV || !env.RESEND_API_KEY) {
     return htmlResponse(page("configuración", "error de configuración", "faltan variables en el servidor."), 500);
   }
@@ -7114,27 +7195,35 @@ async function handleStudioChat(request, env, url) {
       ? `${emChat.autoTranslatedNotice}. ${emChat.confirmSoon}`
       : emChat.confirmSoon;
 
-    try {
-      await resendSend(
-        env,
-        {
-          to: [proj.clientEmail],
-          reply_to: "hola@rebrandyourbrand.es",
-          subject: emChat.replySubject(proj.brand),
-          ...renderEmail(lang, {
-            paras: [
-              emChat.hello,
-              emChat.replyIntro(bold(proj.brand)),
-            ],
-            quote: clientQuote,
-            cta: { label: emChat.viewPortal, url: projectPageUrl + "#chat-human" },
-            note: clientNote,
-          }),
-        },
-        `chat-reply-${p}-${msgId}`
-      );
-    } catch (e) {
-      console.error("error sending studio chat reply email:", e?.message);
+    const sendReplyTask = async () => {
+      try {
+        await resendSend(
+          env,
+          {
+            to: [proj.clientEmail],
+            reply_to: "hola@rebrandyourbrand.es",
+            subject: emChat.replySubject(proj.brand),
+            ...renderEmail(lang, {
+              paras: [
+                emChat.hello,
+                emChat.replyIntro(bold(proj.brand)),
+              ],
+              quote: clientQuote,
+              cta: { label: emChat.viewPortal, url: projectPageUrl + "#chat-human" },
+              note: clientNote,
+            }),
+          },
+          `chat-reply-${p}-${msgId}`
+        );
+      } catch (e) {
+        console.error("error sending studio chat reply email:", e?.message);
+      }
+    };
+
+    if (ctx?.waitUntil) {
+      ctx.waitUntil(sendReplyTask());
+    } else {
+      await sendReplyTask();
     }
     return redirectTo(buildUrl("/responder-chat", { p, t, sent: "1" }));
   }
@@ -7143,6 +7232,26 @@ async function handleStudioChat(request, env, url) {
     ? `<div class="banner-ok" style="margin-bottom:1.25rem;"><p>respuesta enviada con éxito a ${esc(proj.clientEmail)}. el cliente ha recibido la notificación por correo y el mensaje se ha guardado en su panel.</p></div>`
     : "";
 
+  if (proj.lang !== "es" && chatHistory.length && env.GROQ_API_KEY) {
+    const pendingClient = chatHistory
+      .filter((m) => m && m.sender === "client" && m.text && (!m.translations || !m.translations.es))
+      .slice(-2);
+
+    if (pendingClient.length > 0) {
+      let anyUpdated = false;
+      await Promise.all(
+        pendingClient.map(async (m) => {
+          const tr = await translateMessageText(env, m.text, proj.lang, "es");
+          m.translations = m.translations || {};
+          m.translations.es = tr || m.text;
+          anyUpdated = true;
+        })
+      );
+      if (anyUpdated) {
+        await env.LEADS_KV.put(chatKey, JSON.stringify(chatHistory.slice(-100))).catch(() => {});
+      }
+    }
+  }
   if (proj.lang !== "es" && chatHistory.length && env.GROQ_API_KEY) {
     let missingTrans = false;
     for (const m of chatHistory) {
@@ -7255,7 +7364,11 @@ async function handleStudioChat(request, env, url) {
 }
 
 // ── VALORACIÓN VERIFICADA (/valorar) ──
-async function handleReview(request, env, url) {
+async function handleReview(request, env, ctx, url) {
+  if (ctx instanceof URL || (ctx && typeof ctx.searchParams === "object")) {
+    url = ctx;
+    ctx = null;
+  }
   let L = langFromRequest(request);
   const p = url.searchParams.get("p");
   const t = url.searchParams.get("t");
@@ -7372,7 +7485,11 @@ async function handleReview(request, env, url) {
 }
 
 // ── MODERACIÓN DE RESEÑA (/testimonial) ──
-async function handleTestimonialReview(request, env, url) {
+async function handleTestimonialReview(request, env, ctx, url) {
+  if (ctx instanceof URL || (ctx && typeof ctx.searchParams === "object")) {
+    url = ctx;
+    ctx = null;
+  }
   const token = url.searchParams.get("token");
   if (!token || !/^[a-f0-9]{64}$/.test(token)) {
     return htmlResponse(page("inválido", "enlace inválido", "el enlace no es válido."), 400);
@@ -7465,7 +7582,11 @@ async function handleTestimonialReview(request, env, url) {
 }
 
 // ── ELIMINAR UNA RESEÑA YA PUBLICADA (/testimonial-delete) ──
-async function handleTestimonialDelete(request, env, url) {
+async function handleTestimonialDelete(request, env, ctx, url) {
+  if (ctx instanceof URL || (ctx && typeof ctx.searchParams === "object")) {
+    url = ctx;
+    ctx = null;
+  }
   const token = url.searchParams.get("token");
   const id = url.searchParams.get("id");
   if (!token || !/^[a-f0-9]{64}$/.test(token) || !id || !/^[a-f0-9]{16}$/.test(id)) {
@@ -7657,7 +7778,7 @@ const CHANGE_INTENT_RE =
 
 const SERVICE_MENTION_RE = /\b(?:logo\w*|palet\w*|color\w*|kolore\w*|web\w*)\b/iu;
 
-async function handleChatPost(request, env, body, o) {
+async function handleChatPost(request, env, body, o, ctx) {
   try {
     const ip = request.headers.get("CF-Connecting-IP") ?? "";
 
@@ -8268,7 +8389,7 @@ export default {
         return jsonResponse({ error: "method_not_allowed" }, 405, null, { Allow: "POST" });
       }
       try {
-        return await handleStripeWebhook(request, env);
+        return await handleStripeWebhook(request, env, ctx);
       } catch (e) {
         console.error("stripe webhook failed:", e?.message);
         return jsonResponse({ error: "webhook_failed" }, 500, null);
@@ -8278,14 +8399,14 @@ export default {
     if (HTML_CLIENT_PATHS.has(url.pathname) || HTML_ADMIN_PATHS.has(url.pathname)) {
       try {
         if (url.pathname === "/verify") return await handleVerify(request, env, ctx, url);
-        if (url.pathname === "/testimonial") return await handleTestimonialReview(request, env, url);
-        if (url.pathname === "/testimonial-delete") return await handleTestimonialDelete(request, env, url);
-        if (url.pathname === "/advance-phase") return await handlePhaseAdvance(request, env, url);
-        if (url.pathname === "/responder-chat") return await handleStudioChat(request, env, url);
-        if (url.pathname === "/approve-phase") return await handlePhaseApprove(request, env, url);
-        if (url.pathname === "/cancel-renewal") return await handleCancelRenewal(request, env, url);
-        if (url.pathname === "/renovar") return await handleRenewalRedirect(request, env, url);
-        if (url.pathname === "/valorar") return await handleReview(request, env, url);
+        if (url.pathname === "/testimonial") return await handleTestimonialReview(request, env, ctx, url);
+        if (url.pathname === "/testimonial-delete") return await handleTestimonialDelete(request, env, ctx, url);
+        if (url.pathname === "/advance-phase") return await handlePhaseAdvance(request, env, ctx, url);
+        if (url.pathname === "/responder-chat") return await handleStudioChat(request, env, ctx, url);
+        if (url.pathname === "/approve-phase") return await handlePhaseApprove(request, env, ctx, url);
+        if (url.pathname === "/cancel-renewal") return await handleCancelRenewal(request, env, ctx, url);
+        if (url.pathname === "/renovar") return await handleRenewalRedirect(request, env, ctx, url);
+        if (url.pathname === "/valorar") return await handleReview(request, env, ctx, url);
       } catch (e) {
         console.error("html route failed:", e?.message);
         return errorPage(HTML_CLIENT_PATHS.has(url.pathname) ? langFromRequest(request) : "es");
@@ -8303,7 +8424,7 @@ export default {
 
     if (url.pathname === "/proyecto") {
       try {
-        return await handleProject(request, env, url);
+        return await handleProject(request, env, ctx, url);
       } catch (e) {
         console.error("project page failed:", e?.message);
         return errorPage(langFromRequest(request));
@@ -8361,7 +8482,7 @@ export default {
       return jsonResponse({ error: "invalid_json" }, 400, o);
     }
 
-    return handleChatPost(request, env, body, o);
+    return handleChatPost(request, env, body, o, ctx);
   },
 
   async scheduled(controller, env, ctx) {

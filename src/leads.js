@@ -65,7 +65,7 @@ async function deliverVerifiedLead(env, ctx, { lang, messages, clientEmail, bran
   const planLine = plan ? `${svcLabel(plan.ids, "es")} — ${plan.total} €` : "";
   const projectPageUrl = projectToken ? buildUrl("/proyecto", { token: projectToken }) : SITE_URL;
 
-  await resendSend(
+  const leadPromise = resendSend(
     env,
     {
       to: ["hola@rebrandyourbrand.es"],
@@ -87,7 +87,7 @@ async function deliverVerifiedLead(env, ctx, { lang, messages, clientEmail, bran
       }),
     },
     `lead-${projectToken || clientEmail}`
-  );
+  ).catch((e) => console.error("lead email to studio failed:", e?.message));
 
   const t = EM[l].ack;
   const ack = resendSend(
@@ -103,5 +103,11 @@ async function deliverVerifiedLead(env, ctx, { lang, messages, clientEmail, bran
     },
     `ack-${projectToken || clientEmail}`
   ).catch((e) => console.error("ack email failed:", e?.message));
-  if (ctx?.waitUntil) ctx.waitUntil(ack);
+
+  const allEmails = Promise.all([leadPromise, ack]);
+  if (ctx?.waitUntil) {
+    ctx.waitUntil(allEmails);
+  } else {
+    await allEmails;
+  }
 }

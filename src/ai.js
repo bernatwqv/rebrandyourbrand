@@ -191,12 +191,11 @@ async function askGroq(env, lang, ctx, chatMessages, retries = 1) {
             { role: "system", content: buildSystemInstruction(lang, ctx) },
             ...chatMessages.map((m) => ({ role: m.role, content: m.text })),
           ],
-          max_tokens: MAX_OUTPUT_TOKENS,
+          max_tokens: 600,
           temperature: 0.4,
-          reasoning_effort: "low",
           response_format: { type: "json_object" },
         }),
-        signal: AbortSignal.timeout(10000),
+        signal: AbortSignal.timeout(8000),
       });
 
       if (groq.status === 429 || groq.status >= 500) {
@@ -283,9 +282,8 @@ async function askGroqProject(env, lang, proj, chatMessages, retries = 1) {
           ],
           max_tokens: 450,
           temperature: 0.4,
-          reasoning_effort: "low",
         }),
-        signal: AbortSignal.timeout(10000),
+        signal: AbortSignal.timeout(8000),
       });
 
       if (!groq.ok) throw new Error(`Groq HTTP ${groq.status}`);
@@ -303,12 +301,12 @@ async function askGroqProject(env, lang, proj, chatMessages, retries = 1) {
         console.error("askGroqProject failed:", e?.message);
         const l = pickLang(lang);
         return l === "ca"
-          ? "No he pogut processar la consulta ara mateix. Pots escriure directament a en Gael i en Bernat a la pestanya de l'equip."
+          ? "no he pogut processar la consulta ara mateix. pots escriure directament a en gael i en bernat a la pestanya de l'equip."
           : l === "en"
-          ? "I could not process your query right now. You can write directly to Gael and Bernat in the team tab."
+          ? "i could not process your query right now. you can write directly to gael and bernat in the team tab."
           : l === "eu"
-          ? "Ezin izan dut kontsulta prozesatu oraintxe bertan. Gael eta bernati idatzi diezaiekezu zuzenean lan-taldearen fitxan."
-          : "No he podido procesar la consulta ahora mismo. Puedes escribir directamente a Gael y Bernat en la pestaña del equipo.";
+          ? "ezin izan dut kontsulta prozesatu oraintxe bertan. gael eta bernati idatzi diezaiekezu zuzenean lan-taldearen fitxan."
+          : "no he podido procesar la consulta ahora mismo. puedes escribir directamente a gael y bernat en la pestaña del equipo.";
       }
       await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
     }
@@ -353,11 +351,11 @@ async function translateMessageText(env, text, fromLang, toLang) {
             content: raw.slice(0, 2500),
           },
         ],
-        max_tokens: 1000,
-        temperature: 0.2,
+        max_tokens: 450,
+        temperature: 0.1,
         response_format: { type: "json_object" },
       }),
-      signal: AbortSignal.timeout(6000),
+      signal: AbortSignal.timeout(4500),
     });
 
     if (!res.ok) {

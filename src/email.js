@@ -62,18 +62,53 @@ function renderEmail(lang, { paras = [], cta = null, secondaryLink = null, note 
   return { html, text };
 }
 
-// Resend con soporte de Idempotency-Key
-async function resendSend(env, payload, idempotencyKey) {
-  const headers = { "Content-Type": "application/json", Authorization: `Bearer ${env.RESEND_API_KEY}` };
+// Resend con soporte de Idempotency-Key, reintento con backoff en 429/5xx y lectura diagnóstica de errores
+async function resendSend(env, payload, idempotencyKey, headersExtra = null) {
+  const headers = {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${env.RESEND_API_KEY}`,
+  };
   if (idempotencyKey) headers["Idempotency-Key"] = idempotencyKey;
 
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers,
-    body: JSON.stringify({ from: "rebrandyourbrand <hola@rebrandyourbrand.es>", ...payload }),
-    signal: AbortSignal.timeout(8000),
-  });
-  if (!res.ok) throw new Error(`Resend error: ${res.status}`);
+  const body = {
+    from: "rebrandyourbrand <hola@rebrandyourbrand.es>",
+    ...payload,
+  };
+  if (headersExtra && typeof headersExtra === "object") {
+    body.headers = { ...(body.headers || {}), ...headersExtra };
+  }
+
+  for (let attempt = 0; attempt <= 1; attempt++) {
+    try {
+      const res = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers,
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(attempt === 0 ? 6000 : 8000),
+      });
+
+      if (res.ok) {
+        return await res.json().catch(() => ({}));
+      }
+
+      const errText = await res.text().catch(() => "");
+      const status = res.status;
+
+      if ((status === 429 || status >= 500) && attempt === 0 && idempotencyKey) {
+        await new Promise((r) => setTimeout(r, 1200));
+        continue;
+      }
+
+      console.error(`Resend error ${status}: ${errText.slice(0, 300)}`);
+      throw new Error(`Resend error: ${status}`);
+    } catch (err) {
+      if (attempt === 0 && idempotencyKey && !err.message?.includes("Resend error: 4")) {
+        await new Promise((r) => setTimeout(r, 1200));
+        continue;
+      }
+      throw err;
+    }
+  }
 }
 
 // Aviso interno con el mismo diseño. El asunto y el texto empiezan siempre en minúscula.

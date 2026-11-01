@@ -11,7 +11,7 @@ export default {
         return jsonResponse({ error: "method_not_allowed" }, 405, null, { Allow: "POST" });
       }
       try {
-        return await handleStripeWebhook(request, env);
+        return await handleStripeWebhook(request, env, ctx);
       } catch (e) {
         console.error("stripe webhook failed:", e?.message);
         return jsonResponse({ error: "webhook_failed" }, 500, null);
@@ -21,14 +21,14 @@ export default {
     if (HTML_CLIENT_PATHS.has(url.pathname) || HTML_ADMIN_PATHS.has(url.pathname)) {
       try {
         if (url.pathname === "/verify") return await handleVerify(request, env, ctx, url);
-        if (url.pathname === "/testimonial") return await handleTestimonialReview(request, env, url);
-        if (url.pathname === "/testimonial-delete") return await handleTestimonialDelete(request, env, url);
-        if (url.pathname === "/advance-phase") return await handlePhaseAdvance(request, env, url);
-        if (url.pathname === "/responder-chat") return await handleStudioChat(request, env, url);
-        if (url.pathname === "/approve-phase") return await handlePhaseApprove(request, env, url);
-        if (url.pathname === "/cancel-renewal") return await handleCancelRenewal(request, env, url);
-        if (url.pathname === "/renovar") return await handleRenewalRedirect(request, env, url);
-        if (url.pathname === "/valorar") return await handleReview(request, env, url);
+        if (url.pathname === "/testimonial") return await handleTestimonialReview(request, env, ctx, url);
+        if (url.pathname === "/testimonial-delete") return await handleTestimonialDelete(request, env, ctx, url);
+        if (url.pathname === "/advance-phase") return await handlePhaseAdvance(request, env, ctx, url);
+        if (url.pathname === "/responder-chat") return await handleStudioChat(request, env, ctx, url);
+        if (url.pathname === "/approve-phase") return await handlePhaseApprove(request, env, ctx, url);
+        if (url.pathname === "/cancel-renewal") return await handleCancelRenewal(request, env, ctx, url);
+        if (url.pathname === "/renovar") return await handleRenewalRedirect(request, env, ctx, url);
+        if (url.pathname === "/valorar") return await handleReview(request, env, ctx, url);
       } catch (e) {
         console.error("html route failed:", e?.message);
         return errorPage(HTML_CLIENT_PATHS.has(url.pathname) ? langFromRequest(request) : "es");
@@ -46,7 +46,7 @@ export default {
 
     if (url.pathname === "/proyecto") {
       try {
-        return await handleProject(request, env, url);
+        return await handleProject(request, env, ctx, url);
       } catch (e) {
         console.error("project page failed:", e?.message);
         return errorPage(langFromRequest(request));
@@ -104,7 +104,7 @@ export default {
       return jsonResponse({ error: "invalid_json" }, 400, o);
     }
 
-    return handleChatPost(request, env, body, o);
+    return handleChatPost(request, env, body, o, ctx);
   },
 
   async scheduled(controller, env, ctx) {

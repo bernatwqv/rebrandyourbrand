@@ -537,7 +537,7 @@ function addOneYearIso(iso) {
   return d.toISOString();
 }
 
-async function processPaidSession(env, session, { fromWebhook = false } = {}) {
+async function processPaidSession(env, session, { fromWebhook = false } = {}, ctx = null) {
   if (!session || session.mode !== "payment" || session.payment_status !== "paid") return;
 
   const token = session.metadata?.project_token || session.client_reference_id;
@@ -755,7 +755,7 @@ async function processPaidSession(env, session, { fromWebhook = false } = {}) {
 }
 
 // Devuelve 500 en error de webhook (incluida consistencia eventual de KV) para que Stripe reintente
-async function handleStripeWebhook(request, env) {
+async function handleStripeWebhook(request, env, ctx = null) {
   const missingEnv = ["LEADS_KV", "RESEND_API_KEY", "STRIPE_WEBHOOK_SECRET"].filter((k) => !env[k]);
   if (missingEnv.length) {
     console.error("stripe webhook misconfigured, falta en el Worker:", missingEnv.join(", "));
@@ -793,7 +793,7 @@ async function handleStripeWebhook(request, env) {
   }
 
   try {
-    await processPaidSession(env, event.data?.object, { fromWebhook: true });
+    await processPaidSession(env, event.data?.object, { fromWebhook: true }, ctx);
     await env.LEADS_KV.put(eventKey, "1", { expirationTtl: STRIPE_EVENT_TTL_SECONDS });
   } catch (e) {
     console.error("stripe webhook processing failed:", e?.message);
