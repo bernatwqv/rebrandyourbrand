@@ -2090,6 +2090,9 @@ async function handleProject(request, env, url) {
         (function(){
           var bar = document.getElementById("undo-bar");
           if (!bar) return;
+          if (bar.parentElement !== document.body) {
+            document.body.appendChild(bar);
+          }
           var dismiss = function(e){
             if (e && e.preventDefault) e.preventDefault();
             bar.classList.add("is-dismissed");
@@ -2654,8 +2657,7 @@ async function handleProject(request, env, url) {
     ${reviewCardHtml}
     ${materialsBox}
     ${referencesBox}
-    ${addFormHtml}
-    ${undoHtml}`;
+    ${addFormHtml}`;
 
   return htmlResponse(
     page(`${T.title} — ${proj.brand}`, T.heading, "", {
@@ -2663,6 +2665,7 @@ async function handleProject(request, env, url) {
       eyebrow: T.eyebrow,
       wide: true,
       html: fullHtml,
+      overlay: undoHtml,
     }),
     200
   );

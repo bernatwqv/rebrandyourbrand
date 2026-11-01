@@ -3684,31 +3684,37 @@ button.secondary:active,.btn.secondary:active,button.no:active{
 }
 .undo-bar-wrap{
   position:fixed;
-  bottom:1.25rem;
+  bottom:1.5rem;
+  bottom:max(1.5rem, calc(env(safe-area-inset-bottom, 0px) + 1rem));
   left:50%;
   transform:translateX(-50%);
   width:calc(100% - 2rem);
   max-width:480px;
-  z-index:100;
-  background:linear-gradient(150deg,rgba(23,23,26,.95),rgba(30,30,34,.9));
-  backdrop-filter:blur(20px) saturate(160%);
-  -webkit-backdrop-filter:blur(20px) saturate(160%);
+  z-index:99999;
+  background:linear-gradient(150deg,rgba(23,23,26,.96),rgba(30,30,34,.92));
+  backdrop-filter:blur(24px) saturate(180%);
+  -webkit-backdrop-filter:blur(24px) saturate(180%);
   color:#F5F2EA;
-  border:1px solid rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.16);
   border-radius:16px;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.15),0 16px 40px rgba(0,0,0,.35);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 20px 48px -8px rgba(0,0,0,.5);
   overflow:hidden;
-  animation:undoDismiss .4s var(--ease-editorial) 15s forwards;
-  transition:opacity .35s var(--ease-editorial),transform .35s var(--ease-editorial),visibility .35s;
+  animation:undoPopIn .35s var(--ease-editorial) forwards, undoDismiss .4s var(--ease-editorial) 60s forwards;
+  transition:opacity .3s var(--ease-editorial),transform .3s var(--ease-editorial),visibility .3s;
+  will-change:transform,opacity;
 }
 .undo-bar-wrap.is-dismissed{
   opacity:0;
-  transform:translate(-50%,20px);
+  transform:translate(-50%,16px) scale(0.96);
   pointer-events:none;
 }
+@keyframes undoPopIn{
+  from{opacity:0;transform:translate(-50%,24px) scale(0.96);}
+  to{opacity:1;transform:translate(-50%,0) scale(1);}
+}
 @keyframes undoDismiss{
-  0%,90%{opacity:1;transform:translate(-50%,0);pointer-events:auto;}
-  100%{opacity:0;transform:translate(-50%,20px);pointer-events:none;visibility:hidden;}
+  0%,95%{opacity:1;transform:translate(-50%,0) scale(1);pointer-events:auto;}
+  100%{opacity:0;transform:translate(-50%,16px) scale(0.96);pointer-events:none;visibility:hidden;}
 }
 .undo-bar-content{
   display:flex;
@@ -3741,7 +3747,7 @@ button.secondary:active,.btn.secondary:active,button.no:active{
   stroke:#E8A33D;
   stroke-dasharray:56.55;
   stroke-dashoffset:0;
-  animation:undoRingCountdown 15s linear forwards;
+  animation:undoRingCountdown 60s linear forwards;
   stroke-linecap:round;
 }
 @keyframes undoRingCountdown{
@@ -4066,6 +4072,7 @@ function page(
     formLabel = "verificar y acceder al pago",
     footerUrl = SITE_URL,
     footerLabel = "",
+    overlay = "",
   } = {}
 ) {
   const l = pickLang(lang);
@@ -4073,7 +4080,7 @@ function page(
   const tag = common.studioTag;
   const backText = footerLabel || common.backSite;
 
-  return `<!DOCTYPE html><html lang="${l}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="robots" content="noindex"><meta name="color-scheme" content="light"><meta name="theme-color" content="#FFFFFF"><title>${esc(lc1(title))} — rebrandyourbrand</title><style>${PAGE_CSS}</style></head><body><div class="shell${wide ? " wide" : ""}"><header class="topbar"><a href="${SITE_URL}" class="brand-link" aria-label="rebrandyourbrand">${RYBB_BRAND_MARK}</a><span class="brand-tag">${esc(tag)}</span></header><main class="card">${eyebrow ? `<span class="eyebrow">${esc(eyebrow)}</span>` : ""}<h1>${esc(heading)}</h1>${text ? `<p class="lead">${esc(text)}</p>` : ""}${html}${form ? `<form method="POST"><button type="submit">${esc(formLabel)}</button></form>` : ""}</main><footer class="foot"><a href="${esc(footerUrl)}">${esc(backText)}</a><a href="mailto:hola@rebrandyourbrand.es">hola@rebrandyourbrand.es</a></footer></div></body></html>`;
+  return `<!DOCTYPE html><html lang="${l}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="robots" content="noindex"><meta name="color-scheme" content="light"><meta name="theme-color" content="#FFFFFF"><title>${esc(lc1(title))} — rebrandyourbrand</title><style>${PAGE_CSS}</style></head><body><div class="shell${wide ? " wide" : ""}"><header class="topbar"><a href="${SITE_URL}" class="brand-link" aria-label="rebrandyourbrand">${RYBB_BRAND_MARK}</a><span class="brand-tag">${esc(tag)}</span></header><main class="card">${eyebrow ? `<span class="eyebrow">${esc(eyebrow)}</span>` : ""}<h1>${esc(heading)}</h1>${text ? `<p class="lead">${esc(text)}</p>` : ""}${html}${form ? `<form method="POST"><button type="submit">${esc(formLabel)}</button></form>` : ""}</main><footer class="foot"><a href="${esc(footerUrl)}">${esc(backText)}</a><a href="mailto:hola@rebrandyourbrand.es">hola@rebrandyourbrand.es</a></footer></div>${overlay}</body></html>`;
 }
 
 const msgPage = (lang, key, status, extra = {}) => {
@@ -6185,6 +6192,9 @@ async function handleProject(request, env, url) {
         (function(){
           var bar = document.getElementById("undo-bar");
           if (!bar) return;
+          if (bar.parentElement !== document.body) {
+            document.body.appendChild(bar);
+          }
           var dismiss = function(e){
             if (e && e.preventDefault) e.preventDefault();
             bar.classList.add("is-dismissed");
@@ -6749,8 +6759,7 @@ async function handleProject(request, env, url) {
     ${reviewCardHtml}
     ${materialsBox}
     ${referencesBox}
-    ${addFormHtml}
-    ${undoHtml}`;
+    ${addFormHtml}`;
 
   return htmlResponse(
     page(`${T.title} — ${proj.brand}`, T.heading, "", {
@@ -6758,6 +6767,7 @@ async function handleProject(request, env, url) {
       eyebrow: T.eyebrow,
       wide: true,
       html: fullHtml,
+      overlay: undoHtml,
     }),
     200
   );
