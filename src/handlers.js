@@ -3540,10 +3540,11 @@ async function handleEmailForm(request, env, originOk, o) {
       const { success } = await env.CHAT_LIMITER.limit({ key: `e:${ipKey(ip)}` });
       if (!success) throw new HttpError(429, "rate_limited", { "Retry-After": "60" });
     }
-    if (typeof env.VERIFY_LIMITER?.limit !== "function") throw new HttpError(500, "misconfigured");
-    {
+    if (env.VERIFY_LIMITER?.limit) {
       const { success: okV } = await env.VERIFY_LIMITER.limit({ key: `v:${ipKey(ip)}` });
       if (!okV) throw new HttpError(429, "rate_limited", { "Retry-After": "60" });
+    } else if (!(await checkRateLimit(env, "verify_rl:" + ipKey(ip), 5, 300))) {
+      throw new HttpError(429, "rate_limited", { "Retry-After": "60" });
     }
     await verifyTurnstile(env, body.token, ip, "email-form");
 

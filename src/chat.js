@@ -139,8 +139,8 @@ async function handleChatPost(request, env, body, o, ctx) {
     const confirmSigIn = typeof body.confirmSig === "string" ? body.confirmSig : "";
     const isShown = async (p, b, d) =>
       !!(email && b && p && (!p.ids.includes("web") || d)) &&
-      ((await verifyRaw(key, confirmPayload(email, b, p, d), confirmSigIn)) ||
-        (await verifyRaw(key, confirmPayload(email, b, p, d, confirmWindow() - 1), confirmSigIn)));
+      ((await verifyRaw(key, confirmPayload(email, b, p, d), confirmSigIn).catch(() => false)) ||
+        (await verifyRaw(key, confirmPayload(email, b, p, d, confirmWindow() - 1), confirmSigIn).catch(() => false)));
 
     const confirmAndSend = async (plan, brand, domain) => {
       if (!env.RESEND_API_KEY) throw new HttpError(500, "misconfigured");
@@ -148,10 +148,11 @@ async function handleChatPost(request, env, body, o, ctx) {
       if (!brand) throw new HttpError(400, "brand_required");
       if (!(await isShown(plan, brand, domain))) throw new HttpError(400, "invalid_confirmation");
 
-      if (typeof env.VERIFY_LIMITER?.limit !== "function") throw new HttpError(500, "misconfigured");
-      {
+      if (env.VERIFY_LIMITER?.limit) {
         const { success: okV } = await env.VERIFY_LIMITER.limit({ key: `v:${ipKey(ip)}` });
         if (!okV) throw new HttpError(429, "rate_limited", { "Retry-After": "60" });
+      } else if (!(await checkRateLimit(env, "verify_rl:" + ipKey(ip), 5, 300))) {
+        throw new HttpError(429, "rate_limited", { "Retry-After": "60" });
       }
 
       const verifyToken = await startVerification(env, {
@@ -161,6 +162,10 @@ async function handleChatPost(request, env, body, o, ctx) {
         clientEmail: email,
         brand,
         domain,
+      }).catch((e) => {
+        if (e instanceof HttpError) throw e;
+        console.error("startVerification failed:", e?.message);
+        throw new HttpError(502, "upstream_error");
       });
       const reply = MSG[lang].sent;
       return jsonResponse(
