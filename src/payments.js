@@ -391,13 +391,13 @@ async function unlockExtraRevision(env, proj, step, sessionId, sessionData = nul
 
   if (isPostDelivery) {
     proj.usedRevisionSessions = [...usedSessions, sessionId];
-    const notes = session.metadata?.notes || proj.pendingExtraWork?.notes || "";
+    const notes = (session?.metadata?.notes && session.metadata.notes.trim()) ? session.metadata.notes.trim() : (proj.pendingExtraWork?.notes || "");
     proj.extraWork = Array.isArray(proj.extraWork) ? proj.extraWork : [];
     if (!proj.extraWork.some((w) => w.sessionId === sessionId)) {
       proj.extraWork.push({
         id: randomHex(4),
         sessionId,
-        date: Date.now(),
+        date: new Date().toISOString(),
         notes,
         status: "received",
       });
@@ -407,7 +407,7 @@ async function unlockExtraRevision(env, proj, step, sessionId, sessionData = nul
       const history = (await env.LEADS_KV.get(chatKey, { type: "json" })) || [];
       history.push({
         sender: "client",
-        date: Date.now(),
+        date: new Date().toISOString(),
         text: `[solicitud de cambios extraordinarios abonada — 100 €]\n${notes}`,
       });
       await env.LEADS_KV.put(chatKey, JSON.stringify(history.slice(-50)));

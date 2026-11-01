@@ -153,7 +153,7 @@ const AGREE_RE = /(?<![\p{L}\p{N}])(?:confirmo|confirm|vale|adelante|procedemos|
 
 const DENY_RE = /^\s*(?:no|nope|ez|ezeztatu|cancel\w*)(?![\p{L}\p{N}])/iu;
 
-// Precios oficiales permitidos que Brandi puede mencionar: {0, 100, 400, 500, 800} (0 paleta de regalo con logo, 100 paleta suelta o cuota anual, 400 logo o web, 500 paleta y web, 800 pack completo)
+// Precios oficiales permitidos que Brandi puede mencionar: {0, 100, 400, 500, 800} (0 paleta de regalo con logo, 100 paleta suelta, ronda extra de revisión o cuota anual, 400 logo o web, 500 paleta y web, 800 pack completo)
 const ALLOWED_EUR = new Set([0, 100, 400, 500, 800]);
 
 const CATALOG = [
@@ -1078,6 +1078,8 @@ const PG = {
       done: ["¡enviado correctamente!", "fase aprobada con éxito", "hemos registrado tu validación por escrito y ya hemos activado la siguiente etapa de tu proyecto."],
       already: ["fase ya gestionada", "esta fase ya está cerrada", "esta fase ya consta como aprobada y completada en tu proyecto."],
       completed: ["¡proyecto finalizado con éxito!", "todas las fases completadas", "todas las fases de tu proyecto han sido validadas con éxito. ya tienes disponibles todos los archivos definitivos en tu panel de seguimiento."],
+      doneLast: ["¡proyecto finalizado con éxito!", "todas las fases completadas", "todas las fases de tu proyecto han sido validadas con éxito. ya tienes disponibles todos los archivos definitivos en tu panel de seguimiento."],
+      donePhase: (title) => ["fase ya gestionada", "esta fase ya está cerrada", `la fase de ${title} ya consta como aprobada y completada en tu proyecto.`],
     },
     rn: {
       eyebrow: "infraestructura web",
@@ -1256,6 +1258,8 @@ const PG = {
       done: ["enviat correctament!", "fase aprovada amb èxit", "hem registrat la teva validació per escrit i ja hem activat l'etapa següent del teu projecte."],
       already: ["fase ja gestionada", "aquesta fase ja està tancada", "aquesta fase ja consta com a aprovada i completada al teu projecte."],
       completed: ["projecte finalitzat amb èxit!", "totes les fases completades", "totes les fases del teu projecte han estat validades amb èxit. ja tens disponibles tots els arxius definitius al teu tauler de seguiment."],
+      doneLast: ["projecte finalitzat amb èxit!", "totes les fases completades", "totes les fases del teu projecte han estat validades amb èxit. ja tens disponibles tots els arxius definitius al teu tauler de seguiment."],
+      donePhase: (title) => ["fase ja gestionada", "aquesta fase ja està tancada", `la fase de ${title} ja consta com a aprovada i completada al teu projecte.`],
     },
     rn: {
       eyebrow: "infraestructura web",
@@ -1434,6 +1438,8 @@ const PG = {
       done: ["behar bezala bidalita!", "fasea arrakastaz onartuta", "zure idatzizko baliozkotzea erregistratu dugu eta dagoeneko aktibatu dugu zure proiektuaren hurrengo etapa."],
       already: ["fasea kudeatuta", "fase hau itxita dago jada", "fase hau dagoeneko onartuta eta osatuta agertzen da zure proiektuan."],
       completed: ["proiektua arrakastaz amaitu da!", "fase guztiak osatuta", "zure proiektuko fase guztiak arrakastaz baliozkotu dira. dagoeneko eskuragarri dituzu behin betiko fitxategi guztiak zure jarraipen-panelean."],
+      doneLast: ["proiektua arrakastaz amaitu da!", "fase guztiak osatuta", "zure proiektuko fase guztiak arrakastaz baliozkotu dira. dagoeneko eskuragarri dituzu behin betiko fitxategi guztiak zure jarraipen-panelean."],
+      donePhase: (title) => ["fasea kudeatuta", "fase hau itxita dago jada", `${title} fasea dagoeneko onartuta eta osatuta agertzen da zure proiektuan.`],
     },
     rn: {
       eyebrow: "web-azpiegitura",
@@ -1612,6 +1618,8 @@ const PG = {
       done: ["submitted successfully!", "phase approved successfully", "we have recorded your written approval and activated the next stage of your project."],
       already: ["already approved", "this phase is already closed", "this phase is already marked as approved and completed on your project."],
       completed: ["project successfully completed!", "all phases completed", "all phases of your project have been successfully approved. all your final files are now ready in your tracking dashboard."],
+      doneLast: ["project successfully completed!", "all phases completed", "all phases of your project have been successfully approved. all your final files are now ready in your tracking dashboard."],
+      donePhase: (title) => ["already approved", "this phase is already closed", `the ${title} phase is already marked as approved and completed on your project.`],
     },
     rn: {
       eyebrow: "web infrastructure",
@@ -1968,8 +1976,13 @@ async function resendSend(env, payload, idempotencyKey, headersExtra = null) {
   if (idempotencyKey) headers["Idempotency-Key"] = idempotencyKey;
 
   const body = {
-    from: "rebrandyourbrand <hola@rebrandyourbrand.es>",
-    ...payload,
+    from: payload.from || "rebrandyourbrand <hola@rebrandyourbrand.es>",
+    to: payload.to,
+    subject: payload.subject,
+    ...(payload.reply_to ? { reply_to: payload.reply_to } : {}),
+    ...(payload.html ? { html: payload.html } : {}),
+    ...(payload.text ? { text: payload.text } : {}),
+    ...(payload.headers ? { headers: payload.headers } : {}),
   };
   if (headersExtra && typeof headersExtra === "object") {
     body.headers = { ...(body.headers || {}), ...headersExtra };
@@ -2940,13 +2953,13 @@ async function unlockExtraRevision(env, proj, step, sessionId, sessionData = nul
 
   if (isPostDelivery) {
     proj.usedRevisionSessions = [...usedSessions, sessionId];
-    const notes = session.metadata?.notes || proj.pendingExtraWork?.notes || "";
+    const notes = (session?.metadata?.notes && session.metadata.notes.trim()) ? session.metadata.notes.trim() : (proj.pendingExtraWork?.notes || "");
     proj.extraWork = Array.isArray(proj.extraWork) ? proj.extraWork : [];
     if (!proj.extraWork.some((w) => w.sessionId === sessionId)) {
       proj.extraWork.push({
         id: randomHex(4),
         sessionId,
-        date: Date.now(),
+        date: new Date().toISOString(),
         notes,
         status: "received",
       });
@@ -2956,7 +2969,7 @@ async function unlockExtraRevision(env, proj, step, sessionId, sessionData = nul
       const history = (await env.LEADS_KV.get(chatKey, { type: "json" })) || [];
       history.push({
         sender: "client",
-        date: Date.now(),
+        date: new Date().toISOString(),
         text: `[solicitud de cambios extraordinarios abonada — 100 €]\n${notes}`,
       });
       await env.LEADS_KV.put(chatKey, JSON.stringify(history.slice(-50)));
@@ -4758,6 +4771,7 @@ async function handlePhaseAdvance(request, env, ctx, url) {
     return htmlResponse(page("no encontrado", "proyecto no encontrado", "no hemos encontrado este proyecto en kv."), 404);
   }
   const proj = JSON.parse(rawProj);
+  const allDone = Array.isArray(proj.phases) && proj.phases.length > 0 && proj.phases.every((ph) => ph.status === "done");
   const trackingUrl = buildUrl("/proyecto", { token: projectToken });
 
   if (!proj.paid) {
@@ -5334,8 +5348,8 @@ async function handlePhaseApprove(request, env, ctx, url) {
 
   if (ph.status !== "review") {
     if (ph.status === "done") {
-      const isCompleted = proj.status === "done" || proj.phases.every((item) => item.status === "done");
-      const completedInfo = isCompleted ? A.doneLast : A.donePhase(phaseTitle(ph, L));
+      const isCompleted = proj.status === "done" || (Array.isArray(proj.phases) && proj.phases.length > 0 && proj.phases.every((item) => item.status === "done"));
+      const completedInfo = isCompleted ? (A.doneLast || A.completed) : (typeof A.donePhase === "function" ? A.donePhase(phaseTitle(ph, L)) : A.already);
       let reviewBtn = "";
       if (isCompleted) {
         const revUrl = await reviewUrl(env, p);
@@ -5747,6 +5761,8 @@ async function flushPendingMaterialsNotice(env, token, proj) {
   if (!proj || !proj.pendingMaterialsNotice) return;
   const notice = proj.pendingMaterialsNotice;
   delete proj.pendingMaterialsNotice;
+  proj.lastAdded = null;
+  proj.lastAddedMaterials = null;
 
   const matItem = Array.isArray(proj.materialsList) ? proj.materialsList.find((m) => m && m.id === notice.matId) : null;
   const refItem = Array.isArray(proj.referencesList) ? proj.referencesList.find((r) => r && r.id === notice.refId) : null;
@@ -5932,7 +5948,7 @@ async function handleProject(request, env, ctx, url) {
               {
                 to: ["hola@rebrandyourbrand.es"],
                 reply_to: proj.clientEmail,
-                  quote: quoteForStudio,
+                subject: `[${proj.brand || "proyecto"}] nuevo mensaje en el chat`,
                 ...renderEmail("es", {
                   paras: [
                     `el cliente de ${bold(proj.brand)} (${proj.clientEmail}) ha escrito un nuevo mensaje en el chat directo del proyecto:`,
@@ -6014,7 +6030,7 @@ async function handleProject(request, env, ctx, url) {
           400
         );
       }
-      proj.pendingExtraWork = { notes, date: Date.now() };
+      proj.pendingExtraWork = { notes, date: new Date().toISOString() };
       await saveProject(env, token, proj);
 
       const qJoin = String.fromCharCode(38);
@@ -6407,10 +6423,15 @@ async function handleProject(request, env, ctx, url) {
     );
   }
 
-  const extraDoneBanner =
-    url.searchParams.get("extra_done") === "1"
-      ? `<div class="banner-ok">${esc(T.extraWorkSuccess)}</div>`
-      : "";
+  const hasExtraPaid =
+    url.searchParams.get("extra_done") === "1" &&
+    ((revSessionId && Array.isArray(proj.usedRevisionSessions) && proj.usedRevisionSessions.includes(revSessionId)) ||
+     (Array.isArray(proj.extraWork) && proj.extraWork.length > 0) ||
+     (Array.isArray(proj.phases) && proj.phases.some((ph) => ph.extraPaid === true || (Array.isArray(ph.paidRevisionSessions) && ph.paidRevisionSessions.length > 0))));
+
+  const extraDoneBanner = hasExtraPaid
+    ? `<div class="banner-ok">${esc(T.extraWorkSuccess)}</div>`
+    : "";
 
   const undoneBanner =
     url.searchParams.get("undone") === "1"
@@ -6775,26 +6796,7 @@ async function handleProject(request, env, ctx, url) {
   const chatKey = `project_chat:${token}`;
   const humanChatHistory = (await env.LEADS_KV.get(chatKey, { type: "json" })) || [];
 
-  if (L !== "es" && humanChatHistory.length && env.GROQ_API_KEY) {
-    const pendingStudio = humanChatHistory
-      .filter((m) => m && m.sender === "studio" && m.text && (!m.translations || !m.translations[L]))
-      .slice(-2);
 
-    if (pendingStudio.length > 0) {
-      let anyUpdated = false;
-      await Promise.all(
-        pendingStudio.map(async (m) => {
-          const tr = await translateMessageText(env, m.text, "es", L);
-          m.translations = m.translations || {};
-          m.translations[L] = tr || m.text;
-          anyUpdated = true;
-        })
-      );
-      if (anyUpdated) {
-        await env.LEADS_KV.put(chatKey, JSON.stringify(humanChatHistory.slice(-100))).catch(() => {});
-      }
-    }
-  }
   const humanMessagesHtml = humanChatHistory.length
     ? humanChatHistory
         .map((m) => {
@@ -7232,49 +7234,7 @@ async function handleStudioChat(request, env, ctx, url) {
     ? `<div class="banner-ok" style="margin-bottom:1.25rem;"><p>respuesta enviada con éxito a ${esc(proj.clientEmail)}. el cliente ha recibido la notificación por correo y el mensaje se ha guardado en su panel.</p></div>`
     : "";
 
-  if (proj.lang !== "es" && chatHistory.length && env.GROQ_API_KEY) {
-    const pendingClient = chatHistory
-      .filter((m) => m && m.sender === "client" && m.text && (!m.translations || !m.translations.es))
-      .slice(-2);
 
-    if (pendingClient.length > 0) {
-      let anyUpdated = false;
-      await Promise.all(
-        pendingClient.map(async (m) => {
-          const tr = await translateMessageText(env, m.text, proj.lang, "es");
-          m.translations = m.translations || {};
-          m.translations.es = tr || m.text;
-          anyUpdated = true;
-        })
-      );
-      if (anyUpdated) {
-        await env.LEADS_KV.put(chatKey, JSON.stringify(chatHistory.slice(-100))).catch(() => {});
-      }
-    }
-  }
-  if (proj.lang !== "es" && chatHistory.length && env.GROQ_API_KEY) {
-    let missingTrans = false;
-    for (const m of chatHistory) {
-      if (m && m.sender === "client" && m.text && (!m.translations || !m.translations.es)) {
-        missingTrans = true;
-        break;
-      }
-    }
-    if (missingTrans) {
-      await Promise.all(
-        chatHistory.map(async (m) => {
-          if (m && m.sender === "client" && m.text && (!m.translations || !m.translations.es)) {
-            const tr = await translateMessageText(env, m.text, proj.lang, "es");
-            if (tr && tr !== m.text) {
-              m.translations = m.translations || {};
-              m.translations.es = tr;
-            }
-          }
-        })
-      );
-      await env.LEADS_KV.put(chatKey, JSON.stringify(chatHistory.slice(-100))).catch(() => {});
-    }
-  }
 
   const historyHtml = chatHistory.length
     ? chatHistory
@@ -7782,13 +7742,15 @@ async function handleChatPost(request, env, body, o, ctx) {
   try {
     const ip = request.headers.get("CF-Connecting-IP") ?? "";
 
+    if (!env.LEADS_KV || !env.CHAT_LIMITER) {
+      throw new HttpError(500, "misconfigured");
+    }
+
     // ── SESIÓN DE CHAT: Turnstile una sola vez al empezar la conversación ──
     if (body.action === "session") {
       if (!env.TURNSTILE_SECRET_KEY) throw new HttpError(500, "misconfigured");
-      if (env.CHAT_LIMITER) {
-        const { success } = await env.CHAT_LIMITER.limit({ key: `s:${ipKey(ip)}` });
-        if (!success) throw new HttpError(429, "rate_limited", { "Retry-After": "60" });
-      }
+      const { success } = await env.CHAT_LIMITER.limit({ key: `s:${ipKey(ip)}` });
+      if (!success) throw new HttpError(429, "rate_limited", { "Retry-After": "60" });
       await verifyTurnstile(env, body.token, ip, "brandi-chat");
       return jsonResponse({ session: await makeSession(await getKey(env), ip) }, 200, o);
     }
@@ -7800,10 +7762,8 @@ async function handleChatPost(request, env, body, o, ctx) {
     if (!env.GROQ_API_KEY || !env.TURNSTILE_SECRET_KEY) {
       throw new HttpError(500, "misconfigured");
     }
-    if (env.CHAT_LIMITER) {
-      const { success } = await env.CHAT_LIMITER.limit({ key: ipKey(ip) });
-      if (!success) throw new HttpError(429, "rate_limited", { "Retry-After": "60" });
-    }
+    const { success } = await env.CHAT_LIMITER.limit({ key: ipKey(ip) });
+    if (!success) throw new HttpError(429, "rate_limited", { "Retry-After": "60" });
 
     const lang = LANG_ORDER.includes(body.lang) ? body.lang : "es";
     const key = await getKey(env);
@@ -8310,15 +8270,14 @@ async function handleScheduled(controller, env, ctx) {
   let completedFullList = false;
 
   do {
-    const list = await env.LEADS_KV.list({ prefix: "project:", cursor });
-    let reachedLimit = false;
+    // Si ya estamos cerca del límite de lecturas (maxGets = 35), no abrimos otra página para no dejarla a medias
+    if (getsCount >= 20) {
+      break;
+    }
+
+    const list = await env.LEADS_KV.list({ prefix: "project:", limit: 20, cursor });
 
     for (const item of list.keys) {
-      if (getsCount >= maxGets) {
-        reachedLimit = true;
-        break;
-      }
-
       const meta = item.metadata || {};
       const status = meta.status;
 
@@ -8345,32 +8304,21 @@ async function handleScheduled(controller, env, ctx) {
       );
     }
 
-    if (reachedLimit) {
-      const nextCursor = list.cursor || cursor;
-      if (nextCursor) {
-        await env.LEADS_KV.put("cron:project_cursor", nextCursor, { expirationTtl: 86400 }).catch(() => {});
-      }
-      return;
-    }
-
     if (list.list_complete) {
       completedFullList = true;
       cursor = undefined;
+      break;
     } else {
       cursor = list.cursor;
-      if (getsCount >= maxGets) {
-        if (cursor) {
-          await env.LEADS_KV.put("cron:project_cursor", cursor, { expirationTtl: 86400 }).catch(() => {});
-        }
-        return;
+      // Guardar el cursor únicamente cuando la página actual se ha consumido en su totalidad
+      if (cursor) {
+        await env.LEADS_KV.put("cron:project_cursor", cursor, { expirationTtl: 86400 }).catch(() => {});
       }
     }
   } while (cursor && getsCount < maxGets);
 
   if (completedFullList) {
     await env.LEADS_KV.delete("cron:project_cursor").catch(() => {});
-  } else if (cursor) {
-    await env.LEADS_KV.put("cron:project_cursor", cursor, { expirationTtl: 86400 }).catch(() => {});
   }
 }
 

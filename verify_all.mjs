@@ -81,5 +81,59 @@ fnBlocks.forEach((fn) => {
       throw new Error(`Ámbito roto: la función ${name} utiliza 'ip' sin declararla ni recibirla por parámetro.`);
     }
   }
+
+  if (/\ballDone\b/.test(body)) {
+    const hasParam = params.includes("allDone");
+    const declaresAllDone = /\b(?:const|let|var)\s+allDone\b/.test(body);
+    if (!hasParam && !declaresAllDone) {
+      throw new Error(`Ámbito roto: la función ${name} consume 'allDone' sin declararla ni recibirla por parámetro.`);
+    }
+  }
 });
-console.log("worker.js auditoría defensiva de ámbitos y firmas (saveProject, ip, KV): OK");
+console.log("worker.js auditoría defensiva de ámbitos y firmas (saveProject, ip, allDone, KV): OK");
+
+// 4. Auditoría estricta de llamadas a resendSend (asunto obligatorio y sin quote en la raíz del payload)
+const fnResend = [...workerSrc.matchAll(/\bresendSend\s*\(\s*env\s*,\s*\{/g)];
+if (fnResend.length === 0) {
+  throw new Error("No se detectaron llamadas a resendSend en worker.js.");
+}
+
+for (const m of fnResend) {
+  const startIdx = m.index + m[0].length - 1;
+  let depth = 0;
+  let inStr = false;
+  let quoteChar = "";
+  let endIdx = startIdx;
+  for (let i = startIdx; i < workerSrc.length; i++) {
+    const ch = workerSrc[i];
+    if (inStr) {
+      if (ch === "\\") {
+        i++;
+      } else if (ch === quoteChar) {
+        inStr = false;
+      }
+    } else if (ch === '"' || ch === "'" || ch === "`") {
+      inStr = true;
+      quoteChar = ch;
+    } else if (ch === "{") {
+      depth++;
+    } else if (ch === "}") {
+      depth--;
+      if (depth === 0) {
+        endIdx = i;
+        break;
+      }
+    }
+  }
+
+  const payloadStr = workerSrc.slice(startIdx, endIdx + 1);
+  if (!/subject\s*:/.test(payloadStr)) {
+    throw new Error(`Llamada a resendSend sin propiedad 'subject': ${payloadStr.slice(0, 150)}`);
+  }
+  // Verificar que quote no esté como propiedad raíz del payload (fuera de renderEmail)
+  const withoutRender = payloadStr.replace(/renderEmail\s*\([\s\S]*?\n\s*\}/g, "");
+  if (/\bquote\s*:/.test(withoutRender)) {
+    throw new Error(`Llamada a resendSend pasa 'quote' en la raíz del payload: ${payloadStr.slice(0, 150)}`);
+  }
+}
+console.log("worker.js llamadas a resendSend con subject y payload saneado: OK");

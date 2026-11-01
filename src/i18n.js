@@ -725,6 +725,8 @@ const PG = {
       done: ["¡enviado correctamente!", "fase aprobada con éxito", "hemos registrado tu validación por escrito y ya hemos activado la siguiente etapa de tu proyecto."],
       already: ["fase ya gestionada", "esta fase ya está cerrada", "esta fase ya consta como aprobada y completada en tu proyecto."],
       completed: ["¡proyecto finalizado con éxito!", "todas las fases completadas", "todas las fases de tu proyecto han sido validadas con éxito. ya tienes disponibles todos los archivos definitivos en tu panel de seguimiento."],
+      doneLast: ["¡proyecto finalizado con éxito!", "todas las fases completadas", "todas las fases de tu proyecto han sido validadas con éxito. ya tienes disponibles todos los archivos definitivos en tu panel de seguimiento."],
+      donePhase: (title) => ["fase ya gestionada", "esta fase ya está cerrada", `la fase de ${title} ya consta como aprobada y completada en tu proyecto.`],
     },
     rn: {
       eyebrow: "infraestructura web",
@@ -903,6 +905,8 @@ const PG = {
       done: ["enviat correctament!", "fase aprovada amb èxit", "hem registrat la teva validació per escrit i ja hem activat l'etapa següent del teu projecte."],
       already: ["fase ja gestionada", "aquesta fase ja està tancada", "aquesta fase ja consta com a aprovada i completada al teu projecte."],
       completed: ["projecte finalitzat amb èxit!", "totes les fases completades", "totes les fases del teu projecte han estat validades amb èxit. ja tens disponibles tots els arxius definitius al teu tauler de seguiment."],
+      doneLast: ["projecte finalitzat amb èxit!", "totes les fases completades", "totes les fases del teu projecte han estat validades amb èxit. ja tens disponibles tots els arxius definitius al teu tauler de seguiment."],
+      donePhase: (title) => ["fase ja gestionada", "aquesta fase ja està tancada", `la fase de ${title} ja consta com a aprovada i completada al teu projecte.`],
     },
     rn: {
       eyebrow: "infraestructura web",
@@ -1081,6 +1085,8 @@ const PG = {
       done: ["behar bezala bidalita!", "fasea arrakastaz onartuta", "zure idatzizko baliozkotzea erregistratu dugu eta dagoeneko aktibatu dugu zure proiektuaren hurrengo etapa."],
       already: ["fasea kudeatuta", "fase hau itxita dago jada", "fase hau dagoeneko onartuta eta osatuta agertzen da zure proiektuan."],
       completed: ["proiektua arrakastaz amaitu da!", "fase guztiak osatuta", "zure proiektuko fase guztiak arrakastaz baliozkotu dira. dagoeneko eskuragarri dituzu behin betiko fitxategi guztiak zure jarraipen-panelean."],
+      doneLast: ["proiektua arrakastaz amaitu da!", "fase guztiak osatuta", "zure proiektuko fase guztiak arrakastaz baliozkotu dira. dagoeneko eskuragarri dituzu behin betiko fitxategi guztiak zure jarraipen-panelean."],
+      donePhase: (title) => ["fasea kudeatuta", "fase hau itxita dago jada", `${title} fasea dagoeneko onartuta eta osatuta agertzen da zure proiektuan.`],
     },
     rn: {
       eyebrow: "web-azpiegitura",
@@ -1259,6 +1265,8 @@ const PG = {
       done: ["submitted successfully!", "phase approved successfully", "we have recorded your written approval and activated the next stage of your project."],
       already: ["already approved", "this phase is already closed", "this phase is already marked as approved and completed on your project."],
       completed: ["project successfully completed!", "all phases completed", "all phases of your project have been successfully approved. all your final files are now ready in your tracking dashboard."],
+      doneLast: ["project successfully completed!", "all phases completed", "all phases of your project have been successfully approved. all your final files are now ready in your tracking dashboard."],
+      donePhase: (title) => ["already approved", "this phase is already closed", `the ${title} phase is already marked as approved and completed on your project.`],
     },
     rn: {
       eyebrow: "web infrastructure",

@@ -495,6 +495,7 @@ async function handlePhaseAdvance(request, env, ctx, url) {
     return htmlResponse(page("no encontrado", "proyecto no encontrado", "no hemos encontrado este proyecto en kv."), 404);
   }
   const proj = JSON.parse(rawProj);
+  const allDone = Array.isArray(proj.phases) && proj.phases.length > 0 && proj.phases.every((ph) => ph.status === "done");
   const trackingUrl = buildUrl("/proyecto", { token: projectToken });
 
   if (!proj.paid) {
@@ -1071,8 +1072,8 @@ async function handlePhaseApprove(request, env, ctx, url) {
 
   if (ph.status !== "review") {
     if (ph.status === "done") {
-      const isCompleted = proj.status === "done" || proj.phases.every((item) => item.status === "done");
-      const completedInfo = isCompleted ? A.doneLast : A.donePhase(phaseTitle(ph, L));
+      const isCompleted = proj.status === "done" || (Array.isArray(proj.phases) && proj.phases.length > 0 && proj.phases.every((item) => item.status === "done"));
+      const completedInfo = isCompleted ? (A.doneLast || A.completed) : (typeof A.donePhase === "function" ? A.donePhase(phaseTitle(ph, L)) : A.already);
       let reviewBtn = "";
       if (isCompleted) {
         const revUrl = await reviewUrl(env, p);
@@ -1484,6 +1485,8 @@ async function flushPendingMaterialsNotice(env, token, proj) {
   if (!proj || !proj.pendingMaterialsNotice) return;
   const notice = proj.pendingMaterialsNotice;
   delete proj.pendingMaterialsNotice;
+  proj.lastAdded = null;
+  proj.lastAddedMaterials = null;
 
   const matItem = Array.isArray(proj.materialsList) ? proj.materialsList.find((m) => m && m.id === notice.matId) : null;
   const refItem = Array.isArray(proj.referencesList) ? proj.referencesList.find((r) => r && r.id === notice.refId) : null;
@@ -1669,7 +1672,7 @@ async function handleProject(request, env, ctx, url) {
               {
                 to: ["hola@rebrandyourbrand.es"],
                 reply_to: proj.clientEmail,
-                  quote: quoteForStudio,
+                subject: `[${proj.brand || "proyecto"}] nuevo mensaje en el chat`,
                 ...renderEmail("es", {
                   paras: [
                     `el cliente de ${bold(proj.brand)} (${proj.clientEmail}) ha escrito un nuevo mensaje en el chat directo del proyecto:`,
@@ -1751,7 +1754,7 @@ async function handleProject(request, env, ctx, url) {
           400
         );
       }
-      proj.pendingExtraWork = { notes, date: Date.now() };
+      proj.pendingExtraWork = { notes, date: new Date().toISOString() };
       await saveProject(env, token, proj);
 
       const qJoin = String.fromCharCode(38);
@@ -2144,10 +2147,15 @@ async function handleProject(request, env, ctx, url) {
     );
   }
 
-  const extraDoneBanner =
-    url.searchParams.get("extra_done") === "1"
-      ? `<div class="banner-ok">${esc(T.extraWorkSuccess)}</div>`
-      : "";
+  const hasExtraPaid =
+    url.searchParams.get("extra_done") === "1" &&
+    ((revSessionId && Array.isArray(proj.usedRevisionSessions) && proj.usedRevisionSessions.includes(revSessionId)) ||
+     (Array.isArray(proj.extraWork) && proj.extraWork.length > 0) ||
+     (Array.isArray(proj.phases) && proj.phases.some((ph) => ph.extraPaid === true || (Array.isArray(ph.paidRevisionSessions) && ph.paidRevisionSessions.length > 0))));
+
+  const extraDoneBanner = hasExtraPaid
+    ? `<div class="banner-ok">${esc(T.extraWorkSuccess)}</div>`
+    : "";
 
   const undoneBanner =
     url.searchParams.get("undone") === "1"
@@ -2512,26 +2520,7 @@ async function handleProject(request, env, ctx, url) {
   const chatKey = `project_chat:${token}`;
   const humanChatHistory = (await env.LEADS_KV.get(chatKey, { type: "json" })) || [];
 
-  if (L !== "es" && humanChatHistory.length && env.GROQ_API_KEY) {
-    const pendingStudio = humanChatHistory
-      .filter((m) => m && m.sender === "studio" && m.text && (!m.translations || !m.translations[L]))
-      .slice(-2);
 
-    if (pendingStudio.length > 0) {
-      let anyUpdated = false;
-      await Promise.all(
-        pendingStudio.map(async (m) => {
-          const tr = await translateMessageText(env, m.text, "es", L);
-          m.translations = m.translations || {};
-          m.translations[L] = tr || m.text;
-          anyUpdated = true;
-        })
-      );
-      if (anyUpdated) {
-        await env.LEADS_KV.put(chatKey, JSON.stringify(humanChatHistory.slice(-100))).catch(() => {});
-      }
-    }
-  }
   const humanMessagesHtml = humanChatHistory.length
     ? humanChatHistory
         .map((m) => {
@@ -2969,49 +2958,7 @@ async function handleStudioChat(request, env, ctx, url) {
     ? `<div class="banner-ok" style="margin-bottom:1.25rem;"><p>respuesta enviada con éxito a ${esc(proj.clientEmail)}. el cliente ha recibido la notificación por correo y el mensaje se ha guardado en su panel.</p></div>`
     : "";
 
-  if (proj.lang !== "es" && chatHistory.length && env.GROQ_API_KEY) {
-    const pendingClient = chatHistory
-      .filter((m) => m && m.sender === "client" && m.text && (!m.translations || !m.translations.es))
-      .slice(-2);
 
-    if (pendingClient.length > 0) {
-      let anyUpdated = false;
-      await Promise.all(
-        pendingClient.map(async (m) => {
-          const tr = await translateMessageText(env, m.text, proj.lang, "es");
-          m.translations = m.translations || {};
-          m.translations.es = tr || m.text;
-          anyUpdated = true;
-        })
-      );
-      if (anyUpdated) {
-        await env.LEADS_KV.put(chatKey, JSON.stringify(chatHistory.slice(-100))).catch(() => {});
-      }
-    }
-  }
-  if (proj.lang !== "es" && chatHistory.length && env.GROQ_API_KEY) {
-    let missingTrans = false;
-    for (const m of chatHistory) {
-      if (m && m.sender === "client" && m.text && (!m.translations || !m.translations.es)) {
-        missingTrans = true;
-        break;
-      }
-    }
-    if (missingTrans) {
-      await Promise.all(
-        chatHistory.map(async (m) => {
-          if (m && m.sender === "client" && m.text && (!m.translations || !m.translations.es)) {
-            const tr = await translateMessageText(env, m.text, proj.lang, "es");
-            if (tr && tr !== m.text) {
-              m.translations = m.translations || {};
-              m.translations.es = tr;
-            }
-          }
-        })
-      );
-      await env.LEADS_KV.put(chatKey, JSON.stringify(chatHistory.slice(-100))).catch(() => {});
-    }
-  }
 
   const historyHtml = chatHistory.length
     ? chatHistory

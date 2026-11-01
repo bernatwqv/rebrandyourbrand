@@ -71,8 +71,13 @@ async function resendSend(env, payload, idempotencyKey, headersExtra = null) {
   if (idempotencyKey) headers["Idempotency-Key"] = idempotencyKey;
 
   const body = {
-    from: "rebrandyourbrand <hola@rebrandyourbrand.es>",
-    ...payload,
+    from: payload.from || "rebrandyourbrand <hola@rebrandyourbrand.es>",
+    to: payload.to,
+    subject: payload.subject,
+    ...(payload.reply_to ? { reply_to: payload.reply_to } : {}),
+    ...(payload.html ? { html: payload.html } : {}),
+    ...(payload.text ? { text: payload.text } : {}),
+    ...(payload.headers ? { headers: payload.headers } : {}),
   };
   if (headersExtra && typeof headersExtra === "object") {
     body.headers = { ...(body.headers || {}), ...headersExtra };

@@ -343,15 +343,14 @@ async function handleScheduled(controller, env, ctx) {
   let completedFullList = false;
 
   do {
-    const list = await env.LEADS_KV.list({ prefix: "project:", cursor });
-    let reachedLimit = false;
+    // Si ya estamos cerca del límite de lecturas (maxGets = 35), no abrimos otra página para no dejarla a medias
+    if (getsCount >= 20) {
+      break;
+    }
+
+    const list = await env.LEADS_KV.list({ prefix: "project:", limit: 20, cursor });
 
     for (const item of list.keys) {
-      if (getsCount >= maxGets) {
-        reachedLimit = true;
-        break;
-      }
-
       const meta = item.metadata || {};
       const status = meta.status;
 
@@ -378,31 +377,20 @@ async function handleScheduled(controller, env, ctx) {
       );
     }
 
-    if (reachedLimit) {
-      const nextCursor = list.cursor || cursor;
-      if (nextCursor) {
-        await env.LEADS_KV.put("cron:project_cursor", nextCursor, { expirationTtl: 86400 }).catch(() => {});
-      }
-      return;
-    }
-
     if (list.list_complete) {
       completedFullList = true;
       cursor = undefined;
+      break;
     } else {
       cursor = list.cursor;
-      if (getsCount >= maxGets) {
-        if (cursor) {
-          await env.LEADS_KV.put("cron:project_cursor", cursor, { expirationTtl: 86400 }).catch(() => {});
-        }
-        return;
+      // Guardar el cursor únicamente cuando la página actual se ha consumido en su totalidad
+      if (cursor) {
+        await env.LEADS_KV.put("cron:project_cursor", cursor, { expirationTtl: 86400 }).catch(() => {});
       }
     }
   } while (cursor && getsCount < maxGets);
 
   if (completedFullList) {
     await env.LEADS_KV.delete("cron:project_cursor").catch(() => {});
-  } else if (cursor) {
-    await env.LEADS_KV.put("cron:project_cursor", cursor, { expirationTtl: 86400 }).catch(() => {});
   }
 }
