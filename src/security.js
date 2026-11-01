@@ -144,3 +144,13 @@ async function parseResume(key, token) {
   if (!/^[a-f0-9]{64}$/.test(vt || "")) return null;
   return (await verifyRaw(key, `resume|${vt}`, sig)) ? vt : null;
 }
+
+async function checkRateLimit(env, key, limit = 4, ttlSec = 3600) {
+  if (!env?.LEADS_KV || !key) return true;
+  const rlKey = `rl:${key}`;
+  const current = await env.LEADS_KV.get(rlKey);
+  const count = current ? parseInt(current, 10) : 0;
+  if (count >= limit) return false;
+  await env.LEADS_KV.put(rlKey, String(count + 1), { expirationTtl: ttlSec });
+  return true;
+}

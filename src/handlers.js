@@ -143,9 +143,15 @@ async function finalizeProjectClosure(
     proj.currentPhase = maxStep + 1;
     changed = true;
   }
-  if (Array.isArray(proj.services) && proj.services.includes("web") && !proj.nextRenewalAt) {
-    proj.nextRenewalAt = addOneYearIso(now);
-    changed = true;
+  if (Array.isArray(proj.services) && proj.services.includes("web")) {
+    if (!proj.nextRenewalAt) {
+      proj.nextRenewalAt = addOneYearIso(now);
+      changed = true;
+    }
+    if (!proj.renewalNextDue || proj.renewalNextDue !== proj.nextRenewalAt) {
+      proj.renewalNextDue = proj.nextRenewalAt;
+      changed = true;
+    }
   }
 
   // Determinar el mejor entregable definitivo disponible
@@ -809,6 +815,7 @@ async function handlePhaseAdvance(request, env, url) {
 
   if (decision === "review") {
     const now = new Date().toISOString();
+    proj.lastClientActivityAt = Date.now();
     currentPhaseObj.status = "review";
     currentPhaseObj.reviewSentAt = now;
     currentPhaseObj.deliverableUrl = effectiveDeliverableUrl;
@@ -1042,6 +1049,39 @@ async function handlePhaseApprove(request, env, url) {
   }
 
   if (ph.status !== "review") {
+    if (ph.status === "done") {
+      const isCompleted = proj.status === "done" || proj.phases.every((item) => item.status === "done");
+      const completedInfo = isCompleted ? A.doneLast : A.donePhase(phaseTitle(ph, L));
+      let reviewBtn = "";
+      if (isCompleted) {
+        const revUrl = await reviewUrl(env, p);
+        if (revUrl) {
+          reviewBtn = `<a class="btn" href="${esc(revUrl)}" style="margin-bottom:.75rem;">${esc(PG[L].common?.openReview || "dejar valoración del proyecto")}</a>`;
+        }
+      }
+      return htmlResponse(
+        page(completedInfo[0], completedInfo[1], completedInfo[2], {
+          lang: L,
+          eyebrow: A.eyebrow,
+          html: `${reviewBtn}<a class="btn secondary" href="${esc(trackingUrl)}">${esc(PG[L].common.openTracker)}</a>`,
+          footerUrl: trackingUrl,
+          footerLabel: PG[L].common.openTracker,
+        }),
+        200
+      );
+    }
+    if (ph.status === "active" && used > 0) {
+      return htmlResponse(
+        page(A.revWorking[0], A.revWorking[1], A.revWorking[2](used, maxRevs), {
+          lang: L,
+          eyebrow: A.eyebrow,
+          html: `<a class="btn" href="${esc(trackingUrl)}">${esc(PG[L].common.openTracker)}</a>`,
+          footerUrl: trackingUrl,
+          footerLabel: PG[L].common.openTracker,
+        }),
+        200
+      );
+    }
     return redirectTo(trackingUrl);
   }
 
@@ -1184,6 +1224,19 @@ async function handleCancelRenewal(request, env, url) {
   L = pickLang(proj.lang);
   const RN = PG[L].rn;
   const trackingUrl = buildUrl("/proyecto", { token: p });
+
+  const hasWeb = Boolean(
+    proj.includesWeb || (Array.isArray(proj.services) && proj.services.includes("web"))
+  );
+  if (!proj.paid || !hasWeb) {
+    return msgPage(L, "trackInvalid", 400);
+  }
+
+  const currentDue = String(proj.renewalNextDue || proj.nextRenewalAt || "");
+  if (due && currentDue && due !== currentDue && due !== String(proj.nextRenewalAt || "") && due !== String(proj.renewalNextDue || "")) {
+    return msgPage(L, "trackInvalid", 400);
+  }
+
   const dueFormatted = fmtDate(proj.nextRenewalAt || due, L);
 
   if (proj.renewalCanceled) {
@@ -1257,6 +1310,16 @@ async function handleRenewalRedirect(request, env, url) {
   if (!proj.paid || !Array.isArray(proj.services) || !proj.services.includes("web")) {
     return msgPage(L, "invalid", 400);
   }
+
+  const now = Date.now();
+  if (
+    proj.renewalCheckoutUrl &&
+    proj.renewalCheckoutCreatedAt &&
+    now - Number(proj.renewalCheckoutCreatedAt) < 20 * 3600 * 1000
+  ) {
+    return redirectTo(proj.renewalCheckoutUrl);
+  }
+
   const rawRenewal =
     env.WEB_RENEWAL_EUR !== undefined && String(env.WEB_RENEWAL_EUR).trim() !== ""
       ? Number(env.WEB_RENEWAL_EUR)
@@ -1266,6 +1329,11 @@ async function handleRenewalRedirect(request, env, url) {
   if (!checkoutUrl) {
     return paymentRetryPage(L);
   }
+
+  proj.renewalCheckoutUrl = checkoutUrl;
+  proj.renewalCheckoutCreatedAt = now;
+  await saveProject(env, p, proj);
+
   return redirectTo(checkoutUrl);
 }
 
@@ -1407,16 +1475,29 @@ async function handleProject(request, env, url) {
         if (bodyJson) return jsonResponse({ error: "empty_message" }, 400);
         return redirectTo(projectPageUrl + "#chat");
       }
+      const key = await getKey(env);
       const rawHistory = Array.isArray(bodyJson?.history) ? bodyJson.history : [];
-      const history = rawHistory
-        .filter((m) => m && (m.role === "user" || m.role === "assistant") && typeof m.text === "string")
-        .slice(-12)
-        .map((m) => ({ role: m.role, text: m.text.trim().slice(0, 600) }));
-      history.push({ role: "user", text: msgText.slice(0, 600) });
+      const checkedHistory = (
+        await Promise.all(
+          rawHistory.slice(-12).map(async (m) => {
+            if (!m || typeof m.text !== "string") return null;
+            if (m.role === "user") {
+              const text = m.text.trim().slice(0, 600);
+              return text ? { role: "user", text } : null;
+            }
+            if (m.role === "assistant" && typeof m.sig === "string" && (await verifyMsg(key, m.text, m.sig))) {
+              return { role: "assistant", text: m.text.trim().slice(0, 600), sig: m.sig };
+            }
+            return null;
+          })
+        )
+      ).filter(Boolean);
+      checkedHistory.push({ role: "user", text: msgText.slice(0, 600) });
 
-      const reply = await askGroqProject(env, L, proj, history);
+      const reply = await askGroqProject(env, L, proj, checkedHistory);
+      const sig = await signMsg(key, reply);
       if (bodyJson) {
-        return jsonResponse({ ok: true, reply }, 200);
+        return jsonResponse({ ok: true, reply, sig }, 200);
       }
       return redirectTo(projectPageUrl + "#chat");
     }
@@ -2369,7 +2450,7 @@ async function handleProject(request, env, url) {
             .then(function(res){
               if (typingRow && typingRow.parentNode) typingRow.parentNode.removeChild(typingRow);
               var replyText = res && res.reply ? res.reply : "no se ha podido procesar la respuesta.";
-              brandiHistory.push({ role: "assistant", text: replyText });
+              brandiHistory.push({ role: "assistant", text: replyText, sig: res && res.sig ? res.sig : "" });
 
               var aiRow = createMsgRow(brandiLabel, replyText, "is-ai");
               brandiList.appendChild(aiRow);

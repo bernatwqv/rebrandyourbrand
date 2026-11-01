@@ -69,15 +69,29 @@ async function inspectProjectDeadlines(env, keyName, nowMs) {
     const hasMaterials =
       (Array.isArray(proj.materialsList) && proj.materialsList.length > 0) ||
       Boolean(proj.onboarding && (proj.onboarding.materials || proj.onboarding.submittedAt || proj.onboarding.receivedAt));
+    const currentStep = Number(proj.currentPhase || 0);
+    const isFirstPhase = currentStep <= 1;
+    const currentPhaseObj = Array.isArray(proj.phases)
+      ? proj.phases.find((ph) => ph.step === currentStep || ph.status === "active" || ph.status === "review")
+      : null;
+    const waitingMaterials = Boolean(
+      isFirstPhase &&
+      !currentPhaseObj?.deliverableUrl &&
+      !proj.onboardingDone &&
+      !proj.onboardingSubmittedAt &&
+      !proj.materialsReceivedAt &&
+      !hasMaterials
+    );
     const reviewPhase = Array.isArray(proj.phases)
       ? proj.phases.find((ph) => ph.status === "review" && ph.reviewSentAt)
       : null;
-    const waitingMaterials = Boolean(proj.onboardingPending || (!hasMaterials && !proj.materialsReceivedAt));
     const waitingReview = Boolean(reviewPhase);
     const waitingForClient = waitingMaterials || waitingReview;
 
     if (waitingForClient) {
-      const inactiveStart = waitingMaterials ? (proj.paidAt || proj.createdAt) : reviewPhase.reviewSentAt;
+      const inactiveStart = waitingMaterials
+        ? (proj.paidAt || proj.createdAt)
+        : (reviewPhase.reviewSentAt || proj.lastClientActivityAt);
       const inactiveMs = new Date(inactiveStart).getTime();
       if (!Number.isNaN(inactiveMs)) {
         const daysInactive = (nowMs - inactiveMs) / DAY_MS;
@@ -316,16 +330,19 @@ async function handleScheduled(controller, env, ctx) {
   const nowMs = controller?.scheduledTime ? Number(controller.scheduledTime) : Date.now();
   const maxGets = 35;
   let getsCount = 0;
-  let cursor;
+  const savedCursor = await env.LEADS_KV.get("cron:project_cursor").catch(() => null);
+  let cursor = savedCursor || undefined;
+  const INACTIVE_CRON_STATUSES = new Set(["abandoned", "cancelled"]);
+  let completedFullList = false;
 
   do {
     const list = await env.LEADS_KV.list({ prefix: "project:", cursor });
-    const INACTIVE_CRON_STATUSES = new Set(["abandoned", "cancelled"]);
+    let reachedLimit = false;
 
     for (const item of list.keys) {
       if (getsCount >= maxGets) {
-        console.warn("cron subrequests budget reached (35 gets), stopping batch");
-        return;
+        reachedLimit = true;
+        break;
       }
 
       const meta = item.metadata || {};
@@ -336,17 +353,16 @@ async function handleScheduled(controller, env, ctx) {
       }
 
       if (status === "completed" || status === "done") {
-        if (!meta.hasWeb) {
+        if (meta.hasWeb === false) {
           continue;
         }
-        const nextDue = Number(meta.renewalNextDue) || 0;
-        if (nextDue > 0) {
-          const daysUntil = (nextDue - nowMs) / DAY_MS;
-          // Si faltan más de 31 días para renovar, no hace falta leer el proyecto de KV hoy
-          if (daysUntil > 31) {
+        if (meta.hasWeb === true) {
+          const nextDue = Number(meta.renewalNextDue) || 0;
+          if (nextDue > 0 && nowMs < nextDue - 31 * DAY_MS) {
             continue;
           }
         }
+        // Si meta.hasWeb === undefined, se procesa para que saveProject rellene los metadatos
       }
 
       getsCount++;
@@ -354,6 +370,32 @@ async function handleScheduled(controller, env, ctx) {
         console.error("cron project check failed:", item.name, e?.message)
       );
     }
-    cursor = list.list_complete ? undefined : list.cursor;
+
+    if (reachedLimit) {
+      const nextCursor = list.cursor || cursor;
+      if (nextCursor) {
+        await env.LEADS_KV.put("cron:project_cursor", nextCursor, { expirationTtl: 86400 }).catch(() => {});
+      }
+      return;
+    }
+
+    if (list.list_complete) {
+      completedFullList = true;
+      cursor = undefined;
+    } else {
+      cursor = list.cursor;
+      if (getsCount >= maxGets) {
+        if (cursor) {
+          await env.LEADS_KV.put("cron:project_cursor", cursor, { expirationTtl: 86400 }).catch(() => {});
+        }
+        return;
+      }
+    }
   } while (cursor && getsCount < maxGets);
+
+  if (completedFullList) {
+    await env.LEADS_KV.delete("cron:project_cursor").catch(() => {});
+  } else if (cursor) {
+    await env.LEADS_KV.put("cron:project_cursor", cursor, { expirationTtl: 86400 }).catch(() => {});
+  }
 }

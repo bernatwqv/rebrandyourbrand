@@ -153,8 +153,8 @@ const AGREE_RE = /(?<![\p{L}\p{N}])(?:confirmo|confirm|vale|adelante|procedemos|
 
 const DENY_RE = /^\s*(?:no|nope|ez|ezeztatu|cancel\w*)(?![\p{L}\p{N}])/iu;
 
-// Precios oficiales permitidos que Brandi puede mencionar: {0, 100, 400, 500, 800, 900} (0 paleta de regalo con logo, 100 paleta suelta/cuota anual/ronda extra, 400 logo o web, 500 paleta y web, 800 pack completo, 900 con ronda extra)
-const ALLOWED_EUR = new Set([0, 100, 400, 500, 800, 900]);
+// Precios oficiales permitidos que Brandi puede mencionar: {0, 100, 400, 500, 800} (0 paleta de regalo con logo, 100 paleta suelta o cuota anual, 400 logo o web, 500 paleta y web, 800 pack completo)
+const ALLOWED_EUR = new Set([0, 100, 400, 500, 800]);
 
 const CATALOG = [
   `   - ${SERVICES.logo.names.es}: 400 € — ${SERVICES.logo.includes.es}.`,
@@ -1827,6 +1827,16 @@ async function parseResume(key, token) {
   return (await verifyRaw(key, `resume|${vt}`, sig)) ? vt : null;
 }
 
+async function checkRateLimit(env, key, limit = 4, ttlSec = 3600) {
+  if (!env?.LEADS_KV || !key) return true;
+  const rlKey = `rl:${key}`;
+  const current = await env.LEADS_KV.get(rlKey);
+  const count = current ? parseInt(current, 10) : 0;
+  if (count >= limit) return false;
+  await env.LEADS_KV.put(rlKey, String(count + 1), { expirationTtl: ttlSec });
+  return true;
+}
+
 // ══ email.js — Diseño editorial de correos, envío por Resend y alertas internas. ══
 
 const EMAIL_SIGN = {
@@ -2385,9 +2395,15 @@ async function saveProject(env, token, proj, extraOpts = {}) {
     !proj.renewalCanceled &&
     !proj.renewalCancelled
   );
-  const nextDueMs = proj.renewalNextDue
-    ? Number(proj.renewalNextDue)
-    : (proj.nextRenewalAt ? new Date(proj.nextRenewalAt).getTime() : 0);
+  const nextDueRaw = proj.renewalNextDue || proj.nextRenewalAt || 0;
+  const nextDueMs = typeof nextDueRaw === "string" ? new Date(nextDueRaw).getTime() : Number(nextDueRaw);
+
+  const finalOpts = { ...extraOpts };
+  if (!proj.paid && finalOpts.expirationTtl === undefined) {
+    finalOpts.expirationTtl = 7 * 24 * 60 * 60;
+  } else if (proj.paid) {
+    delete finalOpts.expirationTtl;
+  }
 
   await env.LEADS_KV.put(`project:${token}`, JSON.stringify(proj), {
     metadata: {
@@ -2395,7 +2411,7 @@ async function saveProject(env, token, proj, extraOpts = {}) {
       hasWeb,
       renewalNextDue: Number.isNaN(nextDueMs) ? 0 : nextDueMs,
     },
-    ...extraOpts,
+    ...finalOpts,
   });
 }
 
@@ -2866,6 +2882,8 @@ async function processPaidSession(env, session, { fromWebhook = false } = {}) {
     proj.renewalRemindedFor = "";
     proj.renewalOverdueAlertSentAt = null;
     proj.renewalReminderSentAt = null;
+    delete proj.renewalCheckoutUrl;
+    delete proj.renewalCheckoutCreatedAt;
     await saveProject(env, token, proj);
     await alertAdmin(
       env,
@@ -4098,9 +4116,15 @@ async function finalizeProjectClosure(
     proj.currentPhase = maxStep + 1;
     changed = true;
   }
-  if (Array.isArray(proj.services) && proj.services.includes("web") && !proj.nextRenewalAt) {
-    proj.nextRenewalAt = addOneYearIso(now);
-    changed = true;
+  if (Array.isArray(proj.services) && proj.services.includes("web")) {
+    if (!proj.nextRenewalAt) {
+      proj.nextRenewalAt = addOneYearIso(now);
+      changed = true;
+    }
+    if (!proj.renewalNextDue || proj.renewalNextDue !== proj.nextRenewalAt) {
+      proj.renewalNextDue = proj.nextRenewalAt;
+      changed = true;
+    }
   }
 
   // Determinar el mejor entregable definitivo disponible
@@ -4764,6 +4788,7 @@ async function handlePhaseAdvance(request, env, url) {
 
   if (decision === "review") {
     const now = new Date().toISOString();
+    proj.lastClientActivityAt = Date.now();
     currentPhaseObj.status = "review";
     currentPhaseObj.reviewSentAt = now;
     currentPhaseObj.deliverableUrl = effectiveDeliverableUrl;
@@ -4997,6 +5022,39 @@ async function handlePhaseApprove(request, env, url) {
   }
 
   if (ph.status !== "review") {
+    if (ph.status === "done") {
+      const isCompleted = proj.status === "done" || proj.phases.every((item) => item.status === "done");
+      const completedInfo = isCompleted ? A.doneLast : A.donePhase(phaseTitle(ph, L));
+      let reviewBtn = "";
+      if (isCompleted) {
+        const revUrl = await reviewUrl(env, p);
+        if (revUrl) {
+          reviewBtn = `<a class="btn" href="${esc(revUrl)}" style="margin-bottom:.75rem;">${esc(PG[L].common?.openReview || "dejar valoración del proyecto")}</a>`;
+        }
+      }
+      return htmlResponse(
+        page(completedInfo[0], completedInfo[1], completedInfo[2], {
+          lang: L,
+          eyebrow: A.eyebrow,
+          html: `${reviewBtn}<a class="btn secondary" href="${esc(trackingUrl)}">${esc(PG[L].common.openTracker)}</a>`,
+          footerUrl: trackingUrl,
+          footerLabel: PG[L].common.openTracker,
+        }),
+        200
+      );
+    }
+    if (ph.status === "active" && used > 0) {
+      return htmlResponse(
+        page(A.revWorking[0], A.revWorking[1], A.revWorking[2](used, maxRevs), {
+          lang: L,
+          eyebrow: A.eyebrow,
+          html: `<a class="btn" href="${esc(trackingUrl)}">${esc(PG[L].common.openTracker)}</a>`,
+          footerUrl: trackingUrl,
+          footerLabel: PG[L].common.openTracker,
+        }),
+        200
+      );
+    }
     return redirectTo(trackingUrl);
   }
 
@@ -5139,6 +5197,19 @@ async function handleCancelRenewal(request, env, url) {
   L = pickLang(proj.lang);
   const RN = PG[L].rn;
   const trackingUrl = buildUrl("/proyecto", { token: p });
+
+  const hasWeb = Boolean(
+    proj.includesWeb || (Array.isArray(proj.services) && proj.services.includes("web"))
+  );
+  if (!proj.paid || !hasWeb) {
+    return msgPage(L, "trackInvalid", 400);
+  }
+
+  const currentDue = String(proj.renewalNextDue || proj.nextRenewalAt || "");
+  if (due && currentDue && due !== currentDue && due !== String(proj.nextRenewalAt || "") && due !== String(proj.renewalNextDue || "")) {
+    return msgPage(L, "trackInvalid", 400);
+  }
+
   const dueFormatted = fmtDate(proj.nextRenewalAt || due, L);
 
   if (proj.renewalCanceled) {
@@ -5212,6 +5283,16 @@ async function handleRenewalRedirect(request, env, url) {
   if (!proj.paid || !Array.isArray(proj.services) || !proj.services.includes("web")) {
     return msgPage(L, "invalid", 400);
   }
+
+  const now = Date.now();
+  if (
+    proj.renewalCheckoutUrl &&
+    proj.renewalCheckoutCreatedAt &&
+    now - Number(proj.renewalCheckoutCreatedAt) < 20 * 3600 * 1000
+  ) {
+    return redirectTo(proj.renewalCheckoutUrl);
+  }
+
   const rawRenewal =
     env.WEB_RENEWAL_EUR !== undefined && String(env.WEB_RENEWAL_EUR).trim() !== ""
       ? Number(env.WEB_RENEWAL_EUR)
@@ -5221,6 +5302,11 @@ async function handleRenewalRedirect(request, env, url) {
   if (!checkoutUrl) {
     return paymentRetryPage(L);
   }
+
+  proj.renewalCheckoutUrl = checkoutUrl;
+  proj.renewalCheckoutCreatedAt = now;
+  await saveProject(env, p, proj);
+
   return redirectTo(checkoutUrl);
 }
 
@@ -5362,16 +5448,29 @@ async function handleProject(request, env, url) {
         if (bodyJson) return jsonResponse({ error: "empty_message" }, 400);
         return redirectTo(projectPageUrl + "#chat");
       }
+      const key = await getKey(env);
       const rawHistory = Array.isArray(bodyJson?.history) ? bodyJson.history : [];
-      const history = rawHistory
-        .filter((m) => m && (m.role === "user" || m.role === "assistant") && typeof m.text === "string")
-        .slice(-12)
-        .map((m) => ({ role: m.role, text: m.text.trim().slice(0, 600) }));
-      history.push({ role: "user", text: msgText.slice(0, 600) });
+      const checkedHistory = (
+        await Promise.all(
+          rawHistory.slice(-12).map(async (m) => {
+            if (!m || typeof m.text !== "string") return null;
+            if (m.role === "user") {
+              const text = m.text.trim().slice(0, 600);
+              return text ? { role: "user", text } : null;
+            }
+            if (m.role === "assistant" && typeof m.sig === "string" && (await verifyMsg(key, m.text, m.sig))) {
+              return { role: "assistant", text: m.text.trim().slice(0, 600), sig: m.sig };
+            }
+            return null;
+          })
+        )
+      ).filter(Boolean);
+      checkedHistory.push({ role: "user", text: msgText.slice(0, 600) });
 
-      const reply = await askGroqProject(env, L, proj, history);
+      const reply = await askGroqProject(env, L, proj, checkedHistory);
+      const sig = await signMsg(key, reply);
       if (bodyJson) {
-        return jsonResponse({ ok: true, reply }, 200);
+        return jsonResponse({ ok: true, reply, sig }, 200);
       }
       return redirectTo(projectPageUrl + "#chat");
     }
@@ -6324,7 +6423,7 @@ async function handleProject(request, env, url) {
             .then(function(res){
               if (typingRow && typingRow.parentNode) typingRow.parentNode.removeChild(typingRow);
               var replyText = res && res.reply ? res.reply : "no se ha podido procesar la respuesta.";
-              brandiHistory.push({ role: "assistant", text: replyText });
+              brandiHistory.push({ role: "assistant", text: replyText, sig: res && res.sig ? res.sig : "" });
 
               var aiRow = createMsgRow(brandiLabel, replyText, "is-ai");
               brandiList.appendChild(aiRow);
@@ -6881,6 +6980,10 @@ async function handlePendingAction(env, body, ip, o) {
 
   const vt = await parseResume(await getKey(env), body.resume);
   if (!vt) throw new HttpError(400, "invalid_resume");
+
+  const okTok = await checkRateLimit(env, `pending_tok:${vt.slice(0, 24)}`, 4, 3600);
+  if (!okTok) throw new HttpError(429, "rate_limited", { "Retry-After": "60" });
+
   const pendingKey = `pending:${vt}`;
   const raw = await env.LEADS_KV.get(pendingKey);
   if (!raw) throw new HttpError(410, "expired");
@@ -7194,15 +7297,29 @@ async function inspectProjectDeadlines(env, keyName, nowMs) {
     const hasMaterials =
       (Array.isArray(proj.materialsList) && proj.materialsList.length > 0) ||
       Boolean(proj.onboarding && (proj.onboarding.materials || proj.onboarding.submittedAt || proj.onboarding.receivedAt));
+    const currentStep = Number(proj.currentPhase || 0);
+    const isFirstPhase = currentStep <= 1;
+    const currentPhaseObj = Array.isArray(proj.phases)
+      ? proj.phases.find((ph) => ph.step === currentStep || ph.status === "active" || ph.status === "review")
+      : null;
+    const waitingMaterials = Boolean(
+      isFirstPhase &&
+      !currentPhaseObj?.deliverableUrl &&
+      !proj.onboardingDone &&
+      !proj.onboardingSubmittedAt &&
+      !proj.materialsReceivedAt &&
+      !hasMaterials
+    );
     const reviewPhase = Array.isArray(proj.phases)
       ? proj.phases.find((ph) => ph.status === "review" && ph.reviewSentAt)
       : null;
-    const waitingMaterials = Boolean(proj.onboardingPending || (!hasMaterials && !proj.materialsReceivedAt));
     const waitingReview = Boolean(reviewPhase);
     const waitingForClient = waitingMaterials || waitingReview;
 
     if (waitingForClient) {
-      const inactiveStart = waitingMaterials ? (proj.paidAt || proj.createdAt) : reviewPhase.reviewSentAt;
+      const inactiveStart = waitingMaterials
+        ? (proj.paidAt || proj.createdAt)
+        : (reviewPhase.reviewSentAt || proj.lastClientActivityAt);
       const inactiveMs = new Date(inactiveStart).getTime();
       if (!Number.isNaN(inactiveMs)) {
         const daysInactive = (nowMs - inactiveMs) / DAY_MS;
@@ -7441,16 +7558,19 @@ async function handleScheduled(controller, env, ctx) {
   const nowMs = controller?.scheduledTime ? Number(controller.scheduledTime) : Date.now();
   const maxGets = 35;
   let getsCount = 0;
-  let cursor;
+  const savedCursor = await env.LEADS_KV.get("cron:project_cursor").catch(() => null);
+  let cursor = savedCursor || undefined;
+  const INACTIVE_CRON_STATUSES = new Set(["abandoned", "cancelled"]);
+  let completedFullList = false;
 
   do {
     const list = await env.LEADS_KV.list({ prefix: "project:", cursor });
-    const INACTIVE_CRON_STATUSES = new Set(["abandoned", "cancelled"]);
+    let reachedLimit = false;
 
     for (const item of list.keys) {
       if (getsCount >= maxGets) {
-        console.warn("cron subrequests budget reached (35 gets), stopping batch");
-        return;
+        reachedLimit = true;
+        break;
       }
 
       const meta = item.metadata || {};
@@ -7461,17 +7581,16 @@ async function handleScheduled(controller, env, ctx) {
       }
 
       if (status === "completed" || status === "done") {
-        if (!meta.hasWeb) {
+        if (meta.hasWeb === false) {
           continue;
         }
-        const nextDue = Number(meta.renewalNextDue) || 0;
-        if (nextDue > 0) {
-          const daysUntil = (nextDue - nowMs) / DAY_MS;
-          // Si faltan más de 31 días para renovar, no hace falta leer el proyecto de KV hoy
-          if (daysUntil > 31) {
+        if (meta.hasWeb === true) {
+          const nextDue = Number(meta.renewalNextDue) || 0;
+          if (nextDue > 0 && nowMs < nextDue - 31 * DAY_MS) {
             continue;
           }
         }
+        // Si meta.hasWeb === undefined, se procesa para que saveProject rellene los metadatos
       }
 
       getsCount++;
@@ -7479,8 +7598,34 @@ async function handleScheduled(controller, env, ctx) {
         console.error("cron project check failed:", item.name, e?.message)
       );
     }
-    cursor = list.list_complete ? undefined : list.cursor;
+
+    if (reachedLimit) {
+      const nextCursor = list.cursor || cursor;
+      if (nextCursor) {
+        await env.LEADS_KV.put("cron:project_cursor", nextCursor, { expirationTtl: 86400 }).catch(() => {});
+      }
+      return;
+    }
+
+    if (list.list_complete) {
+      completedFullList = true;
+      cursor = undefined;
+    } else {
+      cursor = list.cursor;
+      if (getsCount >= maxGets) {
+        if (cursor) {
+          await env.LEADS_KV.put("cron:project_cursor", cursor, { expirationTtl: 86400 }).catch(() => {});
+        }
+        return;
+      }
+    }
   } while (cursor && getsCount < maxGets);
+
+  if (completedFullList) {
+    await env.LEADS_KV.delete("cron:project_cursor").catch(() => {});
+  } else if (cursor) {
+    await env.LEADS_KV.put("cron:project_cursor", cursor, { expirationTtl: 86400 }).catch(() => {});
+  }
 }
 
 // ══ index.js — Punto de entrada del Worker: enrutado de peticiones HTTP y eventos programados. ══

@@ -31,9 +31,15 @@ async function saveProject(env, token, proj, extraOpts = {}) {
     !proj.renewalCanceled &&
     !proj.renewalCancelled
   );
-  const nextDueMs = proj.renewalNextDue
-    ? Number(proj.renewalNextDue)
-    : (proj.nextRenewalAt ? new Date(proj.nextRenewalAt).getTime() : 0);
+  const nextDueRaw = proj.renewalNextDue || proj.nextRenewalAt || 0;
+  const nextDueMs = typeof nextDueRaw === "string" ? new Date(nextDueRaw).getTime() : Number(nextDueRaw);
+
+  const finalOpts = { ...extraOpts };
+  if (!proj.paid && finalOpts.expirationTtl === undefined) {
+    finalOpts.expirationTtl = 7 * 24 * 60 * 60;
+  } else if (proj.paid) {
+    delete finalOpts.expirationTtl;
+  }
 
   await env.LEADS_KV.put(`project:${token}`, JSON.stringify(proj), {
     metadata: {
@@ -41,7 +47,7 @@ async function saveProject(env, token, proj, extraOpts = {}) {
       hasWeb,
       renewalNextDue: Number.isNaN(nextDueMs) ? 0 : nextDueMs,
     },
-    ...extraOpts,
+    ...finalOpts,
   });
 }
 
@@ -512,6 +518,8 @@ async function processPaidSession(env, session, { fromWebhook = false } = {}) {
     proj.renewalRemindedFor = "";
     proj.renewalOverdueAlertSentAt = null;
     proj.renewalReminderSentAt = null;
+    delete proj.renewalCheckoutUrl;
+    delete proj.renewalCheckoutCreatedAt;
     await saveProject(env, token, proj);
     await alertAdmin(
       env,

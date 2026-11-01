@@ -8,6 +8,10 @@ async function handlePendingAction(env, body, ip, o) {
 
   const vt = await parseResume(await getKey(env), body.resume);
   if (!vt) throw new HttpError(400, "invalid_resume");
+
+  const okTok = await checkRateLimit(env, `pending_tok:${vt.slice(0, 24)}`, 4, 3600);
+  if (!okTok) throw new HttpError(429, "rate_limited", { "Retry-After": "60" });
+
   const pendingKey = `pending:${vt}`;
   const raw = await env.LEADS_KV.get(pendingKey);
   if (!raw) throw new HttpError(410, "expired");
