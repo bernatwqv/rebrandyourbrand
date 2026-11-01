@@ -2326,6 +2326,26 @@ const missingOf = (brand, email, plan, domain) =>
     !email && "email",
   ].filter(Boolean);
 
+function localizeServiceNamesInText(text, lang) {
+  if (!text || typeof text !== "string") return text;
+  const l = pickLang(lang);
+  let t = text;
+  if (l === "en") {
+    t = t.replace(/\bpaleta(?:\s+de\s+empresa)?\b/gi, "company palette");
+    t = t.replace(/\blogotipos?\b/gi, "logo");
+    t = t.replace(/\bweb\b(?!\.(?:[a-z]{2,}))/gi, "website");
+  } else if (l === "ca") {
+    t = t.replace(/\bpaleta(?:\s+de\s+empresa|\s+d'empresa)?\b/gi, "paleta d'empresa");
+    t = t.replace(/\b(?:logotipo|logo)\b/gi, "logotip");
+    t = t.replace(/\bwebgunea\b/gi, "web");
+  } else if (l === "eu") {
+    t = t.replace(/\bpaleta(?:\s+de\s+empresa|\s+d'empresa)?\b/gi, "enpresaren paleta");
+    t = t.replace(/\b(?:logotipo|logotip|logo)\b/gi, "logotipoa");
+    t = t.replace(/\b(?:la\s+)?web\b(?!\.(?:[a-z]{2,}))/gi, "webgunea");
+  }
+  return t;
+}
+
 function buildSystemInstruction(lang, ctx) {
   const { plan, brand, email, domain, denied } = ctx;
   const langName = LANG_NAMES[pickLang(lang)] || LANG_NAMES.es;
@@ -2350,7 +2370,7 @@ Tu objetivo es entender la marca del cliente, dar una breve pincelada estratégi
 ESTILO:
 - No actúes como un bot de atención al cliente. Eres una consultora de marca directa, aguda y conceptual.
 - Respuestas directas, concisas (máximo 3 frases), en minúsculas relajadas si encaja con el tono editorial (escribe todo en minúsculas, sin mayúsculas iniciales, como el resto de la web), sin tecnicismos innecesarios.
-- NUNCA escribas los ids internos de servicio (logo, paleta, web) tal cual: usa siempre los nombres del catalogo en el idioma del cliente (${langName}).
+- NUNCA escribas los ids internos de servicio (logo, paleta, web) tal cual: usa siempre los nombres oficiales del catalogo en el idioma del cliente (${langName}): ${SERVICE_IDS.map((id) => SERVICES[id].names[pickLang(lang)]).join(", ")}.
 - Habla y escribe SIEMPRE en minúsculas (sin mayúsculas iniciales ni en nombres propios, excepto siglas técnicas indispensables como DNS o SSL), exactamente en sintonía con la estética y voz de marca del estudio.
 - Haz UNA sola pregunta por mensaje.
 - No uses puntos medios ni el símbolo ampersand en tus textos; usa conjunciones o guiones largos.
@@ -2389,7 +2409,7 @@ FORMATO DE SALIDA (JSON estricto, sin texto fuera del JSON):
 - "brand": devuelve la marca ya conocida salvo que el cliente la cambie.
 - "domain": devuelve el dominio web indicado si el proyecto incluye web.
 
-REMINDER: the "reply" field must be in ${langName}.`;
+REMINDER: the "reply" field must be in ${langName}. Always name the services using their proper name in ${langName} (${SERVICE_IDS.map((id) => SERVICES[id].names[pickLang(lang)]).join(", ")}), NEVER internal database ids like "paleta" in non-Spanish conversations.`;
 }
 
 // Llamada unica a Groq (modelo de razonamiento): presupuesto de tokens holgado y un reintento si se corta por longitud
@@ -2457,9 +2477,8 @@ async function askGroq(env, lang, ctx, chatMessages, retries = 1) {
 
       const out = parseModelJson(data?.choices?.[0]?.message?.content);
       if (out && typeof out.reply === "string") {
-        out.reply = out.reply
+        out.reply = localizeServiceNamesInText(out.reply, lang)
           .replace(/[\u00b7\u2022]/g, " — ")
-          .replace(/\b(logo|paleta|web)\b/gi, (w) => (lang === "es" ? w : (SERVICES[w.toLowerCase()]?.names?.[lang] || w)))
           .replace(new RegExp("\\x26", "g"), lang === "ca" ? " i " : lang === "en" ? " and " : lang === "eu" ? " eta " : " y ")
           .replace(/(^|[.!?¿¡]\s*|\n\s*)([A-ZÁÉÍÓÚÀÈÒÇÑ])(?![A-ZÁÉÍÓÚÀÈÒÇÑ])/g, (_, p, c) => p + c.toLowerCase());
       }
@@ -2539,7 +2558,7 @@ async function askGroqProject(env, lang, proj, chatMessages, retries = 1) {
       const text = data?.choices?.[0]?.message?.content?.trim();
       if (!text) throw new Error("empty_reply");
 
-      const clean = text
+      const clean = localizeServiceNamesInText(text, lang)
         .replace(/[\u00b7\u2022]/g, " — ")
         .replace(new RegExp("\\x26", "g"), lang === "ca" ? " i " : lang === "en" ? " and " : lang === "eu" ? " eta " : " y ")
         .replace(/(^|[.!?¿¡]\s*|\n\s*)([A-ZÁÉÍÓÚÀÈÒÇÑ])(?![A-ZÁÉÍÓÚÀÈÒÇÑ])/g, (_, p, c) => p + c.toLowerCase());
