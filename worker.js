@@ -621,7 +621,10 @@ const EM = {
       confirmSoon: "gael o bernat te responderán en breve desde el estudio en tu panel de seguimiento.",
       replySubject: (br) => `nueva respuesta de gael y bernat — ${br}`,
       replyIntro: (br) => `gael y bernat han respondido a tu consulta en el proyecto ${br}:`,
+      msgSubject: (br) => `nuevo mensaje de gael y bernat — ${br}`,
+      msgIntro: (br) => `gael y bernat te han enviado un mensaje sobre el proyecto ${br}:`,
       viewPortal: "ver respuesta en el panel de seguimiento",
+      viewMessage: "ver mensaje en el panel de seguimiento",
       autoTranslatedNotice: "traducido automáticamente del original en español",
     },
   },
@@ -746,7 +749,10 @@ const EM = {
       confirmSoon: "en gael o en bernat et respondran ben aviat des de l'estudi al teu panell de seguiment.",
       replySubject: (br) => `nova resposta d'en gael i en bernat — ${br}`,
       replyIntro: (br) => `en gael i en bernat han respost a la teva consulta al projecte ${br}:`,
+      msgSubject: (br) => `nou missatge d'en gael i en bernat — ${br}`,
+      msgIntro: (br) => `en gael i en bernat t'han enviat un missatge sobre el projecte ${br}:`,
       viewPortal: "veure resposta al panell de seguiment",
+      viewMessage: "veure missatge al panell de seguiment",
       autoTranslatedNotice: "traduït automàticament de l'original en espanyol",
     },
   },
@@ -871,7 +877,10 @@ const EM = {
       confirmSoon: "gaelek edo bernatek laster erantzungo dizute estudiotik zure jarraipen-panelean.",
       replySubject: (br) => `gael eta bernaten erantzun berria — ${br}`,
       replyIntro: (br) => `gaelek eta bernatek zure kontsultari erantzun diote ${br} proiektuan:`,
+      msgSubject: (br) => `gael eta bernaten mezu berria — ${br}`,
+      msgIntro: (br) => `gaelek eta bernatek mezu bat bidali dizute ${br} proiektuari buruz:`,
       viewPortal: "ikusi erantzuna jarraipen-panelean",
+      viewMessage: "ikusi mezua jarraipen-panelean",
       autoTranslatedNotice: "gaztelaniazko jatorrizkotik automatikoki itzulita",
     },
   },
@@ -996,7 +1005,10 @@ const EM = {
       confirmSoon: "gael or bernat will reply shortly from the studio in your tracking portal.",
       replySubject: (br) => `new reply from gael and bernat — ${br}`,
       replyIntro: (br) => `gael and bernat have replied to your question in project ${br}:`,
+      msgSubject: (br) => `new message from gael and bernat — ${br}`,
+      msgIntro: (br) => `gael and bernat have sent you a message about project ${br}:`,
       viewPortal: "view reply in tracking portal",
+      viewMessage: "view message in tracking portal",
       autoTranslatedNotice: "automatically translated from the original in spanish",
     },
   },
@@ -1140,6 +1152,7 @@ const PG = {
       obDomain: "dominio (si ya tienes uno o cuál te gustaría)",
       obDomainPh: "ej. ya tengo tumarca.es / me gustaría tumarca.com",
       obDomainRequired: "obligatorio para proyectos con web",
+      fieldRequired: "completa este campo",
       obDomainMissing: ["dominio obligatorio", "indica el dominio de tu web", "tu proyecto incluye desarrollo web, por lo que necesitamos que indiques el dominio actual que posees o el que deseas que registremos para comenzar."],
       obMaterials: "enlace a carpeta con logo previo, fotos y textos (drive, wetransfer, dropbox...) o notas",
       obMaterialsPh: "https://drive.google.com/... o indicaciones breves",
@@ -1320,6 +1333,7 @@ const PG = {
       obDomain: "domini (si ja en tens un o quin t'agradaria)",
       obDomainPh: "ex. ja tinc latevamarca.cat / m'agradaria latevamarca.com",
       obDomainRequired: "obligatori per a projectes amb web",
+      fieldRequired: "completa aquest camp",
       obDomainMissing: ["domini obligatori", "indica el domini de la teva web", "el teu projecte inclou desenvolupament web, per la qual cosa necessitem que indiquis el domini actual que posseeixes o el que vols que registrem per començar."],
       obMaterials: "enllaç a carpeta amb logotip previ, fotos i textos (drive, wetransfer, dropbox...) o notes",
       obMaterialsPh: "https://drive.google.com/... o indicacions breus",
@@ -1500,6 +1514,7 @@ const PG = {
       obDomain: "domeinua (dagoeneko baduzu edo zein nahiko zenukeen)",
       obDomainPh: "adib. badut zuremarka.eus / zuremarka.com nahiko nuke",
       obDomainRequired: "derrigorrezkoa webgunedun proiektuetarako",
+      fieldRequired: "bete eremu hau",
       obDomainMissing: ["domeinua derrigorrezkoa", "adierazi zure webgunearen domeinua", "zure proiektuak web garapena barne hartzen du, beraz, lehendik duzun domeinua edo erregistratzea nahi duzuna adierazi behar duzu hasteko."],
       obMaterials: "aurreko logotipoa, argazkiak eta testuak dituen karpetarako esteka (drive, wetransfer, dropbox...) edo oharrak",
       obMaterialsPh: "https://drive.google.com/... edo ohar laburrak",
@@ -1680,6 +1695,7 @@ const PG = {
       obDomain: "domain (if you already own one or which one you prefer)",
       obDomainPh: "e.g. i own yourbrand.com / i would like yourbrand.es",
       obDomainRequired: "mandatory for website projects",
+      fieldRequired: "please fill out this field",
       obDomainMissing: ["domain required", "please provide your website domain", "your project includes website development, so we need you to indicate your current domain or the domain you want us to register to get started."],
       obMaterials: "link to folder with previous logo, photos and copy (drive, wetransfer, dropbox...) or notes",
       obMaterialsPh: "https://drive.google.com/... or brief notes",
@@ -3326,7 +3342,7 @@ async function processPaidSession(env, session, { fromWebhook = false } = {}, ct
             quote: transcript,
             cta: { label: "gestionar o avanzar fase actual", url: advanceUrl },
             secondaryLink: { label: "abrir seguimiento público del cliente", url: trackingUrl },
-            note: "desde el botón principal puedes enviar propuestas con enlace a revisión del cliente o completar la fase directamente.",
+            note: "desde el botón principal puedes enviar mensajes al cliente (ej. pedir materiales), enviar propuestas a revisión o completar la fase.",
           }),
         },
         `paid-admin-${session.id}`
@@ -4743,6 +4759,140 @@ async function completeProjectPhase(
   };
 }
 
+// Envío unificado de mensajes del estudio al cliente (con traducción y aviso por correo)
+async function sendStudioMessage(env, ctx, proj, projectToken, replyText) {
+  const lang = pickLang(proj.lang);
+  let translatedToClient = null;
+  if (lang !== "es" && env.GROQ_API_KEY) {
+    try {
+      translatedToClient = await translateMessageText(env, replyText, "es", lang);
+    } catch (e) {
+      console.warn("translateMessageText to client failed:", e?.message);
+    }
+  }
+
+  const msgId = randomHex(8);
+  const newMsg = {
+    id: msgId,
+    sender: "studio",
+    text: replyText,
+    date: new Date().toISOString(),
+    ...(translatedToClient && translatedToClient !== replyText ? { translations: { [lang]: translatedToClient } } : {}),
+  };
+
+  const chatKey = `project_chat:${projectToken}`;
+  const chatHistory = (await env.LEADS_KV.get(chatKey, { type: "json" })) || [];
+  const hasClientMessage = chatHistory.some((m) => m && (m.sender === "client" || m.sender === "human"));
+  chatHistory.push(newMsg);
+  await env.LEADS_KV.put(chatKey, JSON.stringify(chatHistory.slice(-100)));
+
+  const emChat = EM[lang].chat;
+  const clientQuote = translatedToClient && translatedToClient !== replyText
+    ? translatedToClient
+    : replyText;
+  const clientNote = translatedToClient && translatedToClient !== replyText
+    ? `${emChat.autoTranslatedNotice}. ${emChat.confirmSoon}`
+    : emChat.confirmSoon;
+
+  const projectPageUrl = buildUrl("/proyecto", { token: projectToken });
+  const subjectFn = hasClientMessage ? emChat.replySubject : (emChat.msgSubject || emChat.replySubject);
+  const introFn = hasClientMessage ? emChat.replyIntro : (emChat.msgIntro || emChat.replyIntro);
+  const ctaLabel = hasClientMessage ? emChat.viewPortal : (emChat.viewMessage || emChat.viewPortal);
+
+  const sendReplyTask = async () => {
+    try {
+      await resendSend(
+        env,
+        {
+          to: [proj.clientEmail],
+          reply_to: "hola@rebrandyourbrand.es",
+          subject: subjectFn(proj.brand),
+          ...renderEmail(lang, {
+            paras: [
+              emChat.hello,
+              introFn(bold(proj.brand)),
+            ],
+            quote: clientQuote,
+            cta: { label: ctaLabel, url: projectPageUrl + "#chat-human" },
+            note: clientNote,
+          }),
+        },
+        `chat-reply-${projectToken}-${msgId}`
+      );
+    } catch (e) {
+      console.error("error sending studio chat reply email:", e?.message);
+    }
+  };
+
+  if (ctx?.waitUntil) {
+    ctx.waitUntil(sendReplyTask());
+  } else {
+    await sendReplyTask();
+  }
+
+  return newMsg;
+}
+
+function formatStudioChatHistory(chatHistory, proj) {
+  if (!Array.isArray(chatHistory) || !chatHistory.length) {
+    return `<div class="chat-empty" style="padding:1.25rem .5rem;">aún no hay mensajes en este proyecto. puedes escribir al cliente para solicitar materiales o darle indicaciones.</div>`;
+  }
+  return chatHistory
+    .map((m) => {
+      const isStudio = m.sender === "studio";
+      const author = isStudio ? "estudio (gael y bernat)" : `cliente (${proj.brand})`;
+      const cls = isStudio ? "is-studio" : "is-client";
+      const hasTrans = !isStudio && proj.lang !== "es" && m.translations && m.translations.es && m.translations.es !== m.text;
+      const displayText = hasTrans ? m.translations.es : m.text;
+      const toggleHtml = hasTrans
+        ? `<div class="chat-trans-wrap">
+            <button type="button" class="chat-trans-toggle" data-orig="${esc(m.text)}" data-trans="${esc(m.translations.es)}" data-showing="trans">
+              <svg class="chat-trans-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>
+              <span class="chat-trans-label">traducido automáticamente, haz clic para ver el mensaje original</span>
+            </button>
+          </div>`
+        : "";
+      return `<div class="chat-msg-row ${cls}" style="margin-bottom:.75rem;">
+        <div class="chat-msg-bubble">
+          <div class="chat-msg-head">
+            <span class="chat-msg-author">${esc(author)}</span>
+            <span class="chat-msg-date">${esc(fmtDate(m.date, "es"))}</span>
+          </div>
+          <div class="chat-msg-text">${esc(displayText)}</div>
+          ${toggleHtml}
+        </div>
+      </div>`;
+    })
+    .join("");
+}
+
+const studioChatToggleScript = `
+<script>
+  (function(){
+    document.addEventListener("click", function(e){
+      var btn = e.target.closest(".chat-trans-toggle");
+      if (!btn) return;
+      var bubble = btn.closest(".chat-msg-bubble");
+      if (!bubble) return;
+      var textEl = bubble.querySelector(".chat-msg-text");
+      var labelEl = btn.querySelector(".chat-trans-label");
+      if (!textEl) return;
+      var orig = btn.getAttribute("data-orig") || "";
+      var trans = btn.getAttribute("data-trans") || "";
+      var showing = btn.getAttribute("data-showing") || "trans";
+      if (showing === "trans") {
+        textEl.textContent = orig;
+        btn.setAttribute("data-showing", "orig");
+        if (labelEl) labelEl.textContent = "ver traducción automática";
+      } else {
+        textEl.textContent = trans;
+        btn.setAttribute("data-showing", "trans");
+        if (labelEl) labelEl.textContent = "traducido automáticamente, haz clic para ver el mensaje original";
+      }
+    });
+  })();
+</script>`;
+
 // ── GESTIÓN INTERNA DE FASES Y ENTREGABLES (/advance-phase) ──
 async function handlePhaseAdvance(request, env, ctx, url) {
   if (ctx instanceof URL || (ctx && typeof ctx.searchParams === "object")) {
@@ -4865,6 +5015,31 @@ async function handlePhaseAdvance(request, env, ctx, url) {
         : "en curso en el estudio";
 
   if (request.method === "GET" || request.method === "HEAD") {
+    const chatKey = `project_chat:${projectToken}`;
+    const chatHistory = (await env.LEADS_KV.get(chatKey, { type: "json" })) || [];
+    const chatUrl = await studioChatUrl(env, projectToken);
+    const historyHtml = formatStudioChatHistory(chatHistory, proj);
+
+    const msgSentNotice = url.searchParams.get("msg_sent") === "1"
+      ? `<div class="banner-ok" style="margin-bottom:1.25rem;"><p>mensaje enviado con éxito a ${esc(proj.clientEmail)}. el cliente ha recibido la notificación por correo y el mensaje se ha guardado en su panel.</p></div>`
+      : "";
+
+    const chatBoxHtml = `
+      <div class="box" id="studio-chat" style="margin-bottom:1.5rem;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;flex-wrap:wrap;gap:.5rem;">
+          <span class="eyebrow" style="margin-bottom:0;">mensajes con el cliente</span>
+          <a class="pill-link" href="${esc(chatUrl)}" target="_blank" rel="noopener noreferrer" style="font-size:.74rem;">abrir chat en ventana dedicada</a>
+        </div>
+        <div class="chat-msg-list" style="background:rgba(255,255,255,.5);padding:1rem;border-radius:14px;border:1px solid rgba(228,222,208,.8);margin-bottom:1rem;">
+          ${historyHtml}
+        </div>
+        <form method="POST" style="text-align:left;">
+          <input type="hidden" name="op" value="chat">
+          <label for="chat-reply-input">enviar mensaje a ${esc(proj.brand)} (se le notificará por correo):</label>
+          <textarea id="chat-reply-input" name="reply" rows="3" placeholder="ej. hola! para empezar con tu proyecto necesitamos que subas el material en tu panel..." required></textarea>
+          <button type="submit" class="btn" style="margin-top:.5rem;">enviar mensaje al cliente</button>
+        </form>
+      </div>`;
     const materialsList = (Array.isArray(proj.materialsList) ? [...proj.materialsList] : []).filter((m) => {
       if (!m) return false;
       if (m.id === "init" && !m.url && !m.fileId && !m.fileUrl && !m.notes && !m.socials) {
@@ -4970,6 +5145,7 @@ async function handlePhaseAdvance(request, env, ctx, url) {
         : "";
 
     const html = `
+      ${msgSentNotice}
       <div class="box">
         <div class="kv">
           <div class="kv-row"><span>proyecto</span><span class="kv-val">${esc(proj.brand)}</span></div>
@@ -4982,6 +5158,7 @@ async function handlePhaseAdvance(request, env, ctx, url) {
           <div class="kv-row"><span>rondas de revisión usadas</span><span class="kv-val">${revsUsed} de ${revsMax}</span></div>
         </div>
       </div>
+      ${chatBoxHtml}
       ${obHtml}
       ${refHtml}
       ${revsHtml}
@@ -4995,6 +5172,7 @@ async function handlePhaseAdvance(request, env, ctx, url) {
         <textarea id="note" name="note" rows="4" maxlength="600" placeholder="contexto breve sobre la entrega, qué revisar o pasos siguientes...">${esc(currentPhaseObj.note || "")}</textarea>
         <button type="submit" name="decision" value="review">${currentPhaseObj.key === "delivery" ? "completar entrega final y cerrar proyecto" : "enviar propuesta a revisión del cliente"}</button>
       </form>
+      ${studioChatToggleScript}
     `;
 
     return htmlResponse(
@@ -5020,6 +5198,24 @@ async function handlePhaseAdvance(request, env, ctx, url) {
 
   const form = await request.formData().catch(() => null);
   const currentManageUrl = await advancePhaseUrl(env, projectToken, step);
+
+  if (form?.get("op") === "chat") {
+    const replyText = cleanInput(form?.get("reply") || "", 2500);
+    if (!replyText) {
+      return htmlResponse(
+        page("mensaje vacío", "falta el texto del mensaje", "escribe un mensaje para enviar al cliente.", {
+          eyebrow: "panel interno del estudio",
+          footerUrl: currentManageUrl,
+          footerLabel: "volver a la fase",
+        }),
+        400
+      );
+    }
+    await sendStudioMessage(env, ctx, proj, projectToken, replyText);
+    const redirectUrl = new URL(currentManageUrl);
+    redirectUrl.searchParams.set("msg_sent", "1");
+    return redirectTo(redirectUrl.toString());
+  }
 
   const rawUrl = String(form?.get("deliverable_url") ?? form?.get("deliverableUrl") ?? "").trim();
   const directUrl = cleanHttpsUrl(rawUrl, 500);
@@ -6665,7 +6861,7 @@ async function handleProject(request, env, ctx, url) {
         <div class="section-subheading">${esc(T.blockAMaterials)}</div>
         ${hasWeb ? `
         <label for="domain">${esc(T.obDomain)}${domainRequired ? ` <span style="color:#cf172f;font-weight:600;">(${esc(T.obDomainRequired)})</span>` : ""}</label>
-        <input id="domain" name="domain" type="text" maxlength="200" value="${esc(domainInputValue)}" placeholder="${esc(domainPlaceholder)}" ${domainRequired ? "required" : ""}>` : ""}
+        <input id="domain" name="domain" type="text" maxlength="200" value="${esc(domainInputValue)}" placeholder="${esc(domainPlaceholder)}" ${domainRequired ? `required oninvalid="this.setCustomValidity('${esc(T.fieldRequired || "completa este campo")}')" oninput="this.setCustomValidity('')"` : ""}>` : ""}
 
         <label for="socials">${esc(T.obSocials)}</label>
         <input id="socials" name="socials" type="text" maxlength="250" value="${esc(socialsValue)}" placeholder="${esc(T.obSocialsPh)}">
@@ -7177,7 +7373,6 @@ async function handleStudioChat(request, env, ctx, url) {
     return htmlResponse(page("no encontrado", "proyecto no encontrado", "no hemos encontrado este proyecto."), 404);
   }
   const proj = JSON.parse(rawProj);
-  const projectPageUrl = buildUrl("/proyecto", { token: p });
   const chatKey = `project_chat:${p}`;
   const chatHistory = (await env.LEADS_KV.get(chatKey, { type: "json" })) || [];
 
@@ -7195,65 +7390,7 @@ async function handleStudioChat(request, env, ctx, url) {
       );
     }
 
-    const lang = pickLang(proj.lang);
-    let translatedToClient = null;
-    if (lang !== "es" && env.GROQ_API_KEY) {
-      try {
-        translatedToClient = await translateMessageText(env, replyText, "es", lang);
-      } catch (e) {
-        console.warn("translateMessageText to client failed:", e?.message);
-      }
-    }
-
-    const msgId = randomHex(8);
-    const newMsg = {
-      id: msgId,
-      sender: "studio",
-      text: replyText,
-      date: new Date().toISOString(),
-      ...(translatedToClient && translatedToClient !== replyText ? { translations: { [lang]: translatedToClient } } : {}),
-    };
-    chatHistory.push(newMsg);
-    await env.LEADS_KV.put(chatKey, JSON.stringify(chatHistory.slice(-100)));
-
-    const emChat = EM[lang].chat;
-    const clientQuote = translatedToClient && translatedToClient !== replyText
-      ? translatedToClient
-      : replyText;
-    const clientNote = translatedToClient && translatedToClient !== replyText
-      ? `${emChat.autoTranslatedNotice}. ${emChat.confirmSoon}`
-      : emChat.confirmSoon;
-
-    const sendReplyTask = async () => {
-      try {
-        await resendSend(
-          env,
-          {
-            to: [proj.clientEmail],
-            reply_to: "hola@rebrandyourbrand.es",
-            subject: emChat.replySubject(proj.brand),
-            ...renderEmail(lang, {
-              paras: [
-                emChat.hello,
-                emChat.replyIntro(bold(proj.brand)),
-              ],
-              quote: clientQuote,
-              cta: { label: emChat.viewPortal, url: projectPageUrl + "#chat-human" },
-              note: clientNote,
-            }),
-          },
-          `chat-reply-${p}-${msgId}`
-        );
-      } catch (e) {
-        console.error("error sending studio chat reply email:", e?.message);
-      }
-    };
-
-    if (ctx?.waitUntil) {
-      ctx.waitUntil(sendReplyTask());
-    } else {
-      await sendReplyTask();
-    }
+    await sendStudioMessage(env, ctx, proj, p, replyText);
     return redirectTo(buildUrl("/responder-chat", { p, t, sent: "1" }));
   }
 
@@ -7261,37 +7398,7 @@ async function handleStudioChat(request, env, ctx, url) {
     ? `<div class="banner-ok" style="margin-bottom:1.25rem;"><p>respuesta enviada con éxito a ${esc(proj.clientEmail)}. el cliente ha recibido la notificación por correo y el mensaje se ha guardado en su panel.</p></div>`
     : "";
 
-
-
-  const historyHtml = chatHistory.length
-    ? chatHistory
-        .map((m) => {
-          const isStudio = m.sender === "studio";
-          const author = isStudio ? "estudio (gael y bernat)" : `cliente (${proj.brand})`;
-          const cls = isStudio ? "is-studio" : "is-client";
-          const hasTrans = !isStudio && proj.lang !== "es" && m.translations && m.translations.es && m.translations.es !== m.text;
-          const displayText = hasTrans ? m.translations.es : m.text;
-          const toggleHtml = hasTrans
-            ? `<div class="chat-trans-wrap">
-                <button type="button" class="chat-trans-toggle" data-orig="${esc(m.text)}" data-trans="${esc(m.translations.es)}" data-showing="trans">
-                  <svg class="chat-trans-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>
-                  <span class="chat-trans-label">traducido automáticamente, haz clic para ver el mensaje original</span>
-                </button>
-              </div>`
-            : "";
-          return `<div class="chat-msg-row ${cls}" style="margin-bottom:.75rem;">
-            <div class="chat-msg-bubble">
-              <div class="chat-msg-head">
-                <span class="chat-msg-author">${esc(author)}</span>
-                <span class="chat-msg-date">${esc(fmtDate(m.date, "es"))}</span>
-              </div>
-              <div class="chat-msg-text">${esc(displayText)}</div>
-              ${toggleHtml}
-            </div>
-          </div>`;
-        })
-        .join("")
-    : `<div class="chat-empty">no hay mensajes en el historial todavía.</div>`;
+  const historyHtml = formatStudioChatHistory(chatHistory, proj);
   const html = `
     ${sentNotice}
     <div class="box" style="margin-bottom:1.5rem;">
@@ -7311,39 +7418,14 @@ async function handleStudioChat(request, env, ctx, url) {
       <textarea id="reply-input" name="reply" rows="4" placeholder="escribe tu respuesta para el cliente..." required></textarea>
       <button type="submit">enviar respuesta al cliente</button>
     </form>
-    <script>
-      (function(){
-        document.addEventListener("click", function(e){
-          var btn = e.target.closest(".chat-trans-toggle");
-          if (!btn) return;
-          var bubble = btn.closest(".chat-msg-bubble");
-          if (!bubble) return;
-          var textEl = bubble.querySelector(".chat-msg-text");
-          var labelEl = btn.querySelector(".chat-trans-label");
-          if (!textEl) return;
-          var orig = btn.getAttribute("data-orig") || "";
-          var trans = btn.getAttribute("data-trans") || "";
-          var showing = btn.getAttribute("data-showing") || "trans";
-          if (showing === "trans") {
-            textEl.textContent = orig;
-            btn.setAttribute("data-showing", "orig");
-            if (labelEl) labelEl.textContent = "ver traducción automática";
-          } else {
-            textEl.textContent = trans;
-            btn.setAttribute("data-showing", "trans");
-            if (labelEl) labelEl.textContent = "traducido automáticamente, haz clic para ver el mensaje original";
-          }
-        });
-      })();
-    </script>
-  `;
+    ${studioChatToggleScript}`;
 
   return htmlResponse(
     page(`chat con ${proj.brand}`, `chat — ${proj.brand}`, "historial y respuesta directa al cliente.", {
       eyebrow: "panel interno del estudio",
       wide: true,
       html,
-      footerUrl: projectPageUrl,
+      footerUrl: buildUrl("/proyecto", { token: p }),
       footerLabel: "ver panel público del cliente",
     }),
     200

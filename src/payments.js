@@ -737,7 +737,7 @@ async function processPaidSession(env, session, { fromWebhook = false } = {}, ct
             quote: transcript,
             cta: { label: "gestionar o avanzar fase actual", url: advanceUrl },
             secondaryLink: { label: "abrir seguimiento público del cliente", url: trackingUrl },
-            note: "desde el botón principal puedes enviar propuestas con enlace a revisión del cliente o completar la fase directamente.",
+            note: "desde el botón principal puedes enviar mensajes al cliente (ej. pedir materiales), enviar propuestas a revisión o completar la fase.",
           }),
         },
         `paid-admin-${session.id}`
