@@ -353,94 +353,94 @@ const redirectTo = (location) =>
 
 const MSG = {
   es: {
-    fallback: "Perdona, ha ocurrido un pequeño desajuste técnico. ¿Podrías repetirlo?",
-    sent: "¡Listo! Te acabamos de enviar un correo de verificación. Ábrelo y pulsa el botón para confirmar tu briefing y abrir la página de tu proyecto con el pago seguro. Si no lo ves, mira en spam o reenvíalo con los botones de abajo.",
+    fallback: "perdona, ha ocurrido un pequeño desajuste técnico. ¿podrías repetirlo?",
+    sent: "¡listo! te acabamos de enviar un correo de verificación. ábrelo y pulsa el botón para confirmar tu briefing y abrir la página de tu proyecto con el pago seguro. si no lo ves, mira en spam o reenvíalo con los botones de abajo.",
   },
   ca: {
-    fallback: "Perdona, hi ha hagut un petit desajust tècnic. Ho pots repetir?",
-    sent: "Llest! Acabem d'enviar-te un correu de verificació. Obre'l i prem el botó per confirmar el teu briefing i obrir la pàgina del teu projecte amb el pagament segur. Si no el veus, mira el correu brossa o reenvia'l amb els botons de sota.",
+    fallback: "perdona, hi ha hagut un petit desajust tècnic. ho pots repetir?",
+    sent: "llest! acabem d'enviar-te un correu de verificació. obre'l i prem el botó per confirmar el teu briefing i obrir la pàgina del teu projecte amb el pagament segur. si no el veus, mira el correu brossa o reenvia'l amb els botons de sota.",
   },
   eu: {
-    fallback: "Barkatu, akats tekniko txiki bat gertatu da. Errepika dezakezu?",
-    sent: "Prest! Egiaztatze-mezu bat bidali berri dizugu. Ireki eta sakatu botoia zure briefing-a berresteko eta ordainketa segurua duen zure proiektuaren orria irekitzeko. Ikusten ez baduzu, begiratu spama edo bidali berriro beheko botoiekin.",
+    fallback: "barkatu, akats tekniko txiki bat gertatu da. errepika dezakezu?",
+    sent: "prest! egiaztatze-mezu bat bidali berri dizugu. ireki eta sakatu botoia zure briefing-a berresteko eta ordainketa segurua duen zure proiektuaren orria irekitzeko. ikusten ez baduzu, begiratu spama edo bidali berriro beheko botoiekin.",
   },
   en: {
-    fallback: "Apologies, a minor technical glitch occurred. Could you rephrase?",
-    sent: "All set! We just sent you a verification email. Open it and click the button to confirm your briefing and open your project page with secure payment. If you cannot see it, check spam or resend it with the buttons below.",
+    fallback: "apologies, a minor technical glitch occurred. could you rephrase?",
+    sent: "all set! we just sent you a verification email. open it and click the button to confirm your briefing and open your project page with secure payment. if you cannot see it, check spam or resend it with the buttons below.",
   },
 };
 
 const ASK = {
   es: {
-    brand: "¿Cómo se llama tu marca o proyecto?",
-    services: "¿Qué necesitas: logotipo (400 €, incluye paleta de empresa de regalo), paleta de empresa (100 €), web (400 €) o una combinación?",
-    email: "¿A qué correo electrónico te enviamos la verificación?",
-    domain: "¿Cuál es tu dominio o web actual (o cuál te gustaría registrar)?",
+    brand: "¿cómo se llama tu marca o proyecto?",
+    services: "¿qué necesitas: logotipo (400 €, incluye paleta de empresa de regalo), paleta de empresa (100 €), web (400 €) o una combinación?",
+    email: "¿a qué correo electrónico te enviamos la verificación?",
+    domain: "¿cuál es tu dominio o web actual (o cuál te gustaría registrar)?",
   },
   ca: {
-    brand: "Com es diu la teva marca o projecte?",
-    services: "Què necessites: logotip (400 €, inclou paleta d'empresa de regal), paleta d'empresa (100 €), web (400 €) o una combinació?",
-    email: "A quin correu electrònic t'enviem la verificació?",
-    domain: "Quin és el teu domini o web actual (o quin t'agradaria registrar)?",
+    brand: "com es diu la teva marca o projecte?",
+    services: "què necessites: logotip (400 €, inclou paleta d'empresa de regal), paleta d'empresa (100 €), web (400 €) o una combinació?",
+    email: "a quin correu electrònic t'enviem la verificació?",
+    domain: "quin és el teu domini o web actual (o quin t'agradaria registrar)?",
   },
   eu: {
-    brand: "Nola du izena zure marka edo proiektuak?",
-    services: "Zer behar duzu: logotipoa (400 €, enpresaren paleta opari barne), enpresaren paleta (100 €), webgunea (400 €) edo konbinazio bat?",
-    email: "Ze helbide elektronikotara bidaliko dizugu egiaztapena?",
-    domain: "Zein da zure domeinua edo egungo webgunea (edo zein erregistratu nahiko zenuke)?",
+    brand: "nola du izena zure marka edo proiektuak?",
+    services: "zer behar duzu: logotipoa (400 €, enpresaren paleta opari barne), enpresaren paleta (100 €), webgunea (400 €) edo konbinazio bat?",
+    email: "ze helbide elektronikotara bidaliko dizugu egiaztapena?",
+    domain: "zein da zure domeinua edo egungo webgunea (edo zein erregistratu nahiko zenuke)?",
   },
   en: {
-    brand: "What is your brand or project called?",
-    services: "What do you need: logo (€400, includes complimentary company palette), company color palette (€100), website (€400) or a combination?",
-    email: "Which email address should we send the verification to?",
-    domain: "What is your domain or current website (or which one would you like to register)?",
+    brand: "what is your brand or project called?",
+    services: "what do you need: logo (€400, includes complimentary company palette), company color palette (€100), website (€400) or a combination?",
+    email: "which email address should we send the verification to?",
+    domain: "what is your domain or current website (or which one would you like to register)?",
   },
 };
 
 const SUMMARY = {
   es: {
-    title: "Resumen de tu propuesta:",
-    brand: "Marca",
-    domain: "Dominio",
-    email: "Correo",
-    services: "Servicios",
-    total: "Inversión total",
+    title: "resumen de tu propuesta:",
+    brand: "marca",
+    domain: "dominio",
+    email: "correo",
+    services: "servicios",
+    total: "inversión total",
     pay: "pago único de creación del 100 %, sin cuotas mensuales",
-    legal: "Al confirmar, declaras actuar como empresa o autónomo y aceptas las condiciones de servicio y la política de privacidad.",
-    ask: "¿Confirmas que quieres recibir el correo de verificación para continuar con el pago seguro?",
+    legal: "al confirmar, declaras actuar como empresa o autónomo y aceptas las condiciones de servicio y la política de privacidad.",
+    ask: "¿confirmas que quieres recibir el correo de verificación para continuar con el pago seguro?",
   },
   ca: {
-    title: "Resum de la teva proposta:",
-    brand: "Marca",
-    domain: "Domini",
-    email: "Correu",
-    services: "Serveis",
-    total: "Inversió total",
+    title: "resum de la teva proposta:",
+    brand: "marca",
+    domain: "domini",
+    email: "correu",
+    services: "serveis",
+    total: "inversió total",
     pay: "pagament únic de creació del 100 %, sense quotes mensuals",
-    legal: "En confirmar, declares actuar com a empresa o autònom i acceptes les condicions de servei i la política de privacitat.",
-    ask: "Confirmes que vols rebre el correu de verificació per continuar amb el pagament segur?",
+    legal: "en confirmar, declares actuar com a empresa o autònom i acceptes les condicions de servei i la política de privacitat.",
+    ask: "confirmes que vols rebre el correu de verificació per continuar amb el pagament segur?",
   },
   eu: {
-    title: "Zure proposamenaren laburpena:",
-    brand: "Marka",
-    domain: "Domeinua",
-    email: "Posta elektronikoa",
-    services: "Zerbitzuak",
-    total: "Guztizko inbertsioa",
+    title: "zure proposamenaren laburpena:",
+    brand: "marka",
+    domain: "domeinua",
+    email: "posta elektronikoa",
+    services: "zerbitzuak",
+    total: "guztizko inbertsioa",
     pay: "sorkuntzaren % 100eko ordainketa bakarra, hileroko kuotarik gabe",
-    legal: "Berrestean, enpresa edo autonomo gisa jokatzen duzula adierazten duzu eta zerbitzu-baldintzak zein pribatutasun-politika onartzen dituzu.",
-    ask: "Berresten al duzu egiaztatze-mezua jaso nahi duzula ordainketa seguruarekin jarraitzeko?",
+    legal: "berrestean, enpresa edo autonomo gisa jokatzen duzula adierazten duzu eta zerbitzu-baldintzak zein pribatutasun-politika onartzen dituzu.",
+    ask: "berresten al duzu egiaztatze-mezua jaso nahi duzula ordainketa seguruarekin jarraitzeko?",
   },
   en: {
-    title: "Summary of your proposal:",
-    brand: "Brand",
-    domain: "Domain",
-    email: "Email",
-    services: "Services",
-    total: "Total investment",
+    title: "summary of your proposal:",
+    brand: "brand",
+    domain: "domain",
+    email: "email",
+    services: "services",
+    total: "total investment",
     pay: "one-time 100% creation payment, no monthly fees",
-    legal: "By confirming, you state that you act as a business or sole trader and accept the terms of service and the privacy policy.",
-    ask: "Do you confirm you want to receive the verification email to continue to the secure payment?",
+    legal: "by confirming, you state that you act as a business or sole trader and accept the terms of service and the privacy policy.",
+    ask: "do you confirm you want to receive the verification email to continue to the secure payment?",
   },
 };
 
@@ -1157,6 +1157,15 @@ const PG = {
       obUndoBtn: "deshacer",
       obDismissBtn: "aceptar",
       obUndoneBanner: "acción deshecha: el último envío de materiales ha sido cancelado con éxito.",
+      extraWorkEyebrow: "trabajo extraordinario",
+      extraWorkTitle: "cambios o mejoras posteriores (100 € por ronda)",
+      extraWorkDesc: "como cliente del estudio, tras la entrega final puedes solicitar en cualquier momento una ronda de cambios extraordinarios o mejoras puntuales en tu web o identidad por 100 € precio cerrado.",
+      extraWorkPh: "describe los ajustes o cambios que necesitas en tu web, logotipo o identidad...",
+      extraWorkBtn: "solicitar y abonar ronda extra (100 €)",
+      extraWorkSuccess: "ronda extraordinaria abonada con éxito. el equipo ha recibido tus indicaciones y se pondrá en contacto contigo para aplicarlas.",
+      extraWorkEmpty: "por favor, describe brevemente los cambios que necesitas antes de continuar.",
+      extraWorkHistory: "trabajos extraordinarios solicitados:",
+      extraWorkStatusReceived: "recibido por el estudio",
       obLblSocials: "web o redes",
       obLblDomain: "dominio",
       obLblMaterials: "carpeta o notas",
@@ -1322,6 +1331,15 @@ const PG = {
       obUndoBtn: "desfer",
       obDismissBtn: "d'acord",
       obUndoneBanner: "acció desfeta: l'últim enviament de materials s'ha descartat amb èxit.",
+      extraWorkEyebrow: "treball extraordinari",
+      extraWorkTitle: "canvis o millores posteriors (100 € per ronda)",
+      extraWorkDesc: "com a client de l'estudi, després del lliurament final pots demanar en qualsevol moment una ronda de canvis extraordinaris o millores puntuals al teu web o identitat per 100 € preu tancat.",
+      extraWorkPh: "descriu els ajustos o canvis que necessites al teu web, logotip o identitat...",
+      extraWorkBtn: "demanar i abonar ronda extra (100 €)",
+      extraWorkSuccess: "ronda extraordinària abonada amb èxit. l'equip ha rebut les teves indicacions i es posarà en contacte amb tu per aplicar-les.",
+      extraWorkEmpty: "si us plau, descriu breument els canvis que necessites abans de continuar.",
+      extraWorkHistory: "treballs extraordinaris demanats:",
+      extraWorkStatusReceived: "rebut per l'estudi",
       obLblSocials: "web o xarxes",
       obLblDomain: "domini",
       obLblMaterials: "carpeta o notes",
@@ -1487,6 +1505,15 @@ const PG = {
       obUndoBtn: "desegin",
       obDismissBtn: "ados",
       obUndoneBanner: "ekintza desegin da: azken material-bidalketa bertan behera utzi da.",
+      extraWorkEyebrow: "ezohiko lana",
+      extraWorkTitle: "ondorengo aldaketak edo hobekuntzak (100 € txandako)",
+      extraWorkDesc: "estudioko bezero gisa, azken entregaren ondoren edozein unetan eska dezakezu aparteko aldaketa-txanda bat edo puntualki zure webgunean edo nortasunean hobekuntzak egiteko 100 €-ko prezio itxian.",
+      extraWorkPh: "azaldu zure webgunean, logotipoan edo nortasunean behar dituzun doikuntzak edo aldaketak...",
+      extraWorkBtn: "eskatu eta ordaindu aparteko txanda (100 €)",
+      extraWorkSuccess: "aparteko txanda behar bezala ordaindu da. lantaldeak zure oharrak jaso ditu eta zurekin harremanetan jarriko da aplikatzeko.",
+      extraWorkEmpty: "mesedez, azaldu laburki behar dituzun aldaketak jarraitu aurretik.",
+      extraWorkHistory: "eskatutako aparteko lanak:",
+      extraWorkStatusReceived: "estudioak jasoa",
       obLblSocials: "webgunea edo sareak",
       obLblDomain: "domeinua",
       obLblMaterials: "karpeta edo oharrak",
@@ -1652,6 +1679,15 @@ const PG = {
       obUndoBtn: "undo",
       obDismissBtn: "dismiss",
       obUndoneBanner: "action undone: the latest submission was successfully discarded.",
+      extraWorkEyebrow: "extraordinary work",
+      extraWorkTitle: "subsequent adjustments or enhancements (€100 per round)",
+      extraWorkDesc: "as a studio client, after final delivery you can request an extraordinary round of adjustments or specific improvements to your website or brand identity at any time for a fixed price of €100.",
+      extraWorkPh: "describe the adjustments or changes you need for your website, logo, or brand identity...",
+      extraWorkBtn: "request and pay for extra round (€100)",
+      extraWorkSuccess: "extra round successfully paid. the studio team has received your notes and will be in touch to implement them.",
+      extraWorkEmpty: "please briefly describe the changes you need before continuing.",
+      extraWorkHistory: "requested extraordinary work:",
+      extraWorkStatusReceived: "received by the studio",
       obLblSocials: "web or social",
       obLblDomain: "domain",
       obLblMaterials: "folder or notes",
@@ -1867,7 +1903,19 @@ function renderEmail(lang, { paras = [], cta = null, secondaryLink = null, note 
   const secondary = secondaryLink
     ? `<p style="text-align:center;margin:0 0 24px;font-size:12px;"><a href="${esc(secondaryLink.url)}" target="_blank" style="color:#3D5A85;text-decoration:underline;text-transform:lowercase;">${esc(secondaryLink.label)}</a></p>`
     : "";
-  const footer = `<p style="color:#58575E;font-size:12px;line-height:1.55;margin:32px 0 0;border-top:1px solid #E4DED0;padding-top:20px;">${note ? `${note}<br><br>` : ""}${EMAIL_SIGN[l]}</p>`;
+  const helpLineByLang = {
+    es: '¿tienes alguna pregunta? escríbenos a <a href="mailto:hola@rebrandyourbrand.es" style="color:#3D5A85;text-decoration:underline;">hola@rebrandyourbrand.es</a>.',
+    ca: 'tens alguna pregunta? escriu-nos a <a href="mailto:hola@rebrandyourbrand.es" style="color:#3D5A85;text-decoration:underline;">hola@rebrandyourbrand.es</a>.',
+    eu: 'galderarik baduzu? idatzi iezaguzu <a href="mailto:hola@rebrandyourbrand.es" style="color:#3D5A85;text-decoration:underline;">hola@rebrandyourbrand.es</a> helbidera.',
+    en: 'have any questions? write to us at <a href="mailto:hola@rebrandyourbrand.es" style="color:#3D5A85;text-decoration:underline;">hola@rebrandyourbrand.es</a>.',
+  };
+  const helpTextByLang = {
+    es: "¿tienes alguna pregunta? escríbenos a hola@rebrandyourbrand.es.",
+    ca: "tens alguna pregunta? escriu-nos a hola@rebrandyourbrand.es.",
+    eu: "galderarik baduzu? idatzi iezaguzu hola@rebrandyourbrand.es helbidera.",
+    en: "have any questions? write to us at hola@rebrandyourbrand.es.",
+  };
+  const footer = `<p style="color:#58575E;font-size:12px;line-height:1.55;margin:32px 0 0;border-top:1px solid #E4DED0;padding-top:20px;">${note ? `${note}<br><br>` : ""}${helpLineByLang[l]}<br><br>${EMAIL_SIGN[l]}</p>`;
 
   const html = `<!DOCTYPE html>
 <html lang="${l}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light only"></head>
@@ -1883,7 +1931,7 @@ function renderEmail(lang, { paras = [], cta = null, secondaryLink = null, note 
     quote,
     cta ? `${cta.label}:\n${cta.url}` : "",
     secondaryLink ? `${secondaryLink.label}:\n${secondaryLink.url}` : "",
-    [note && htmlToText(note), EMAIL_SIGN[l]].filter(Boolean).join("\n\n"),
+    [note && htmlToText(note), helpTextByLang[l], EMAIL_SIGN[l]].filter(Boolean).join("\n\n"),
   ]
     .filter(Boolean)
     .join("\n\n");
@@ -2182,7 +2230,9 @@ Tu objetivo es entender la marca del cliente, dar una breve pincelada estratégi
 
 ESTILO:
 - No actúes como un bot de atención al cliente. Eres una consultora de marca directa, aguda y conceptual.
-- Máximo 3 frases por mensaje. Haz UNA sola pregunta por mensaje.
+- Respuestas directas, concisas (máximo 3 frases), en minúsculas relajadas si encaja con el tono editorial (escribe todo en minúsculas, sin mayúsculas iniciales, como el resto de la web), sin tecnicismos innecesarios.
+- Habla y escribe SIEMPRE en minúsculas (sin mayúsculas iniciales ni en nombres propios, excepto siglas técnicas indispensables como DNS o SSL), exactamente en sintonía con la estética y voz de marca del estudio.
+- Haz UNA sola pregunta por mensaje.
 - No uses puntos medios ni el símbolo ampersand en tus textos; usa conjunciones o guiones largos.
 
 No hay planes cerrados: el cliente elige solo los servicios que necesita y paga únicamente por ellos (pago único del 100% mediante enlace seguro tras verificar el correo, sin cuotas mensuales). Servicios y precios oficiales:
@@ -2264,6 +2314,12 @@ async function askGroq(env, lang, ctx, chatMessages, retries = 1) {
 
       const data = await groq.json().catch(() => null);
       const out = parseModelJson(data?.choices?.[0]?.message?.content);
+      if (out && typeof out.reply === "string") {
+        out.reply = out.reply
+          .replace(/[\u00b7\u2022]/g, " — ")
+          .replace(new RegExp("\\x26", "g"), lang === "ca" ? " i " : lang === "en" ? " and " : lang === "eu" ? " eta " : " y ")
+          .replace(/(^|[.!?¿¡]\s*|\n\s*)([A-ZÁÉÍÓÚÀÈÒÇÑ])(?![A-ZÁÉÍÓÚÀÈÒÇÑ])/g, (_, p, c) => p + c.toLowerCase());
+      }
       return out && typeof out === "object" && !Array.isArray(out) ? out : {};
     } catch (err) {
       if (err instanceof HttpError) throw err;
@@ -2310,7 +2366,8 @@ ${phasesStr}
 
 TU MISIÓN:
 - Resuelve cualquier duda del cliente sobre el estado de su proyecto, fases, plazos, entregables o condiciones con precisión, cercanía y profesionalidad.
-- Respuestas directas, concisas (máximo 3 o 4 frases), en minúsculas relajadas si encaja con el tono editorial, sin tecnicismos innecesarios.
+- Respuestas directas, concisas (máximo 3 o 4 frases), en minúsculas relajadas (todo en minúsculas, sin mayúsculas iniciales), sin tecnicismos innecesarios.
+- Si el proyecto ya está finalizado y el cliente desea retocar o solicitar mejoras en su web o logotipo, indícale amablemente que puede contratar rondas de trabajo extraordinario a 100 € cerrados por ronda directamente desde el apartado de trabajo extraordinario en este mismo portal.
 - NUNCA uses puntos medios ni el carácter ampersand en tus textos. Usa conjunciones o guiones largos.
 - Si el cliente solicita cambios complejos, negociaciones, aprobaciones directas de fase o pide expresamente hablar con personas, indícale amablemente que use la pestaña del equipo humano o pulse el botón de "hablar con el equipo humano" para contactar directamente con Gael y Bernat.`;
 }
@@ -2341,7 +2398,8 @@ async function askGroqProject(env, lang, proj, chatMessages, retries = 1) {
 
       const clean = text
         .replace(/[\u00b7\u2022]/g, " — ")
-        .replace(new RegExp("\\x26", "g"), lang === "ca" ? " i " : lang === "en" ? " and " : lang === "eu" ? " eta " : " y ");
+        .replace(new RegExp("\\x26", "g"), lang === "ca" ? " i " : lang === "en" ? " and " : lang === "eu" ? " eta " : " y ")
+        .replace(/(^|[.!?¿¡]\s*|\n\s*)([A-ZÁÉÍÓÚÀÈÒÇÑ])(?![A-ZÁÉÍÓÚÀÈÒÇÑ])/g, (_, p, c) => p + c.toLowerCase());
       return clean;
     } catch (e) {
       if (attempt === retries) {
@@ -2560,6 +2618,7 @@ async function ensureStripeCheckout(env, proj) {
     "metadata[project_token]": proj.token,
     "metadata[services]": proj.services.join(","),
     "metadata[brand]": safeBrand,
+    "custom_text[submit][message]": (l === "en" ? "have any questions? write to us at hola@rebrandyourbrand.es." : l === "ca" ? "tens alguna pregunta? escriu-nos a hola@rebrandyourbrand.es." : l === "eu" ? "galderarik baduzu? idatzi iezaguzu hola@rebrandyourbrand.es helbidera." : "¿tienes alguna pregunta? escríbenos a hola@rebrandyourbrand.es."),
   });
 
   const hasLogo = proj.services.includes("logo");
@@ -2668,18 +2727,33 @@ async function createRenewalCheckout(env, proj, renewalEur) {
   }
 }
 
-async function createExtraRevisionCheckout(env, proj, step, returnUrl, cancelUrl) {
+async function createExtraRevisionCheckout(env, proj, step, returnUrl, cancelUrl, notes = "") {
   if (!env.STRIPE_SECRET_KEY || !proj) return "";
   const l = pickLang(proj.lang);
   const safeBrand = proj.brand || "proyecto";
-  const ph = (proj.phases || []).find((p) => Number(p.step) === Number(step)) || { step };
-  const phaseName = phaseTitle(ph, l) || `fase ${step}`;
+  const isPostDelivery = String(step) === "post_delivery";
+  const ph = isPostDelivery ? null : ((proj.phases || []).find((p) => Number(p.step) === Number(step)) || { step });
+  const phaseName = ph ? (phaseTitle(ph, l) || `fase ${step}`) : "";
 
-  const titleByLang = {
-    es: `Ronda de ajustes adicional — ${phaseName}`,
-    ca: `Ronda d'ajustos addicional — ${phaseName}`,
-    eu: `Doikuntza-txanda gehigarria — ${phaseName}`,
-    en: `Additional revision round — ${phaseName}`,
+  const titleByLang = isPostDelivery
+    ? {
+        es: "Ronda de cambios extraordinarios post-entrega",
+        ca: "Ronda de canvis extraordinaris post-lliurament",
+        eu: "Entregaren ondorengo ezohiko aldaketa-txanda",
+        en: "Post-delivery extraordinary revision round",
+      }
+    : {
+        es: `Ronda de ajustes adicional — ${phaseName}`,
+        ca: `Ronda d'ajustos addicional — ${phaseName}`,
+        eu: `Doikuntza-txanda gehigarria — ${phaseName}`,
+        en: `Additional revision round — ${phaseName}`,
+      };
+
+  const helpMsgByLang = {
+    es: "¿tienes alguna pregunta? escríbenos a hola@rebrandyourbrand.es.",
+    ca: "tens alguna pregunta? escriu-nos a hola@rebrandyourbrand.es.",
+    eu: "galderarik baduzu? idatzi iezaguzu hola@rebrandyourbrand.es helbidera.",
+    en: "have any questions? write to us at hola@rebrandyourbrand.es.",
   };
 
   const params = new URLSearchParams({
@@ -2698,6 +2772,8 @@ async function createExtraRevisionCheckout(env, proj, step, returnUrl, cancelUrl
     "metadata[projectToken]": proj.token,
     "metadata[step]": String(step),
     "metadata[brand]": safeBrand,
+    ...(isPostDelivery ? { "metadata[isPostDelivery]": "true", "metadata[notes]": String(notes).slice(0, 400) } : {}),
+    "custom_text[submit][message]": helpMsgByLang[l],
     "line_items[0][price_data][currency]": "eur",
     "line_items[0][price_data][product_data][name]": `${titleByLang[l]} — ${safeBrand}`.slice(0, 250),
     "line_items[0][price_data][unit_amount]": String(EXTRA_REVISION_EUR * 100),
@@ -2725,8 +2801,6 @@ async function createExtraRevisionCheckout(env, proj, step, returnUrl, cancelUrl
 
 async function unlockExtraRevision(env, proj, step, sessionId, sessionData = null) {
   if (!proj || !sessionId) return false;
-  const ph = (proj.phases || []).find((p) => Number(p.step) === Number(step));
-  if (!ph) return false;
 
   const usedSessions = Array.isArray(proj.usedRevisionSessions) ? proj.usedRevisionSessions : [];
   if (usedSessions.includes(sessionId)) {
@@ -2746,6 +2820,69 @@ async function unlockExtraRevision(env, proj, step, sessionId, sessionData = nul
   if (session.metadata?.projectToken !== proj.token) {
     return false;
   }
+
+  const isPostDelivery =
+    String(step) === "post_delivery" ||
+    session.metadata?.step === "post_delivery" ||
+    session.metadata?.isPostDelivery === "true";
+
+  if (isPostDelivery) {
+    proj.usedRevisionSessions = [...usedSessions, sessionId];
+    const notes = session.metadata?.notes || proj.pendingExtraWork?.notes || "";
+    proj.extraWork = Array.isArray(proj.extraWork) ? proj.extraWork : [];
+    if (!proj.extraWork.some((w) => w.sessionId === sessionId)) {
+      proj.extraWork.push({
+        id: randomHex(4),
+        sessionId,
+        date: Date.now(),
+        notes,
+        status: "received",
+      });
+      delete proj.pendingExtraWork;
+
+      const chatKey = `project_chat:${proj.token}`;
+      const history = (await env.LEADS_KV.get(chatKey, { type: "json" })) || [];
+      history.push({
+        sender: "client",
+        date: Date.now(),
+        text: `[solicitud de cambios extraordinarios abonada — 100 €]\n${notes}`,
+      });
+      await env.LEADS_KV.put(chatKey, JSON.stringify(history.slice(-50)));
+    }
+
+    await saveProject(env, proj.token, proj);
+
+    if (env.RESEND_API_KEY) {
+      const trackingUrl = buildUrl("/proyecto", { token: proj.token });
+      await resendSend(
+        env,
+        {
+          to: ["hola@rebrandyourbrand.es"],
+          reply_to: proj.clientEmail,
+          subject: `trabajo extraordinario abonado (100 €) — ${proj.brand}`,
+          ...renderEmail("es", {
+            paras: [
+              `el cliente de ${bold(proj.brand)} ha contratado y abonado una ronda de cambios extraordinarios post-entrega (100 €).`,
+              lines(
+                `— cliente: ${bold(proj.clientEmail)}`,
+                `— fecha: ${bold(fmtDate(Date.now(), "es"))}`,
+                `— id sesión stripe: ${bold(sessionId)}`
+              ),
+              bold("indicaciones del cliente:"),
+            ],
+            quote: notes,
+            cta: { label: "ver seguimiento del cliente", url: trackingUrl },
+          }),
+        },
+        `extra-post-${proj.token}-${sessionId}`
+      ).catch((e) => console.error("extra post-delivery alert email failed:", e?.message));
+    }
+
+    return true;
+  }
+
+  const ph = (proj.phases || []).find((p) => Number(p.step) === Number(step));
+  if (!ph) return false;
   if (String(session.metadata?.step) !== String(step)) {
     return false;
   }
@@ -3107,12 +3244,9 @@ async function handleStripeWebhook(request, env) {
 const RYBB_LOGO_PATH =
   "M258.2 2.5L262.5 2.1L288 2.5L288.5 70.5L293.9 64.4L298.9 60.4L305.2 57.7L313.5 56.4L322.2 57.4L327.4 59.1L333.5 63L339 69.5L341.5 74L344 80.5L346.7 91.7L347.6 97.7L348.7 126.5L348.8 168.5L347.9 195.5L346.7 206.3L344.5 215L341.5 222L338.1 227.6L334.3 231.9L329.7 235.2L323.4 237.9L316.5 238.9L306.9 238.5L301.4 237.1L295.7 233.8L290.6 228.9L286.5 222.9L283.5 236.8L258.1 236.5ZM696 2.5L696.5 2.1L722.7 2.5L723 236.5L715.5 236.9L699 236.5L698.2 234.4L697.4 226.2L696.5 224.1L692.8 229.3L687.8 234.3L682.7 237.2L677.3 238.7L668.5 239L662.6 237.9L656.7 234.8L652.4 231.2L648.9 226.6L646.3 221.2L642.3 207.3L640.3 180.5L640.1 164.5L640.2 118.5L641.3 99.5L642.3 90.6L644.3 81.7L645.6 77.1L648.7 70.2L653 64.4L658.5 60L664.1 57.6L671.6 56.4L679.2 57.4L684.2 59.3L690 63.5L695.5 69.9L695.9 68.5ZM234.2 88.5L140.5 88.8L138.5 88.9L137.9 89.5L139.3 99.2L141.7 105.8L144.6 110.9L151.2 117.3L160.1 121.4L167.6 122.7L172.5 122.8L180.4 121.9L184.3 120.8L189.7 118.2L193.1 115.6L196.4 111.9L199.5 106.3L233.5 110.5L233.7 112.3L230.7 120.2L227.5 126L222.2 132.7L212.8 141.3L207.8 144.3L201.6 147.1L189.4 150.8L182.5 151.9L170.5 152.7L159.5 151.9L152.7 150.7L140.4 147.1L129.8 141.7L121.5 135L116.6 129.9L113.1 125.4L107.3 115.2L103.5 105L101.2 95.4L100.5 89.1L100.1 73.5L101.4 60.8L103.8 51.4L106.7 44.2L113.2 32.7L121.2 23.7L127.2 18.7L132.1 15.6L139.5 11.9L146.1 9.6L156.6 7.2L169.5 6.3L185.2 8.4L196.5 12L207.5 18L211.4 21L217 26.4L224.3 36.2L227.8 42.7L230.4 49.2L233.5 62L234.8 77.5ZM88.5 8.8L89.2 9.5L88.8 18.5L87.7 34.5L86.5 43L79.4 41.2L73.5 40.8L66.6 41.2L61.1 42.6L57 44.5L51.8 48.3L48.5 52L45.6 57.1L43.2 65.6L42.7 73.5L42.5 149.5L41.5 150.1L21.5 150.1L4.5 150.1L3.5 149.5L3.5 9.4L4.5 8.9L36.5 8.9L39.5 8.9L40.2 9.5L40.2 29.5L40.7 32.5L41.5 33L45.5 24L49.1 18.6L54.2 13.7L60.3 9.9L67.8 7.4L74.5 6.7L82.4 7.2ZM138.5 63.9L193.5 64.2L197.8 63.5L195.5 53L192.8 47.7L189.1 43.4L185.3 40.2L180 37.5L174.5 36L168.5 35.4L161.6 36.2L156.2 37.7L151.7 40.1L147.8 43.3L144.5 47.1L141.5 52L139.1 58.6ZM520.8 236.5L497.5 236.9L494.8 236.5L492.5 224.4L486.7 231.2L483.5 234L479.2 236.7L475.5 238L469.5 239L461.6 238.7L456.2 237.3L450.3 234.2L447.1 231.4L444 227.6L441.3 223.2L438.4 216.1L435.4 201.2L434.4 182.5L435.1 165.5L436.3 157.7L439 148.5L441.7 143.2L444.4 139.9L450.1 134.6L456.6 131.1L490.7 119.5L490.8 103.5L489.6 91.8L486.8 84.7L484.8 82.7L482.3 81.2L477.6 80.4L473.7 81.1L471.1 82.5L468.2 85.7L466.6 89.2L465.1 95.5L464.5 109.5L463.5 110.3L437.5 109.7L437.2 100.5L438.2 89.5L441.4 77.9L444.1 72.6L447.5 68L451.6 64.1L456.5 61L464.5 58L475.8 56.5L480 56.5L491.5 58L499.6 60.9L503.9 63.5L509 68.5L512.4 73.1L516.4 83.1L518.9 98.5L519.3 113.5L519.3 215.5ZM621.5 236.6L594.5 236.9L594.1 236.5L593.8 111.5L593 96.5L591.8 89.7L589.5 85L586.2 82.2L581.5 81.2L578.3 81.8L575.6 83.1L573 85.5L571.4 87.9L569 94.5L567.3 108.6L566.9 236.5L541.5 236.9L539.7 236.5L539.4 91.5L538.6 59.5L539.5 58.9L564.5 59.2L565.7 71.5L566.5 72.4L572.2 64.7L577.8 60.3L584.8 57.3L593.4 56.4L602.3 58.2L608.8 61.7L611.9 64.7L614.4 68.1L617.9 75.6L620.8 86.6L621.8 100.5ZM426.8 57.5L426.5 86.8L425.5 87.2L418.5 86.7L413.5 87L410.4 87.8L406.3 89.9L403.1 92.6L400.6 96.1L397.5 105L396.3 122.5L396 236.5L395.5 236.9L389.5 236.9L368 236.5L367.8 88.5L366.9 59.5L367.5 58.9L392.5 59L393.5 59.5L394.5 74L394.7 75.5L395.5 75.6L400.9 66.4L403.8 63.3L408.4 59.9L411.7 58.2L416.5 57L422.5 56.8ZM301.8 81.4L297.5 83L294 86.4L291.9 90.4L290.1 96.5L289.1 104.5L288.5 125.7L288.4 167.5L289.2 192.5L291 203.5L293 208.5L295.6 211.9L299.4 214.2L303.5 214.8L308.4 213.9L312.4 210.9L315.2 205.6L316.6 198.3L317.9 179.5L317.9 122.5L316.8 101.5L314.6 89.9L312.6 85.9L310.1 83.4L305.9 81.6ZM679.7 81.3L675.6 83.1L672.5 87L670.9 91.5L669.3 101.7L668.5 127.6L668.5 170.5L669.2 192.5L671.4 207.2L673 210.6L675.2 213.3L677.8 214.7L681.5 215.2L686 214.5L689.1 211.8L691.7 207.2L693.7 200.4L694.8 190.5L695.7 172.5L695.8 128.5L694.8 104.5L692.7 91.8L690.7 86.8L688 83.5L684.1 81.5ZM488.7 143.2L475.6 148.1L471.3 150.8L467 155.5L464.5 162.1L463.9 169.5L463.8 184.5L464.1 196.5L464.9 202.5L466.5 208L468.1 211.4L470.7 213.9L473.6 215L479.4 215L484 212.5L487.2 208.7L489.8 201.4L490.8 186.5L490.9 143.5L490.5 142.9ZM89 171.5L95.5 171.2L101.5 171.9L107.4 174.1L111.1 176.4L114.9 179.7L119.4 186.1L122.7 195.8L123.2 202.5L123 209.5L119.7 220.2L116.7 225.2L113.4 228.9L108.7 232.2L102.3 234.8L95.3 235.5L88.5 235.1L84.4 234.1L79 231.5L74.6 227.9L71 223.6L68.5 219L66.3 212.3L65.6 204.5L66 196.5L67.4 190.8L69.7 185.3L73.1 180.6L78.3 175.8L82.8 173.4ZM235.8 172.5L235 186.5L234.5 187.5L228.5 186.6L224.1 187.6L220.4 189.9L217.5 194L216.2 201.5L216.2 233.5L215.7 234.5L200.5 234.5L200 231.5L200 172.5L200.5 172.1L214.5 172L215.3 172.5L215.6 180.5L216.5 181.2L220.1 175.6L224.8 172.3L230.5 171.2L233.9 171.6ZM2.5 172.3L18.5 172L19.4 172.5L31.2 213.3L32.5 216.4L44.9 172.5L45.5 172.1L60.5 172.1L61.5 172.4L41.8 232.3L38.4 241.9L35.2 248.7L30.2 254.6L24.2 257.7L14.5 258.1L10.8 257.7L7.8 256.5L10.5 244.3L16.5 244.9L20 243.6L22.5 240.1L23.6 237.1L23.7 234.6ZM133.5 172.5L134.5 172L148.5 172L149.3 172.5L149.5 206.3L150.1 213.4L151.1 216.3L153.4 219L156 220.4L159.5 221L163.1 220.5L166.9 218.4L169.1 215.6L170.4 211.9L170.8 206.5L170.9 172.5L171.5 172.1L186.5 172.3L186.5 234.1L172.5 234.3L171.5 225.8L165 232.5L161 234.4L156.5 235.1L149.6 234.9L145.8 233.7L142 231.5L138 227.5L135.8 223.7L134.6 219.9L133.5 212.9ZM93.8 184.5L88.7 186.1L86.5 188L84.4 190.9L82.3 197.6L81.9 204.5L83 212.5L85.6 217.9L89.4 221.1L94.5 222.2L97.4 221.8L100.2 220.7L103.7 217.2L106.1 211.5L106.9 202.5L105.9 194.6L103.4 189.1L99.7 185.8Z";
 
-const RYBB_RE_GLYPH_PATH =
-  "M83.8 52.6L56.3 52.7L55.7 52.8L55.5 52.9L55.9 55.8L56.6 57.7L57.5 59.2L59.4 61.1L62 62.3L64.3 62.7L65.7 62.7L68 62.5L69.1 62.1L70.7 61.4L71.7 60.6L72.7 59.5L73.6 57.9L83.6 59.1L83.7 59.6L82.8 62L81.8 63.7L80.3 65.6L77.5 68.2L76.1 69.1L74.2 69.9L70.6 70.9L68.6 71.3L65.1 71.5L61.9 71.3L59.9 70.9L56.2 69.9L53.1 68.3L50.7 66.3L49.2 64.8L48.2 63.5L46.5 60.5L45.4 57.5L44.7 54.7L44.5 52.8L44.4 48.2L44.8 44.5L45.5 41.7L46.3 39.6L48.3 36.2L50.6 33.6L52.4 32.1L53.8 31.2L56 30.1L57.9 29.4L61 28.8L64.8 28.5L69.4 29.1L72.7 30.2L76 31.9L77.1 32.8L78.8 34.4L80.9 37.3L81.9 39.2L82.7 41.1L83.6 44.8L84 49.4ZM41 29.2L41.2 29.4L41.1 32.1L40.8 36.8L40.4 39.3L38.3 38.7L36.6 38.6L34.5 38.7L32.9 39.2L31.7 39.7L30.2 40.8L29.2 41.9L28.4 43.4L27.7 45.9L27.5 48.2L27.5 70.6L27.2 70.7L21.3 70.7L16.3 70.7L16 70.6L16 29.4L16.3 29.2L25.7 29.2L26.6 29.2L26.8 29.4L26.8 35.3L26.9 36.2L27.2 36.3L28.3 33.7L29.4 32.1L30.9 30.6L32.7 29.5L34.9 28.8L36.9 28.6L39.2 28.7ZM55.7 45.4L71.9 45.5L73.1 45.3L72.4 42.2L71.7 40.7L70.6 39.4L69.4 38.5L67.9 37.7L66.3 37.2L64.5 37L62.5 37.3L60.9 37.7L59.6 38.4L58.4 39.4L57.5 40.5L56.6 41.9L55.9 43.9Z";
+const RYBB_BRAND_MARK = `<svg viewBox="0 0 726 261" width="118" height="42" fill="currentColor" aria-hidden="true" style="display:block;height:24px;width:auto;"><path fill-rule="evenodd" d="${RYBB_LOGO_PATH}"></path></svg>`;
 
-const RYBB_BRAND_MARK = `<span class="brand-link-inner" style="display:inline-flex;align-items:center;gap:.6rem;text-decoration:none;color:#17171A"><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:7px;background:#EDE6D6;border:1px solid #E4DED0;box-shadow:inset 0 1px 0 rgba(255,255,255,.8)"><svg viewBox="0 0 100 100" width="14" height="14" fill="#17171A" aria-hidden="true"><path fill-rule="evenodd" d="${RYBB_RE_GLYPH_PATH}"></path></svg></span><span style="font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:15px;letter-spacing:-.02em;text-transform:lowercase;line-height:1">brandyourbrand</span></span>`;
-
-const RYBB_LOGO_SVG = `<svg viewBox="0 0 726 261" width="96" height="34" fill="currentColor" aria-hidden="true" style="display:block;height:28px;width:auto;"><path fill-rule="evenodd" d="${RYBB_LOGO_PATH}"></path></svg>`;
+const RYBB_LOGO_SVG = RYBB_BRAND_MARK;
 
 const PAGE_CSS = `
 :root{
@@ -4478,7 +4612,7 @@ async function handlePhaseAdvance(request, env, url) {
     );
   }
 
-  const allDone = Array.isArray(proj.phases) && proj.phases.every((ph) => ph.status === "done");
+  // allDone ya declarado al inicio de handleProject
   if (allDone || checkAllServicesApproved(proj)) {
     if (!allDone || !proj.finishedAt || !proj.reviewInvited || proj.status !== "done") {
       await finalizeProjectClosure(env, proj, projectToken).catch((e) =>
@@ -5425,6 +5559,7 @@ async function handleProject(request, env, url) {
   L = pickLang(proj.lang);
   const T = PG[L].tr;
   const projectPageUrl = buildUrl("/proyecto", { token });
+  const allDone = proj.status === "done" || (Array.isArray(proj.phases) && proj.phases.length > 0 && proj.phases.every((ph) => ph.status === "done"));
 
   if (request.method === "POST") {
     let bodyJson = null;
@@ -5566,6 +5701,35 @@ async function handleProject(request, env, url) {
         footerUrl: projectPageUrl,
         footerLabel: PG[L].common.openTracker,
       });
+    }
+
+    if (op === "extra_work") {
+      if (!allDone) return redirectTo(projectPageUrl);
+      const notes = cleanNote(form?.get("notes") || bodyJson?.notes || "", 1500);
+      if (!notes || notes.length < 5) {
+        return htmlResponse(
+          page(T.title, T.heading, T.extraWorkEmpty, {
+            lang: L,
+            eyebrow: T.extraWorkEyebrow,
+            wide: true,
+            html: `<p class="lead" style="color:#cf172f;">${esc(T.extraWorkEmpty)}</p><a class="btn" href="${esc(projectPageUrl)}">${esc(PG[L].common.openTracker)}</a>`,
+            footerUrl: projectPageUrl,
+            footerLabel: PG[L].common.openTracker,
+          }),
+          400
+        );
+      }
+      proj.pendingExtraWork = { notes, date: Date.now() };
+      await saveProject(env, token, proj);
+
+      const qJoin = String.fromCharCode(38);
+      const returnUrl = `${WORKER_URL}/proyecto?token=${token}${qJoin}rev_session_id={CHECKOUT_SESSION_ID}${qJoin}extra_done=1`;
+      const cancelUrl = `${projectPageUrl}#extra-work`;
+      const checkoutUrl = await createExtraRevisionCheckout(env, proj, "post_delivery", returnUrl, cancelUrl, notes);
+      if (!checkoutUrl) {
+        return msgPage(L, "retry", 502, { form: false, footerUrl: projectPageUrl, footerLabel: PG[L].common.openTracker });
+      }
+      return redirectTo(checkoutUrl);
     }
 
     if (op === "onboarding") {
@@ -5910,6 +6074,14 @@ async function handleProject(request, env, url) {
     }
   }
 
+  const revSessionId = url.searchParams.get("rev_session_id");
+  if (revSessionId && /^cs_[A-Za-z0-9_]+$/.test(revSessionId)) {
+    const stepParam = url.searchParams.get("step") || "post_delivery";
+    await unlockExtraRevision(env, proj, stepParam, revSessionId);
+    const freshProjRaw = await env.LEADS_KV.get(`project:${token}`);
+    if (freshProjRaw) proj = JSON.parse(freshProjRaw);
+  }
+
   const receiptRow =
     proj.paid && isStripeReceiptUrl(proj.receiptUrl)
       ? `<div class="phase-actions" style="margin-top:.85rem;"><a class="pill-link" href="${esc(proj.receiptUrl)}" target="_blank" rel="noopener noreferrer">${esc(T.receipt)}</a></div>`
@@ -5945,10 +6117,15 @@ async function handleProject(request, env, url) {
     );
   }
 
+  const extraDoneBanner =
+    url.searchParams.get("extra_done") === "1"
+      ? `<div class="banner-ok">${esc(T.extraWorkSuccess)}</div>`
+      : "";
+
   const undoneBanner =
     url.searchParams.get("undone") === "1"
       ? `<div class="banner-ok">${esc(T.obUndoneBanner)}</div>`
-      : "";
+      : extraDoneBanner;
 
   const bannerHtml =
     url.searchParams.get("ob") === "1"
@@ -5996,7 +6173,7 @@ async function handleProject(request, env, url) {
       </script>`
       : "";
 
-  const allDone = Array.isArray(proj.phases) && proj.phases.every((ph) => ph.status === "done");
+  // allDone ya declarado arriba en handleProject
 
   // Normalizar lista de materiales y referencias (modo append-only)
   const materialsList = Array.isArray(proj.materialsList) ? [...proj.materialsList] : [];
@@ -6198,6 +6375,39 @@ async function handleProject(request, env, url) {
       </div>`;
     })
   );
+
+  let postDeliveryHtml = "";
+  if (allDone) {
+    const workItems = Array.isArray(proj.extraWork) ? proj.extraWork : [];
+    const workHistoryHtml = workItems.length
+      ? `<div style="margin-top:1rem;border-top:1px solid #E4DED0;padding-top:.85rem;">
+          <span style="font-size:11px;font-family:ui-monospace,monospace;letter-spacing:.05em;color:#58575E;text-transform:lowercase;display:block;margin-bottom:.5rem;">${esc(T.extraWorkHistory)}</span>
+          ${workItems.map((w) => `
+            <div style="background:rgba(255,255,255,.7);border:1px solid #E4DED0;border-radius:10px;padding:.75rem .9rem;margin-bottom:.5rem;font-size:13px;">
+              <div style="display:flex;justify-content:space-between;color:#58575E;font-size:11px;margin-bottom:.25rem;">
+                <span>${esc(fmtDate(w.date, L))}</span>
+                <span style="color:#3D5A85;font-weight:600;">${esc(T.extraWorkStatusReceived)}</span>
+              </div>
+              <div style="color:#17171A;white-space:pre-wrap;">${esc(w.notes)}</div>
+            </div>
+          `).join("")}
+        </div>`
+      : "";
+
+    postDeliveryHtml = `
+      <div id="extra-work" class="box" style="margin-top:1.25rem;">
+        <span class="eyebrow">${esc(T.extraWorkEyebrow)}</span>
+        <h2>${esc(T.extraWorkTitle)}</h2>
+        <p class="lead" style="margin-bottom:1rem;font-size:.85rem;">${esc(T.extraWorkDesc)}</p>
+        <form method="POST" action="${esc(projectPageUrl)}#extra-work">
+          <input type="hidden" name="op" value="extra_work">
+          <label for="extra-notes" style="display:block;font-size:12px;color:#58575E;margin-bottom:.4rem;text-transform:lowercase;">${esc(T.extraWorkPh)}</label>
+          <textarea id="extra-notes" name="notes" rows="3" maxlength="1500" required placeholder="${esc(T.extraWorkPh)}" style="width:100%;margin-bottom:.75rem;padding:.75rem;border-radius:10px;border:1px solid #E4DED0;background:rgba(255,255,255,.9);font-family:inherit;font-size:13px;"></textarea>
+          <button type="submit" class="btn">${esc(T.extraWorkBtn)}</button>
+        </form>
+        ${workHistoryHtml}
+      </div>`;
+  }
 
   let reviewCardHtml = "";
   if (allDone && !proj.reviewSubmitted) {
@@ -6491,6 +6701,7 @@ async function handleProject(request, env, url) {
     ${headerHtml}
     <h3>${esc(T.state)}</h3>
     <div class="timeline">${phaseCards.join("")}</div>
+    ${postDeliveryHtml}
     ${chatSectionHtml}
     ${reviewCardHtml}
     ${materialsBox}

@@ -505,7 +505,7 @@ async function handlePhaseAdvance(request, env, url) {
     );
   }
 
-  const allDone = Array.isArray(proj.phases) && proj.phases.every((ph) => ph.status === "done");
+  // allDone ya declarado al inicio de handleProject
   if (allDone || checkAllServicesApproved(proj)) {
     if (!allDone || !proj.finishedAt || !proj.reviewInvited || proj.status !== "done") {
       await finalizeProjectClosure(env, proj, projectToken).catch((e) =>
@@ -1452,6 +1452,7 @@ async function handleProject(request, env, url) {
   L = pickLang(proj.lang);
   const T = PG[L].tr;
   const projectPageUrl = buildUrl("/proyecto", { token });
+  const allDone = proj.status === "done" || (Array.isArray(proj.phases) && proj.phases.length > 0 && proj.phases.every((ph) => ph.status === "done"));
 
   if (request.method === "POST") {
     let bodyJson = null;
@@ -1593,6 +1594,35 @@ async function handleProject(request, env, url) {
         footerUrl: projectPageUrl,
         footerLabel: PG[L].common.openTracker,
       });
+    }
+
+    if (op === "extra_work") {
+      if (!allDone) return redirectTo(projectPageUrl);
+      const notes = cleanNote(form?.get("notes") || bodyJson?.notes || "", 1500);
+      if (!notes || notes.length < 5) {
+        return htmlResponse(
+          page(T.title, T.heading, T.extraWorkEmpty, {
+            lang: L,
+            eyebrow: T.extraWorkEyebrow,
+            wide: true,
+            html: `<p class="lead" style="color:#cf172f;">${esc(T.extraWorkEmpty)}</p><a class="btn" href="${esc(projectPageUrl)}">${esc(PG[L].common.openTracker)}</a>`,
+            footerUrl: projectPageUrl,
+            footerLabel: PG[L].common.openTracker,
+          }),
+          400
+        );
+      }
+      proj.pendingExtraWork = { notes, date: Date.now() };
+      await saveProject(env, token, proj);
+
+      const qJoin = String.fromCharCode(38);
+      const returnUrl = `${WORKER_URL}/proyecto?token=${token}${qJoin}rev_session_id={CHECKOUT_SESSION_ID}${qJoin}extra_done=1`;
+      const cancelUrl = `${projectPageUrl}#extra-work`;
+      const checkoutUrl = await createExtraRevisionCheckout(env, proj, "post_delivery", returnUrl, cancelUrl, notes);
+      if (!checkoutUrl) {
+        return msgPage(L, "retry", 502, { form: false, footerUrl: projectPageUrl, footerLabel: PG[L].common.openTracker });
+      }
+      return redirectTo(checkoutUrl);
     }
 
     if (op === "onboarding") {
@@ -1937,6 +1967,14 @@ async function handleProject(request, env, url) {
     }
   }
 
+  const revSessionId = url.searchParams.get("rev_session_id");
+  if (revSessionId && /^cs_[A-Za-z0-9_]+$/.test(revSessionId)) {
+    const stepParam = url.searchParams.get("step") || "post_delivery";
+    await unlockExtraRevision(env, proj, stepParam, revSessionId);
+    const freshProjRaw = await env.LEADS_KV.get(`project:${token}`);
+    if (freshProjRaw) proj = JSON.parse(freshProjRaw);
+  }
+
   const receiptRow =
     proj.paid && isStripeReceiptUrl(proj.receiptUrl)
       ? `<div class="phase-actions" style="margin-top:.85rem;"><a class="pill-link" href="${esc(proj.receiptUrl)}" target="_blank" rel="noopener noreferrer">${esc(T.receipt)}</a></div>`
@@ -1972,10 +2010,15 @@ async function handleProject(request, env, url) {
     );
   }
 
+  const extraDoneBanner =
+    url.searchParams.get("extra_done") === "1"
+      ? `<div class="banner-ok">${esc(T.extraWorkSuccess)}</div>`
+      : "";
+
   const undoneBanner =
     url.searchParams.get("undone") === "1"
       ? `<div class="banner-ok">${esc(T.obUndoneBanner)}</div>`
-      : "";
+      : extraDoneBanner;
 
   const bannerHtml =
     url.searchParams.get("ob") === "1"
@@ -2023,7 +2066,7 @@ async function handleProject(request, env, url) {
       </script>`
       : "";
 
-  const allDone = Array.isArray(proj.phases) && proj.phases.every((ph) => ph.status === "done");
+  // allDone ya declarado arriba en handleProject
 
   // Normalizar lista de materiales y referencias (modo append-only)
   const materialsList = Array.isArray(proj.materialsList) ? [...proj.materialsList] : [];
@@ -2225,6 +2268,39 @@ async function handleProject(request, env, url) {
       </div>`;
     })
   );
+
+  let postDeliveryHtml = "";
+  if (allDone) {
+    const workItems = Array.isArray(proj.extraWork) ? proj.extraWork : [];
+    const workHistoryHtml = workItems.length
+      ? `<div style="margin-top:1rem;border-top:1px solid #E4DED0;padding-top:.85rem;">
+          <span style="font-size:11px;font-family:ui-monospace,monospace;letter-spacing:.05em;color:#58575E;text-transform:lowercase;display:block;margin-bottom:.5rem;">${esc(T.extraWorkHistory)}</span>
+          ${workItems.map((w) => `
+            <div style="background:rgba(255,255,255,.7);border:1px solid #E4DED0;border-radius:10px;padding:.75rem .9rem;margin-bottom:.5rem;font-size:13px;">
+              <div style="display:flex;justify-content:space-between;color:#58575E;font-size:11px;margin-bottom:.25rem;">
+                <span>${esc(fmtDate(w.date, L))}</span>
+                <span style="color:#3D5A85;font-weight:600;">${esc(T.extraWorkStatusReceived)}</span>
+              </div>
+              <div style="color:#17171A;white-space:pre-wrap;">${esc(w.notes)}</div>
+            </div>
+          `).join("")}
+        </div>`
+      : "";
+
+    postDeliveryHtml = `
+      <div id="extra-work" class="box" style="margin-top:1.25rem;">
+        <span class="eyebrow">${esc(T.extraWorkEyebrow)}</span>
+        <h2>${esc(T.extraWorkTitle)}</h2>
+        <p class="lead" style="margin-bottom:1rem;font-size:.85rem;">${esc(T.extraWorkDesc)}</p>
+        <form method="POST" action="${esc(projectPageUrl)}#extra-work">
+          <input type="hidden" name="op" value="extra_work">
+          <label for="extra-notes" style="display:block;font-size:12px;color:#58575E;margin-bottom:.4rem;text-transform:lowercase;">${esc(T.extraWorkPh)}</label>
+          <textarea id="extra-notes" name="notes" rows="3" maxlength="1500" required placeholder="${esc(T.extraWorkPh)}" style="width:100%;margin-bottom:.75rem;padding:.75rem;border-radius:10px;border:1px solid #E4DED0;background:rgba(255,255,255,.9);font-family:inherit;font-size:13px;"></textarea>
+          <button type="submit" class="btn">${esc(T.extraWorkBtn)}</button>
+        </form>
+        ${workHistoryHtml}
+      </div>`;
+  }
 
   let reviewCardHtml = "";
   if (allDone && !proj.reviewSubmitted) {
@@ -2518,6 +2594,7 @@ async function handleProject(request, env, url) {
     ${headerHtml}
     <h3>${esc(T.state)}</h3>
     <div class="timeline">${phaseCards.join("")}</div>
+    ${postDeliveryHtml}
     ${chatSectionHtml}
     ${reviewCardHtml}
     ${materialsBox}

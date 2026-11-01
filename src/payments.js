@@ -196,6 +196,7 @@ async function ensureStripeCheckout(env, proj) {
     "metadata[project_token]": proj.token,
     "metadata[services]": proj.services.join(","),
     "metadata[brand]": safeBrand,
+    "custom_text[submit][message]": (l === "en" ? "have any questions? write to us at hola@rebrandyourbrand.es." : l === "ca" ? "tens alguna pregunta? escriu-nos a hola@rebrandyourbrand.es." : l === "eu" ? "galderarik baduzu? idatzi iezaguzu hola@rebrandyourbrand.es helbidera." : "¿tienes alguna pregunta? escríbenos a hola@rebrandyourbrand.es."),
   });
 
   const hasLogo = proj.services.includes("logo");
@@ -304,18 +305,33 @@ async function createRenewalCheckout(env, proj, renewalEur) {
   }
 }
 
-async function createExtraRevisionCheckout(env, proj, step, returnUrl, cancelUrl) {
+async function createExtraRevisionCheckout(env, proj, step, returnUrl, cancelUrl, notes = "") {
   if (!env.STRIPE_SECRET_KEY || !proj) return "";
   const l = pickLang(proj.lang);
   const safeBrand = proj.brand || "proyecto";
-  const ph = (proj.phases || []).find((p) => Number(p.step) === Number(step)) || { step };
-  const phaseName = phaseTitle(ph, l) || `fase ${step}`;
+  const isPostDelivery = String(step) === "post_delivery";
+  const ph = isPostDelivery ? null : ((proj.phases || []).find((p) => Number(p.step) === Number(step)) || { step });
+  const phaseName = ph ? (phaseTitle(ph, l) || `fase ${step}`) : "";
 
-  const titleByLang = {
-    es: `Ronda de ajustes adicional — ${phaseName}`,
-    ca: `Ronda d'ajustos addicional — ${phaseName}`,
-    eu: `Doikuntza-txanda gehigarria — ${phaseName}`,
-    en: `Additional revision round — ${phaseName}`,
+  const titleByLang = isPostDelivery
+    ? {
+        es: "Ronda de cambios extraordinarios post-entrega",
+        ca: "Ronda de canvis extraordinaris post-lliurament",
+        eu: "Entregaren ondorengo ezohiko aldaketa-txanda",
+        en: "Post-delivery extraordinary revision round",
+      }
+    : {
+        es: `Ronda de ajustes adicional — ${phaseName}`,
+        ca: `Ronda d'ajustos addicional — ${phaseName}`,
+        eu: `Doikuntza-txanda gehigarria — ${phaseName}`,
+        en: `Additional revision round — ${phaseName}`,
+      };
+
+  const helpMsgByLang = {
+    es: "¿tienes alguna pregunta? escríbenos a hola@rebrandyourbrand.es.",
+    ca: "tens alguna pregunta? escriu-nos a hola@rebrandyourbrand.es.",
+    eu: "galderarik baduzu? idatzi iezaguzu hola@rebrandyourbrand.es helbidera.",
+    en: "have any questions? write to us at hola@rebrandyourbrand.es.",
   };
 
   const params = new URLSearchParams({
@@ -334,6 +350,8 @@ async function createExtraRevisionCheckout(env, proj, step, returnUrl, cancelUrl
     "metadata[projectToken]": proj.token,
     "metadata[step]": String(step),
     "metadata[brand]": safeBrand,
+    ...(isPostDelivery ? { "metadata[isPostDelivery]": "true", "metadata[notes]": String(notes).slice(0, 400) } : {}),
+    "custom_text[submit][message]": helpMsgByLang[l],
     "line_items[0][price_data][currency]": "eur",
     "line_items[0][price_data][product_data][name]": `${titleByLang[l]} — ${safeBrand}`.slice(0, 250),
     "line_items[0][price_data][unit_amount]": String(EXTRA_REVISION_EUR * 100),
@@ -361,8 +379,6 @@ async function createExtraRevisionCheckout(env, proj, step, returnUrl, cancelUrl
 
 async function unlockExtraRevision(env, proj, step, sessionId, sessionData = null) {
   if (!proj || !sessionId) return false;
-  const ph = (proj.phases || []).find((p) => Number(p.step) === Number(step));
-  if (!ph) return false;
 
   const usedSessions = Array.isArray(proj.usedRevisionSessions) ? proj.usedRevisionSessions : [];
   if (usedSessions.includes(sessionId)) {
@@ -382,6 +398,69 @@ async function unlockExtraRevision(env, proj, step, sessionId, sessionData = nul
   if (session.metadata?.projectToken !== proj.token) {
     return false;
   }
+
+  const isPostDelivery =
+    String(step) === "post_delivery" ||
+    session.metadata?.step === "post_delivery" ||
+    session.metadata?.isPostDelivery === "true";
+
+  if (isPostDelivery) {
+    proj.usedRevisionSessions = [...usedSessions, sessionId];
+    const notes = session.metadata?.notes || proj.pendingExtraWork?.notes || "";
+    proj.extraWork = Array.isArray(proj.extraWork) ? proj.extraWork : [];
+    if (!proj.extraWork.some((w) => w.sessionId === sessionId)) {
+      proj.extraWork.push({
+        id: randomHex(4),
+        sessionId,
+        date: Date.now(),
+        notes,
+        status: "received",
+      });
+      delete proj.pendingExtraWork;
+
+      const chatKey = `project_chat:${proj.token}`;
+      const history = (await env.LEADS_KV.get(chatKey, { type: "json" })) || [];
+      history.push({
+        sender: "client",
+        date: Date.now(),
+        text: `[solicitud de cambios extraordinarios abonada — 100 €]\n${notes}`,
+      });
+      await env.LEADS_KV.put(chatKey, JSON.stringify(history.slice(-50)));
+    }
+
+    await saveProject(env, proj.token, proj);
+
+    if (env.RESEND_API_KEY) {
+      const trackingUrl = buildUrl("/proyecto", { token: proj.token });
+      await resendSend(
+        env,
+        {
+          to: ["hola@rebrandyourbrand.es"],
+          reply_to: proj.clientEmail,
+          subject: `trabajo extraordinario abonado (100 €) — ${proj.brand}`,
+          ...renderEmail("es", {
+            paras: [
+              `el cliente de ${bold(proj.brand)} ha contratado y abonado una ronda de cambios extraordinarios post-entrega (100 €).`,
+              lines(
+                `— cliente: ${bold(proj.clientEmail)}`,
+                `— fecha: ${bold(fmtDate(Date.now(), "es"))}`,
+                `— id sesión stripe: ${bold(sessionId)}`
+              ),
+              bold("indicaciones del cliente:"),
+            ],
+            quote: notes,
+            cta: { label: "ver seguimiento del cliente", url: trackingUrl },
+          }),
+        },
+        `extra-post-${proj.token}-${sessionId}`
+      ).catch((e) => console.error("extra post-delivery alert email failed:", e?.message));
+    }
+
+    return true;
+  }
+
+  const ph = (proj.phases || []).find((p) => Number(p.step) === Number(step));
+  if (!ph) return false;
   if (String(session.metadata?.step) !== String(step)) {
     return false;
   }

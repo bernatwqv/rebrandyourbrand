@@ -126,7 +126,9 @@ Tu objetivo es entender la marca del cliente, dar una breve pincelada estratégi
 
 ESTILO:
 - No actúes como un bot de atención al cliente. Eres una consultora de marca directa, aguda y conceptual.
-- Máximo 3 frases por mensaje. Haz UNA sola pregunta por mensaje.
+- Respuestas directas, concisas (máximo 3 frases), en minúsculas relajadas si encaja con el tono editorial (escribe todo en minúsculas, sin mayúsculas iniciales, como el resto de la web), sin tecnicismos innecesarios.
+- Habla y escribe SIEMPRE en minúsculas (sin mayúsculas iniciales ni en nombres propios, excepto siglas técnicas indispensables como DNS o SSL), exactamente en sintonía con la estética y voz de marca del estudio.
+- Haz UNA sola pregunta por mensaje.
 - No uses puntos medios ni el símbolo ampersand en tus textos; usa conjunciones o guiones largos.
 
 No hay planes cerrados: el cliente elige solo los servicios que necesita y paga únicamente por ellos (pago único del 100% mediante enlace seguro tras verificar el correo, sin cuotas mensuales). Servicios y precios oficiales:
@@ -208,6 +210,12 @@ async function askGroq(env, lang, ctx, chatMessages, retries = 1) {
 
       const data = await groq.json().catch(() => null);
       const out = parseModelJson(data?.choices?.[0]?.message?.content);
+      if (out && typeof out.reply === "string") {
+        out.reply = out.reply
+          .replace(/[\u00b7\u2022]/g, " — ")
+          .replace(new RegExp("\\x26", "g"), lang === "ca" ? " i " : lang === "en" ? " and " : lang === "eu" ? " eta " : " y ")
+          .replace(/(^|[.!?¿¡]\s*|\n\s*)([A-ZÁÉÍÓÚÀÈÒÇÑ])(?![A-ZÁÉÍÓÚÀÈÒÇÑ])/g, (_, p, c) => p + c.toLowerCase());
+      }
       return out && typeof out === "object" && !Array.isArray(out) ? out : {};
     } catch (err) {
       if (err instanceof HttpError) throw err;
@@ -254,7 +262,8 @@ ${phasesStr}
 
 TU MISIÓN:
 - Resuelve cualquier duda del cliente sobre el estado de su proyecto, fases, plazos, entregables o condiciones con precisión, cercanía y profesionalidad.
-- Respuestas directas, concisas (máximo 3 o 4 frases), en minúsculas relajadas si encaja con el tono editorial, sin tecnicismos innecesarios.
+- Respuestas directas, concisas (máximo 3 o 4 frases), en minúsculas relajadas (todo en minúsculas, sin mayúsculas iniciales), sin tecnicismos innecesarios.
+- Si el proyecto ya está finalizado y el cliente desea retocar o solicitar mejoras en su web o logotipo, indícale amablemente que puede contratar rondas de trabajo extraordinario a 100 € cerrados por ronda directamente desde el apartado de trabajo extraordinario en este mismo portal.
 - NUNCA uses puntos medios ni el carácter ampersand en tus textos. Usa conjunciones o guiones largos.
 - Si el cliente solicita cambios complejos, negociaciones, aprobaciones directas de fase o pide expresamente hablar con personas, indícale amablemente que use la pestaña del equipo humano o pulse el botón de "hablar con el equipo humano" para contactar directamente con Gael y Bernat.`;
 }
@@ -285,7 +294,8 @@ async function askGroqProject(env, lang, proj, chatMessages, retries = 1) {
 
       const clean = text
         .replace(/[\u00b7\u2022]/g, " — ")
-        .replace(new RegExp("\\x26", "g"), lang === "ca" ? " i " : lang === "en" ? " and " : lang === "eu" ? " eta " : " y ");
+        .replace(new RegExp("\\x26", "g"), lang === "ca" ? " i " : lang === "en" ? " and " : lang === "eu" ? " eta " : " y ")
+        .replace(/(^|[.!?¿¡]\s*|\n\s*)([A-ZÁÉÍÓÚÀÈÒÇÑ])(?![A-ZÁÉÍÓÚÀÈÒÇÑ])/g, (_, p, c) => p + c.toLowerCase());
       return clean;
     } catch (e) {
       if (attempt === retries) {

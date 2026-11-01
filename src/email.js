@@ -26,7 +26,19 @@ function renderEmail(lang, { paras = [], cta = null, secondaryLink = null, note 
   const secondary = secondaryLink
     ? `<p style="text-align:center;margin:0 0 24px;font-size:12px;"><a href="${esc(secondaryLink.url)}" target="_blank" style="color:#3D5A85;text-decoration:underline;text-transform:lowercase;">${esc(secondaryLink.label)}</a></p>`
     : "";
-  const footer = `<p style="color:#58575E;font-size:12px;line-height:1.55;margin:32px 0 0;border-top:1px solid #E4DED0;padding-top:20px;">${note ? `${note}<br><br>` : ""}${EMAIL_SIGN[l]}</p>`;
+  const helpLineByLang = {
+    es: '¿tienes alguna pregunta? escríbenos a <a href="mailto:hola@rebrandyourbrand.es" style="color:#3D5A85;text-decoration:underline;">hola@rebrandyourbrand.es</a>.',
+    ca: 'tens alguna pregunta? escriu-nos a <a href="mailto:hola@rebrandyourbrand.es" style="color:#3D5A85;text-decoration:underline;">hola@rebrandyourbrand.es</a>.',
+    eu: 'galderarik baduzu? idatzi iezaguzu <a href="mailto:hola@rebrandyourbrand.es" style="color:#3D5A85;text-decoration:underline;">hola@rebrandyourbrand.es</a> helbidera.',
+    en: 'have any questions? write to us at <a href="mailto:hola@rebrandyourbrand.es" style="color:#3D5A85;text-decoration:underline;">hola@rebrandyourbrand.es</a>.',
+  };
+  const helpTextByLang = {
+    es: "¿tienes alguna pregunta? escríbenos a hola@rebrandyourbrand.es.",
+    ca: "tens alguna pregunta? escriu-nos a hola@rebrandyourbrand.es.",
+    eu: "galderarik baduzu? idatzi iezaguzu hola@rebrandyourbrand.es helbidera.",
+    en: "have any questions? write to us at hola@rebrandyourbrand.es.",
+  };
+  const footer = `<p style="color:#58575E;font-size:12px;line-height:1.55;margin:32px 0 0;border-top:1px solid #E4DED0;padding-top:20px;">${note ? `${note}<br><br>` : ""}${helpLineByLang[l]}<br><br>${EMAIL_SIGN[l]}</p>`;
 
   const html = `<!DOCTYPE html>
 <html lang="${l}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light only"><meta name="supported-color-schemes" content="light only"></head>
@@ -42,7 +54,7 @@ function renderEmail(lang, { paras = [], cta = null, secondaryLink = null, note 
     quote,
     cta ? `${cta.label}:\n${cta.url}` : "",
     secondaryLink ? `${secondaryLink.label}:\n${secondaryLink.url}` : "",
-    [note && htmlToText(note), EMAIL_SIGN[l]].filter(Boolean).join("\n\n"),
+    [note && htmlToText(note), helpTextByLang[l], EMAIL_SIGN[l]].filter(Boolean).join("\n\n"),
   ]
     .filter(Boolean)
     .join("\n\n");
