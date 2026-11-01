@@ -243,7 +243,8 @@ function buildProjectSystemInstruction(lang, proj) {
     })
     .join("\n");
 
-  const materialsCount = (proj.materialsList || []).length;
+  const realMaterials = (proj.materialsList || []).filter((m) => m && (m.id !== "init" || m.url || m.fileId || m.fileUrl || m.notes || m.socials));
+  const materialsCount = realMaterials.length;
   const refsCount = (proj.referencesList || []).length;
 
   return `Eres Brandi, Directora Creativa e Inteligencia Artística de rebrandyourbrand.

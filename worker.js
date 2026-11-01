@@ -2347,7 +2347,8 @@ function buildProjectSystemInstruction(lang, proj) {
     })
     .join("\n");
 
-  const materialsCount = (proj.materialsList || []).length;
+  const realMaterials = (proj.materialsList || []).filter((m) => m && (m.id !== "init" || m.url || m.fileId || m.fileUrl || m.notes || m.socials));
+  const materialsCount = realMaterials.length;
   const refsCount = (proj.referencesList || []).length;
 
   return `Eres Brandi, Directora Creativa e Inteligencia Artística de rebrandyourbrand.
@@ -2484,20 +2485,6 @@ async function createProjectRecord(env, { clientEmail, brand, plan, lang, messag
 
   const nowIso = new Date().toISOString();
   const cleanDomain = typeof domain === "string" ? domain.trim().slice(0, 200) : "";
-  const initialMaterials = cleanDomain
-    ? [
-        {
-          id: "init",
-          createdAt: nowIso,
-          domain: cleanDomain,
-          socials: "",
-          url: "",
-          fileUrl: "",
-          filename: "",
-          notes: "",
-        },
-      ]
-    : [];
 
   const projectData = {
     token: projectToken,
@@ -2514,9 +2501,8 @@ async function createProjectRecord(env, { clientEmail, brand, plan, lang, messag
     currentPhase: 1,
     createdAt: nowIso,
     phases: newPhases(plan.ids),
-    materialsList: initialMaterials,
+    materialsList: [],
     referencesList: [],
-    ...(cleanDomain ? { onboarding: { domain: cleanDomain, socials: "", materials: "", submittedAt: nowIso } } : {}),
   };
   await saveProject(env, projectToken, projectData, {
     expirationTtl: PENDING_PROJECT_TTL_SECONDS,
@@ -4665,19 +4651,32 @@ async function handlePhaseAdvance(request, env, url) {
         : "en curso en el estudio";
 
   if (request.method === "GET" || request.method === "HEAD") {
-    const materialsList = Array.isArray(proj.materialsList) ? [...proj.materialsList] : [];
+    const materialsList = (Array.isArray(proj.materialsList) ? [...proj.materialsList] : []).filter((m) => {
+      if (!m) return false;
+      if (m.id === "init" && !m.url && !m.fileId && !m.fileUrl && !m.notes && !m.socials) {
+        if (m.domain && !proj.domain) proj.domain = m.domain;
+        return false;
+      }
+      return true;
+    });
     if (proj.onboarding && materialsList.length === 0) {
       const ob = proj.onboarding;
       const legacyUrl = cleanHttpsUrl(ob.materials || "", 500);
-      materialsList.push({
-        createdAt: ob.submittedAt || ob.receivedAt || "",
-        domain: ob.domain || "",
-        socials: ob.socials || "",
-        notes: legacyUrl ? "" : (ob.materials || ""),
-        url: legacyUrl || "",
-        fileUrl: "",
-        filename: "",
-      });
+      const hasRealContent = Boolean(legacyUrl || ob.socials || ob.materials || ob.notes);
+      if (hasRealContent) {
+        materialsList.push({
+          id: "legacy",
+          createdAt: ob.submittedAt || ob.receivedAt || "",
+          domain: ob.domain || "",
+          socials: ob.socials || "",
+          notes: legacyUrl ? "" : (ob.materials || ""),
+          url: legacyUrl || "",
+          fileUrl: "",
+          filename: "",
+        });
+      } else if (ob.domain && !proj.domain) {
+        proj.domain = ob.domain;
+      }
     }
     const referencesList = Array.isArray(proj.referencesList) ? [...proj.referencesList] : [];
 
@@ -4762,6 +4761,7 @@ async function handlePhaseAdvance(request, env, url) {
           <div class="kv-row"><span>proyecto</span><span class="kv-val">${esc(proj.brand)}</span></div>
           <div class="kv-row"><span>cliente</span><span class="kv-val">${esc(proj.clientEmail)}</span></div>
           <div class="kv-row"><span>idioma</span><span class="kv-val">${esc(proj.lang)}</span></div>
+          ${proj.domain ? `<div class="kv-row"><span>dominio preferido</span><span class="kv-val">${esc(proj.domain)}</span></div>` : ""}
           <div class="kv-row"><span>servicios</span><span class="kv-val">${esc(svcLabel(proj.services, "es"))}</span></div>
           <div class="kv-row"><span>fase actual</span><span class="kv-val">paso ${currentPhaseObj.step} — ${esc(currentTitleEs)}</span></div>
           <div class="kv-row"><span>estado</span><span class="kv-val">${esc(stateLabel)}</span></div>
@@ -5736,10 +5736,24 @@ async function handleProject(request, env, url) {
     if (op === "onboarding") {
       if (!proj.paid) return redirectTo(projectPageUrl);
 
+      // Normalizar lista de materiales previa excluyendo ítems sintéticos sin contenido
+      const existingMaterials = (Array.isArray(proj.materialsList) ? [...proj.materialsList] : []).filter((m) => {
+        if (!m) return false;
+        if (m.id === "init" && !m.url && !m.fileId && !m.fileUrl && !m.notes && !m.socials) {
+          if (m.domain && !proj.domain) proj.domain = m.domain;
+          return false;
+        }
+        return true;
+      });
+      proj.materialsList = existingMaterials;
+      const isFirstSubmission = existingMaterials.length === 0;
+
       // Bloque 1 — Materiales del negocio:
-      const domain = hasWeb ? cleanInput(form?.get("domain") ?? "", 200) : "";
-      const hasDomainAlready = Boolean(proj.onboarding?.domain || (Array.isArray(proj.materialsList) && proj.materialsList.some((m) => m.domain)));
-      if (hasWeb && !hasDomainAlready && !domain) {
+      const submittedDomain = hasWeb ? cleanInput(form?.get("domain") ?? "", 200) : "";
+      const defaultDomain = proj.domain || proj.onboarding?.domain || "";
+      const domain = submittedDomain || (isFirstSubmission ? defaultDomain : "");
+
+      if (hasWeb && isFirstSubmission && !domain) {
         return htmlResponse(
           page(T.obDomainMissing[0], T.obDomainMissing[1], T.obDomainMissing[2], {
             lang: L,
@@ -5750,6 +5764,10 @@ async function handleProject(request, env, url) {
           }),
           400
         );
+      }
+      if (hasWeb && domain) {
+        proj.domain = domain;
+        if (proj.onboarding) proj.onboarding.domain = domain;
       }
       const socials = cleanInput(form?.get("socials") ?? "", 250);
       const rawMaterialsUrl = String(form?.get("materials_url") ?? "").trim();
@@ -5863,10 +5881,11 @@ async function handleProject(request, env, url) {
         referenceFileDownloadUrl = await fileDownloadUrl(env, token, "ref", referenceFileId);
       }
 
-      const hasMaterial = Boolean(domain || socials || materialsUrl || materialsNotes || materialsFileDownloadUrl);
+      const hasDomainChange = Boolean(hasWeb && submittedDomain && submittedDomain !== (defaultDomain || proj.domain));
+      const hasRealMaterial = Boolean(hasDomainChange || socials || materialsUrl || materialsNotes || materialsFileDownloadUrl);
       const hasReference = Boolean(referenceUrl || referenceNotes || referenceFileDownloadUrl);
 
-      if (!hasMaterial && !hasReference) {
+      if (!hasRealMaterial && !hasReference) {
         return htmlResponse(
           page(T.obMissing[0], T.obMissing[1], T.obMissing[2], {
             lang: L,
@@ -5905,11 +5924,13 @@ async function handleProject(request, env, url) {
       let createdMatItem = null;
       let createdRefItem = null;
 
+      const hasMaterial = Boolean((hasWeb && (submittedDomain || isFirstSubmission)) || hasRealMaterial);
+
       if (hasMaterial) {
         createdMatItem = {
           id: crypto.randomUUID().replace(/-/g, "").slice(0, 12),
           createdAt: nowIso,
-          domain,
+          domain: submittedDomain || (isFirstSubmission ? domain : ""),
           socials,
           url: materialsUrl,
           notes: materialsNotes,
@@ -5921,7 +5942,7 @@ async function handleProject(request, env, url) {
         proj.materialsList.push(createdMatItem);
         if (!proj.onboarding) {
           proj.onboarding = {
-            domain: domain || "",
+            domain: proj.domain || domain || "",
             socials: socials || "",
             materials: materialsUrl || materialsNotes || materialsFilename || "",
             submittedAt: nowIso,
@@ -5950,7 +5971,7 @@ async function handleProject(request, env, url) {
         refFileId: createdRefItem?.fileId || null,
         timestamp: Date.now(),
       };
-      if (hasMaterial) {
+      if (hasMaterial || hasReference) {
         delete proj.abandonWarningSentAt;
       }
 
@@ -6175,21 +6196,33 @@ async function handleProject(request, env, url) {
 
   // allDone ya declarado arriba en handleProject
 
-  // Normalizar lista de materiales y referencias (modo append-only)
-  const materialsList = Array.isArray(proj.materialsList) ? [...proj.materialsList] : [];
+  // Normalizar lista de materiales y referencias (modo append-only, filtrando init vacíos)
+  const materialsList = (Array.isArray(proj.materialsList) ? [...proj.materialsList] : []).filter((m) => {
+    if (!m) return false;
+    if (m.id === "init" && !m.url && !m.fileId && !m.fileUrl && !m.notes && !m.socials) {
+      if (m.domain && !proj.domain) proj.domain = m.domain;
+      return false;
+    }
+    return true;
+  });
   if (proj.onboarding && materialsList.length === 0) {
     const ob = proj.onboarding;
     const legacyUrl = cleanHttpsUrl(ob.materials || "", 500);
-    materialsList.push({
-      id: "legacy",
-      createdAt: ob.submittedAt || ob.receivedAt || proj.createdAt || "",
-      domain: ob.domain || "",
-      socials: ob.socials || "",
-      notes: legacyUrl ? "" : (ob.materials || ""),
-      url: legacyUrl || "",
-      fileUrl: "",
-      filename: "",
-    });
+    const hasRealContent = Boolean(legacyUrl || ob.socials || ob.materials || ob.notes);
+    if (hasRealContent) {
+      materialsList.push({
+        id: "legacy",
+        createdAt: ob.submittedAt || ob.receivedAt || proj.createdAt || "",
+        domain: ob.domain || "",
+        socials: ob.socials || "",
+        notes: legacyUrl ? "" : (ob.materials || ""),
+        url: legacyUrl || "",
+        fileUrl: "",
+        filename: "",
+      });
+    } else if (ob.domain && !proj.domain) {
+      proj.domain = ob.domain;
+    }
   }
   const referencesList = Array.isArray(proj.referencesList) ? [...proj.referencesList] : [];
 
@@ -6261,9 +6294,12 @@ async function handleProject(request, env, url) {
 
   let addFormHtml = "";
   if (!allDone) {
-    const hasWeb = Array.isArray(proj.services) && proj.services.includes("web");
-    const hasDomainAlready = Boolean(proj.onboarding?.domain || materialsList.some((m) => m.domain));
-    const domainRequired = hasWeb && !hasDomainAlready;
+    const isFirstSubmission = materialsList.length === 0;
+    const defaultDomain = proj.domain || proj.onboarding?.domain || (materialsList.find((m) => m?.domain)?.domain) || "";
+    const domainRequired = hasWeb && isFirstSubmission;
+    const domainInputValue = isFirstSubmission ? defaultDomain : "";
+    const domainPlaceholder = defaultDomain || T.obDomainPh;
+
     const formFields = `
       <form method="POST" enctype="multipart/form-data" style="text-align:left;">
         <input type="hidden" name="op" value="onboarding">
@@ -6271,7 +6307,7 @@ async function handleProject(request, env, url) {
         <div class="section-subheading">${esc(T.blockAMaterials)}</div>
         ${hasWeb ? `
         <label for="domain">${esc(T.obDomain)}${domainRequired ? ` <span style="color:#cf172f;font-weight:600;">(${esc(T.obDomainRequired)})</span>` : ""}</label>
-        <input id="domain" name="domain" type="text" maxlength="200" placeholder="${esc(T.obDomainPh)}" ${domainRequired ? "required" : ""}>` : ""}
+        <input id="domain" name="domain" type="text" maxlength="200" value="${esc(domainInputValue)}" placeholder="${esc(domainPlaceholder)}" ${domainRequired ? "required" : ""}>` : ""}
 
         <label for="socials">${esc(T.obSocials)}</label>
         <input id="socials" name="socials" type="text" maxlength="250" placeholder="${esc(T.obSocialsPh)}">
@@ -6301,7 +6337,7 @@ async function handleProject(request, env, url) {
         <button type="submit">${esc(T.obSubmit)}</button>
       </form>`;
 
-    if (materialsList.length > 0) {
+    if (!isFirstSubmission) {
       addFormHtml = `
         <details class="add-materials-slider">
           <summary class="slider-summary">${esc(T.obAccordionTitle)}</summary>
@@ -6314,8 +6350,8 @@ async function handleProject(request, env, url) {
       addFormHtml = `
         <div class="box accent">
           <span class="eyebrow">${esc(T.obEyebrow)}</span>
-          <h2>${esc(T.obAddTitle)}</h2>
-          <p class="lead" style="margin-bottom:1.15rem;font-size:.85rem;">${esc(T.obAddIntro)}</p>
+          <h2>${esc(T.obTitle)}</h2>
+          <p class="lead" style="margin-bottom:1.15rem;font-size:.85rem;">${esc(T.obIntro)}</p>
           ${formFields}
         </div>`;
     }
@@ -7514,8 +7550,9 @@ async function inspectProjectDeadlines(env, keyName, nowMs) {
   // 2. Cláusula 3.2 — Preaviso a los 30 días y rescisión por abandono a los 37 días sin actividad
   if (proj.status === "active" || proj.status === "in_progress") {
     const hasMaterials =
-      (Array.isArray(proj.materialsList) && proj.materialsList.length > 0) ||
-      Boolean(proj.onboarding && (proj.onboarding.materials || proj.onboarding.submittedAt || proj.onboarding.receivedAt));
+      (Array.isArray(proj.materialsList) &&
+        proj.materialsList.some((m) => m && (m.id !== "init" || m.url || m.fileId || m.fileUrl || m.notes || m.socials))) ||
+      Boolean(proj.onboarding && (proj.onboarding.materials || proj.onboarding.socials || proj.onboarding.url || proj.onboarding.notes));
     const currentStep = Number(proj.currentPhase || 0);
     const isFirstPhase = currentStep <= 1;
     const currentPhaseObj = Array.isArray(proj.phases)

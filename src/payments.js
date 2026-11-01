@@ -62,20 +62,6 @@ async function createProjectRecord(env, { clientEmail, brand, plan, lang, messag
 
   const nowIso = new Date().toISOString();
   const cleanDomain = typeof domain === "string" ? domain.trim().slice(0, 200) : "";
-  const initialMaterials = cleanDomain
-    ? [
-        {
-          id: "init",
-          createdAt: nowIso,
-          domain: cleanDomain,
-          socials: "",
-          url: "",
-          fileUrl: "",
-          filename: "",
-          notes: "",
-        },
-      ]
-    : [];
 
   const projectData = {
     token: projectToken,
@@ -92,9 +78,8 @@ async function createProjectRecord(env, { clientEmail, brand, plan, lang, messag
     currentPhase: 1,
     createdAt: nowIso,
     phases: newPhases(plan.ids),
-    materialsList: initialMaterials,
+    materialsList: [],
     referencesList: [],
-    ...(cleanDomain ? { onboarding: { domain: cleanDomain, socials: "", materials: "", submittedAt: nowIso } } : {}),
   };
   await saveProject(env, projectToken, projectData, {
     expirationTtl: PENDING_PROJECT_TTL_SECONDS,

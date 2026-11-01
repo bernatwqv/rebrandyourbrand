@@ -67,8 +67,9 @@ async function inspectProjectDeadlines(env, keyName, nowMs) {
   // 2. Cláusula 3.2 — Preaviso a los 30 días y rescisión por abandono a los 37 días sin actividad
   if (proj.status === "active" || proj.status === "in_progress") {
     const hasMaterials =
-      (Array.isArray(proj.materialsList) && proj.materialsList.length > 0) ||
-      Boolean(proj.onboarding && (proj.onboarding.materials || proj.onboarding.submittedAt || proj.onboarding.receivedAt));
+      (Array.isArray(proj.materialsList) &&
+        proj.materialsList.some((m) => m && (m.id !== "init" || m.url || m.fileId || m.fileUrl || m.notes || m.socials))) ||
+      Boolean(proj.onboarding && (proj.onboarding.materials || proj.onboarding.socials || proj.onboarding.url || proj.onboarding.notes));
     const currentStep = Number(proj.currentPhase || 0);
     const isFirstPhase = currentStep <= 1;
     const currentPhaseObj = Array.isArray(proj.phases)
