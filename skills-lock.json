@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "skills": {
+    "animation-vocabulary": {
+      "source": "emilkowalski/skills",
+      "sourceType": "github",
+      "skillPath": "skills/animation-vocabulary/SKILL.md",
+      "computedHash": "9aaad861dd54dab7c9bb3fb5bd4c539078d8d06c14530d92d49cdb1509bfa937"
+    },
+    "emil-design-eng": {
+      "source": "emilkowalski/skills",
+      "sourceType": "github",
+      "skillPath": "skills/emil-design-eng/SKILL.md",
+      "computedHash": "77853cec799207f80868c611374c6ed5fdf34a55355c5ab544b59e791c63ad98"
+    },
+    "i18n-expert": {
+      "source": "daymade/claude-code-skills",
+      "sourceType": "github",
+      "skillPath": "i18n-expert/SKILL.md",
+      "computedHash": "3d059508e0c60ae95c34b83fb8aabc19a6edeb8a778ffa8bdeeacd102fdd1179"
+    },
+    "impeccable": {
+      "source": "pbakaus/impeccable",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/impeccable/SKILL.md",
+      "computedHash": "a50f941ad06621638cd19f15d8f3d46729ae166de7985b8c87bf65cf3b834b60"
+    },
+    "resend": {
+      "source": "resend/resend-skills",
+      "sourceType": "github",
+      "skillPath": "skills/resend/SKILL.md",
+      "computedHash": "48c14808dd31fa3fe107bde119eab5d431a4bfa63106bd61c5eed8a68af0741f"
+    },
+    "stripe-best-practices": {
+      "source": "stripe/ai",
+      "sourceType": "github",
+      "skillPath": "skills/stripe-best-practices/SKILL.md",
+      "computedHash": "02f4689f2abe4c19dddf8678ad214fef2fc23084b91c32a5b7b43b5bab4dac57"
+    }
+  }
+}
