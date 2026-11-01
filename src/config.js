@@ -149,8 +149,27 @@ const DENY_RE = /^\s*(?:no|nope|ez|ezeztatu|cancel\w*)(?![\p{L}\p{N}])/iu;
 // Precios oficiales permitidos que Brandi puede mencionar: {0, 100, 400, 500, 800} (0 paleta de regalo con logo, 100 paleta suelta, ronda extra de revisión o cuota anual, 400 logo o web, 500 paleta y web, 800 pack completo)
 const ALLOWED_EUR = new Set([0, 100, 400, 500, 800]);
 
-const CATALOG = [
-  `   - ${SERVICES.logo.names.es}: 400 € — ${SERVICES.logo.includes.es}.`,
-  `   - ${SERVICES.paleta.names.es}: 100 € (o 0 € incluida de regalo al contratar el logotipo) — ${SERVICES.paleta.includes.es}.`,
-  `   - ${SERVICES.web.names.es}: 400 € — ${SERVICES.web.includes.es}.`,
-].join("\n");
+// Normaliza "en-US", "CA_es", "EU" → "en" | "ca" | "eu" | "es" ("" si no es válido)
+const normLang = (v) => {
+  const p = String(v ?? "").toLowerCase().trim().split(/[-_]/)[0];
+  return LANG_ORDER.includes(p) ? p : "";
+};
+
+// Catálogo en el idioma del cliente
+const catalogFor = (lang) => {
+  const l = normLang(lang) || "es";
+  const money = (n) => (l === "en" ? `€${n}` : `${n} €`);
+  const free = {
+    es: "0 € incluida de regalo al contratar el logotipo",
+    ca: "0 € inclosa de regal en contractar el logotip",
+    eu: "0 € opari gisa, logotipoa kontratatzean",
+    en: "€0 complimentary when hiring the logo",
+  };
+  return SERVICE_IDS.map((id) => {
+    const s = SERVICES[id];
+    const price = id === "paleta" ? `${money(s.price)} (${free[l]})` : money(s.price);
+    return `   - ${s.names[l]}: ${price} — ${s.includes[l]}.`;
+  }).join("\n");
+};
+
+const CATALOG = catalogFor("es");

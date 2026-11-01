@@ -156,11 +156,30 @@ const DENY_RE = /^\s*(?:no|nope|ez|ezeztatu|cancel\w*)(?![\p{L}\p{N}])/iu;
 // Precios oficiales permitidos que Brandi puede mencionar: {0, 100, 400, 500, 800} (0 paleta de regalo con logo, 100 paleta suelta, ronda extra de revisión o cuota anual, 400 logo o web, 500 paleta y web, 800 pack completo)
 const ALLOWED_EUR = new Set([0, 100, 400, 500, 800]);
 
-const CATALOG = [
-  `   - ${SERVICES.logo.names.es}: 400 € — ${SERVICES.logo.includes.es}.`,
-  `   - ${SERVICES.paleta.names.es}: 100 € (o 0 € incluida de regalo al contratar el logotipo) — ${SERVICES.paleta.includes.es}.`,
-  `   - ${SERVICES.web.names.es}: 400 € — ${SERVICES.web.includes.es}.`,
-].join("\n");
+// Normaliza "en-US", "CA_es", "EU" → "en" | "ca" | "eu" | "es" ("" si no es válido)
+const normLang = (v) => {
+  const p = String(v ?? "").toLowerCase().trim().split(/[-_]/)[0];
+  return LANG_ORDER.includes(p) ? p : "";
+};
+
+// Catálogo en el idioma del cliente
+const catalogFor = (lang) => {
+  const l = normLang(lang) || "es";
+  const money = (n) => (l === "en" ? `€${n}` : `${n} €`);
+  const free = {
+    es: "0 € incluida de regalo al contratar el logotipo",
+    ca: "0 € inclosa de regal en contractar el logotip",
+    eu: "0 € opari gisa, logotipoa kontratatzean",
+    en: "€0 complimentary when hiring the logo",
+  };
+  return SERVICE_IDS.map((id) => {
+    const s = SERVICES[id];
+    const price = id === "paleta" ? `${money(s.price)} (${free[l]})` : money(s.price);
+    return `   - ${s.names[l]}: ${price} — ${s.includes[l]}.`;
+  }).join("\n");
+};
+
+const CATALOG = catalogFor("es");
 
 // ══ utils.js — Utilidades comunes: idioma, fechas, formato de texto y limpieza de entradas. ══
 
@@ -2288,7 +2307,7 @@ function buildSystemInstruction(lang, ctx) {
   const langName = LANG_NAMES[pickLang(lang)] || LANG_NAMES.es;
 
   const servicesBlock = plan
-    ? `SERVICIOS ELEGIDOS: ${svcLabel(plan.ids, "es")} (${plan.total} € en total).`
+    ? `SERVICIOS ELEGIDOS: ${svcLabel(plan.ids, lang)} (${plan.total} € en total).`
     : `SERVICIOS: sin elegir todavía. El cliente no ha usado el selector de la web, así que quizá no conoce todas las opciones.`;
   const domainBlock = plan?.ids?.includes("web")
     ? (domain ? `DOMINIO WEB: ya conocido (${domain}).` : `DOMINIO WEB: estrictamente OBLIGATORIO al contratar la web. Aún falta.`)
@@ -2298,7 +2317,9 @@ function buildSystemInstruction(lang, ctx) {
     ? `\nEl cliente acaba de RECHAZAR el resumen. Pregúntale con amabilidad qué quiere cambiar (marca, servicios, dominio o correo). No repitas el resumen.`
     : "";
 
-  return `Eres Brandi, Directora de Arte e Inteligencia Creativa en rebrandyourbrand. Idioma obligatorio de respuesta: ${langName}.
+  return `LANGUAGE RULE (absolute priority): the value of the "reply" field MUST be written entirely in ${langName}. These instructions are in Spanish for internal use only: never copy their language. Answer in Spanish only if ${langName} is español, even if the client mixes languages.
+
+Eres Brandi, Directora de Arte e Inteligencia Creativa en rebrandyourbrand. Idioma obligatorio de respuesta: ${langName}.
 
 Tu objetivo es entender la marca del cliente, dar una breve pincelada estratégica y reunir los datos necesarios para cerrar la propuesta: MARCA, SERVICIOS${plan?.ids?.includes("web") ? ", DOMINIO" : ""} y CORREO.
 
@@ -2310,7 +2331,7 @@ ESTILO:
 - No uses puntos medios ni el símbolo ampersand en tus textos; usa conjunciones o guiones largos.
 
 No hay planes cerrados: el cliente elige solo los servicios que necesita y paga únicamente por ellos (pago único del 100% mediante enlace seguro tras verificar el correo, sin cuotas mensuales). Servicios y precios oficiales:
-${CATALOG}
+${catalogFor(lang)}
 El logotipo cuesta 400 € e incluye la paleta de empresa de regalo (valorada en 100 €). La paleta de empresa en solitario cuesta 100 €. La web cuesta 400 € de desarrollo (más 100 €/año de infraestructura técnica).
 El precio total de creación es la suma de los servicios elegidos (con la paleta a 0 € si se contrata el logotipo: Logotipo + Paleta = 400 €, Logotipo + Paleta + Web = 800 €, Paleta + Web = 500 €). No hay otros descuentos.
 Si el cliente elige o pregunta por la web (400 € de pago único de desarrollo), es estrictamente obligatorio conocer su dominio o URL actual (o qué dominio desea registrar) antes de cerrar la propuesta, y aclara si surge la duda que conlleva una cuota obligatoria de 100 €/año exclusivamente por infraestructura técnica gestionada (dominio, correo corporativo, DNS, certificados SSL y despliegue edge): no incluye cambios de contenido, diseño ni nuevas secciones tras la entrega (cada fase incluye 2 rondas de revisión gratuitas durante la creación; cualquier ronda de ajustes extra o cambio posterior tiene un precio cerrado de 100 €).
@@ -2334,14 +2355,16 @@ CÓMO CONDUCIR LA CONVERSACIÓN:
 
 FORMATO DE SALIDA (JSON estricto, sin texto fuera del JSON):
 {
-  "reply": "tu respuesta al cliente",
+  "reply": "your reply to the client, written in ${langName}",
   "brand": "nombre de la marca del cliente, o null si aún no lo sabes",
   "domain": "dominio indicado por el cliente (ej. mitienda.es), o null",
   "services": ["logo", "paleta", "web"] (solo los elegidos) | null
 }
 - "services": lista de ids elegidos por el cliente (valores posibles: "logo", "paleta", "web")${plan ? ` (ahora mismo: ${JSON.stringify(plan.ids)}; devuélvelo tal cual salvo que el cliente pida cambiarlo explícitamente)` : "; null mientras no los haya elegido claramente"}.
 - "brand": devuelve la marca ya conocida salvo que el cliente la cambie.
-- "domain": devuelve el dominio web indicado si el proyecto incluye web.`;
+- "domain": devuelve el dominio web indicado si el proyecto incluye web.
+
+REMINDER: the "reply" field must be in ${langName}.`;
 }
 
 function parseModelJson(content) {
@@ -2424,7 +2447,9 @@ function buildProjectSystemInstruction(lang, proj) {
   const materialsCount = realMaterials.length;
   const refsCount = (proj.referencesList || []).length;
 
-  return `Eres Brandi, Directora Creativa e Inteligencia Artística de rebrandyourbrand.
+  return `LANGUAGE RULE (absolute priority): answer ONLY in ${langName}, even though these instructions are in Spanish.
+
+Eres Brandi, Directora Creativa e Inteligencia Artística de rebrandyourbrand.
 El cliente ya ha contratado su proyecto y se encuentra en su portal privado de seguimiento.
 Idioma obligatorio de respuesta: ${langName}.
 
@@ -2443,7 +2468,9 @@ TU MISIÓN:
 - Respuestas directas, concisas (máximo 3 o 4 frases), en minúsculas relajadas (todo en minúsculas, sin mayúsculas iniciales), sin tecnicismos innecesarios.
 - Si el proyecto ya está finalizado y el cliente desea retocar o solicitar mejoras en su web o logotipo, indícale amablemente que puede contratar rondas de trabajo extraordinario a 100 € cerrados por ronda directamente desde el apartado de trabajo extraordinario en este mismo portal.
 - NUNCA uses puntos medios ni el carácter ampersand en tus textos. Usa conjunciones o guiones largos.
-- Si el cliente solicita cambios complejos, negociaciones, aprobaciones directas de fase o pide expresamente hablar con personas, indícale amablemente que use la pestaña del equipo humano o pulse el botón de "hablar con el equipo humano" para contactar directamente con Gael y Bernat.`;
+- Si el cliente solicita cambios complejos, negociaciones, aprobaciones directas de fase o pide expresamente hablar con personas, indícale amablemente que use la pestaña del equipo humano o pulse el botón de "hablar con el equipo humano" para contactar directamente con Gael y Bernat.
+
+REMINDER: write your answer in ${langName}.`;
 }
 
 async function askGroqProject(env, lang, proj, chatMessages, retries = 1) {
@@ -7643,7 +7670,7 @@ async function handleEmailForm(request, env, originOk, o) {
     const plan = normalizeServices(body.services);
     if (!plan) throw new HttpError(400, "plan_required");
 
-    const lang = LANG_ORDER.includes(body.lang) ? body.lang : "es";
+    const lang = normLang(body.lang) || langFromRequest(request);
     const description = cleanText(body.description, 500) || "sin descripción";
 
     await startVerification(env, {
@@ -7778,7 +7805,7 @@ async function handleChatPost(request, env, body, o, ctx) {
       if (!ok) throw new HttpError(429, "rate_limited", { "Retry-After": "60" });
     }
 
-    const lang = LANG_ORDER.includes(body.lang) ? body.lang : "es";
+    const lang = normLang(body.lang) || langFromRequest(request);
     const key = await getKey(env);
     const rawAllMessages = Array.isArray(body.messages)
       ? body.messages

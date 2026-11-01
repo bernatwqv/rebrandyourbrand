@@ -113,7 +113,7 @@ async function handleChatPost(request, env, body, o, ctx) {
       if (!ok) throw new HttpError(429, "rate_limited", { "Retry-After": "60" });
     }
 
-    const lang = LANG_ORDER.includes(body.lang) ? body.lang : "es";
+    const lang = normLang(body.lang) || langFromRequest(request);
     const key = await getKey(env);
     const rawAllMessages = Array.isArray(body.messages)
       ? body.messages

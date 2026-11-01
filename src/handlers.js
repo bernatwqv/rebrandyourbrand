@@ -3367,7 +3367,7 @@ async function handleEmailForm(request, env, originOk, o) {
     const plan = normalizeServices(body.services);
     if (!plan) throw new HttpError(400, "plan_required");
 
-    const lang = LANG_ORDER.includes(body.lang) ? body.lang : "es";
+    const lang = normLang(body.lang) || langFromRequest(request);
     const description = cleanText(body.description, 500) || "sin descripción";
 
     await startVerification(env, {
