@@ -1878,6 +1878,7 @@ async function handleProject(request, env, url) {
         refFileId: createdRefItem?.fileId || null,
         timestamp: Date.now(),
       };
+      delete proj.draft;
       if (hasMaterial || hasReference) {
         delete proj.abandonWarningSentAt;
       }
@@ -1934,6 +1935,21 @@ async function handleProject(request, env, url) {
       if (!proj.paid) return redirectTo(projectPageUrl);
       if (proj.lastAdded) {
         const { matId, matFileId, refId, refFileId } = proj.lastAdded;
+        const undoneMat = Array.isArray(proj.materialsList) ? proj.materialsList.find((m) => m.id === matId) : null;
+        const undoneRef = Array.isArray(proj.referencesList) ? proj.referencesList.find((r) => r.id === refId) : null;
+
+        // Guardar borrador para restaurar en el formulario exactamente lo que el usuario tenía antes de enviar:
+        proj.draft = {
+          domain: undoneMat?.domain || proj.domain || "",
+          socials: undoneMat?.socials || "",
+          materials_url: undoneMat?.url || "",
+          materials_notes: undoneMat?.notes || "",
+          materials_filename: undoneMat?.filename || "",
+          reference_url: undoneRef?.url || "",
+          reference_notes: undoneRef?.notes || "",
+          reference_filename: undoneRef?.filename || "",
+        };
+
         if (matId && Array.isArray(proj.materialsList)) {
           proj.materialsList = proj.materialsList.filter((m) => m.id !== matId);
         }
@@ -2065,6 +2081,12 @@ async function handleProject(request, env, url) {
       ? `
       <div class="undo-bar-wrap" id="undo-bar">
         <div class="undo-bar-content">
+          <a class="btn-dismiss" id="undo-dismiss-btn" href="${esc(projectPageUrl)}" aria-label="${esc(T.obDismissBtn)}">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </a>
           <div class="undo-bar-text">
             <svg class="undo-ring" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
               <circle class="undo-ring-bg" cx="12" cy="12" r="9" fill="none" stroke-width="2.5"></circle>
@@ -2077,12 +2099,6 @@ async function handleProject(request, env, url) {
               <input type="hidden" name="op" value="undo_onboarding">
               <button type="submit" class="btn-undo">${esc(T.obUndoBtn)}</button>
             </form>
-            <a class="btn-dismiss" id="undo-dismiss-btn" href="${esc(projectPageUrl)}" aria-label="${esc(T.obDismissBtn)}">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
-            </a>
           </div>
         </div>
       </div>
@@ -2211,9 +2227,25 @@ async function handleProject(request, env, url) {
   if (!allDone) {
     const isFirstSubmission = materialsList.length === 0;
     const defaultDomain = proj.domain || proj.onboarding?.domain || (materialsList.find((m) => m?.domain)?.domain) || "";
+    const draft = proj.draft || null;
+    const hasDraft = Boolean(draft);
+
     const domainRequired = hasWeb && isFirstSubmission;
-    const domainInputValue = isFirstSubmission ? defaultDomain : "";
+    const domainInputValue = draft?.domain || (isFirstSubmission ? defaultDomain : "");
     const domainPlaceholder = defaultDomain || T.obDomainPh;
+
+    const socialsValue = draft?.socials || "";
+    const matUrlValue = draft?.materials_url || "";
+    const matNotesValue = draft?.materials_notes || "";
+    const refUrlValue = draft?.reference_url || "";
+    const refNotesValue = draft?.reference_notes || "";
+
+    const matPrevFileNote = draft?.materials_filename && typeof T.obPrevFile === "function"
+      ? `<span class="file-note" style="color:#825008;margin-bottom:.35rem;display:block;">${esc(T.obPrevFile(draft.materials_filename))}</span>`
+      : "";
+    const refPrevFileNote = draft?.reference_filename && typeof T.obPrevRef === "function"
+      ? `<span class="file-note" style="color:#825008;margin-bottom:.35rem;display:block;">${esc(T.obPrevRef(draft.reference_filename))}</span>`
+      : "";
 
     const formFields = `
       <form method="POST" enctype="multipart/form-data" style="text-align:left;">
@@ -2225,36 +2257,38 @@ async function handleProject(request, env, url) {
         <input id="domain" name="domain" type="text" maxlength="200" value="${esc(domainInputValue)}" placeholder="${esc(domainPlaceholder)}" ${domainRequired ? "required" : ""}>` : ""}
 
         <label for="socials">${esc(T.obSocials)}</label>
-        <input id="socials" name="socials" type="text" maxlength="250" placeholder="${esc(T.obSocialsPh)}">
+        <input id="socials" name="socials" type="text" maxlength="250" value="${esc(socialsValue)}" placeholder="${esc(T.obSocialsPh)}">
 
         <label for="materials_url">${esc(T.obMaterialsUrl)}</label>
-        <input id="materials_url" name="materials_url" type="url" maxlength="500" placeholder="${esc(T.obMaterialsUrlPh)}">
+        <input id="materials_url" name="materials_url" type="url" maxlength="500" value="${esc(matUrlValue)}" placeholder="${esc(T.obMaterialsUrlPh)}">
 
         <label for="materials_file">${esc(T.obMaterialsFile)}</label>
+        ${matPrevFileNote}
         <input id="materials_file" name="materials_file" type="file">
         <span class="file-note">${esc(T.obMaterialsFileNote)}</span>
 
         <label for="materials_notes">${esc(T.obMaterialsNotes)}</label>
-        <textarea id="materials_notes" name="materials_notes" rows="3" maxlength="1000" placeholder="${esc(T.obMaterialsNotesPh)}"></textarea>
+        <textarea id="materials_notes" name="materials_notes" rows="3" maxlength="1000" placeholder="${esc(T.obMaterialsNotesPh)}">${esc(matNotesValue)}</textarea>
 
         <div class="section-subheading">${esc(T.blockBRefs)}</div>
 
         <label for="reference_url">${esc(T.obRefUrl)}</label>
-        <input id="reference_url" name="reference_url" type="url" maxlength="500" placeholder="${esc(T.obRefUrlPh)}">
+        <input id="reference_url" name="reference_url" type="url" maxlength="500" value="${esc(refUrlValue)}" placeholder="${esc(T.obRefUrlPh)}">
 
         <label for="reference_file">${esc(T.obRefFile)}</label>
+        ${refPrevFileNote}
         <input id="reference_file" name="reference_file" type="file">
         <span class="file-note">${esc(T.obMaterialsFileNote)}</span>
 
         <label for="reference_notes">${esc(T.obRefNotes)}</label>
-        <textarea id="reference_notes" name="reference_notes" rows="3" maxlength="1000" placeholder="${esc(T.obRefNotesPh)}"></textarea>
+        <textarea id="reference_notes" name="reference_notes" rows="3" maxlength="1000" placeholder="${esc(T.obRefNotesPh)}">${esc(refNotesValue)}</textarea>
 
         <button type="submit">${esc(T.obSubmit)}</button>
       </form>`;
 
     if (!isFirstSubmission) {
       addFormHtml = `
-        <details class="add-materials-slider">
+        <details class="add-materials-slider"${hasDraft ? " open" : ""}>
           <summary class="slider-summary">${esc(T.obAccordionTitle)}</summary>
           <div class="slider-body">
             <div class="slider-warning"><p>${esc(T.obDelayWarning)}</p></div>
