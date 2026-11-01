@@ -2960,8 +2960,10 @@ async function handleEmailForm(request, env, originOk, o) {
 
   try {
     const ip = request.headers.get("CF-Connecting-IP") ?? "";
-    const { success } = await env.CHAT_LIMITER.limit({ key: `e:${ipKey(ip)}` });
-    if (!success) throw new HttpError(429, "rate_limited", { "Retry-After": "60" });
+    if (env.CHAT_LIMITER) {
+      const { success } = await env.CHAT_LIMITER.limit({ key: `e:${ipKey(ip)}` });
+      if (!success) throw new HttpError(429, "rate_limited", { "Retry-After": "60" });
+    }
     if (env.VERIFY_LIMITER) {
       const { success: okV } = await env.VERIFY_LIMITER.limit({ key: `v:${ipKey(ip)}` });
       if (!okV) throw new HttpError(429, "rate_limited", { "Retry-After": "60" });

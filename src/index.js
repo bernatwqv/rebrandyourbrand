@@ -67,7 +67,9 @@ export default {
 
     if (request.method === "GET" && (url.pathname === "/" || url.pathname === "/testimonials")) {
       try {
-        const approved = (await env.LEADS_KV.get(APPROVED_KEY, { type: "json", cacheTtl: 60 })) || [];
+        const approved = env?.LEADS_KV
+          ? (await env.LEADS_KV.get(APPROVED_KEY, { type: "json", cacheTtl: 60 })) || []
+          : [];
         const publicList = approved.map(({ name, business, rating, comment }) => ({
           name,
           business,

@@ -2,9 +2,11 @@
 // El token firmado de reanudación hace de credencial, así quien vuelve no repite el captcha.
 
 async function handlePendingAction(env, body, ip, o) {
-  if (!env.LEADS_KV || !env.CHAT_LIMITER || !env.RESEND_API_KEY) throw new HttpError(500, "misconfigured");
-  const { success } = await env.CHAT_LIMITER.limit({ key: `p:${ipKey(ip)}` });
-  if (!success) throw new HttpError(429, "rate_limited", { "Retry-After": "60" });
+  if (!env.LEADS_KV || !env.RESEND_API_KEY) throw new HttpError(500, "misconfigured");
+  if (env.CHAT_LIMITER) {
+    const { success } = await env.CHAT_LIMITER.limit({ key: `p:${ipKey(ip)}` });
+    if (!success) throw new HttpError(429, "rate_limited", { "Retry-After": "60" });
+  }
 
   const vt = await parseResume(await getKey(env), body.resume);
   if (!vt) throw new HttpError(400, "invalid_resume");
@@ -77,9 +79,11 @@ async function handleChatPost(request, env, body, o) {
 
     // ── SESIÓN DE CHAT: Turnstile una sola vez al empezar la conversación ──
     if (body.action === "session") {
-      if (!env.CHAT_LIMITER || !env.TURNSTILE_SECRET_KEY) throw new HttpError(500, "misconfigured");
-      const { success } = await env.CHAT_LIMITER.limit({ key: `s:${ipKey(ip)}` });
-      if (!success) throw new HttpError(429, "rate_limited", { "Retry-After": "60" });
+      if (!env.TURNSTILE_SECRET_KEY) throw new HttpError(500, "misconfigured");
+      if (env.CHAT_LIMITER) {
+        const { success } = await env.CHAT_LIMITER.limit({ key: `s:${ipKey(ip)}` });
+        if (!success) throw new HttpError(429, "rate_limited", { "Retry-After": "60" });
+      }
       await verifyTurnstile(env, body.token, ip, "brandi-chat");
       return jsonResponse({ session: await makeSession(await getKey(env), ip) }, 200, o);
     }
@@ -88,11 +92,13 @@ async function handleChatPost(request, env, body, o) {
     if (body.action === "pending") return await handlePendingAction(env, body, ip, o);
 
     // ── CHAT CON BRANDI ──
-    if (!env.LEADS_KV || !env.CHAT_LIMITER || !env.GROQ_API_KEY || !env.TURNSTILE_SECRET_KEY) {
+    if (!env.GROQ_API_KEY || !env.TURNSTILE_SECRET_KEY) {
       throw new HttpError(500, "misconfigured");
     }
-    const { success } = await env.CHAT_LIMITER.limit({ key: ipKey(ip) });
-    if (!success) throw new HttpError(429, "rate_limited", { "Retry-After": "60" });
+    if (env.CHAT_LIMITER) {
+      const { success } = await env.CHAT_LIMITER.limit({ key: ipKey(ip) });
+      if (!success) throw new HttpError(429, "rate_limited", { "Retry-After": "60" });
+    }
 
     const lang = LANG_ORDER.includes(body.lang) ? body.lang : "es";
     const key = await getKey(env);
